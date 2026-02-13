@@ -2,15 +2,19 @@ import React from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '../src/context/AuthContext';
+import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
+import { FavoritesProvider } from '../src/context/FavoritesContext';
 
-export default function RootLayout() {
+function AppContent() {
+  const { theme, colors } = useTheme();
+  
   return (
-    <AuthProvider>
-      <StatusBar style="light" />
+    <>
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#1a2332' },
+          contentStyle: { backgroundColor: colors.background },
           animation: 'slide_from_right',
         }}
       >
@@ -26,7 +30,22 @@ export default function RootLayout() {
         <Stack.Screen name="peer-portal" />
         <Stack.Screen name="forgot-password" />
         <Stack.Screen name="reset-password" />
+        <Stack.Screen name="journal" />
+        <Stack.Screen name="mood" />
+        <Stack.Screen name="settings" />
       </Stack>
-    </AuthProvider>
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <FavoritesProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </FavoritesProvider>
+    </ThemeProvider>
   );
 }
