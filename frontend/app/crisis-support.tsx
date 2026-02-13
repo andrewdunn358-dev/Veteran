@@ -155,14 +155,38 @@ export default function CrisisSupport() {
                 </View>
               </View>
               {counsellor.status === 'available' && (
-                <TouchableOpacity
-                  style={styles.talkButton}
-                  onPress={() => handleCall(counsellor.phone)}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="call" size={20} color="#ffffff" />
-                  <Text style={styles.talkButtonText}>Talk Now</Text>
-                </TouchableOpacity>
+                <View style={styles.counsellorContactButtons}>
+                  <TouchableOpacity
+                    style={styles.counsellorCallButton}
+                    onPress={() => handleCall(counsellor.phone)}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="call" size={20} color="#ffffff" />
+                    <Text style={styles.counsellorCallButtonText}>Call</Text>
+                  </TouchableOpacity>
+                  
+                  {counsellor.sms && (
+                    <TouchableOpacity
+                      style={styles.counsellorSecondaryButton}
+                      onPress={() => handleSMS(counsellor.sms!)}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="chatbubble" size={18} color="#7c9cbf" />
+                      <Text style={styles.counsellorSecondaryButtonText}>Text</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {counsellor.whatsapp && (
+                    <TouchableOpacity
+                      style={styles.counsellorSecondaryButton}
+                      onPress={() => handleWhatsApp(counsellor.whatsapp!)}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="logo-whatsapp" size={18} color="#7c9cbf" />
+                      <Text style={styles.counsellorSecondaryButtonText}>WhatsApp</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               )}
             </View>
           ))}
