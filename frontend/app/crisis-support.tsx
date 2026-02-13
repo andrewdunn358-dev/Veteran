@@ -10,6 +10,8 @@ interface Counsellor {
   specialization: string;
   nextAvailable?: string;
   phone: string;
+  sms?: string;
+  whatsapp?: string;
 }
 
 export default function CrisisSupport() {
