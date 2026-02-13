@@ -110,8 +110,8 @@ export default function PeerSupport() {
     }
   };
 
-  const handleCallVeteran = (contact: string) => {
-    Linking.openURL(`tel:${contact}`);
+  const handleCallVeteran = (phone: string) => {
+    Linking.openURL(`tel:${phone}`);
   };
 
   const handleSMS = (number: string) => {
@@ -148,9 +148,30 @@ export default function PeerSupport() {
             </Text>
           </View>
 
-          {/* Veterans List */}
-          {registeredVeterans.map((veteran, index) => (
-            <View key={index} style={styles.veteranCard}>
+          {/* Loading/Error/Empty States */}
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#4a90e2" />
+              <Text style={styles.loadingText}>Loading peer supporters...</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={24} color="#ef4444" />
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity style={styles.retryButton} onPress={fetchPeerSupporters}>
+                <Text style={styles.retryButtonText}>Retry</Text>
+              </TouchableOpacity>
+            </View>
+          ) : peerSupporters.filter(v => v.status !== 'unavailable').length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="time" size={32} color="#7c9cbf" />
+              <Text style={styles.emptyText}>No peer supporters available</Text>
+              <Text style={styles.emptySubtext}>Please check back later or register to become a supporter</Text>
+            </View>
+          ) : (
+            /* Veterans List */
+            peerSupporters.filter(v => v.status !== 'unavailable').map((veteran, index) => (
+            <View key={veteran.id || index} style={styles.veteranCard}>
               <View style={styles.veteranHeader}>
                 <Ionicons name="person-circle" size={40} color="#7c9cbf" />
                 <View style={styles.veteranMainInfo}>
@@ -158,13 +179,13 @@ export default function PeerSupport() {
                     <Text style={styles.veteranName}>{veteran.firstName}</Text>
                     <View style={[
                       styles.availabilityBadge,
-                      veteran.availability === 'available' ? styles.badgeAvailable : styles.badgeLimited
+                      veteran.status === 'available' ? styles.badgeAvailable : styles.badgeLimited
                     ]}>
                       <Text style={[
                         styles.availabilityText,
-                        veteran.availability === 'available' ? styles.textAvailable : styles.textLimited
+                        veteran.status === 'available' ? styles.textAvailable : styles.textLimited
                       ]}>
-                        {veteran.availability === 'available' ? 'Available' : 'Limited'}
+                        {veteran.status === 'available' ? 'Available' : 'Limited'}
                       </Text>
                     </View>
                   </View>
@@ -180,11 +201,11 @@ export default function PeerSupport() {
                 <Text style={styles.veteranYears}>Served: {veteran.yearsServed}</Text>
               </View>
 
-              {veteran.availability === 'available' && (
+              {veteran.status === 'available' && (
                 <View style={styles.veteranContactButtons}>
                   <TouchableOpacity
                     style={styles.veteranCallButton}
-                    onPress={() => handleCallVeteran(veteran.contact)}
+                    onPress={() => handleCallVeteran(veteran.phone)}
                     activeOpacity={0.8}
                   >
                     <Ionicons name="call" size={18} color="#ffffff" />
@@ -215,14 +236,15 @@ export default function PeerSupport() {
                 </View>
               )}
               
-              {veteran.availability === 'limited' && (
+              {veteran.status === 'limited' && (
                 <View style={styles.limitedNotice}>
                   <Ionicons name="time" size={16} color="#9ca3af" />
                   <Text style={styles.limitedText}>Limited availability - check back later</Text>
                 </View>
               )}
             </View>
-          ))}
+          ))
+          )}
 
           {/* Disclaimer */}
           <View style={styles.disclaimer}>
