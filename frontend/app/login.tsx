@@ -179,6 +179,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
+  forgotPassword: {
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  forgotPasswordText: {
+    color: '#4a90d9',
+    fontSize: 14,
+  },
   footer: {
     marginTop: 'auto',
     alignItems: 'center',
