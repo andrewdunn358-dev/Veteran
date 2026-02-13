@@ -297,7 +297,7 @@ export default function PeerSupport() {
             >
               <Ionicons name="people" size={24} color="#ffffff" />
               <Text style={styles.primaryButtonText}>View Available Veterans</Text>
-              <Text style={styles.primaryButtonSubtext}>{registeredVeterans.filter(v => v.availability === 'available').length} veterans available now</Text>
+              <Text style={styles.primaryButtonSubtext}>Tap to see peer supporters</Text>
             </TouchableOpacity>
 
             {/* What is it */}
