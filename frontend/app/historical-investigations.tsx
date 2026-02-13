@@ -11,19 +11,19 @@ export default function HistoricalInvestigations() {
     {
       name: 'Combat Stress',
       description: 'Specialist support for veterans dealing with investigation-related stress and anxiety',
-      phone: '08001381619',
+      phone: '01912704378',
       icon: 'shield' as const,
     },
     {
       name: 'Veterans UK Welfare Service',
       description: 'Confidential welfare support and guidance for veterans facing investigations',
-      phone: '08081914218',
+      phone: '01912704378',
       icon: 'information-circle' as const,
     },
     {
       name: 'SSAFA',
       description: 'Practical and emotional support for veterans and families during difficult times',
-      phone: '08001314880',
+      phone: '01912704378',
       icon: 'heart' as const,
     },
   ];
