@@ -12,16 +12,30 @@ export default function Root({ children }: PropsWithChildren) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
-        {/*
-          Disable body scrolling on web to make ScrollView components work correctly.
-          If you want to enable scrolling, remove `ScrollViewStyleReset` and
-          set `overflow: auto` on the body style below.
-        */}
         <ScrollViewStyleReset />
         <style
           dangerouslySetInnerHTML={{
             __html: `
-              body > div:first-child { position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; }
+              html, body {
+                background-color: #0f1419 !important;
+              }
+              body > div:first-child { 
+                position: fixed !important; 
+                top: 0; 
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                right: auto !important;
+                bottom: 0; 
+                width: 100%;
+                max-width: 480px !important;
+                box-shadow: 0 0 40px rgba(0,0,0,0.5);
+              }
+              @media (min-width: 481px) {
+                body > div:first-child {
+                  border-left: 1px solid #2d3748;
+                  border-right: 1px solid #2d3748;
+                }
+              }
               [role="tablist"] [role="tab"] * { overflow: visible !important; }
               [role="heading"], [role="heading"] * { overflow: visible !important; }
             `,
@@ -35,6 +49,7 @@ export default function Root({ children }: PropsWithChildren) {
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
+          backgroundColor: "#0f1419",
         }}
       >
         {children}
