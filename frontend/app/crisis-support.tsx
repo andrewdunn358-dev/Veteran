@@ -52,15 +52,15 @@ export default function CrisisSupport() {
     {
       name: 'Combat Stress',
       description: '24/7 veteran mental health helpline',
-      phone: '01912704378',
-      sms: '01912704378',
-      whatsapp: '441912704378',
+      phone: '0800 138 1619',
+      sms: null,
+      whatsapp: null,
       icon: 'shield' as const,
     },
     {
       name: 'Samaritans',
       description: '24/7 confidential emotional support',
-      phone: '01912704378',
+      phone: '116 123',
       sms: null,
       whatsapp: null,
       icon: 'heart' as const,
@@ -68,7 +68,7 @@ export default function CrisisSupport() {
     {
       name: 'Veterans UK',
       description: 'Government support and guidance',
-      phone: '01912704378',
+      phone: '0808 191 4218',
       sms: null,
       whatsapp: null,
       icon: 'information-circle' as const,
