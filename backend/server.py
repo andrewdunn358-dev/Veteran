@@ -468,9 +468,9 @@ async def get_peer_support_registrations(current_user: User = Depends(require_ro
 
 # ============ SETUP/SEED ENDPOINTS ============
 
-@api_router.post("/setup/init")
+@api_router.api_route("/setup/init", methods=["GET", "POST"])
 async def initialize_system():
-    """Initialize system with default admin user"""
+    """Initialize system with default admin user (GET or POST)"""
     # Check if admin already exists
     existing_admin = await db.users.find_one({"role": "admin"})
     if existing_admin:
