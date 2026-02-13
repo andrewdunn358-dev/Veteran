@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from './context/AuthContext';
+import { useAuth } from '../src/context/AuthContext';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
