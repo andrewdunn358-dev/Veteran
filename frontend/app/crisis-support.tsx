@@ -124,8 +124,28 @@ export default function CrisisSupport() {
             Professional counsellors available now to speak with you
           </Text>
 
-          {onDutyCounsellors.map((counsellor, index) => (
-            <View key={index} style={styles.counsellorCard}>
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#4a90e2" />
+              <Text style={styles.loadingText}>Loading counsellors...</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={24} color="#ef4444" />
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity style={styles.retryButton} onPress={fetchCounsellors}>
+                <Text style={styles.retryButtonText}>Retry</Text>
+              </TouchableOpacity>
+            </View>
+          ) : counsellors.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="time" size={32} color="#7c9cbf" />
+              <Text style={styles.emptyText}>No counsellors on duty at the moment</Text>
+              <Text style={styles.emptySubtext}>Please try the crisis services below</Text>
+            </View>
+          ) : (
+            counsellors.map((counsellor, index) => (
+            <View key={counsellor.id || index} style={styles.counsellorCard}>
               <View style={styles.counsellorHeader}>
                 <View style={styles.counsellorInfo}>
                   <View style={styles.counsellorNameRow}>
@@ -147,8 +167,8 @@ export default function CrisisSupport() {
                     </View>
                   </View>
                   <Text style={styles.counsellorSpec}>{counsellor.specialization}</Text>
-                  {counsellor.nextAvailable && (
-                    <Text style={styles.nextAvailable}>Next available in {counsellor.nextAvailable}</Text>
+                  {counsellor.next_available && (
+                    <Text style={styles.nextAvailable}>Next available in {counsellor.next_available}</Text>
                   )}
                 </View>
               </View>
@@ -187,7 +207,8 @@ export default function CrisisSupport() {
                 </View>
               )}
             </View>
-          ))}
+          ))
+          )}
         </View>
 
         {/* Instructions */}
