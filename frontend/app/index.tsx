@@ -1,30 +1,219 @@
-import { Text, View, StyleSheet, Image } from "react-native";
-
-const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking, Platform } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Index() {
-  console.log(EXPO_PUBLIC_BACKEND_URL, "EXPO_PUBLIC_BACKEND_URL");
+  const router = useRouter();
+
+  const handleEmergencyCall = () => {
+    Linking.openURL('tel:999');
+  };
 
   return (
-    <View style={styles.container}>
-      <Image
-        source={require("../assets/images/app-image.png")}
-        style={styles.image}
-      />
-    </View>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <StatusBar barStyle="light-content" backgroundColor="#1a2332" />
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header with badge */}
+        <View style={styles.header}>
+          <View style={styles.badgeContainer}>
+            <Ionicons name="shield" size={32} color="#7c9cbf" />
+            <Text style={styles.headerTitle}>Veterans Support</Text>
+          </View>
+          <Text style={styles.headerSubtitle}>You are not alone. Help is here.</Text>
+        </View>
+
+        {/* Emergency Notice */}
+        <TouchableOpacity 
+          style={styles.emergencyNotice}
+          onPress={handleEmergencyCall}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="alert-circle" size={24} color="#ff4444" />
+          <View style={styles.emergencyTextContainer}>
+            <Text style={styles.emergencyTitle}>Immediate Danger?</Text>
+            <Text style={styles.emergencyText}>Call 999 for emergency services</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Main Actions */}
+        <View style={styles.mainActions}>
+          {/* Primary Help Button */}
+          <TouchableOpacity 
+            style={styles.primaryButton}
+            onPress={() => router.push('/crisis-support')}
+            activeOpacity={0.9}
+          >
+            <Ionicons name="help-circle" size={48} color="#ffffff" />
+            <Text style={styles.primaryButtonText}>I NEED HELP NOW</Text>
+            <Text style={styles.primaryButtonSubtext}>24/7 Crisis Support</Text>
+          </TouchableOpacity>
+
+          {/* Secondary Actions */}
+          <View style={styles.secondaryActions}>
+            <TouchableOpacity 
+              style={styles.secondaryButton}
+              onPress={() => router.push('/peer-support')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="people" size={32} color="#7c9cbf" />
+              <Text style={styles.secondaryButtonText}>Talk to Another Veteran</Text>
+              <Text style={styles.secondaryButtonSubtext}>Peer support</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.secondaryButton}
+              onPress={() => router.push('/organizations')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="list" size={32} color="#7c9cbf" />
+              <Text style={styles.secondaryButtonText}>Support Organisations</Text>
+              <Text style={styles.secondaryButtonSubtext}>UK veteran services</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Disclaimer */}
+        <View style={styles.disclaimer}>
+          <Text style={styles.disclaimerText}>
+            This app is not an emergency service. For immediate danger, always call 999.
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#1a2332',
+  },
   container: {
     flex: 1,
-    backgroundColor: "#0c0c0c",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#1a2332',
   },
-  image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
+  scrollContent: {
+    padding: 24,
+    paddingBottom: 40,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 32,
+    marginTop: 16,
+  },
+  badgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#ffffff',
+    marginLeft: 12,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#b0c4de',
+    textAlign: 'center',
+  },
+  emergencyNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2d1f1f',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 32,
+    borderWidth: 2,
+    borderColor: '#ff4444',
+  },
+  emergencyTextContainer: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  emergencyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#ff6666',
+    marginBottom: 4,
+  },
+  emergencyText: {
+    fontSize: 14,
+    color: '#ffcccc',
+  },
+  mainActions: {
+    marginBottom: 32,
+  },
+  primaryButton: {
+    backgroundColor: '#cc0000',
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    marginBottom: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#cc0000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  primaryButtonText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  primaryButtonSubtext: {
+    fontSize: 14,
+    color: '#ffcccc',
+    marginTop: 8,
+  },
+  secondaryActions: {
+    gap: 16,
+  },
+  secondaryButton: {
+    backgroundColor: '#2d3748',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#4a5568',
+  },
+  secondaryButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#ffffff',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  secondaryButtonSubtext: {
+    fontSize: 13,
+    color: '#b0c4de',
+    marginTop: 4,
+  },
+  disclaimer: {
+    backgroundColor: '#2d3748',
+    borderRadius: 8,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#4a5568',
+  },
+  disclaimerText: {
+    fontSize: 12,
+    color: '#b0c4de',
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });
