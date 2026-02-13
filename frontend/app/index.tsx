@@ -97,6 +97,16 @@ export default function Index() {
             This app is not an emergency service. For immediate danger, always call 999.
           </Text>
         </View>
+
+        {/* Staff Login */}
+        <TouchableOpacity 
+          style={styles.staffLogin}
+          onPress={() => router.push('/login')}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="lock-closed-outline" size={18} color="#8899a6" />
+          <Text style={styles.staffLoginText}>Staff Portal Login</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
