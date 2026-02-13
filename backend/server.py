@@ -21,9 +21,16 @@ SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
-# MongoDB connection
+# MongoDB connection with SSL fix
+import ssl
+import certifi
+
 mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url, serverSelectionTimeoutMS=10000)
+client = AsyncIOMotorClient(
+    mongo_url,
+    serverSelectionTimeoutMS=10000,
+    tlsCAFile=certifi.where()
+)
 db = client[os.environ.get('DB_NAME', 'veterans_support')]
 
 # Create the main app
