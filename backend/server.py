@@ -304,6 +304,223 @@ async def get_me(current_user: User = Depends(get_current_user)):
     """Get current user info"""
     return current_user
 
+# ============ PASSWORD MANAGEMENT ENDPOINTS ============
+
+@api_router.post("/auth/change-password")
+async def change_password(
+    password_data: ChangePassword,
+    current_user: User = Depends(get_current_user)
+):
+    """Change own password (logged-in users)"""
+    user_data = await db.users.find_one({"email": current_user.email})
+    if not verify_password(password_data.current_password, user_data["password_hash"]):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    
+    new_hash = hash_password(password_data.new_password)
+    await db.users.update_one(
+        {"email": current_user.email},
+        {"$set": {"password_hash": new_hash}}
+    )
+    return {"message": "Password changed successfully"}
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(request: ResetPasswordRequest):
+    """Request password reset email"""
+    user_data = await db.users.find_one({"email": request.email})
+    if not user_data:
+        # Don't reveal if email exists
+        return {"message": "If this email exists, a reset link has been sent"}
+    
+    # Generate reset token
+    reset_token = secrets.token_urlsafe(32)
+    expires = datetime.utcnow() + timedelta(hours=1)
+    
+    # Store reset token
+    await db.password_resets.delete_many({"email": request.email})  # Remove old tokens
+    await db.password_resets.insert_one({
+        "email": request.email,
+        "token": reset_token,
+        "expires": expires
+    })
+    
+    # Send email
+    email_sent = await send_reset_email(request.email, reset_token)
+    
+    if not email_sent:
+        # For non-production, return token directly
+        return {
+            "message": "Email service not configured",
+            "reset_token": reset_token,
+            "note": "In production, this would be sent via email"
+        }
+    
+    return {"message": "If this email exists, a reset link has been sent"}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(reset_data: ResetPassword):
+    """Reset password using token"""
+    reset_record = await db.password_resets.find_one({"token": reset_data.token})
+    
+    if not reset_record:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+    
+    if reset_record["expires"] < datetime.utcnow():
+        await db.password_resets.delete_one({"token": reset_data.token})
+        raise HTTPException(status_code=400, detail="Reset token has expired")
+    
+    # Update password
+    new_hash = hash_password(reset_data.new_password)
+    await db.users.update_one(
+        {"email": reset_record["email"]},
+        {"$set": {"password_hash": new_hash}}
+    )
+    
+    # Delete used token
+    await db.password_resets.delete_one({"token": reset_data.token})
+    
+    return {"message": "Password reset successfully"}
+
+@api_router.post("/auth/admin-reset-password")
+async def admin_reset_password(
+    reset_data: AdminResetPassword,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Admin resets another user's password"""
+    user = await db.users.find_one({"id": reset_data.user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    new_hash = hash_password(reset_data.new_password)
+    await db.users.update_one(
+        {"id": reset_data.user_id},
+        {"$set": {"password_hash": new_hash}}
+    )
+    
+    return {"message": f"Password reset for user {user['email']}"}
+
+@api_router.get("/auth/users", response_model=List[User])
+async def get_all_users(current_user: User = Depends(require_role("admin"))):
+    """Get all users (admin only)"""
+    users = await db.users.find().to_list(1000)
+    return [User(**u) for u in users]
+
+@api_router.delete("/auth/users/{user_id}")
+async def delete_user(user_id: str, current_user: User = Depends(require_role("admin"))):
+    """Delete a user (admin only)"""
+    if user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot delete yourself")
+    
+    result = await db.users.delete_one({"id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "User deleted successfully"}
+
+# ============ CMS CONTENT ENDPOINTS ============
+
+@api_router.get("/content/{page_name}")
+async def get_page_content(page_name: str):
+    """Get all content for a page (public)"""
+    content = await db.page_content.find({"page_name": page_name}).to_list(100)
+    return {item["section"]: item["content"] for item in content}
+
+@api_router.get("/content")
+async def get_all_content():
+    """Get all CMS content (public)"""
+    content = await db.page_content.find().to_list(500)
+    result = {}
+    for item in content:
+        if item["page_name"] not in result:
+            result[item["page_name"]] = {}
+        result[item["page_name"]][item["section"]] = item["content"]
+    return result
+
+@api_router.put("/content/{page_name}/{section}")
+async def update_page_content(
+    page_name: str,
+    section: str,
+    content_data: PageContentUpdate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Update page content (admin only)"""
+    existing = await db.page_content.find_one({
+        "page_name": page_name,
+        "section": section
+    })
+    
+    if existing:
+        await db.page_content.update_one(
+            {"page_name": page_name, "section": section},
+            {"$set": {
+                "content": content_data.content,
+                "updated_at": datetime.utcnow(),
+                "updated_by": current_user.email
+            }}
+        )
+    else:
+        content_obj = PageContent(
+            page_name=page_name,
+            section=section,
+            content=content_data.content,
+            updated_by=current_user.email
+        )
+        await db.page_content.insert_one(content_obj.dict())
+    
+    return {"message": "Content updated successfully"}
+
+@api_router.post("/content/seed")
+async def seed_default_content(current_user: User = Depends(require_role("admin"))):
+    """Seed default CMS content (admin only)"""
+    default_content = [
+        # Home page
+        {"page_name": "home", "section": "title", "content": "Veterans Support"},
+        {"page_name": "home", "section": "tagline_english", "content": "Once in service, forever united"},
+        {"page_name": "home", "section": "tagline_latin", "content": "Semel Servientes, Semper Uniti"},
+        {"page_name": "home", "section": "emergency_title", "content": "Immediate Danger?"},
+        {"page_name": "home", "section": "emergency_text", "content": "Call 999 for emergency services"},
+        {"page_name": "home", "section": "help_button", "content": "I NEED HELP NOW"},
+        {"page_name": "home", "section": "help_subtext", "content": "24/7 Crisis Support"},
+        {"page_name": "home", "section": "peer_button", "content": "Talk to Another Veteran"},
+        {"page_name": "home", "section": "hiat_button", "content": "Issues Related to Historical Investigations"},
+        {"page_name": "home", "section": "orgs_button", "content": "Support Organisations"},
+        {"page_name": "home", "section": "disclaimer", "content": "This app is not an emergency service. For immediate danger, always call 999."},
+        
+        # Crisis support page
+        {"page_name": "crisis-support", "section": "title", "content": "Crisis Support"},
+        {"page_name": "crisis-support", "section": "subtitle", "content": "Help is available 24/7"},
+        {"page_name": "crisis-support", "section": "samaritans_name", "content": "Samaritans"},
+        {"page_name": "crisis-support", "section": "samaritans_desc", "content": "Free 24/7 support for anyone in distress"},
+        {"page_name": "crisis-support", "section": "samaritans_phone", "content": "116 123"},
+        {"page_name": "crisis-support", "section": "combat_stress_name", "content": "Combat Stress"},
+        {"page_name": "crisis-support", "section": "combat_stress_desc", "content": "UK veteran mental health charity"},
+        {"page_name": "crisis-support", "section": "combat_stress_phone", "content": "0800 138 1619"},
+        
+        # Peer support page
+        {"page_name": "peer-support", "section": "title", "content": "Peer Support"},
+        {"page_name": "peer-support", "section": "subtitle", "content": "Connect with fellow veterans who understand"},
+        {"page_name": "peer-support", "section": "intro", "content": "Sometimes the best support comes from those who have walked the same path."},
+        
+        # Historical investigations page
+        {"page_name": "historical-investigations", "section": "title", "content": "Historical Investigations Support"},
+        {"page_name": "historical-investigations", "section": "subtitle", "content": "Support for veterans facing historical investigations"},
+        {"page_name": "historical-investigations", "section": "intro", "content": "We understand the stress and anxiety that can come with historical investigations. You are not alone."},
+        
+        # Organizations page
+        {"page_name": "organizations", "section": "title", "content": "Support Organisations"},
+        {"page_name": "organizations", "section": "subtitle", "content": "UK veteran support services"},
+    ]
+    
+    for item in default_content:
+        existing = await db.page_content.find_one({
+            "page_name": item["page_name"],
+            "section": item["section"]
+        })
+        if not existing:
+            content_obj = PageContent(**item, updated_by=current_user.email)
+            await db.page_content.insert_one(content_obj.dict())
+    
+    return {"message": "Default content seeded successfully"}
+
 # ============ COUNSELLOR ENDPOINTS ============
 
 @api_router.post("/counsellors", response_model=Counsellor)
