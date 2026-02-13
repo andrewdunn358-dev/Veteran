@@ -103,18 +103,14 @@ export default function CrisisSupport() {
           <Text style={styles.headerTitle}>Crisis Support</Text>
         </View>
 
-        {/* Emergency Banner */}
-        <TouchableOpacity 
-          style={styles.emergencyBanner}
-          onPress={() => Linking.openURL('tel:999')}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="call" size={28} color="#ffffff" />
+        {/* Emergency Banner - Display only, no call functionality */}
+        <View style={styles.emergencyBanner}>
+          <Ionicons name="warning" size={28} color="#ffffff" />
           <View style={styles.emergencyTextContainer}>
-            <Text style={styles.emergencyTitle}>Emergency: 999</Text>
-            <Text style={styles.emergencySubtext}>Tap to call immediately</Text>
+            <Text style={styles.emergencyTitle}>Emergency: Call 999</Text>
+            <Text style={styles.emergencySubtext}>For immediate danger, dial 999 directly</Text>
           </View>
-        </TouchableOpacity>
+        </View>
 
         {/* On-Duty Counsellors Section */}
         <View style={styles.counsellorsSection}>
