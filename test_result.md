@@ -206,7 +206,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Peer support registration API endpoint"
     - "Home screen with crisis support navigation"
     - "Crisis support options page"
     - "Support organizations directory"
