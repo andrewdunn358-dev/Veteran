@@ -1,9 +1,11 @@
+import React from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { AuthProvider } from './context/AuthContext';
 
 export default function RootLayout() {
   return (
-    <>
+    <AuthProvider>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -17,7 +19,12 @@ export default function RootLayout() {
         <Stack.Screen name="organizations" />
         <Stack.Screen name="peer-support" />
         <Stack.Screen name="historical-investigations" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="portal" />
+        <Stack.Screen name="admin" />
+        <Stack.Screen name="counsellor-portal" />
+        <Stack.Screen name="peer-portal" />
       </Stack>
-    </>
+    </AuthProvider>
   );
 }
