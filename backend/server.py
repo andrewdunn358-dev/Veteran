@@ -145,6 +145,84 @@ class PeerSupportRegistration(BaseModel):
 class PeerSupportRegistrationCreate(BaseModel):
     email: EmailStr
 
+# Password Management Models
+class ChangePassword(BaseModel):
+    current_password: str
+    new_password: str
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPassword(BaseModel):
+    token: str
+    new_password: str
+
+class AdminResetPassword(BaseModel):
+    user_id: str
+    new_password: str
+
+# CMS Content Models
+class PageContent(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    page_name: str  # home, crisis-support, organizations, peer-support, historical-investigations
+    section: str    # title, subtitle, emergency_text, etc.
+    content: str
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_by: Optional[str] = None
+
+class PageContentUpdate(BaseModel):
+    content: str
+
+# SMTP Configuration
+SMTP_HOST = os.getenv("SMTP_HOST", "")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+SMTP_FROM = os.getenv("SMTP_FROM", "noreply@veteran.dbty.co.uk")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://veteran-support.vercel.app")
+
+async def send_reset_email(email: str, reset_token: str):
+    """Send password reset email via SMTP"""
+    if not SMTP_HOST:
+        logging.warning("SMTP not configured, skipping email")
+        return False
+    
+    try:
+        reset_link = f"{FRONTEND_URL}/reset-password?token={reset_token}"
+        
+        msg = MIMEMultipart()
+        msg['From'] = SMTP_FROM
+        msg['To'] = email
+        msg['Subject'] = "Password Reset - Veterans Support"
+        
+        body = f"""
+        <html>
+        <body>
+        <h2>Password Reset Request</h2>
+        <p>You have requested to reset your password for the Veterans Support portal.</p>
+        <p>Click the link below to reset your password:</p>
+        <p><a href="{reset_link}">Reset Password</a></p>
+        <p>Or copy this link: {reset_link}</p>
+        <p>This link will expire in 1 hour.</p>
+        <p>If you did not request this, please ignore this email.</p>
+        <br>
+        <p>Veterans Support Team</p>
+        </body>
+        </html>
+        """
+        
+        msg.attach(MIMEText(body, 'html'))
+        
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.sendmail(SMTP_FROM, email, msg.as_string())
+        
+        return True
+    except Exception as e:
+        logging.error(f"Failed to send email: {str(e)}")
+        return False
+
 # ============ AUTH FUNCTIONS ============
 
 def hash_password(password: str) -> str:
