@@ -120,16 +120,35 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     marginTop: 16,
   },
+  badgeImage: {
+    width: 120,
+    height: 120,
+    marginBottom: 16,
+  },
   badgeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+    fontSize: 26,
+    fontWeight: '700',
     color: '#ffffff',
-    marginLeft: 12,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  taglineEnglish: {
+    fontSize: 15,
+    color: '#b0c4de',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginBottom: 4,
+  },
+  taglineLatin: {
+    fontSize: 14,
+    color: '#8fa8c4',
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   headerSubtitle: {
     fontSize: 16,
