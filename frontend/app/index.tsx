@@ -3,18 +3,30 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linkin
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../src/context/ThemeContext';
 
 export default function Index() {
   const router = useRouter();
+  const { colors, theme } = useTheme();
+  const styles = createStyles(colors);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <StatusBar barStyle="light-content" backgroundColor="#1a2332" />
+      <StatusBar barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
       <ScrollView 
         style={styles.container}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Settings Icon */}
+        <TouchableOpacity 
+          style={styles.settingsIcon}
+          onPress={() => router.push('/settings')}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="settings-outline" size={24} color={colors.textSecondary} />
+        </TouchableOpacity>
+
         {/* Header with badge */}
         <View style={styles.header}>
           <Image 
@@ -56,7 +68,7 @@ export default function Index() {
               onPress={() => router.push('/peer-support')}
               activeOpacity={0.8}
             >
-              <Ionicons name="people" size={32} color="#7c9cbf" />
+              <Ionicons name="people" size={32} color={colors.textSecondary} />
               <Text style={styles.secondaryButtonText}>Talk to Another Veteran</Text>
               <Text style={styles.secondaryButtonSubtext}>Peer support</Text>
             </TouchableOpacity>
@@ -66,7 +78,7 @@ export default function Index() {
               onPress={() => router.push('/historical-investigations')}
               activeOpacity={0.8}
             >
-              <Ionicons name="document-text" size={32} color="#7c9cbf" />
+              <Ionicons name="document-text" size={32} color={colors.textSecondary} />
               <Text style={styles.secondaryButtonText}>Issues Related to Historical Investigations</Text>
               <Text style={styles.secondaryButtonSubtext}>Support for investigation-related stress</Text>
             </TouchableOpacity>
@@ -76,11 +88,48 @@ export default function Index() {
               onPress={() => router.push('/organizations')}
               activeOpacity={0.8}
             >
-              <Ionicons name="list" size={32} color="#7c9cbf" />
+              <Ionicons name="list" size={32} color={colors.textSecondary} />
               <Text style={styles.secondaryButtonText}>Support Organisations</Text>
               <Text style={styles.secondaryButtonSubtext}>UK veteran services</Text>
             </TouchableOpacity>
           </View>
+        </View>
+
+        {/* Self-Care Tools Section */}
+        <Text style={styles.sectionTitle}>Self-Care Tools</Text>
+        <View style={styles.toolsRow}>
+          <TouchableOpacity 
+            style={styles.toolButton}
+            onPress={() => router.push('/mood')}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.toolIconBg, { backgroundColor: '#fef3c7' }]}>
+              <Text style={styles.toolEmoji}>😊</Text>
+            </View>
+            <Text style={styles.toolText}>Daily{'\n'}Check-in</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.toolButton}
+            onPress={() => router.push('/journal')}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.toolIconBg, { backgroundColor: '#dbeafe' }]}>
+              <Ionicons name="book" size={24} color="#3b82f6" />
+            </View>
+            <Text style={styles.toolText}>My{'\n'}Journal</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.toolButton}
+            onPress={() => router.push('/settings')}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.toolIconBg, { backgroundColor: '#f3e8ff' }]}>
+              <Ionicons name="settings" size={24} color="#9333ea" />
+            </View>
+            <Text style={styles.toolText}>Settings</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Disclaimer */}
@@ -96,7 +145,7 @@ export default function Index() {
           onPress={() => router.push('/login')}
           activeOpacity={0.7}
         >
-          <Ionicons name="lock-closed-outline" size={18} color="#8899a6" />
+          <Ionicons name="lock-closed-outline" size={18} color={colors.textMuted} />
           <Text style={styles.staffLoginText}>Staff Portal Login</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -104,18 +153,25 @@ export default function Index() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1a2332',
+    backgroundColor: colors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: '#1a2332',
+    backgroundColor: colors.background,
   },
   scrollContent: {
     padding: 24,
     paddingBottom: 40,
+  },
+  settingsIcon: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    padding: 8,
+    zIndex: 10,
   },
   header: {
     alignItems: 'center',
@@ -135,26 +191,26 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#ffffff',
+    color: colors.text,
     marginBottom: 8,
     textAlign: 'center',
   },
   taglineEnglish: {
     fontSize: 15,
-    color: '#b0c4de',
+    color: colors.textSecondary,
     textAlign: 'center',
     fontStyle: 'italic',
     marginBottom: 4,
   },
   taglineLatin: {
     fontSize: 14,
-    color: '#8fa8c4',
+    color: colors.textMuted,
     textAlign: 'center',
     fontStyle: 'italic',
   },
   headerSubtitle: {
     fontSize: 16,
-    color: '#b0c4de',
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   emergencyNotice: {
@@ -218,36 +274,74 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   secondaryButton: {
-    backgroundColor: '#2d3748',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#4a5568',
+    borderColor: colors.border,
   },
   secondaryButtonText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#ffffff',
+    color: colors.text,
     marginTop: 8,
     textAlign: 'center',
   },
   secondaryButtonSubtext: {
     fontSize: 13,
-    color: '#b0c4de',
+    color: colors.textSecondary,
     marginTop: 4,
     textAlign: 'center',
   },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 16,
+  },
+  toolsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 32,
+    gap: 12,
+  },
+  toolButton: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  toolIconBg: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  toolEmoji: {
+    fontSize: 24,
+  },
+  toolText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
   disclaimer: {
-    backgroundColor: '#2d3748',
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#4a5568',
+    borderColor: colors.border,
   },
   disclaimerText: {
     fontSize: 12,
-    color: '#b0c4de',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 18,
   },
@@ -260,7 +354,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   staffLoginText: {
-    color: '#8899a6',
+    color: colors.textMuted,
     fontSize: 14,
   },
 });
