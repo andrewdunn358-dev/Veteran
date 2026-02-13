@@ -50,16 +50,12 @@ export default function HistoricalInvestigations() {
           </View>
         </View>
 
-        {/* Emergency Banner */}
+        {/* Emergency Banner - Display only, no call functionality */}
         <View style={styles.emergencyBannerContainer}>
-          <TouchableOpacity 
-            style={styles.emergencyBanner}
-            onPress={() => Linking.openURL('tel:999')}
-            activeOpacity={0.8}
-          >
+          <View style={styles.emergencyBanner}>
             <Ionicons name="warning" size={24} color="#ffffff" />
-            <Text style={styles.emergencyText}>At risk? Call 999</Text>
-          </TouchableOpacity>
+            <Text style={styles.emergencyText}>At risk? Dial 999</Text>
+          </View>
           
           <TouchableOpacity 
             style={styles.crisisButton}
