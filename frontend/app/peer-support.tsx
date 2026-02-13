@@ -200,14 +200,38 @@ export default function PeerSupport() {
               </View>
 
               {veteran.availability === 'available' && (
-                <TouchableOpacity
-                  style={styles.connectButton}
-                  onPress={() => handleCallVeteran(veteran.contact)}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="call" size={20} color="#ffffff" />
-                  <Text style={styles.connectButtonText}>Connect with {veteran.firstName}</Text>
-                </TouchableOpacity>
+                <View style={styles.veteranContactButtons}>
+                  <TouchableOpacity
+                    style={styles.veteranCallButton}
+                    onPress={() => handleCallVeteran(veteran.contact)}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="call" size={18} color="#ffffff" />
+                    <Text style={styles.veteranCallButtonText}>Call</Text>
+                  </TouchableOpacity>
+                  
+                  {veteran.sms && (
+                    <TouchableOpacity
+                      style={styles.veteranSecondaryButton}
+                      onPress={() => handleSMS(veteran.sms!)}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="chatbubble" size={18} color="#7c9cbf" />
+                      <Text style={styles.veteranSecondaryButtonText}>Text</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {veteran.whatsapp && (
+                    <TouchableOpacity
+                      style={styles.veteranSecondaryButton}
+                      onPress={() => handleWhatsApp(veteran.whatsapp!)}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="logo-whatsapp" size={18} color="#7c9cbf" />
+                      <Text style={styles.veteranSecondaryButtonText}>WhatsApp</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               )}
               
               {veteran.availability === 'limited' && (
