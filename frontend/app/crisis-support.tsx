@@ -22,12 +22,16 @@ export default function CrisisSupport() {
       status: 'available',
       specialization: 'Trauma & PTSD',
       phone: '08001381619',
+      sms: '07537173683',
+      whatsapp: '447537173683',
     },
     {
       name: 'James R.',
       status: 'available',
       specialization: 'Depression & Anxiety',
       phone: '08001381619',
+      sms: '07537173683',
+      whatsapp: '447537173683',
     },
     {
       name: 'David T.',
@@ -35,6 +39,8 @@ export default function CrisisSupport() {
       specialization: 'Crisis Intervention',
       nextAvailable: '30 mins',
       phone: '08001381619',
+      sms: '07537173683',
+      whatsapp: '447537173683',
     },
   ];
 
