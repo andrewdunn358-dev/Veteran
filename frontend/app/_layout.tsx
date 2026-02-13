@@ -24,6 +24,8 @@ export default function RootLayout() {
         <Stack.Screen name="admin" />
         <Stack.Screen name="counsellor-portal" />
         <Stack.Screen name="peer-portal" />
+        <Stack.Screen name="forgot-password" />
+        <Stack.Screen name="reset-password" />
       </Stack>
     </AuthProvider>
   );
