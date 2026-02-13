@@ -1,14 +1,17 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking, Platform, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
 interface Counsellor {
+  id: string;
   name: string;
-  status: 'available' | 'busy';
+  status: 'available' | 'busy' | 'off';
   specialization: string;
-  nextAvailable?: string;
+  next_available?: string;
   phone: string;
   sms?: string;
   whatsapp?: string;
@@ -16,35 +19,34 @@ interface Counsellor {
 
 export default function CrisisSupport() {
   const router = useRouter();
+  const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock on-duty counsellors
-  const onDutyCounsellors: Counsellor[] = [
-    {
-      name: 'Sarah M.',
-      status: 'available',
-      specialization: 'Trauma & PTSD',
-      phone: '01912704378',
-      sms: '01912704378',
-      whatsapp: '441912704378',
-    },
-    {
-      name: 'James R.',
-      status: 'available',
-      specialization: 'Depression & Anxiety',
-      phone: '01912704378',
-      sms: '01912704378',
-      whatsapp: '441912704378',
-    },
-    {
-      name: 'David T.',
-      status: 'busy',
-      specialization: 'Crisis Intervention',
-      nextAvailable: '30 mins',
-      phone: '01912704378',
-      sms: '01912704378',
-      whatsapp: '441912704378',
-    },
-  ];
+  // Fetch counsellors from API
+  const fetchCounsellors = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/counsellors`);
+      if (response.ok) {
+        const data = await response.json();
+        // Filter to show only available and busy counsellors (not 'off')
+        setCounsellors(data.filter((c: Counsellor) => c.status !== 'off'));
+      } else {
+        setError('Unable to load counsellors');
+      }
+    } catch (err) {
+      console.error('Error fetching counsellors:', err);
+      setError('Unable to connect. Please check your connection.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCounsellors();
+  }, []);
 
   const crisisServices = [
     {

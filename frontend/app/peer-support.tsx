@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, TextInput, Alert, KeyboardAvoidingView, Platform, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, TextInput, Alert, KeyboardAvoidingView, Platform, Linking, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,12 +7,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 interface PeerVeteran {
+  id: string;
   firstName: string;
   area: string;
   background: string;
   yearsServed: string;
-  availability: 'available' | 'limited';
-  contact: string;
+  status: 'available' | 'limited' | 'unavailable';
+  phone: string;
   sms?: string;
   whatsapp?: string;
 }
@@ -23,58 +24,38 @@ export default function PeerSupport() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showVeteransList, setShowVeteransList] = useState(false);
+  const [peerSupporters, setPeerSupporters] = useState<PeerVeteran[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock registered veterans (first names only)
-  const registeredVeterans: PeerVeteran[] = [
-    {
-      firstName: 'Michael',
-      area: 'Greater Manchester',
-      background: 'Royal Marines, 12 years service. Iraq and Afghanistan veteran.',
-      yearsServed: '2001-2013',
-      availability: 'available',
-      contact: '01912704378',
-      sms: '01912704378',
-      whatsapp: '441912704378',
-    },
-    {
-      firstName: 'David',
-      area: 'West Yorkshire',
-      background: 'Army infantry, 8 years. Served in multiple deployments.',
-      yearsServed: '2005-2013',
-      availability: 'available',
-      contact: '01912704378',
-      sms: '01912704378',
-      whatsapp: '441912704378',
-    },
-    {
-      firstName: 'Thomas',
-      area: 'London & South East',
-      background: 'RAF Regiment, 15 years service. Now peer support volunteer.',
-      yearsServed: '2000-2015',
-      availability: 'limited',
-      contact: '01912704378',
-    },
-    {
-      firstName: 'Robert',
-      area: 'Scotland (Glasgow)',
-      background: 'Royal Navy, 10 years. Experienced with transition challenges.',
-      yearsServed: '2006-2016',
-      availability: 'available',
-      contact: '01912704378',
-      sms: '01912704378',
-      whatsapp: '441912704378',
-    },
-    {
-      firstName: 'Andrew',
-      area: 'Midlands',
-      background: 'Army medical corps, 14 years. Trained peer supporter.',
-      yearsServed: '2003-2017',
-      availability: 'available',
-      contact: '01912704378',
-      sms: '01912704378',
-      whatsapp: '441912704378',
-    },
-  ];
+  // Fetch peer supporters from API
+  const fetchPeerSupporters = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/peer-supporters`);
+      if (response.ok) {
+        const data = await response.json();
+        setPeerSupporters(data);
+      } else {
+        setError('Unable to load peer supporters');
+      }
+    } catch (err) {
+      console.error('Error fetching peer supporters:', err);
+      setError('Unable to connect. Please check your connection.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showVeteransList) {
+      fetchPeerSupporters();
+    }
+  }, [showVeteransList]);
+
+  // Get available count for display
+  const availableCount = peerSupporters.filter(p => p.status === 'available' || p.status === 'limited').length;
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
