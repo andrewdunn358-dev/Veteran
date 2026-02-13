@@ -109,27 +109,33 @@ user_problem_statement: |
 backend:
   - task: "Peer support registration API endpoint"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Created POST /api/peer-support/register endpoint to store veteran emails for peer support programme. Includes email validation and duplicate checking."
+      - working: true
+        agent: "testing"
+        comment: "✅ BACKEND TESTING COMPLETE: POST /api/peer-support/register working perfectly. Tested valid email registration (returns 200 with id/email/timestamp), invalid email format validation (returns 422), duplicate email handling (returns 400 with user-friendly message), empty email rejection (returns 422). All responses include proper HTTP status codes and JSON format. MongoDB storage verified - all test registrations successfully stored and retrievable."
 
   - task: "Get peer support registrations endpoint"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "low"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Created GET /api/peer-support/registrations endpoint for admin to view all registrations."
+      - working: true
+        agent: "testing"
+        comment: "✅ BACKEND TESTING COMPLETE: GET /api/peer-support/registrations working perfectly. Returns array of registrations sorted by timestamp (newest first). Proper JSON response format with all required fields (id, email, timestamp). Successfully retrieves all stored registrations from MongoDB. Status code 200 with correct headers."
 
 frontend:
   - task: "Home screen with crisis support navigation"
