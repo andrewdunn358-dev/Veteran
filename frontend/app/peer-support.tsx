@@ -133,6 +133,15 @@ export default function PeerSupport() {
     Linking.openURL(`tel:${contact}`);
   };
 
+  const handleSMS = (number: string) => {
+    Linking.openURL(`sms:${number}`);
+  };
+
+  const handleWhatsApp = (number: string) => {
+    const whatsappUrl = `https://wa.me/${number}`;
+    Linking.openURL(whatsappUrl);
+  };
+
   if (showVeteransList) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
