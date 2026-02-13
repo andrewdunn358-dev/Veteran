@@ -13,6 +13,8 @@ interface PeerVeteran {
   yearsServed: string;
   availability: 'available' | 'limited';
   contact: string;
+  sms?: string;
+  whatsapp?: string;
 }
 
 export default function PeerSupport() {
