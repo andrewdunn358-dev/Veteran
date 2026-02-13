@@ -259,4 +259,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
+  staffLogin: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 24,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  staffLoginText: {
+    color: '#8899a6',
+    fontSize: 14,
+  },
 });
