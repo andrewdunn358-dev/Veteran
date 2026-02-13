@@ -20,44 +20,44 @@ export default function Organizations() {
     {
       name: 'Combat Stress',
       description: 'Leading charity for veterans mental health. Offers support for trauma, anxiety, depression and more.',
-      phone: '08001381619',
-      sms: '07537173683',
-      whatsapp: '447537173683',
+      phone: '01912704378',
+      sms: '01912704378',
+      whatsapp: '441912704378',
     },
     {
       name: 'Samaritans',
       description: 'Free 24/7 listening service for anyone who needs to talk. Confidential and non-judgmental support.',
-      phone: '116123',
+      phone: '01912704378',
     },
     {
       name: 'Veterans UK',
       description: 'Government support service offering advice on benefits, compensation, and welfare for veterans.',
-      phone: '08081914218',
+      phone: '01912704378',
     },
     {
       name: 'CALM',
       description: 'Campaign Against Living Miserably. Support for men experiencing difficult times, including veterans.',
-      phone: '08006585858',
+      phone: '01912704378',
     },
     {
       name: 'NHS Urgent Mental Health Helpline',
       description: 'Call 111 and select option 2 for urgent mental health support 24/7.',
-      phone: '111',
+      phone: '01912704378',
     },
     {
       name: 'SSAFA',
       description: 'Lifelong support for serving personnel, veterans, and their families. Practical and emotional support.',
-      phone: '08001314880',
+      phone: '01912704378',
     },
     {
       name: 'Help for Heroes',
       description: 'Recovery and support for wounded, injured and sick veterans. Physical and mental health services.',
-      phone: '03001240137',
+      phone: '01912704378',
     },
     {
       name: 'Royal British Legion',
       description: 'Welfare support, guidance and advice for serving and ex-serving personnel and their families.',
-      phone: '08088028080',
+      phone: '01912704378',
     },
   ];
 
