@@ -13,31 +13,119 @@ from datetime import datetime, timedelta
 import bcrypt
 import jwt
 
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+# JWT Configuration
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[os.environ.get('DB_NAME', 'veterans_support')]
 
-# Create the main app without a prefix
+# Create the main app
 app = FastAPI()
-
-# Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
+security = HTTPBearer()
 
+# ============ MODELS ============
 
-# Define Models
-class StatusCheck(BaseModel):
+# Auth Models
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    role: str = Field(..., pattern="^(admin|counsellor|peer)$")
+    name: str
+
+class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    email: EmailStr
+    role: str
+    name: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: User
 
+# Counsellor Models
+class CounsellorCreate(BaseModel):
+    name: str
+    specialization: str
+    phone: str
+    sms: Optional[str] = None
+    whatsapp: Optional[str] = None
+    user_id: Optional[str] = None
+
+class Counsellor(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    specialization: str
+    status: str = "off"  # available, busy, off
+    next_available: Optional[str] = None
+    phone: str
+    sms: Optional[str] = None
+    whatsapp: Optional[str] = None
+    user_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CounsellorStatusUpdate(BaseModel):
+    status: str = Field(..., pattern="^(available|busy|off)$")
+    next_available: Optional[str] = None
+
+# Peer Supporter Models
+class PeerSupporterCreate(BaseModel):
+    firstName: str
+    area: str
+    background: str
+    yearsServed: str
+    phone: str
+    sms: Optional[str] = None
+    whatsapp: Optional[str] = None
+    user_id: Optional[str] = None
+
+class PeerSupporter(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    firstName: str
+    area: str
+    background: str
+    yearsServed: str
+    status: str = "unavailable"  # available, limited, unavailable
+    phone: str
+    sms: Optional[str] = None
+    whatsapp: Optional[str] = None
+    user_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PeerSupporterStatusUpdate(BaseModel):
+    status: str = Field(..., pattern="^(available|limited|unavailable)$")
+
+# Organization Models
+class OrganizationCreate(BaseModel):
+    name: str
+    description: str
+    phone: str
+    sms: Optional[str] = None
+    whatsapp: Optional[str] = None
+
+class Organization(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    phone: str
+    sms: Optional[str] = None
+    whatsapp: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+# Peer Support Registration (from app)
 class PeerSupportRegistration(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: EmailStr
@@ -46,38 +134,315 @@ class PeerSupportRegistration(BaseModel):
 class PeerSupportRegistrationCreate(BaseModel):
     email: EmailStr
 
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "UK Veterans Support API"}
+# ============ AUTH FUNCTIONS ============
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.dict()
-    status_obj = StatusCheck(**status_dict)
-    _ = await db.status_checks.insert_one(status_obj.dict())
-    return status_obj
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt"""
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    status_checks = await db.status_checks.find().to_list(1000)
-    return [StatusCheck(**status_check) for status_check in status_checks]
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against a hash"""
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
-# Peer Support Registration Endpoints
+def create_access_token(data: dict) -> str:
+    """Create JWT access token"""
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> User:
+    """Get current authenticated user from JWT token"""
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        
+        user_data = await db.users.find_one({"email": email})
+        if user_data is None:
+            raise HTTPException(status_code=401, detail="User not found")
+        
+        return User(**user_data)
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
+
+def require_role(required_role: str):
+    """Dependency to check if user has required role"""
+    async def role_checker(current_user: User = Depends(get_current_user)):
+        if current_user.role != required_role and current_user.role != "admin":
+            raise HTTPException(
+                status_code=403,
+                detail=f"Access denied. Required role: {required_role}"
+            )
+        return current_user
+    return role_checker
+
+# ============ AUTH ENDPOINTS ============
+
+@api_router.post("/auth/register", response_model=User)
+async def register_user(user_input: UserCreate, current_user: User = Depends(require_role("admin"))):
+    """Register a new user (admin only)"""
+    existing_user = await db.users.find_one({"email": user_input.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    user_dict = user_input.dict(exclude={"password"})
+    user_obj = User(**user_dict)
+    user_data = user_obj.dict()
+    user_data["password_hash"] = hash_password(user_input.password)
+    
+    await db.users.insert_one(user_data)
+    return user_obj
+
+@api_router.post("/auth/login", response_model=TokenResponse)
+async def login(credentials: UserLogin):
+    """Login and get JWT token"""
+    user_data = await db.users.find_one({"email": credentials.email})
+    if not user_data or not verify_password(credentials.password, user_data["password_hash"]):
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
+    
+    user = User(**user_data)
+    access_token = create_access_token(data={"sub": user.email, "role": user.role})
+    
+    return TokenResponse(access_token=access_token, user=user)
+
+@api_router.get("/auth/me", response_model=User)
+async def get_me(current_user: User = Depends(get_current_user)):
+    """Get current user info"""
+    return current_user
+
+# ============ COUNSELLOR ENDPOINTS ============
+
+@api_router.post("/counsellors", response_model=Counsellor)
+async def create_counsellor(
+    counsellor_input: CounsellorCreate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Create a new counsellor (admin only)"""
+    counsellor_obj = Counsellor(**counsellor_input.dict())
+    await db.counsellors.insert_one(counsellor_obj.dict())
+    return counsellor_obj
+
+@api_router.get("/counsellors", response_model=List[Counsellor])
+async def get_counsellors():
+    """Get all counsellors (public - for mobile app)"""
+    counsellors = await db.counsellors.find().to_list(1000)
+    return [Counsellor(**c) for c in counsellors]
+
+@api_router.get("/counsellors/available", response_model=List[Counsellor])
+async def get_available_counsellors():
+    """Get only available counsellors"""
+    counsellors = await db.counsellors.find({"status": "available"}).to_list(1000)
+    return [Counsellor(**c) for c in counsellors]
+
+@api_router.get("/counsellors/{counsellor_id}", response_model=Counsellor)
+async def get_counsellor(counsellor_id: str):
+    """Get a specific counsellor"""
+    counsellor = await db.counsellors.find_one({"id": counsellor_id})
+    if not counsellor:
+        raise HTTPException(status_code=404, detail="Counsellor not found")
+    return Counsellor(**counsellor)
+
+@api_router.put("/counsellors/{counsellor_id}", response_model=Counsellor)
+async def update_counsellor(
+    counsellor_id: str,
+    counsellor_input: CounsellorCreate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Update a counsellor (admin only)"""
+    result = await db.counsellors.update_one(
+        {"id": counsellor_id},
+        {"$set": counsellor_input.dict(exclude_unset=True)}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Counsellor not found")
+    
+    updated = await db.counsellors.find_one({"id": counsellor_id})
+    return Counsellor(**updated)
+
+@api_router.patch("/counsellors/{counsellor_id}/status", response_model=Counsellor)
+async def update_counsellor_status(
+    counsellor_id: str,
+    status_update: CounsellorStatusUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    """Update counsellor status (counsellor or admin)"""
+    # Check if user is counsellor or admin
+    counsellor = await db.counsellors.find_one({"id": counsellor_id})
+    if not counsellor:
+        raise HTTPException(status_code=404, detail="Counsellor not found")
+    
+    if current_user.role == "counsellor" and counsellor.get("user_id") != current_user.id:
+        raise HTTPException(status_code=403, detail="Can only update your own status")
+    
+    result = await db.counsellors.update_one(
+        {"id": counsellor_id},
+        {"$set": status_update.dict(exclude_unset=True)}
+    )
+    
+    updated = await db.counsellors.find_one({"id": counsellor_id})
+    return Counsellor(**updated)
+
+@api_router.delete("/counsellors/{counsellor_id}")
+async def delete_counsellor(
+    counsellor_id: str,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Delete a counsellor (admin only)"""
+    result = await db.counsellors.delete_one({"id": counsellor_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Counsellor not found")
+    return {"message": "Counsellor deleted successfully"}
+
+# ============ PEER SUPPORTER ENDPOINTS ============
+
+@api_router.post("/peer-supporters", response_model=PeerSupporter)
+async def create_peer_supporter(
+    peer_input: PeerSupporterCreate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Create a new peer supporter (admin only)"""
+    peer_obj = PeerSupporter(**peer_input.dict())
+    await db.peer_supporters.insert_one(peer_obj.dict())
+    return peer_obj
+
+@api_router.get("/peer-supporters", response_model=List[PeerSupporter])
+async def get_peer_supporters():
+    """Get all peer supporters (public - for mobile app)"""
+    peers = await db.peer_supporters.find().to_list(1000)
+    return [PeerSupporter(**p) for p in peers]
+
+@api_router.get("/peer-supporters/available", response_model=List[PeerSupporter])
+async def get_available_peer_supporters():
+    """Get only available peer supporters"""
+    peers = await db.peer_supporters.find({"status": {"$in": ["available", "limited"]}}).to_list(1000)
+    return [PeerSupporter(**p) for p in peers]
+
+@api_router.get("/peer-supporters/{peer_id}", response_model=PeerSupporter)
+async def get_peer_supporter(peer_id: str):
+    """Get a specific peer supporter"""
+    peer = await db.peer_supporters.find_one({"id": peer_id})
+    if not peer:
+        raise HTTPException(status_code=404, detail="Peer supporter not found")
+    return PeerSupporter(**peer)
+
+@api_router.put("/peer-supporters/{peer_id}", response_model=PeerSupporter)
+async def update_peer_supporter(
+    peer_id: str,
+    peer_input: PeerSupporterCreate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Update a peer supporter (admin only)"""
+    result = await db.peer_supporters.update_one(
+        {"id": peer_id},
+        {"$set": peer_input.dict(exclude_unset=True)}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Peer supporter not found")
+    
+    updated = await db.peer_supporters.find_one({"id": peer_id})
+    return PeerSupporter(**updated)
+
+@api_router.patch("/peer-supporters/{peer_id}/status", response_model=PeerSupporter)
+async def update_peer_supporter_status(
+    peer_id: str,
+    status_update: PeerSupporterStatusUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    """Update peer supporter status (peer or admin)"""
+    peer = await db.peer_supporters.find_one({"id": peer_id})
+    if not peer:
+        raise HTTPException(status_code=404, detail="Peer supporter not found")
+    
+    if current_user.role == "peer" and peer.get("user_id") != current_user.id:
+        raise HTTPException(status_code=403, detail="Can only update your own status")
+    
+    result = await db.peer_supporters.update_one(
+        {"id": peer_id},
+        {"$set": status_update.dict(exclude_unset=True)}
+    )
+    
+    updated = await db.peer_supporters.find_one({"id": peer_id})
+    return PeerSupporter(**updated)
+
+@api_router.delete("/peer-supporters/{peer_id}")
+async def delete_peer_supporter(
+    peer_id: str,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Delete a peer supporter (admin only)"""
+    result = await db.peer_supporters.delete_one({"id": peer_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Peer supporter not found")
+    return {"message": "Peer supporter deleted successfully"}
+
+# ============ ORGANIZATION ENDPOINTS ============
+
+@api_router.post("/organizations", response_model=Organization)
+async def create_organization(
+    org_input: OrganizationCreate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Create a new organization (admin only)"""
+    org_obj = Organization(**org_input.dict())
+    await db.organizations.insert_one(org_obj.dict())
+    return org_obj
+
+@api_router.get("/organizations", response_model=List[Organization])
+async def get_organizations():
+    """Get all organizations (public)"""
+    orgs = await db.organizations.find().to_list(1000)
+    return [Organization(**o) for o in orgs]
+
+@api_router.get("/organizations/{org_id}", response_model=Organization)
+async def get_organization(org_id: str):
+    """Get a specific organization"""
+    org = await db.organizations.find_one({"id": org_id})
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    return Organization(**org)
+
+@api_router.put("/organizations/{org_id}", response_model=Organization)
+async def update_organization(
+    org_id: str,
+    org_input: OrganizationCreate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Update an organization (admin only)"""
+    result = await db.organizations.update_one(
+        {"id": org_id},
+        {"$set": org_input.dict(exclude_unset=True)}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    
+    updated = await db.organizations.find_one({"id": org_id})
+    return Organization(**updated)
+
+@api_router.delete("/organizations/{org_id}")
+async def delete_organization(
+    org_id: str,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Delete an organization (admin only)"""
+    result = await db.organizations.delete_one({"id": org_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    return {"message": "Organization deleted successfully"}
+
+# ============ PEER SUPPORT REGISTRATION (from app) ============
+
 @api_router.post("/peer-support/register", response_model=PeerSupportRegistration)
 async def register_peer_support(input: PeerSupportRegistrationCreate):
-    """
-    Register interest for peer support programme.
-    Stores email for later contact about the peer support initiative.
-    """
+    """Register interest for peer support programme (public)"""
     try:
-        # Check if email already exists
         existing = await db.peer_support_registrations.find_one({"email": input.email})
         if existing:
-            raise HTTPException(
-                status_code=400, 
-                detail="This email is already registered."
-            )
+            raise HTTPException(status_code=400, detail="This email is already registered.")
         
         registration_dict = input.dict()
         registration_obj = PeerSupportRegistration(**registration_dict)
@@ -92,17 +457,47 @@ async def register_peer_support(input: PeerSupportRegistrationCreate):
         raise HTTPException(status_code=500, detail="Failed to register. Please try again.")
 
 @api_router.get("/peer-support/registrations", response_model=List[PeerSupportRegistration])
-async def get_peer_support_registrations():
-    """
-    Retrieve all peer support registrations.
-    For admin use - to see who has registered interest.
-    """
+async def get_peer_support_registrations(current_user: User = Depends(require_role("admin"))):
+    """Get all peer support registrations (admin only)"""
     try:
         registrations = await db.peer_support_registrations.find().sort("timestamp", -1).to_list(1000)
         return [PeerSupportRegistration(**reg) for reg in registrations]
     except Exception as e:
         logging.error(f"Error retrieving registrations: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to retrieve registrations.")
+
+# ============ SETUP/SEED ENDPOINTS ============
+
+@api_router.post("/setup/init")
+async def initialize_system():
+    """Initialize system with default admin user"""
+    # Check if admin already exists
+    existing_admin = await db.users.find_one({"role": "admin"})
+    if existing_admin:
+        raise HTTPException(status_code=400, detail="System already initialized")
+    
+    # Create default admin
+    admin_user = User(
+        email="admin@veteran.dbty.co.uk",
+        role="admin",
+        name="System Administrator"
+    )
+    admin_data = admin_user.dict()
+    admin_data["password_hash"] = hash_password("ChangeThisPassword123!")
+    await db.users.insert_one(admin_data)
+    
+    return {
+        "message": "System initialized successfully",
+        "admin_email": "admin@veteran.dbty.co.uk",
+        "default_password": "ChangeThisPassword123!",
+        "warning": "Please change the default password immediately!"
+    }
+
+# ============ ROOT ENDPOINT ============
+
+@api_router.get("/")
+async def root():
+    return {"message": "UK Veterans Support API - Admin System Active"}
 
 # Include the router in the main app
 app.include_router(api_router)
