@@ -21,11 +21,14 @@ export default function Index() {
       >
         {/* Header with badge */}
         <View style={styles.header}>
-          <View style={styles.badgeContainer}>
-            <Ionicons name="shield" size={32} color="#7c9cbf" />
-            <Text style={styles.headerTitle}>Veterans Support</Text>
-          </View>
-          <Text style={styles.headerSubtitle}>You are not alone. Help is here.</Text>
+          <Image 
+            source={require('../assets/images/veteran-badge.png')}
+            style={styles.badgeImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.headerTitle}>Veterans Support</Text>
+          <Text style={styles.taglineEnglish}>Once in service, forever united</Text>
+          <Text style={styles.taglineLatin}>Semel Servientes, Semper Uniti</Text>
         </View>
 
         {/* Emergency Notice */}
