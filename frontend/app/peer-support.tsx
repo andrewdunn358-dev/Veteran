@@ -33,6 +33,8 @@ export default function PeerSupport() {
       yearsServed: '2001-2013',
       availability: 'available',
       contact: '08001381619',
+      sms: '07537173683',
+      whatsapp: '447537173683',
     },
     {
       firstName: 'David',
@@ -41,6 +43,8 @@ export default function PeerSupport() {
       yearsServed: '2005-2013',
       availability: 'available',
       contact: '08001381619',
+      sms: '07537173683',
+      whatsapp: '447537173683',
     },
     {
       firstName: 'Thomas',
@@ -57,6 +61,8 @@ export default function PeerSupport() {
       yearsServed: '2006-2016',
       availability: 'available',
       contact: '08001381619',
+      sms: '07537173683',
+      whatsapp: '447537173683',
     },
     {
       firstName: 'Andrew',
@@ -65,6 +71,8 @@ export default function PeerSupport() {
       yearsServed: '2003-2017',
       availability: 'available',
       contact: '08001381619',
+      sms: '07537173683',
+      whatsapp: '447537173683',
     },
   ];
 
