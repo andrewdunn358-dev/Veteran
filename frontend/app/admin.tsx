@@ -47,13 +47,19 @@ interface User {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'users'>('counsellors');
+  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'users' | 'content'>('counsellors');
   const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
   const [peers, setPeers] = useState<PeerSupporter[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [content, setContent] = useState<Record<string, Record<string, string>>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [showContentModal, setShowContentModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [editingContent, setEditingContent] = useState({ page: '', section: '', value: '' });
   const { user, token, logout } = useAuth();
   const router = useRouter();
 
@@ -77,6 +83,14 @@ export default function AdminDashboard() {
     role: 'counsellor',
   });
 
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  const [resetPassword, setResetPassword] = useState('');
+
   useEffect(() => {
     if (!user || user.role !== 'admin') {
       router.replace('/login');
@@ -88,13 +102,19 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [counsellorsRes, peersRes] = await Promise.all([
+      const [counsellorsRes, peersRes, usersRes, contentRes] = await Promise.all([
         fetch(`${API_URL}/api/counsellors`),
         fetch(`${API_URL}/api/peer-supporters`),
+        fetch(`${API_URL}/api/auth/users`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${API_URL}/api/content`),
       ]);
       
       if (counsellorsRes.ok) setCounsellors(await counsellorsRes.json());
       if (peersRes.ok) setPeers(await peersRes.json());
+      if (usersRes.ok) setUsers(await usersRes.json());
+      if (contentRes.ok) setContent(await contentRes.json());
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -181,6 +201,7 @@ export default function AdminDashboard() {
         Alert.alert('Success', `User account created for ${userFormData.email}`);
         setShowUserModal(false);
         setUserFormData({ email: '', password: '', name: '', role: 'counsellor' });
+        fetchData();
       } else {
         const error = await response.json();
         Alert.alert('Error', error.detail || 'Failed to create user');
@@ -190,7 +211,112 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDelete = async (type: 'counsellor' | 'peer', id: string) => {
+  const handleChangePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      Alert.alert('Error', 'New passwords do not match');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          current_password: passwordData.currentPassword,
+          new_password: passwordData.newPassword,
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', 'Password changed successfully');
+        setShowPasswordModal(false);
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        const error = await response.json();
+        Alert.alert('Error', error.detail || 'Failed to change password');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error');
+    }
+  };
+
+  const handleResetUserPassword = async () => {
+    if (!selectedUser || !resetPassword) return;
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/admin-reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: selectedUser.id,
+          new_password: resetPassword,
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', `Password reset for ${selectedUser.email}`);
+        setShowResetModal(false);
+        setSelectedUser(null);
+        setResetPassword('');
+      } else {
+        const error = await response.json();
+        Alert.alert('Error', error.detail || 'Failed to reset password');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error');
+    }
+  };
+
+  const handleUpdateContent = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/content/${editingContent.page}/${editingContent.section}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ content: editingContent.value }),
+        }
+      );
+
+      if (response.ok) {
+        Alert.alert('Success', 'Content updated successfully');
+        setShowContentModal(false);
+        fetchData();
+      } else {
+        const error = await response.json();
+        Alert.alert('Error', error.detail || 'Failed to update content');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error');
+    }
+  };
+
+  const handleSeedContent = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/content/seed`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', 'Default content created');
+        fetchData();
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to seed content');
+    }
+  };
+
+  const handleDelete = async (type: 'counsellor' | 'peer' | 'user', id: string) => {
     Alert.alert(
       'Confirm Delete',
       'Are you sure you want to delete this record?',
@@ -201,8 +327,12 @@ export default function AdminDashboard() {
           style: 'destructive',
           onPress: async () => {
             try {
-              const endpoint = type === 'counsellor' ? 'counsellors' : 'peer-supporters';
-              const response = await fetch(`${API_URL}/api/${endpoint}/${id}`, {
+              let endpoint = '';
+              if (type === 'counsellor') endpoint = `counsellors/${id}`;
+              else if (type === 'peer') endpoint = `peer-supporters/${id}`;
+              else endpoint = `auth/users/${id}`;
+
+              const response = await fetch(`${API_URL}/api/${endpoint}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` },
               });
@@ -245,6 +375,14 @@ export default function AdminDashboard() {
     }
   };
 
+  const pageNames: Record<string, string> = {
+    'home': 'Home Page',
+    'crisis-support': 'Crisis Support',
+    'peer-support': 'Peer Support',
+    'historical-investigations': 'Historical Investigations',
+    'organizations': 'Organizations',
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -252,48 +390,55 @@ export default function AdminDashboard() {
           <Text style={styles.title}>Admin Dashboard</Text>
           <Text style={styles.subtitle}>Welcome, {user?.name}</Text>
         </View>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Ionicons name="log-out-outline" size={24} color="#ef4444" />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity onPress={() => setShowPasswordModal(true)} style={styles.headerButton}>
+            <Ionicons name="key-outline" size={20} color="#4a90d9" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleLogout} style={styles.headerButton}>
+            <Ionicons name="log-out-outline" size={20} color="#ef4444" />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <View style={styles.tabs}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'counsellors' && styles.activeTab]}
-          onPress={() => setActiveTab('counsellors')}
-        >
-          <Text style={[styles.tabText, activeTab === 'counsellors' && styles.activeTabText]}>
-            Counsellors
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'peers' && styles.activeTab]}
-          onPress={() => setActiveTab('peers')}
-        >
-          <Text style={[styles.tabText, activeTab === 'peers' && styles.activeTabText]}>
-            Peers
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
+        <View style={styles.tabs}>
+          {(['counsellors', 'peers', 'users', 'content'] as const).map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              style={[styles.tab, activeTab === tab && styles.activeTab]}
+              onPress={() => setActiveTab(tab)}
+            >
+              <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+                {tab === 'content' ? 'CMS' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
 
-      <View style={styles.actions}>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => setShowAddModal(true)}
-        >
-          <Ionicons name="add" size={20} color="#ffffff" />
-          <Text style={styles.addButtonText}>
-            Add {activeTab === 'counsellors' ? 'Counsellor' : 'Peer'}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.userButton}
-          onPress={() => setShowUserModal(true)}
-        >
-          <Ionicons name="person-add" size={20} color="#ffffff" />
-          <Text style={styles.addButtonText}>Create Login</Text>
-        </TouchableOpacity>
-      </View>
+      {activeTab !== 'content' && activeTab !== 'users' && (
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
+            <Ionicons name="add" size={20} color="#ffffff" />
+            <Text style={styles.addButtonText}>
+              Add {activeTab === 'counsellors' ? 'Counsellor' : 'Peer'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.userButton} onPress={() => setShowUserModal(true)}>
+            <Ionicons name="person-add" size={20} color="#ffffff" />
+            <Text style={styles.addButtonText}>Create Login</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {activeTab === 'content' && (
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.seedButton} onPress={handleSeedContent}>
+            <Ionicons name="refresh" size={20} color="#ffffff" />
+            <Text style={styles.addButtonText}>Load Default Content</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {isLoading ? (
         <View style={styles.loading}>
@@ -301,7 +446,7 @@ export default function AdminDashboard() {
         </View>
       ) : (
         <ScrollView style={styles.list}>
-          {activeTab === 'counsellors' ? (
+          {activeTab === 'counsellors' && (
             counsellors.length === 0 ? (
               <Text style={styles.emptyText}>No counsellors added yet</Text>
             ) : (
@@ -324,7 +469,9 @@ export default function AdminDashboard() {
                 </View>
               ))
             )
-          ) : (
+          )}
+
+          {activeTab === 'peers' && (
             peers.length === 0 ? (
               <Text style={styles.emptyText}>No peer supporters added yet</Text>
             ) : (
@@ -344,6 +491,73 @@ export default function AdminDashboard() {
                   >
                     <Ionicons name="trash-outline" size={18} color="#ef4444" />
                   </TouchableOpacity>
+                </View>
+              ))
+            )
+          )}
+
+          {activeTab === 'users' && (
+            users.length === 0 ? (
+              <Text style={styles.emptyText}>No users found</Text>
+            ) : (
+              users.map((u) => (
+                <View key={u.id} style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardName}>{u.name}</Text>
+                    <View style={[styles.roleBadge, u.role === 'admin' && styles.adminBadge]}>
+                      <Text style={styles.roleText}>{u.role}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.cardDetail}>{u.email}</Text>
+                  <View style={styles.cardActions}>
+                    <TouchableOpacity
+                      style={styles.resetButton}
+                      onPress={() => {
+                        setSelectedUser(u);
+                        setShowResetModal(true);
+                      }}
+                    >
+                      <Ionicons name="key-outline" size={16} color="#4a90d9" />
+                      <Text style={styles.resetButtonText}>Reset Password</Text>
+                    </TouchableOpacity>
+                    {u.role !== 'admin' && (
+                      <TouchableOpacity
+                        style={styles.deleteButton}
+                        onPress={() => handleDelete('user', u.id)}
+                      >
+                        <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              ))
+            )
+          )}
+
+          {activeTab === 'content' && (
+            Object.keys(content).length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No content found</Text>
+                <Text style={styles.emptySubtext}>Click "Load Default Content" to get started</Text>
+              </View>
+            ) : (
+              Object.entries(content).map(([pageName, sections]) => (
+                <View key={pageName} style={styles.contentCard}>
+                  <Text style={styles.contentPageTitle}>{pageNames[pageName] || pageName}</Text>
+                  {Object.entries(sections).map(([section, value]) => (
+                    <TouchableOpacity
+                      key={section}
+                      style={styles.contentItem}
+                      onPress={() => {
+                        setEditingContent({ page: pageName, section, value });
+                        setShowContentModal(true);
+                      }}
+                    >
+                      <Text style={styles.contentSection}>{section.replace(/_/g, ' ')}</Text>
+                      <Text style={styles.contentValue} numberOfLines={2}>{value}</Text>
+                      <Ionicons name="pencil" size={16} color="#4a90d9" style={styles.editIcon} />
+                    </TouchableOpacity>
+                  ))}
                 </View>
               ))
             )
@@ -485,23 +699,128 @@ export default function AdminDashboard() {
               />
               <View style={styles.roleSelector}>
                 <Text style={styles.roleLabel}>Role:</Text>
-                <TouchableOpacity
-                  style={[styles.roleButton, userFormData.role === 'counsellor' && styles.roleButtonActive]}
-                  onPress={() => setUserFormData({ ...userFormData, role: 'counsellor' })}
-                >
-                  <Text style={styles.roleButtonText}>Counsellor</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.roleButton, userFormData.role === 'peer' && styles.roleButtonActive]}
-                  onPress={() => setUserFormData({ ...userFormData, role: 'peer' })}
-                >
-                  <Text style={styles.roleButtonText}>Peer</Text>
-                </TouchableOpacity>
+                {['counsellor', 'peer', 'admin'].map((role) => (
+                  <TouchableOpacity
+                    key={role}
+                    style={[styles.roleButton, userFormData.role === role && styles.roleButtonActive]}
+                    onPress={() => setUserFormData({ ...userFormData, role })}
+                  >
+                    <Text style={styles.roleButtonText}>{role}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             </ScrollView>
 
             <TouchableOpacity style={styles.saveButton} onPress={handleCreateUser}>
               <Text style={styles.saveButtonText}>Create Account</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Change Password Modal */}
+      <Modal visible={showPasswordModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Change Your Password</Text>
+              <TouchableOpacity onPress={() => setShowPasswordModal(false)}>
+                <Ionicons name="close" size={24} color="#ffffff" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalForm}>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Current Password"
+                placeholderTextColor="#8899a6"
+                value={passwordData.currentPassword}
+                onChangeText={(text) => setPasswordData({ ...passwordData, currentPassword: text })}
+                secureTextEntry
+              />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="New Password"
+                placeholderTextColor="#8899a6"
+                value={passwordData.newPassword}
+                onChangeText={(text) => setPasswordData({ ...passwordData, newPassword: text })}
+                secureTextEntry
+              />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Confirm New Password"
+                placeholderTextColor="#8899a6"
+                value={passwordData.confirmPassword}
+                onChangeText={(text) => setPasswordData({ ...passwordData, confirmPassword: text })}
+                secureTextEntry
+              />
+            </ScrollView>
+
+            <TouchableOpacity style={styles.saveButton} onPress={handleChangePassword}>
+              <Text style={styles.saveButtonText}>Change Password</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Reset User Password Modal */}
+      <Modal visible={showResetModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Reset Password</Text>
+              <TouchableOpacity onPress={() => setShowResetModal(false)}>
+                <Ionicons name="close" size={24} color="#ffffff" />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.resetUserInfo}>
+              Resetting password for: {selectedUser?.email}
+            </Text>
+
+            <TextInput
+              style={styles.modalInput}
+              placeholder="New Password"
+              placeholderTextColor="#8899a6"
+              value={resetPassword}
+              onChangeText={setResetPassword}
+              secureTextEntry
+            />
+
+            <TouchableOpacity style={styles.saveButton} onPress={handleResetUserPassword}>
+              <Text style={styles.saveButtonText}>Reset Password</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Content Modal */}
+      <Modal visible={showContentModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Content</Text>
+              <TouchableOpacity onPress={() => setShowContentModal(false)}>
+                <Ionicons name="close" size={24} color="#ffffff" />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.contentEditLabel}>
+              {pageNames[editingContent.page] || editingContent.page} - {editingContent.section.replace(/_/g, ' ')}
+            </Text>
+
+            <TextInput
+              style={[styles.modalInput, styles.contentTextArea]}
+              placeholder="Content"
+              placeholderTextColor="#8899a6"
+              value={editingContent.value}
+              onChangeText={(text) => setEditingContent({ ...editingContent, value: text })}
+              multiline
+              numberOfLines={4}
+            />
+
+            <TouchableOpacity style={styles.saveButton} onPress={handleUpdateContent}>
+              <Text style={styles.saveButtonText}>Save Content</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -533,8 +852,17 @@ const styles = StyleSheet.create({
     color: '#8899a6',
     marginTop: 4,
   },
-  logoutButton: {
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  headerButton: {
     padding: 8,
+    backgroundColor: '#243447',
+    borderRadius: 8,
+  },
+  tabsContainer: {
+    maxHeight: 60,
   },
   tabs: {
     flexDirection: 'row',
@@ -542,11 +870,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   tab: {
-    flex: 1,
     paddingVertical: 12,
+    paddingHorizontal: 20,
     backgroundColor: '#243447',
     borderRadius: 8,
-    alignItems: 'center',
   },
   activeTab: {
     backgroundColor: '#4a90d9',
@@ -584,6 +911,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     gap: 8,
   },
+  seedButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f59e0b',
+    paddingVertical: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
   addButtonText: {
     color: '#ffffff',
     fontWeight: '600',
@@ -597,10 +934,20 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
   },
+  emptyContainer: {
+    alignItems: 'center',
+    marginTop: 40,
+  },
   emptyText: {
     color: '#8899a6',
     textAlign: 'center',
     marginTop: 40,
+  },
+  emptySubtext: {
+    color: '#6b7280',
+    textAlign: 'center',
+    marginTop: 8,
+    fontSize: 12,
   },
   card: {
     backgroundColor: '#243447',
@@ -630,15 +977,81 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'capitalize',
   },
+  roleBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#4a90d9',
+  },
+  adminBadge: {
+    backgroundColor: '#8b5cf6',
+  },
+  roleText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
   cardDetail: {
     color: '#8899a6',
     marginBottom: 4,
   },
-  deleteButton: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
+  cardActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 12,
+  },
+  resetButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     padding: 8,
+    backgroundColor: '#1a2332',
+    borderRadius: 6,
+  },
+  resetButtonText: {
+    color: '#4a90d9',
+    fontSize: 12,
+  },
+  deleteButton: {
+    padding: 8,
+  },
+  contentCard: {
+    backgroundColor: '#243447',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  contentPageTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#ffffff',
+    marginBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#374151',
+    paddingBottom: 8,
+  },
+  contentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#374151',
+  },
+  contentSection: {
+    width: 120,
+    color: '#8899a6',
+    fontSize: 12,
+    textTransform: 'capitalize',
+  },
+  contentValue: {
+    flex: 1,
+    color: '#ffffff',
+    fontSize: 14,
+  },
+  editIcon: {
+    marginLeft: 8,
   },
   modalOverlay: {
     flex: 1,
@@ -673,9 +1086,23 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     marginBottom: 12,
   },
+  contentTextArea: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  contentEditLabel: {
+    color: '#8899a6',
+    marginBottom: 12,
+    textTransform: 'capitalize',
+  },
+  resetUserInfo: {
+    color: '#8899a6',
+    marginBottom: 16,
+  },
   roleSelector: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
     gap: 12,
     marginTop: 8,
   },
@@ -694,6 +1121,7 @@ const styles = StyleSheet.create({
   },
   roleButtonText: {
     color: '#ffffff',
+    textTransform: 'capitalize',
   },
   saveButton: {
     backgroundColor: '#4a90d9',
