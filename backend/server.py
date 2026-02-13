@@ -25,16 +25,25 @@ SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
-# MongoDB connection with SSL fix
+# MongoDB connection with SSL fix for Atlas
 import ssl
 import certifi
 
 mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(
-    mongo_url,
-    serverSelectionTimeoutMS=10000,
-    tlsCAFile=certifi.where()
-)
+
+# Only apply SSL settings for MongoDB Atlas (remote) connections
+if 'mongodb+srv' in mongo_url or 'mongodb.net' in mongo_url:
+    client = AsyncIOMotorClient(
+        mongo_url,
+        serverSelectionTimeoutMS=10000,
+        tlsCAFile=certifi.where()
+    )
+else:
+    # Local MongoDB without SSL
+    client = AsyncIOMotorClient(
+        mongo_url,
+        serverSelectionTimeoutMS=10000
+    )
 db = client[os.environ.get('DB_NAME', 'veterans_support')]
 
 # Create the main app
