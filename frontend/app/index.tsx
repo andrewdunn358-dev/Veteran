@@ -27,18 +27,14 @@ export default function Index() {
           <Text style={styles.taglineLatin}>Semel Servientes, Semper Uniti</Text>
         </View>
 
-        {/* Emergency Notice */}
-        <TouchableOpacity 
-          style={styles.emergencyNotice}
-          onPress={handleEmergencyCall}
-          activeOpacity={0.8}
-        >
+        {/* Emergency Notice - Display only, no call functionality */}
+        <View style={styles.emergencyNotice}>
           <Ionicons name="alert-circle" size={24} color="#ff4444" />
           <View style={styles.emergencyTextContainer}>
             <Text style={styles.emergencyTitle}>Immediate Danger?</Text>
-            <Text style={styles.emergencyText}>Call 999 for emergency services</Text>
+            <Text style={styles.emergencyText}>Dial 999 for emergency services</Text>
           </View>
-        </TouchableOpacity>
+        </View>
 
         {/* Main Actions */}
         <View style={styles.mainActions}>
