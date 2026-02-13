@@ -1,16 +1,70 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, TextInput, Alert, KeyboardAvoidingView, Platform, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
+interface PeerVeteran {
+  firstName: string;
+  area: string;
+  background: string;
+  yearsServed: string;
+  availability: 'available' | 'limited';
+  contact: string;
+}
+
 export default function PeerSupport() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [showVeteransList, setShowVeteransList] = useState(false);
+
+  // Mock registered veterans (first names only)
+  const registeredVeterans: PeerVeteran[] = [
+    {
+      firstName: 'Michael',
+      area: 'Greater Manchester',
+      background: 'Royal Marines, 12 years service. Iraq and Afghanistan veteran.',
+      yearsServed: '2001-2013',
+      availability: 'available',
+      contact: '08001381619',
+    },
+    {
+      firstName: 'David',
+      area: 'West Yorkshire',
+      background: 'Army infantry, 8 years. Served in multiple deployments.',
+      yearsServed: '2005-2013',
+      availability: 'available',
+      contact: '08001381619',
+    },
+    {
+      firstName: 'Thomas',
+      area: 'London & South East',
+      background: 'RAF Regiment, 15 years service. Now peer support volunteer.',
+      yearsServed: '2000-2015',
+      availability: 'limited',
+      contact: '08001381619',
+    },
+    {
+      firstName: 'Robert',
+      area: 'Scotland (Glasgow)',
+      background: 'Royal Navy, 10 years. Experienced with transition challenges.',
+      yearsServed: '2006-2016',
+      availability: 'available',
+      contact: '08001381619',
+    },
+    {
+      firstName: 'Andrew',
+      area: 'Midlands',
+      background: 'Army medical corps, 14 years. Trained peer supporter.',
+      yearsServed: '2003-2017',
+      availability: 'available',
+      contact: '08001381619',
+    },
+  ];
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -49,7 +103,6 @@ export default function PeerSupport() {
               onPress: () => {
                 setEmail('');
                 setShowForm(false);
-                router.back();
               },
             },
           ]
@@ -65,6 +118,99 @@ export default function PeerSupport() {
       setIsSubmitting(false);
     }
   };
+
+  const handleCallVeteran = (contact: string) => {
+    Linking.openURL(`tel:${contact}`);
+  };
+
+  if (showVeteransList) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+        <StatusBar barStyle="light-content" backgroundColor="#1a2332" />
+        <ScrollView 
+          style={styles.container}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => setShowVeteransList(false)} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#7c9cbf" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Peer Supporters</Text>
+          </View>
+
+          {/* Info */}
+          <View style={styles.infoBox}>
+            <Ionicons name="information-circle" size={20} color="#7c9cbf" />
+            <Text style={styles.infoText}>
+              Connect with fellow veterans who volunteer their time to support others. All conversations are confidential.
+            </Text>
+          </View>
+
+          {/* Veterans List */}
+          {registeredVeterans.map((veteran, index) => (
+            <View key={index} style={styles.veteranCard}>
+              <View style={styles.veteranHeader}>
+                <Ionicons name="person-circle" size={40} color="#7c9cbf" />
+                <View style={styles.veteranMainInfo}>
+                  <View style={styles.veteranNameRow}>
+                    <Text style={styles.veteranName}>{veteran.firstName}</Text>
+                    <View style={[
+                      styles.availabilityBadge,
+                      veteran.availability === 'available' ? styles.badgeAvailable : styles.badgeLimited
+                    ]}>
+                      <Text style={[
+                        styles.availabilityText,
+                        veteran.availability === 'available' ? styles.textAvailable : styles.textLimited
+                      ]}>
+                        {veteran.availability === 'available' ? 'Available' : 'Limited'}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.veteranLocationRow}>
+                    <Ionicons name="location" size={14} color="#7c9cbf" />
+                    <Text style={styles.veteranArea}>{veteran.area}</Text>
+                  </View>
+                </View>
+              </View>
+              
+              <View style={styles.veteranDetails}>
+                <Text style={styles.veteranBackground}>{veteran.background}</Text>
+                <Text style={styles.veteranYears}>Served: {veteran.yearsServed}</Text>
+              </View>
+
+              {veteran.availability === 'available' && (
+                <TouchableOpacity
+                  style={styles.connectButton}
+                  onPress={() => handleCallVeteran(veteran.contact)}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="call" size={20} color="#ffffff" />
+                  <Text style={styles.connectButtonText}>Connect with {veteran.firstName}</Text>
+                </TouchableOpacity>
+              )}
+              
+              {veteran.availability === 'limited' && (
+                <View style={styles.limitedNotice}>
+                  <Ionicons name="time" size={16} color="#9ca3af" />
+                  <Text style={styles.limitedText}>Limited availability - check back later</Text>
+                </View>
+              )}
+            </View>
+          ))}
+
+          {/* Disclaimer */}
+          <View style={styles.disclaimer}>
+            <Ionicons name="shield-checkmark" size={16} color="#b0c4de" />
+            <Text style={styles.disclaimerText}>
+              All peer supporters are verified veterans who have completed training. This is not professional counselling or emergency support.
+            </Text>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
@@ -96,6 +242,17 @@ export default function PeerSupport() {
           <View style={styles.content}>
             <Text style={styles.title}>Talk to Another Veteran</Text>
             <Text style={styles.subtitle}>Peer support from those who understand</Text>
+
+            {/* View Available Veterans Button */}
+            <TouchableOpacity 
+              style={styles.primaryButton}
+              onPress={() => setShowVeteransList(true)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="people" size={24} color="#ffffff" />
+              <Text style={styles.primaryButtonText}>View Available Veterans</Text>
+              <Text style={styles.primaryButtonSubtext}>{registeredVeterans.filter(v => v.availability === 'available').length} veterans available now</Text>
+            </TouchableOpacity>
 
             {/* What is it */}
             <View style={styles.section}>
@@ -132,15 +289,20 @@ export default function PeerSupport() {
               </Text>
             </View>
 
-            {/* Call to Action */}
+            {/* Register to Give Support */}
+            <View style={styles.divider} />
+            
+            <Text style={styles.giveSupportTitle}>Want to Support Others?</Text>
+            <Text style={styles.giveSupportSubtitle}>Become a peer supporter and help fellow veterans</Text>
+
             {!showForm ? (
               <TouchableOpacity 
-                style={styles.primaryButton}
+                style={styles.secondaryButton}
                 onPress={() => setShowForm(true)}
                 activeOpacity={0.8}
               >
-                <Ionicons name="person-add" size={24} color="#ffffff" />
-                <Text style={styles.primaryButtonText}>Register Your Interest</Text>
+                <Ionicons name="person-add" size={20} color="#7c9cbf" />
+                <Text style={styles.secondaryButtonText}>Register to Give Support</Text>
               </TouchableOpacity>
             ) : (
               <View style={styles.formContainer}>
@@ -246,7 +408,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#b0c4de',
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
+  },
+  primaryButton: {
+    backgroundColor: '#4a90e2',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  primaryButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginTop: 8,
+  },
+  primaryButtonSubtext: {
+    fontSize: 13,
+    color: '#bfdbfe',
+    marginTop: 4,
   },
   section: {
     backgroundColor: '#2d3748',
@@ -272,26 +452,44 @@ const styles = StyleSheet.create({
     color: '#b0c4de',
     lineHeight: 22,
   },
-  primaryButton: {
+  divider: {
+    height: 1,
+    backgroundColor: '#4a5568',
+    marginVertical: 24,
+  },
+  giveSupportTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#ffffff',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  giveSupportSubtitle: {
+    fontSize: 14,
+    color: '#b0c4de',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  secondaryButton: {
     flexDirection: 'row',
-    backgroundColor: '#4a90e2',
+    backgroundColor: '#2d3748',
     borderRadius: 12,
-    padding: 20,
+    padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
-    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#4a5568',
   },
-  primaryButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#ffffff',
+  secondaryButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#7c9cbf',
   },
   formContainer: {
     backgroundColor: '#2d3748',
     borderRadius: 12,
     padding: 24,
-    marginTop: 16,
     borderWidth: 1,
     borderColor: '#4a5568',
   },
@@ -341,6 +539,120 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 15,
     color: '#7c9cbf',
+  },
+  infoBox: {
+    flexDirection: 'row',
+    backgroundColor: '#2d3748',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 20,
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#b0c4de',
+    lineHeight: 20,
+  },
+  veteranCard: {
+    backgroundColor: '#2d3748',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#4a5568',
+  },
+  veteranHeader: {
+    flexDirection: 'row',
+    marginBottom: 12,
+    gap: 12,
+  },
+  veteranMainInfo: {
+    flex: 1,
+  },
+  veteranNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  veteranName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  availabilityBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  badgeAvailable: {
+    backgroundColor: '#2d4a3e',
+  },
+  badgeLimited: {
+    backgroundColor: '#4a3a2d',
+  },
+  availabilityText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  textAvailable: {
+    color: '#a8e6cf',
+  },
+  textLimited: {
+    color: '#fde68a',
+  },
+  veteranLocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  veteranArea: {
+    fontSize: 14,
+    color: '#7c9cbf',
+  },
+  veteranDetails: {
+    marginBottom: 12,
+  },
+  veteranBackground: {
+    fontSize: 14,
+    color: '#b0c4de',
+    lineHeight: 20,
+    marginBottom: 6,
+  },
+  veteranYears: {
+    fontSize: 13,
+    color: '#9ca3af',
+    fontStyle: 'italic',
+  },
+  connectButton: {
+    flexDirection: 'row',
+    backgroundColor: '#4a90e2',
+    borderRadius: 8,
+    padding: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  connectButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  limitedNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    backgroundColor: '#1a2332',
+    borderRadius: 8,
+    gap: 8,
+  },
+  limitedText: {
+    fontSize: 14,
+    color: '#9ca3af',
+    fontStyle: 'italic',
   },
   disclaimer: {
     flexDirection: 'row',

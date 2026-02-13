@@ -4,23 +4,39 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+interface Counsellor {
+  name: string;
+  status: 'available' | 'busy';
+  specialization: string;
+  nextAvailable?: string;
+  phone: string;
+}
+
 export default function CrisisSupport() {
   const router = useRouter();
 
-  const handleCall = (number: string) => {
-    Linking.openURL(`tel:${number}`);
-  };
-
-  const handleSMS = (number: string) => {
-    Linking.openURL(`sms:${number}`);
-  };
-
-  const handleWhatsApp = (number: string) => {
-    // Remove spaces and format for WhatsApp
-    const formattedNumber = number.replace(/\s/g, '');
-    const whatsappUrl = `https://wa.me/${formattedNumber}`;
-    Linking.openURL(whatsappUrl);
-  };
+  // Mock on-duty counsellors
+  const onDutyCounsellors: Counsellor[] = [
+    {
+      name: 'Sarah M.',
+      status: 'available',
+      specialization: 'Trauma & PTSD',
+      phone: '08001381619',
+    },
+    {
+      name: 'James R.',
+      status: 'available',
+      specialization: 'Depression & Anxiety',
+      phone: '08001381619',
+    },
+    {
+      name: 'David T.',
+      status: 'busy',
+      specialization: 'Crisis Intervention',
+      nextAvailable: '30 mins',
+      phone: '08001381619',
+    },
+  ];
 
   const crisisServices = [
     {
@@ -48,6 +64,20 @@ export default function CrisisSupport() {
       icon: 'information-circle' as const,
     },
   ];
+
+  const handleCall = (number: string) => {
+    Linking.openURL(`tel:${number}`);
+  };
+
+  const handleSMS = (number: string) => {
+    Linking.openURL(`sms:${number}`);
+  };
+
+  const handleWhatsApp = (number: string) => {
+    const formattedNumber = number.replace(/\s/g, '');
+    const whatsappUrl = `https://wa.me/${formattedNumber}`;
+    Linking.openURL(whatsappUrl);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
@@ -78,10 +108,62 @@ export default function CrisisSupport() {
           </View>
         </TouchableOpacity>
 
+        {/* On-Duty Counsellors Section */}
+        <View style={styles.counsellorsSection}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="people-circle" size={24} color="#7c9cbf" />
+            <Text style={styles.sectionTitle}>On-Duty Counsellors</Text>
+          </View>
+          <Text style={styles.sectionDescription}>
+            Professional counsellors available now to speak with you
+          </Text>
+
+          {onDutyCounsellors.map((counsellor, index) => (
+            <View key={index} style={styles.counsellorCard}>
+              <View style={styles.counsellorHeader}>
+                <View style={styles.counsellorInfo}>
+                  <View style={styles.counsellorNameRow}>
+                    <Text style={styles.counsellorName}>{counsellor.name}</Text>
+                    <View style={[
+                      styles.statusBadge,
+                      counsellor.status === 'available' ? styles.statusAvailable : styles.statusBusy
+                    ]}>
+                      <View style={[
+                        styles.statusDot,
+                        counsellor.status === 'available' ? styles.dotAvailable : styles.dotBusy
+                      ]} />
+                      <Text style={[
+                        styles.statusText,
+                        counsellor.status === 'available' ? styles.statusTextAvailable : styles.statusTextBusy
+                      ]}>
+                        {counsellor.status === 'available' ? 'Available' : 'Busy'}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.counsellorSpec}>{counsellor.specialization}</Text>
+                  {counsellor.nextAvailable && (
+                    <Text style={styles.nextAvailable}>Next available in {counsellor.nextAvailable}</Text>
+                  )}
+                </View>
+              </View>
+              {counsellor.status === 'available' && (
+                <TouchableOpacity
+                  style={styles.talkButton}
+                  onPress={() => handleCall(counsellor.phone)}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="call" size={20} color="#ffffff" />
+                  <Text style={styles.talkButtonText}>Talk Now</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
+        </View>
+
         {/* Instructions */}
         <View style={styles.instructions}>
           <Text style={styles.instructionsText}>
-            Choose how you'd like to reach out for support:
+            Or choose another way to reach out for support:
           </Text>
         </View>
 
@@ -97,7 +179,6 @@ export default function CrisisSupport() {
             </View>
 
             <View style={styles.contactButtons}>
-              {/* Call Button */}
               <TouchableOpacity
                 style={styles.contactButton}
                 onPress={() => handleCall(service.phone)}
@@ -107,7 +188,6 @@ export default function CrisisSupport() {
                 <Text style={styles.contactButtonText}>Call</Text>
               </TouchableOpacity>
 
-              {/* SMS Button */}
               {service.sms && (
                 <TouchableOpacity
                   style={[styles.contactButton, styles.contactButtonSecondary]}
@@ -119,7 +199,6 @@ export default function CrisisSupport() {
                 </TouchableOpacity>
               )}
 
-              {/* WhatsApp Button */}
               {service.whatsapp && (
                 <TouchableOpacity
                   style={[styles.contactButton, styles.contactButtonSecondary]}
@@ -206,6 +285,115 @@ const styles = StyleSheet.create({
   emergencySubtext: {
     fontSize: 14,
     color: '#ffcccc',
+  },
+  counsellorsSection: {
+    backgroundColor: '#2d3748',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#4a5568',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  sectionDescription: {
+    fontSize: 14,
+    color: '#b0c4de',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  counsellorCard: {
+    backgroundColor: '#1a2332',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#4a5568',
+  },
+  counsellorHeader: {
+    marginBottom: 12,
+  },
+  counsellorInfo: {
+    flex: 1,
+  },
+  counsellorNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  counsellorName: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 6,
+  },
+  statusAvailable: {
+    backgroundColor: '#2d4a3e',
+  },
+  statusBusy: {
+    backgroundColor: '#4a3a2d',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  dotAvailable: {
+    backgroundColor: '#4ade80',
+  },
+  dotBusy: {
+    backgroundColor: '#fbbf24',
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  statusTextAvailable: {
+    color: '#a8e6cf',
+  },
+  statusTextBusy: {
+    color: '#fde68a',
+  },
+  counsellorSpec: {
+    fontSize: 14,
+    color: '#b0c4de',
+    marginBottom: 4,
+  },
+  nextAvailable: {
+    fontSize: 13,
+    color: '#9ca3af',
+    fontStyle: 'italic',
+  },
+  talkButton: {
+    flexDirection: 'row',
+    backgroundColor: '#4a90e2',
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  talkButtonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#ffffff',
   },
   instructions: {
     backgroundColor: '#2d3748',

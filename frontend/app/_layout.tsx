@@ -16,6 +16,7 @@ export default function RootLayout() {
         <Stack.Screen name="crisis-support" />
         <Stack.Screen name="organizations" />
         <Stack.Screen name="peer-support" />
+        <Stack.Screen name="historical-investigations" />
       </Stack>
     </>
   );

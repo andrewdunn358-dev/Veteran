@@ -68,6 +68,16 @@ export default function Index() {
 
             <TouchableOpacity 
               style={styles.secondaryButton}
+              onPress={() => router.push('/historical-investigations')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="document-text" size={32} color="#7c9cbf" />
+              <Text style={styles.secondaryButtonText}>Issues Related to Historical Investigations</Text>
+              <Text style={styles.secondaryButtonSubtext}>Support for investigation-related stress</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.secondaryButton}
               onPress={() => router.push('/organizations')}
               activeOpacity={0.8}
             >
@@ -202,6 +212,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#b0c4de',
     marginTop: 4,
+    textAlign: 'center',
   },
   disclaimer: {
     backgroundColor: '#2d3748',
