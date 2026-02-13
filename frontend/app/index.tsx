@@ -7,10 +7,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function Index() {
   const router = useRouter();
 
-  const handleEmergencyCall = () => {
-    Linking.openURL('tel:999');
-  };
-
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <StatusBar barStyle="light-content" backgroundColor="#1a2332" />
