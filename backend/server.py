@@ -23,7 +23,13 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
+# SSL configuration for compatibility with different Python versions
+client = AsyncIOMotorClient(
+    mongo_url,
+    tls=True,
+    tlsAllowInvalidCertificates=True,
+    serverSelectionTimeoutMS=10000
+)
 db = client[os.environ.get('DB_NAME', 'veterans_support')]
 
 # Create the main app
