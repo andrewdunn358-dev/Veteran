@@ -86,15 +86,11 @@ export default function Organizations() {
           <Text style={styles.headerTitle}>Support Organisations</Text>
         </View>
 
-        {/* Emergency Banner */}
-        <TouchableOpacity 
-          style={styles.emergencyBanner}
-          onPress={() => Linking.openURL('tel:999')}
-          activeOpacity={0.8}
-        >
+        {/* Emergency Banner - Display only, no call functionality */}
+        <View style={styles.emergencyBanner}>
           <Ionicons name="warning" size={24} color="#ffffff" />
-          <Text style={styles.emergencyText}>Emergency? Call 999</Text>
-        </TouchableOpacity>
+          <Text style={styles.emergencyText}>Emergency? Dial 999</Text>
+        </View>
 
         <ScrollView 
           style={styles.scrollView}
