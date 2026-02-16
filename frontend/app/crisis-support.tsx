@@ -199,7 +199,7 @@ export default function CrisisSupport() {
                 <View style={styles.counsellorContactButtons}>
                   <TouchableOpacity
                     style={styles.counsellorCallButton}
-                    onPress={() => handleCall(counsellor.phone)}
+                    onPress={() => handleCall(counsellor.phone, counsellor.name, 'counsellor', counsellor.id)}
                     activeOpacity={0.8}
                   >
                     <Ionicons name="call" size={20} color="#ffffff" />
@@ -209,7 +209,7 @@ export default function CrisisSupport() {
                   {counsellor.sms && (
                     <TouchableOpacity
                       style={styles.counsellorSecondaryButton}
-                      onPress={() => handleSMS(counsellor.sms!)}
+                      onPress={() => handleSMS(counsellor.sms!, counsellor.name, 'counsellor', counsellor.id)}
                       activeOpacity={0.8}
                     >
                       <Ionicons name="chatbubble" size={18} color="#7c9cbf" />
