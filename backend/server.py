@@ -869,6 +869,151 @@ async def seed_organizations(current_user: User = Depends(require_role("admin"))
     
     return {"message": f"Organizations seeded successfully. Added {added_count} new organizations."}
 
+# ============ RESOURCES LIBRARY ============
+
+@api_router.get("/resources")
+async def get_resources():
+    """Get all resources (public)"""
+    resources = await db.resources.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return resources
+
+@api_router.post("/resources", response_model=Resource)
+async def create_resource(
+    resource_input: ResourceCreate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Create a new resource (admin only)"""
+    import base64
+    
+    image_url = resource_input.image_url
+    
+    # Handle base64 image upload - store in database as data URL
+    if resource_input.image_data:
+        # Keep the base64 data as a data URL for simplicity
+        # In production, you'd upload to S3/CloudStorage
+        if not resource_input.image_data.startswith('data:'):
+            image_url = f"data:image/png;base64,{resource_input.image_data}"
+        else:
+            image_url = resource_input.image_data
+    
+    resource = Resource(
+        title=resource_input.title,
+        description=resource_input.description,
+        category=resource_input.category,
+        content=resource_input.content,
+        link=resource_input.link,
+        image_url=image_url
+    )
+    
+    await db.resources.insert_one(resource.dict())
+    return resource
+
+@api_router.put("/resources/{resource_id}")
+async def update_resource(
+    resource_id: str,
+    resource_input: ResourceUpdate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Update a resource (admin only)"""
+    existing = await db.resources.find_one({"id": resource_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Resource not found")
+    
+    update_data = {k: v for k, v in resource_input.dict().items() if v is not None and k != 'image_data'}
+    
+    # Handle base64 image upload
+    if resource_input.image_data:
+        if not resource_input.image_data.startswith('data:'):
+            update_data['image_url'] = f"data:image/png;base64,{resource_input.image_data}"
+        else:
+            update_data['image_url'] = resource_input.image_data
+    
+    update_data['updated_at'] = datetime.utcnow()
+    
+    await db.resources.update_one({"id": resource_id}, {"$set": update_data})
+    
+    updated = await db.resources.find_one({"id": resource_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/resources/{resource_id}")
+async def delete_resource(
+    resource_id: str,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Delete a resource (admin only)"""
+    result = await db.resources.delete_one({"id": resource_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Resource not found")
+    return {"message": "Resource deleted successfully"}
+
+@api_router.post("/resources/seed")
+async def seed_resources(current_user: User = Depends(require_role("admin"))):
+    """Seed default resources for veterans (admin only)"""
+    default_resources = [
+        {
+            "title": "Understanding PTSD",
+            "description": "A comprehensive guide to understanding Post-Traumatic Stress Disorder, its symptoms, and coping strategies.",
+            "category": "Mental Health",
+            "content": "PTSD is a mental health condition triggered by experiencing or witnessing a terrifying event. Symptoms may include flashbacks, nightmares, severe anxiety, and uncontrollable thoughts about the event.",
+            "link": "https://www.nhs.uk/mental-health/conditions/post-traumatic-stress-disorder-ptsd/",
+        },
+        {
+            "title": "Transition to Civilian Life",
+            "description": "Tips and resources for veterans transitioning from military to civilian employment.",
+            "category": "Career & Employment",
+            "content": "Transitioning from military to civilian life can be challenging. This resource provides guidance on translating military skills to civilian job requirements.",
+            "link": "https://www.gov.uk/guidance/support-for-veterans",
+        },
+        {
+            "title": "Veterans Benefits Guide",
+            "description": "Complete guide to benefits and support available for UK veterans.",
+            "category": "Benefits & Support",
+            "content": "UK veterans have access to various benefits including healthcare, housing assistance, and financial support. Learn about what you're entitled to.",
+            "link": "https://www.gov.uk/government/collections/armed-forces-and-veterans-welfare-services",
+        },
+        {
+            "title": "Family Support Resources",
+            "description": "Resources for families of veterans dealing with challenges.",
+            "category": "Family Support",
+            "content": "Supporting a veteran can be challenging. These resources help families understand and cope with the unique challenges they may face.",
+            "link": "https://www.ssafa.org.uk/",
+        },
+        {
+            "title": "Sleep Hygiene for Veterans",
+            "description": "Practical tips for improving sleep quality, a common challenge for veterans.",
+            "category": "Wellness",
+            "content": "Good sleep is essential for mental and physical health. Learn evidence-based techniques to improve your sleep.",
+        },
+        {
+            "title": "Mindfulness & Meditation",
+            "description": "Introduction to mindfulness techniques that can help manage stress and anxiety.",
+            "category": "Wellness",
+            "content": "Mindfulness meditation has been shown to help reduce symptoms of anxiety and depression. Start with just 5 minutes a day.",
+        },
+        {
+            "title": "Emergency Contacts",
+            "description": "Important phone numbers and contacts for crisis situations.",
+            "category": "Crisis Support",
+            "content": "Samaritans: 116 123 (24/7)\\nCombat Stress: 0800 138 1619\\nVeterans UK: 0808 1914 218\\nNHS Mental Health: 111 (option 2)",
+        },
+        {
+            "title": "Physical Health & Fitness",
+            "description": "Maintaining physical fitness after military service.",
+            "category": "Wellness",
+            "content": "Regular physical activity is important for both mental and physical health. Find exercise routines suitable for your fitness level.",
+        },
+    ]
+    
+    added_count = 0
+    for resource_data in default_resources:
+        existing = await db.resources.find_one({"title": resource_data["title"]})
+        if not existing:
+            resource_obj = Resource(**resource_data)
+            await db.resources.insert_one(resource_obj.dict())
+            added_count += 1
+    
+    return {"message": f"Resources seeded successfully. Added {added_count} new resources."}
+
 # ============ PEER SUPPORT REGISTRATION (from app) ============
 
 @api_router.post("/peer-support/register", response_model=PeerSupportRegistration)
