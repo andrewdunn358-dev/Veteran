@@ -853,9 +853,16 @@ export default function AdminDashboard() {
                 <View key={c.id} style={styles.card}>
                   <View style={styles.cardHeader}>
                     <Text style={styles.cardName}>{c.name}</Text>
-                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(c.status) }]}>
+                    <TouchableOpacity 
+                      style={[styles.statusBadge, { backgroundColor: getStatusColor(c.status) }]}
+                      onPress={() => {
+                        setSelectedStaff({ type: 'counsellor', id: c.id, name: c.name, currentStatus: c.status });
+                        setShowStatusModal(true);
+                      }}
+                    >
                       <Text style={styles.statusText}>{c.status}</Text>
-                    </View>
+                      <Ionicons name="pencil" size={12} color="#ffffff" style={{ marginLeft: 4 }} />
+                    </TouchableOpacity>
                   </View>
                   <Text style={styles.cardDetail}>{c.specialization}</Text>
                   <Text style={styles.cardDetail}>{c.phone}</Text>
@@ -878,9 +885,16 @@ export default function AdminDashboard() {
                 <View key={p.id} style={styles.card}>
                   <View style={styles.cardHeader}>
                     <Text style={styles.cardName}>{p.firstName}</Text>
-                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(p.status) }]}>
+                    <TouchableOpacity 
+                      style={[styles.statusBadge, { backgroundColor: getStatusColor(p.status) }]}
+                      onPress={() => {
+                        setSelectedStaff({ type: 'peer', id: p.id, name: p.firstName, currentStatus: p.status });
+                        setShowStatusModal(true);
+                      }}
+                    >
                       <Text style={styles.statusText}>{p.status}</Text>
-                    </View>
+                      <Ionicons name="pencil" size={12} color="#ffffff" style={{ marginLeft: 4 }} />
+                    </TouchableOpacity>
                   </View>
                   <Text style={styles.cardDetail}>{p.area} - {p.background}</Text>
                   <Text style={styles.cardDetail}>{p.yearsServed} years served</Text>
@@ -890,6 +904,134 @@ export default function AdminDashboard() {
                   >
                     <Ionicons name="trash-outline" size={18} color="#ef4444" />
                   </TouchableOpacity>
+                </View>
+              ))
+            )
+          )}
+
+          {/* Callbacks Tab */}
+          {activeTab === 'callbacks' && (
+            callbacks.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="call" size={48} color="#7c9cbf" />
+                <Text style={styles.emptyText}>No callback requests</Text>
+                <Text style={styles.emptySubtext}>When veterans request callbacks, they'll appear here</Text>
+              </View>
+            ) : (
+              callbacks.map((cb) => (
+                <View key={cb.id} style={[styles.card, cb.status === 'pending' && styles.urgentCard]}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardName}>{cb.name}</Text>
+                    <View style={[styles.statusBadge, { 
+                      backgroundColor: cb.status === 'pending' ? '#f59e0b' : 
+                                       cb.status === 'in_progress' ? '#3b82f6' : '#22c55e' 
+                    }]}>
+                      <Text style={styles.statusText}>{cb.status.replace('_', ' ')}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.callbackMeta}>
+                    <Ionicons name={cb.request_type === 'counsellor' ? 'medkit' : 'people'} size={14} color="#7c9cbf" />
+                    <Text style={styles.cardDetailSmall}>{cb.request_type === 'counsellor' ? 'Counsellor' : 'Peer'} request</Text>
+                  </View>
+                  <Text style={styles.cardDetail}>Phone: {cb.phone}</Text>
+                  {cb.email && <Text style={styles.cardDetailSmall}>Email: {cb.email}</Text>}
+                  <Text style={styles.callbackMessage}>"{cb.message}"</Text>
+                  <Text style={styles.cardDetailSmall}>
+                    {new Date(cb.created_at).toLocaleString()}
+                  </Text>
+                  {cb.assigned_name && (
+                    <Text style={styles.cardDetailSmall}>Assigned to: {cb.assigned_name}</Text>
+                  )}
+                  
+                  <View style={styles.callbackActions}>
+                    {cb.status === 'pending' && (
+                      <TouchableOpacity 
+                        style={styles.takeControlButton}
+                        onPress={() => handleTakeCallback(cb.id)}
+                      >
+                        <Ionicons name="hand-left" size={16} color="#ffffff" />
+                        <Text style={styles.actionButtonText}>Take Control</Text>
+                      </TouchableOpacity>
+                    )}
+                    {cb.status === 'in_progress' && (
+                      <>
+                        <TouchableOpacity 
+                          style={styles.completeButton}
+                          onPress={() => handleCompleteCallback(cb.id)}
+                        >
+                          <Ionicons name="checkmark" size={16} color="#ffffff" />
+                          <Text style={styles.actionButtonText}>Complete</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                          style={styles.releaseButton}
+                          onPress={() => handleReleaseCallback(cb.id)}
+                        >
+                          <Ionicons name="arrow-undo" size={16} color="#ffffff" />
+                          <Text style={styles.actionButtonText}>Release</Text>
+                        </TouchableOpacity>
+                      </>
+                    )}
+                  </View>
+                </View>
+              ))
+            )
+          )}
+
+          {/* Panic Alerts Tab */}
+          {activeTab === 'alerts' && (
+            panicAlerts.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="shield-checkmark" size={48} color="#22c55e" />
+                <Text style={styles.emptyText}>No panic alerts</Text>
+                <Text style={styles.emptySubtext}>Great news - no emergency alerts at this time</Text>
+              </View>
+            ) : (
+              panicAlerts.map((alert) => (
+                <View key={alert.id} style={[styles.card, alert.status === 'active' && styles.panicCard]}>
+                  <View style={styles.cardHeader}>
+                    <View style={styles.alertTitleRow}>
+                      {alert.status === 'active' && <Ionicons name="warning" size={20} color="#ef4444" />}
+                      <Text style={styles.cardName}>{alert.user_name || 'Anonymous'}</Text>
+                    </View>
+                    <View style={[styles.statusBadge, { 
+                      backgroundColor: alert.status === 'active' ? '#ef4444' : 
+                                       alert.status === 'acknowledged' ? '#f59e0b' : '#22c55e' 
+                    }]}>
+                      <Text style={styles.statusText}>{alert.status}</Text>
+                    </View>
+                  </View>
+                  {alert.user_phone && <Text style={styles.cardDetail}>Phone: {alert.user_phone}</Text>}
+                  {alert.message && <Text style={styles.callbackMessage}>"{alert.message}"</Text>}
+                  <Text style={styles.cardDetailSmall}>
+                    {new Date(alert.created_at).toLocaleString()}
+                  </Text>
+                  {alert.acknowledged_by && (
+                    <Text style={styles.cardDetailSmall}>Acknowledged by: {alert.acknowledged_by}</Text>
+                  )}
+                  {alert.resolved_by && (
+                    <Text style={styles.cardDetailSmall}>Resolved by: {alert.resolved_by}</Text>
+                  )}
+                  
+                  <View style={styles.callbackActions}>
+                    {alert.status === 'active' && (
+                      <TouchableOpacity 
+                        style={styles.acknowledgeButton}
+                        onPress={() => handleAcknowledgeAlert(alert.id)}
+                      >
+                        <Ionicons name="eye" size={16} color="#ffffff" />
+                        <Text style={styles.actionButtonText}>Acknowledge</Text>
+                      </TouchableOpacity>
+                    )}
+                    {(alert.status === 'active' || alert.status === 'acknowledged') && (
+                      <TouchableOpacity 
+                        style={styles.resolveButton}
+                        onPress={() => handleResolveAlert(alert.id)}
+                      >
+                        <Ionicons name="checkmark-circle" size={16} color="#ffffff" />
+                        <Text style={styles.actionButtonText}>Resolve</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </View>
               ))
             )
