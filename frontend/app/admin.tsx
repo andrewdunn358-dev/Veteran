@@ -48,11 +48,12 @@ interface User {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'users' | 'content'>('counsellors');
+  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'users' | 'content' | 'metrics'>('counsellors');
   const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
   const [peers, setPeers] = useState<PeerSupporter[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [content, setContent] = useState<Record<string, Record<string, string>>>({});
+  const [callMetrics, setCallMetrics] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
