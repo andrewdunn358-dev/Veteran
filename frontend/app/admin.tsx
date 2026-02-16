@@ -1036,6 +1036,39 @@ export default function AdminDashboard() {
                     numberOfLines={3}
                   />
                 </>
+              ) : activeTab === 'resources' ? (
+                <>
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Title"
+                    placeholderTextColor="#8899a6"
+                    value={formData.name}
+                    onChangeText={(text) => setFormData({ ...formData, name: text })}
+                  />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Category (e.g., Mental Health, Housing, Employment)"
+                    placeholderTextColor="#8899a6"
+                    value={formData.specialization}
+                    onChangeText={(text) => setFormData({ ...formData, specialization: text })}
+                  />
+                  <TextInput
+                    style={[styles.modalInput, { minHeight: 80, textAlignVertical: 'top' }]}
+                    placeholder="Description"
+                    placeholderTextColor="#8899a6"
+                    value={formData.description}
+                    onChangeText={(text) => setFormData({ ...formData, description: text })}
+                    multiline
+                    numberOfLines={3}
+                  />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="External Link (optional)"
+                    placeholderTextColor="#8899a6"
+                    value={formData.whatsapp}
+                    onChangeText={(text) => setFormData({ ...formData, whatsapp: text })}
+                  />
+                </>
               ) : (
                 <>
                   <TextInput
