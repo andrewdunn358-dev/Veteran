@@ -1542,6 +1542,16 @@ async function seedContent() {
     }
 }
 
+async function seedResources() {
+    try {
+        await apiCall('/resources/seed', { method: 'POST' });
+        showNotification('Default resources loaded successfully');
+        loadAllData();
+    } catch (error) {
+        showNotification('Failed to load resources: ' + error.message, 'error');
+    }
+}
+
 // Modal overlay click - DISABLED to prevent accidental closures
 // Users must click Cancel or Close button to close the modal
 // This prevents losing form data on accidental clicks
