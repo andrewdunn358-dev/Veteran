@@ -1150,6 +1150,8 @@ export default function AdminDashboard() {
                   handleAddPeer();
                 } else if (activeTab === 'orgs') {
                   handleAddOrganization();
+                } else if (activeTab === 'resources') {
+                  handleAddResource();
                 } else if (activeTab === 'users') {
                   handleCreateUser();
                 }
