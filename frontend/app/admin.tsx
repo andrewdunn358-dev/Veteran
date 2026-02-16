@@ -363,6 +363,9 @@ export default function AdminDashboard() {
       area: '',
       background: '',
       yearsServed: '',
+      createAccount: false,
+      email: '',
+      password: '',
     });
   };
 
