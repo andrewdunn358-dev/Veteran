@@ -247,18 +247,18 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        Alert.alert('Success', formData.createAccount 
+        showToast(formData.createAccount 
           ? 'Peer supporter added with login account' 
-          : 'Peer supporter added successfully');
+          : 'Peer supporter added successfully', 'success');
         setShowAddModal(false);
         resetForm();
         fetchData();
       } else {
         const error = await response.json();
-        Alert.alert('Error', error.detail || 'Failed to add peer supporter');
+        showToast(error.detail || 'Failed to add peer supporter', 'error');
       }
     } catch (error) {
-      Alert.alert('Error', 'Network error');
+      showToast('Network error', 'error');
     }
   };
 
@@ -274,7 +274,7 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        Alert.alert('Success', `User account created for ${userFormData.email}`);
+        showToast(`User account created for ${userFormData.email}`, 'success');
         setShowUserModal(false);
         setUserFormData({ email: '', password: '', name: '', role: 'counsellor' });
         fetchData();
