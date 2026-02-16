@@ -461,7 +461,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDelete = async (type: 'counsellor' | 'peer' | 'user', id: string) => {
+  const handleDelete = async (type: 'counsellor' | 'peer' | 'org' | 'user', id: string) => {
     Alert.alert(
       'Confirm Delete',
       'Are you sure you want to delete this record?',
@@ -475,6 +475,7 @@ export default function AdminDashboard() {
               let endpoint = '';
               if (type === 'counsellor') endpoint = `counsellors/${id}`;
               else if (type === 'peer') endpoint = `peer-supporters/${id}`;
+              else if (type === 'org') endpoint = `organizations/${id}`;
               else endpoint = `auth/users/${id}`;
 
               const response = await fetch(`${API_URL}/api/${endpoint}`, {
@@ -508,6 +509,7 @@ export default function AdminDashboard() {
       createAccount: false,
       email: '',
       password: '',
+      description: '',
     });
   };
 
