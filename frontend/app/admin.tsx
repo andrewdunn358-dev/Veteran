@@ -1460,4 +1460,81 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  // Metrics Tab Styles
+  metricsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 16,
+    gap: 12,
+  },
+  metricCard: {
+    flex: 1,
+    backgroundColor: '#243447',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+  },
+  metricValue: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginTop: 8,
+  },
+  metricLabel: {
+    fontSize: 12,
+    color: '#8899a6',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  metricRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2a3f55',
+  },
+  metricRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  metricRowLabel: {
+    fontSize: 14,
+    color: '#ffffff',
+  },
+  metricRowValue: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#4a90d9',
+  },
+  logItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2a3f55',
+  },
+  logIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(74, 144, 217, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  logDetails: {
+    flex: 1,
+  },
+  logName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#ffffff',
+  },
+  logMeta: {
+    fontSize: 12,
+    color: '#8899a6',
+    marginTop: 2,
+  },
 });
