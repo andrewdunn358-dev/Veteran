@@ -1043,6 +1043,8 @@ export default function AdminDashboard() {
                   handleAddCounsellor();
                 } else if (activeTab === 'peers') {
                   handleAddPeer();
+                } else if (activeTab === 'orgs') {
+                  handleAddOrganization();
                 } else if (activeTab === 'users') {
                   handleCreateUser();
                 }
