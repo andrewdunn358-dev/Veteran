@@ -660,6 +660,89 @@ export default function AdminDashboard() {
               ))
             )
           )}
+
+          {/* Call Metrics Tab */}
+          {activeTab === 'metrics' && (
+            callMetrics ? (
+              <>
+                {/* Summary Cards */}
+                <View style={styles.metricsContainer}>
+                  <View style={styles.metricCard}>
+                    <Ionicons name="call" size={28} color="#22c55e" />
+                    <Text style={styles.metricValue}>{callMetrics.total_calls}</Text>
+                    <Text style={styles.metricLabel}>Total Calls (30 days)</Text>
+                  </View>
+                </View>
+
+                {/* Calls by Type */}
+                <View style={styles.contentCard}>
+                  <Text style={styles.contentPageTitle}>Calls by Contact Type</Text>
+                  {Object.entries(callMetrics.calls_by_type || {}).map(([type, count]) => (
+                    <View key={type} style={styles.metricRow}>
+                      <View style={styles.metricRowLeft}>
+                        <Ionicons 
+                          name={type === 'counsellor' ? 'medkit' : type === 'peer' ? 'people' : 'call'} 
+                          size={18} 
+                          color="#7c9cbf" 
+                        />
+                        <Text style={styles.metricRowLabel}>{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
+                      </View>
+                      <Text style={styles.metricRowValue}>{count as number}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                {/* Calls by Method */}
+                <View style={styles.contentCard}>
+                  <Text style={styles.contentPageTitle}>Calls by Method</Text>
+                  {Object.entries(callMetrics.calls_by_method || {}).map(([method, count]) => (
+                    <View key={method} style={styles.metricRow}>
+                      <View style={styles.metricRowLeft}>
+                        <Ionicons 
+                          name={method === 'phone' ? 'call' : method === 'sms' ? 'chatbubble' : 'logo-whatsapp'} 
+                          size={18} 
+                          color="#7c9cbf" 
+                        />
+                        <Text style={styles.metricRowLabel}>{method.charAt(0).toUpperCase() + method.slice(1)}</Text>
+                      </View>
+                      <Text style={styles.metricRowValue}>{count as number}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                {/* Recent Activity */}
+                <View style={styles.contentCard}>
+                  <Text style={styles.contentPageTitle}>Recent Activity</Text>
+                  {(callMetrics.recent_logs || []).slice(0, 10).map((log: any, index: number) => (
+                    <View key={index} style={styles.logItem}>
+                      <View style={styles.logIcon}>
+                        <Ionicons 
+                          name={log.call_method === 'phone' ? 'call' : log.call_method === 'sms' ? 'chatbubble' : 'logo-whatsapp'} 
+                          size={16} 
+                          color="#4a90d9" 
+                        />
+                      </View>
+                      <View style={styles.logDetails}>
+                        <Text style={styles.logName}>{log.contact_name}</Text>
+                        <Text style={styles.logMeta}>
+                          {log.contact_type} • {new Date(log.timestamp).toLocaleDateString()}
+                        </Text>
+                      </View>
+                    </View>
+                  ))}
+                  {(callMetrics.recent_logs || []).length === 0 && (
+                    <Text style={styles.emptySubtext}>No call activity yet</Text>
+                  )}
+                </View>
+              </>
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="analytics" size={48} color="#7c9cbf" />
+                <Text style={styles.emptyText}>No call data available</Text>
+                <Text style={styles.emptySubtext}>Call metrics will appear here once users start making calls</Text>
+              </View>
+            )
+          )}
         </ScrollView>
       )}
 
