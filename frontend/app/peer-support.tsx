@@ -110,15 +110,38 @@ export default function PeerSupport() {
     }
   };
 
-  const handleCallVeteran = (phone: string) => {
+  // Log call intent to backend
+  const logCallIntent = async (contactType: string, contactId: string | null, contactName: string, contactPhone: string, callMethod: string) => {
+    try {
+      await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/call-logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contact_type: contactType,
+          contact_id: contactId,
+          contact_name: contactName,
+          contact_phone: contactPhone,
+          call_method: callMethod,
+        }),
+      });
+    } catch (err) {
+      // Silent fail - don't block the user from making the call
+      console.log('Failed to log call intent:', err);
+    }
+  };
+
+  const handleCallVeteran = (phone: string, name: string = 'Peer Supporter', id: string | null = null) => {
+    logCallIntent('peer', id, name, phone, 'phone');
     Linking.openURL(`tel:${phone}`);
   };
 
-  const handleSMS = (number: string) => {
+  const handleSMS = (number: string, name: string = 'Peer Supporter', id: string | null = null) => {
+    logCallIntent('peer', id, name, number, 'sms');
     Linking.openURL(`sms:${number}`);
   };
 
-  const handleWhatsApp = (number: string) => {
+  const handleWhatsApp = (number: string, name: string = 'Peer Supporter', id: string | null = null) => {
+    logCallIntent('peer', id, name, number, 'whatsapp');
     const whatsappUrl = `https://wa.me/${number}`;
     Linking.openURL(whatsappUrl);
   };
