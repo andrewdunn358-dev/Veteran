@@ -64,6 +64,17 @@ export default function AdminDashboard() {
   const { user, token, logout } = useAuth();
   const router = useRouter();
 
+  // Toast state
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' | 'info' }>({
+    visible: false,
+    message: '',
+    type: 'success',
+  });
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ visible: true, message, type });
+  };
+
   // Form states
   const [formData, setFormData] = useState({
     name: '',
