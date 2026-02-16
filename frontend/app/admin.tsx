@@ -281,6 +281,56 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleAddOrganization = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/organizations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          description: formData.description,
+          phone: formData.phone,
+          sms: formData.sms || null,
+          whatsapp: formData.whatsapp || null,
+        }),
+      });
+
+      if (response.ok) {
+        showToast('Organization added successfully', 'success');
+        setShowAddModal(false);
+        resetForm();
+        fetchData();
+      } else {
+        const error = await response.json();
+        showToast(error.detail || 'Failed to add organization', 'error');
+      }
+    } catch (error) {
+      showToast('Network error', 'error');
+    }
+  };
+
+  const handleSeedOrganizations = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/organizations/seed`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        showToast(data.message, 'success');
+        fetchData();
+      } else {
+        showToast('Failed to seed organizations', 'error');
+      }
+    } catch (error) {
+      showToast('Network error', 'error');
+    }
+  };
+
   const handleCreateUser = async () => {
     try {
       const response = await fetch(`${API_URL}/api/auth/register`, {
