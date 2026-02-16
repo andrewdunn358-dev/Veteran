@@ -659,7 +659,7 @@ export default function AdminDashboard() {
                     onChangeText={(text) => setFormData({ ...formData, specialization: text })}
                   />
                 </>
-              ) : (
+              ) : activeTab === 'peers' ? (
                 <>
                   <TextInput
                     style={styles.modalInput}
@@ -690,28 +690,107 @@ export default function AdminDashboard() {
                     onChangeText={(text) => setFormData({ ...formData, yearsServed: text })}
                   />
                 </>
+              ) : (
+                <>
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Name"
+                    placeholderTextColor="#8899a6"
+                    value={userFormData.name}
+                    onChangeText={(text) => setUserFormData({ ...userFormData, name: text })}
+                  />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Email"
+                    placeholderTextColor="#8899a6"
+                    value={userFormData.email}
+                    onChangeText={(text) => setUserFormData({ ...userFormData, email: text })}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Password"
+                    placeholderTextColor="#8899a6"
+                    value={userFormData.password}
+                    onChangeText={(text) => setUserFormData({ ...userFormData, password: text })}
+                    secureTextEntry
+                  />
+                  <View style={styles.roleSelector}>
+                    <Text style={styles.roleLabel}>Role:</Text>
+                    {['counsellor', 'peer', 'admin'].map((role) => (
+                      <TouchableOpacity
+                        key={role}
+                        style={[styles.roleButton, userFormData.role === role && styles.roleButtonActive]}
+                        onPress={() => setUserFormData({ ...userFormData, role })}
+                      >
+                        <Text style={styles.roleButtonText}>{role}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </>
               )}
-              <TextInput
-                style={styles.modalInput}
-                placeholder="Phone Number"
-                placeholderTextColor="#8899a6"
-                value={formData.phone}
-                onChangeText={(text) => setFormData({ ...formData, phone: text })}
-              />
-              <TextInput
-                style={styles.modalInput}
-                placeholder="SMS Number (optional)"
-                placeholderTextColor="#8899a6"
-                value={formData.sms}
-                onChangeText={(text) => setFormData({ ...formData, sms: text })}
-              />
-              <TextInput
-                style={styles.modalInput}
-                placeholder="WhatsApp Number (optional)"
-                placeholderTextColor="#8899a6"
-                value={formData.whatsapp}
-                onChangeText={(text) => setFormData({ ...formData, whatsapp: text })}
-              />
+              
+              {(activeTab === 'counsellors' || activeTab === 'peers') && (
+                <>
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Phone Number"
+                    placeholderTextColor="#8899a6"
+                    value={formData.phone}
+                    onChangeText={(text) => setFormData({ ...formData, phone: text })}
+                  />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="SMS Number (optional)"
+                    placeholderTextColor="#8899a6"
+                    value={formData.sms}
+                    onChangeText={(text) => setFormData({ ...formData, sms: text })}
+                  />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="WhatsApp Number (optional)"
+                    placeholderTextColor="#8899a6"
+                    value={formData.whatsapp}
+                    onChangeText={(text) => setFormData({ ...formData, whatsapp: text })}
+                  />
+
+                  {/* Create Login Account Section */}
+                  <View style={styles.accountSection}>
+                    <TouchableOpacity 
+                      style={styles.checkboxRow}
+                      onPress={() => setFormData({ ...formData, createAccount: !formData.createAccount })}
+                    >
+                      <View style={[styles.checkbox, formData.createAccount && styles.checkboxChecked]}>
+                        {formData.createAccount && <Ionicons name="checkmark" size={16} color="#ffffff" />}
+                      </View>
+                      <Text style={styles.checkboxLabel}>Create login account for this person</Text>
+                    </TouchableOpacity>
+
+                    {formData.createAccount && (
+                      <>
+                        <TextInput
+                          style={styles.modalInput}
+                          placeholder="Email for login"
+                          placeholderTextColor="#8899a6"
+                          value={formData.email}
+                          onChangeText={(text) => setFormData({ ...formData, email: text })}
+                          keyboardType="email-address"
+                          autoCapitalize="none"
+                        />
+                        <TextInput
+                          style={styles.modalInput}
+                          placeholder="Password"
+                          placeholderTextColor="#8899a6"
+                          value={formData.password}
+                          onChangeText={(text) => setFormData({ ...formData, password: text })}
+                          secureTextEntry
+                        />
+                      </>
+                    )}
+                  </View>
+                </>
+              )}
             </ScrollView>
 
             <TouchableOpacity
