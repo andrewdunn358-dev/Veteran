@@ -33,6 +33,7 @@ function AppContent() {
         <Stack.Screen name="journal" />
         <Stack.Screen name="mood" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="resources" />
       </Stack>
     </>
   );
