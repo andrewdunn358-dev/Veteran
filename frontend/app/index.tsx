@@ -16,7 +16,7 @@ export default function SplashScreen() {
     // Fade in animation
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 1000,
+      duration: 800,
       useNativeDriver: true,
     }).start();
   }, []);
@@ -41,7 +41,13 @@ export default function SplashScreen() {
     }
   };
 
-  const handleEnter = () => {
+  const handleYes = () => {
+    // Go straight to crisis support / counsellors
+    router.replace('/crisis-support');
+  };
+
+  const handleNo = () => {
+    // Go to main app
     router.replace('/home');
   };
 
@@ -61,24 +67,26 @@ export default function SplashScreen() {
         <Text style={styles.title}>Radio Check</Text>
         <Text style={styles.subtitle}>Veterans Support Network</Text>
 
-        {/* Tagline */}
-        <Text style={styles.tagline}>
-          "Semel Servientes, Semper Uniti"
-        </Text>
-        <Text style={styles.taglineTranslation}>
-          Once Serving, Always United
-        </Text>
+        {/* Question */}
+        <View style={styles.questionContainer}>
+          <Ionicons name="heart" size={32} color="#ef4444" style={styles.heartIcon} />
+          <Text style={styles.question}>
+            Are you in need of immediate help?
+          </Text>
+        </View>
 
-        {/* Description */}
-        <Text style={styles.description}>
-          A safe space for UK military veterans to connect, find support, and access resources.
-        </Text>
+        {/* Yes/No Buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.yesButton} onPress={handleYes}>
+            <Ionicons name="checkmark-circle" size={24} color="#ffffff" />
+            <Text style={styles.yesButtonText}>Yes, I need help now</Text>
+          </TouchableOpacity>
 
-        {/* Enter Button */}
-        <TouchableOpacity style={styles.enterButton} onPress={handleEnter}>
-          <Text style={styles.enterButtonText}>Enter</Text>
-          <Ionicons name="arrow-forward" size={20} color="#ffffff" />
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.noButton} onPress={handleNo}>
+            <Text style={styles.noButtonText}>No, continue to app</Text>
+            <Ionicons name="arrow-forward" size={20} color="#7c9cbf" />
+          </TouchableOpacity>
+        </View>
 
         {/* Emergency Notice */}
         <View style={styles.emergencyNotice}>
