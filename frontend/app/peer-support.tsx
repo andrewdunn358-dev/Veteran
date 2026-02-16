@@ -228,7 +228,7 @@ export default function PeerSupport() {
                 <View style={styles.veteranContactButtons}>
                   <TouchableOpacity
                     style={styles.veteranCallButton}
-                    onPress={() => handleCallVeteran(veteran.phone)}
+                    onPress={() => handleCallVeteran(veteran.phone, veteran.firstName, veteran.id)}
                     activeOpacity={0.8}
                   >
                     <Ionicons name="call" size={18} color="#ffffff" />
