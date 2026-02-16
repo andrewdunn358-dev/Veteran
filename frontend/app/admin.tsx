@@ -972,7 +972,7 @@ export default function AdminDashboard() {
                 </>
               )}
               
-              {(activeTab === 'counsellors' || activeTab === 'peers') && (
+              {(activeTab === 'counsellors' || activeTab === 'peers' || activeTab === 'orgs') && (
                 <>
                   <TextInput
                     style={styles.modalInput}
@@ -996,7 +996,8 @@ export default function AdminDashboard() {
                     onChangeText={(text) => setFormData({ ...formData, whatsapp: text })}
                   />
 
-                  {/* Create Login Account Section */}
+                  {/* Create Login Account Section - Only for counsellors and peers */}
+                  {(activeTab === 'counsellors' || activeTab === 'peers') && (
                   <View style={styles.accountSection}>
                     <TouchableOpacity 
                       style={styles.checkboxRow}
@@ -1030,6 +1031,7 @@ export default function AdminDashboard() {
                       </>
                     )}
                   </View>
+                  )}
                 </>
               )}
             </ScrollView>
