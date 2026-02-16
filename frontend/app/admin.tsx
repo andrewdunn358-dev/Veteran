@@ -912,6 +912,25 @@ export default function AdminDashboard() {
                     onChangeText={(text) => setFormData({ ...formData, yearsServed: text })}
                   />
                 </>
+              ) : activeTab === 'orgs' ? (
+                <>
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Organization Name"
+                    placeholderTextColor="#8899a6"
+                    value={formData.name}
+                    onChangeText={(text) => setFormData({ ...formData, name: text })}
+                  />
+                  <TextInput
+                    style={[styles.modalInput, { minHeight: 80, textAlignVertical: 'top' }]}
+                    placeholder="Description"
+                    placeholderTextColor="#8899a6"
+                    value={formData.description}
+                    onChangeText={(text) => setFormData({ ...formData, description: text })}
+                    multiline
+                    numberOfLines={3}
+                  />
+                </>
               ) : (
                 <>
                   <TextInput
