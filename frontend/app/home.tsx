@@ -305,6 +305,10 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginTop: 4,
     textAlign: 'center',
   },
+  callbackButton: {
+    borderColor: '#22c55e',
+    borderWidth: 1,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
