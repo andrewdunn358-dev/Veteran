@@ -765,27 +765,36 @@ export default function AdminDashboard() {
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
         <View style={styles.tabs}>
-          {(['counsellors', 'peers', 'orgs', 'resources', 'users', 'content', 'metrics'] as const).map((tab) => (
+          {(['counsellors', 'peers', 'callbacks', 'alerts', 'orgs', 'resources', 'users', 'content', 'metrics'] as const).map((tab) => (
             <TouchableOpacity
               key={tab}
-              style={[styles.tab, activeTab === tab && styles.activeTab]}
+              style={[styles.tab, activeTab === tab && styles.activeTab, (tab === 'alerts' && panicAlerts.filter(a => a.status === 'active').length > 0) && styles.alertTab]}
               onPress={() => setActiveTab(tab)}
             >
               <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab === 'orgs' ? 'Orgs' : tab === 'resources' ? 'Resources' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab === 'orgs' ? 'Orgs' : tab === 'resources' ? 'Resources' : tab === 'callbacks' ? 'Callbacks' : tab === 'alerts' ? `Alerts${panicAlerts.filter(a => a.status === 'active').length > 0 ? ` (${panicAlerts.filter(a => a.status === 'active').length})` : ''}` : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
 
-      {activeTab !== 'content' && activeTab !== 'metrics' && activeTab !== 'resources' && (
+      {activeTab !== 'content' && activeTab !== 'metrics' && activeTab !== 'resources' && activeTab !== 'callbacks' && activeTab !== 'alerts' && (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
             <Ionicons name="add" size={20} color="#ffffff" />
             <Text style={styles.addButtonText}>
               Add New {activeTab === 'counsellors' ? 'Counsellor' : activeTab === 'peers' ? 'Peer Supporter' : activeTab === 'orgs' ? 'Organization' : 'User'}
             </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {(activeTab === 'callbacks' || activeTab === 'alerts') && (
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.seedButton} onPress={fetchData}>
+            <Ionicons name="refresh" size={20} color="#ffffff" />
+            <Text style={styles.addButtonText}>Refresh</Text>
           </TouchableOpacity>
         </View>
       )}
