@@ -280,16 +280,16 @@ export default function AdminDashboard() {
         fetchData();
       } else {
         const error = await response.json();
-        Alert.alert('Error', error.detail || 'Failed to create user');
+        showToast(error.detail || 'Failed to create user', 'error');
       }
     } catch (error) {
-      Alert.alert('Error', 'Network error');
+      showToast('Network error', 'error');
     }
   };
 
   const handleChangePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      Alert.alert('Error', 'New passwords do not match');
+      showToast('New passwords do not match', 'error');
       return;
     }
 
@@ -307,15 +307,15 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        Alert.alert('Success', 'Password changed successfully');
+        showToast('Password changed successfully', 'success');
         setShowPasswordModal(false);
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
       } else {
         const error = await response.json();
-        Alert.alert('Error', error.detail || 'Failed to change password');
+        showToast(error.detail || 'Failed to change password', 'error');
       }
     } catch (error) {
-      Alert.alert('Error', 'Network error');
+      showToast('Network error', 'error');
     }
   };
 
@@ -336,7 +336,7 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        Alert.alert('Success', `Password reset for ${selectedUser.email}`);
+        showToast(`Password reset for ${selectedUser.email}`, 'success');
         setShowResetModal(false);
         setSelectedUser(null);
         setResetPassword('');
