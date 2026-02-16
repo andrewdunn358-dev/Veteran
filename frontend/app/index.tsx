@@ -11,7 +11,6 @@ const API_URL = 'https://veterans-support-api.onrender.com';
 export default function SplashScreen() {
   const router = useRouter();
   const { colors, theme } = useTheme();
-  const [isReady, setIsReady] = useState(false);
   const [showCookieNotice, setShowCookieNotice] = useState(false);
   const [showPanicModal, setShowPanicModal] = useState(false);
   const [panicSubmitting, setPanicSubmitting] = useState(false);
@@ -22,9 +21,6 @@ export default function SplashScreen() {
   useEffect(() => {
     // Check if user has accepted cookies
     checkCookieConsent();
-    // Set ready after a brief delay
-    const timer = setTimeout(() => setIsReady(true), 100);
-    return () => clearTimeout(timer);
   }, []);
 
   const checkCookieConsent = async () => {
