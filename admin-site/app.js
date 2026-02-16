@@ -1552,6 +1552,145 @@ async function seedResources() {
     }
 }
 
+// ============ CATEGORY MANAGEMENT ============
+let categories = [];
+
+function loadCategories() {
+    // Get unique categories from resources
+    categories = [...new Set(resources.map(r => r.category).filter(Boolean))];
+    renderCategories();
+}
+
+function renderCategories() {
+    const container = document.getElementById('category-list-display');
+    if (!container) return;
+    
+    if (categories.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 14px;">No categories yet. Add resources to create categories.</p>';
+        return;
+    }
+    
+    container.innerHTML = categories.map(cat => `
+        <div class="category-tag" style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--primary-color); color: white; border-radius: 20px; font-size: 13px;">
+            <span>${cat}</span>
+            <button onclick="deleteCategory('${cat}')" style="background: none; border: none; color: white; cursor: pointer; padding: 0; font-size: 14px;" title="Delete category">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+function addCategory() {
+    const input = document.getElementById('new-category-input');
+    const newCategory = input.value.trim();
+    
+    if (!newCategory) {
+        showNotification('Please enter a category name', 'error');
+        return;
+    }
+    
+    if (categories.includes(newCategory)) {
+        showNotification('Category already exists', 'error');
+        return;
+    }
+    
+    categories.push(newCategory);
+    renderCategories();
+    input.value = '';
+    showNotification('Category added. It will appear in dropdowns when adding resources.');
+}
+
+async function deleteCategory(category) {
+    // Check if any resources use this category
+    const resourcesWithCategory = resources.filter(r => r.category === category);
+    
+    if (resourcesWithCategory.length > 0) {
+        if (!confirm(`${resourcesWithCategory.length} resource(s) use this category. Deleting will NOT remove the resources, but the category won't appear in the list. Continue?`)) {
+            return;
+        }
+    }
+    
+    categories = categories.filter(c => c !== category);
+    renderCategories();
+    showNotification('Category removed from list');
+}
+
+// ============ LOGO / SETTINGS MANAGEMENT ============
+let siteSettings = {};
+let newLogoData = null;
+
+async function loadSettings() {
+    try {
+        const settings = await apiCall('/settings').catch(() => ({}));
+        siteSettings = settings;
+        
+        // Display current logo
+        const logoImg = document.getElementById('current-logo-img');
+        if (logoImg && siteSettings.logo_url) {
+            logoImg.src = siteSettings.logo_url;
+        } else if (logoImg) {
+            // Default logo
+            logoImg.src = 'https://static.prod-images.emergentagent.com/jobs/22c2fac2-c7ea-4255-b9fb-379a93a49652/images/b2952f18c7d26f1e02afc6a0e07efe1ee43cd00af073f456000dce29b154ce3a.png';
+        }
+    } catch (error) {
+        console.error('Error loading settings:', error);
+    }
+}
+
+function previewNewLogo(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        
+        if (file.size > 2 * 1024 * 1024) {
+            showNotification('Logo must be less than 2MB', 'error');
+            input.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            newLogoData = e.target.result;
+            document.getElementById('new-logo-preview').src = newLogoData;
+            document.getElementById('new-logo-preview-container').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+async function saveLogo() {
+    if (!newLogoData) {
+        showNotification('Please select a logo image first', 'error');
+        return;
+    }
+    
+    try {
+        await apiCall('/settings', {
+            method: 'PUT',
+            body: JSON.stringify({
+                logo_url: newLogoData
+            })
+        });
+        
+        // Update current logo display
+        document.getElementById('current-logo-img').src = newLogoData;
+        document.getElementById('new-logo-preview-container').style.display = 'none';
+        document.getElementById('logo-upload-input').value = '';
+        newLogoData = null;
+        
+        showNotification('Logo saved successfully! Refresh the page to see changes.');
+    } catch (error) {
+        showNotification('Failed to save logo: ' + error.message, 'error');
+    }
+}
+
+// Update loadAllData to include settings and categories
+const originalLoadAllData = loadAllData;
+loadAllData = async function() {
+    await originalLoadAllData();
+    loadCategories();
+    loadSettings();
+};
+
 // Modal overlay click - DISABLED to prevent accidental closures
 // Users must click Cancel or Close button to close the modal
 // This prevents losing form data on accidental clicks
