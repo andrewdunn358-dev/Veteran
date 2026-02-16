@@ -1393,6 +1393,11 @@ const styles = StyleSheet.create({
     color: '#8899a6',
     marginBottom: 4,
   },
+  cardDetailSmall: {
+    color: '#6b7280',
+    fontSize: 12,
+    marginBottom: 2,
+  },
   cardActions: {
     flexDirection: 'row',
     alignItems: 'center',
