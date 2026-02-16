@@ -101,6 +101,8 @@ export default function AdminDashboard() {
     createAccount: false,
     email: '',
     password: '',
+    // Organization fields
+    description: '',
   });
 
   const [userFormData, setUserFormData] = useState({
