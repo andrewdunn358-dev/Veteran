@@ -47,10 +47,20 @@ interface User {
   role: string;
 }
 
+interface Organization {
+  id: string;
+  name: string;
+  description: string;
+  phone: string;
+  sms?: string;
+  whatsapp?: string;
+}
+
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'users' | 'content' | 'metrics'>('counsellors');
+  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'orgs' | 'users' | 'content' | 'metrics'>('counsellors');
   const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
   const [peers, setPeers] = useState<PeerSupporter[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [content, setContent] = useState<Record<string, Record<string, string>>>({});
   const [callMetrics, setCallMetrics] = useState<any>(null);
