@@ -12,7 +12,7 @@ Build and deploy a mobile-first web application for UK military veterans providi
 ### Deployed URLs
 - **Frontend**: Deployed on Vercel
 - **Backend**: Deployed on Render
-- **Preview**: https://veteran-staff-portal.preview.emergentagent.com
+- **Preview**: https://crisis-hub-8.preview.emergentagent.com
 
 ### Admin Credentials
 - **Email**: admin@veteran.dbty.co.uk
