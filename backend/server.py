@@ -199,6 +199,36 @@ class PageContent(BaseModel):
 class PageContentUpdate(BaseModel):
     content: str
 
+# Resource Library Models
+class ResourceCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    category: str = "General"
+    content: Optional[str] = None  # Rich text content
+    link: Optional[str] = None  # External link
+    image_url: Optional[str] = None
+    image_data: Optional[str] = None  # Base64 encoded image
+
+class Resource(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: Optional[str] = None
+    category: str = "General"
+    content: Optional[str] = None
+    link: Optional[str] = None
+    image_url: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ResourceUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    content: Optional[str] = None
+    link: Optional[str] = None
+    image_url: Optional[str] = None
+    image_data: Optional[str] = None  # Base64 encoded image for updates
+
 # Resend Configuration
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL", "noreply@veteran.dbty.co.uk")
