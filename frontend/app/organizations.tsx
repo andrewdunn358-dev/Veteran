@@ -1,65 +1,48 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
 interface Organization {
+  id: string;
   name: string;
   description: string;
   phone: string;
   sms?: string;
   whatsapp?: string;
-  website?: string;
 }
 
 export default function Organizations() {
   const router = useRouter();
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const organizations: Organization[] = [
-    {
-      name: 'Combat Stress',
-      description: 'Leading charity for veterans mental health. Offers support for trauma, anxiety, depression and more.',
-      phone: '01912704378',
-      sms: '01912704378',
-      whatsapp: '441912704378',
-    },
-    {
-      name: 'Samaritans',
-      description: 'Free 24/7 listening service for anyone who needs to talk. Confidential and non-judgmental support.',
-      phone: '01912704378',
-    },
-    {
-      name: 'Veterans UK',
-      description: 'Government support service offering advice on benefits, compensation, and welfare for veterans.',
-      phone: '01912704378',
-    },
-    {
-      name: 'CALM',
-      description: 'Campaign Against Living Miserably. Support for men experiencing difficult times, including veterans.',
-      phone: '01912704378',
-    },
-    {
-      name: 'NHS Urgent Mental Health Helpline',
-      description: 'Call 111 and select option 2 for urgent mental health support 24/7.',
-      phone: '01912704378',
-    },
-    {
-      name: 'SSAFA',
-      description: 'Lifelong support for serving personnel, veterans, and their families. Practical and emotional support.',
-      phone: '01912704378',
-    },
-    {
-      name: 'Help for Heroes',
-      description: 'Recovery and support for wounded, injured and sick veterans. Physical and mental health services.',
-      phone: '01912704378',
-    },
-    {
-      name: 'Royal British Legion',
-      description: 'Welfare support, guidance and advice for serving and ex-serving personnel and their families.',
-      phone: '01912704378',
-    },
-  ];
+  const fetchOrganizations = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/organizations`);
+      if (response.ok) {
+        const data = await response.json();
+        setOrganizations(data);
+      } else {
+        setError('Unable to load organizations');
+      }
+    } catch (err) {
+      console.error('Error fetching organizations:', err);
+      setError('Unable to connect. Please check your connection.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrganizations();
+  }, []);
 
   const handleCall = (number: string) => {
     Linking.openURL(`tel:${number}`);
@@ -104,9 +87,30 @@ export default function Organizations() {
             </Text>
           </View>
 
-          {/* Organizations List */}
-          {organizations.map((org, index) => (
-            <View key={index} style={styles.orgCard}>
+          {/* Loading State */}
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#4a90e2" />
+              <Text style={styles.loadingText}>Loading organizations...</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={32} color="#ef4444" />
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity style={styles.retryButton} onPress={fetchOrganizations}>
+                <Text style={styles.retryButtonText}>Retry</Text>
+              </TouchableOpacity>
+            </View>
+          ) : organizations.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="business" size={48} color="#7c9cbf" />
+              <Text style={styles.emptyText}>No organizations available</Text>
+              <Text style={styles.emptySubtext}>Please contact support for assistance</Text>
+            </View>
+          ) : (
+          /* Organizations List */
+          organizations.map((org) => (
+            <View key={org.id} style={styles.orgCard}>
               <View style={styles.orgHeader}>
                 <Ionicons name="shield-checkmark" size={24} color="#7c9cbf" />
                 <View style={styles.orgInfo}>
@@ -152,7 +156,8 @@ export default function Organizations() {
                 )}
               </View>
             </View>
-          ))}
+          ))
+          )}
 
           {/* Footer Note */}
           <View style={styles.footer}>
