@@ -465,6 +465,14 @@ export default function AdminDashboard() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Toast Notification */}
+      <Toast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        onHide={() => setToast({ ...toast, visible: false })}
+      />
+
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Admin Dashboard</Text>
