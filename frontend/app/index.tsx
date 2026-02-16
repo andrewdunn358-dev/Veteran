@@ -166,7 +166,7 @@ export default function SplashScreen() {
             In an emergency, always call 999
           </Text>
         </View>
-      </Animated.View>
+      </View>
 
       {/* GDPR Cookie Notice */}
       {showCookieNotice && (
