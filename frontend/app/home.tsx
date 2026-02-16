@@ -92,6 +92,17 @@ export default function Index() {
               <Text style={styles.secondaryButtonText}>Support Organisations</Text>
               <Text style={styles.secondaryButtonSubtext}>UK veteran services</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.secondaryButton, styles.callbackButton]}
+              onPress={() => router.push('/callback')}
+              activeOpacity={0.8}
+              data-testid="callback-request-btn"
+            >
+              <Ionicons name="call" size={32} color="#22c55e" />
+              <Text style={styles.secondaryButtonText}>Request a Callback</Text>
+              <Text style={styles.secondaryButtonSubtext}>We'll call you back</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
