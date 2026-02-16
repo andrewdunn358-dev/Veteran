@@ -26,7 +26,7 @@ Build and deploy a mobile-first web application for UK military veterans providi
 - [x] Home page with crisis support access + Self-Care Tools section
 - [x] Crisis Support page - CONNECTED TO LIVE API (counsellors with real-time availability)
 - [x] Peer Support page - CONNECTED TO LIVE API (peer supporters with real-time availability)
-- [x] Organizations page
+- [x] Organizations page - **NOW FETCHES FROM DATABASE (Feb 2026)**
 - [x] Historical Investigations support page
 
 ### Self-Care Tools (Phase 1) - All use LOCAL STORAGE, no login required
@@ -40,13 +40,14 @@ Build and deploy a mobile-first web application for UK military veterans providi
 - [x] User management (CRUD)
 - [x] Counsellor management (CRUD + status updates)
 - [x] Peer supporter management (CRUD + status updates)
+- [x] **Organizations/Resources Management** - NEW: Full CRUD with "Load UK Veteran Resources" seed button
 - [x] **Combined Staff + User Creation** - Single form with "Create login account" checkbox
-- [x] CMS for editing page content - NOW WORKING
+- [x] CMS for editing page content - WORKING
 - [x] Password management (change password, admin reset)
 - [x] **Toast Notifications** - Visual feedback on successful actions
 - [x] **Call Metrics Tab** - View call logs, stats by type/method, recent activity
 
-### Call Intent Logging - NEW Feb 2026
+### Call Intent Logging - Feb 2026
 - [x] Log all call intents (phone, SMS, WhatsApp) to database
 - [x] Metrics dashboard for admins showing:
   - Total calls (30 days)
@@ -58,7 +59,7 @@ Build and deploy a mobile-first web application for UK military veterans providi
 - [x] Counsellor portal (/counsellor-portal) - update availability status
 - [x] Peer supporter portal (/peer-portal) - update availability status
 
-### Password Management - UPDATED Feb 2026
+### Password Management - Feb 2026
 - [x] User password change
 - [x] Admin password reset
 - [x] **Forgot password email flow - Now using Resend** (requires RESEND_API_KEY on Render)
@@ -87,6 +88,7 @@ Build and deploy a mobile-first web application for UK military veterans providi
 - `DELETE /api/auth/users/{id}` - Delete user (admin only)
 - `GET /api/call-logs` - Get call metrics with stats (admin only)
 - Full CRUD for counsellors, peer supporters, organizations
+- `POST /api/organizations/seed` - Seed default UK veteran organizations (admin only)
 - `POST /api/content/seed` - Seed default CMS content
 - `PUT /api/content/{page}/{section}` - Update CMS content
 
@@ -97,7 +99,7 @@ Build and deploy a mobile-first web application for UK military veterans providi
 - **users**: {email, password_hash, role, name}
 - **counsellors**: {name, specialization, status, phone, sms, whatsapp, user_id}
 - **peer_supporters**: {firstName, area, background, yearsServed, status, phone, user_id}
-- **organizations**: {name, description, phone}
+- **organizations**: {id, name, description, phone, sms, whatsapp, created_at}
 - **page_content**: {page_name, section, content}
 - **password_resets**: {token, email, expires}
 - **call_logs**: {id, contact_type, contact_id, contact_name, contact_phone, call_method, timestamp}
@@ -112,6 +114,13 @@ Build and deploy a mobile-first web application for UK military veterans providi
   - Add to Render: `RESEND_API_KEY=re_your_api_key_here`
   - Also add: `SENDER_EMAIL=noreply@veteran.dbty.co.uk`
   - And: `FRONTEND_URL=https://your-vercel-url.com`
+
+### P1 - VoIP/PBX Integration (User Request)
+- [ ] **FusionPBX or alternative VoIP integration** for:
+  - Live call routing
+  - User presence/busy status
+  - Operator panel integration
+- Options researched: FusionPBX (requires membership), 3CX (free tier), Vonage (API-first), CloudTalk
 
 ### P1 - Image Upload for CMS
 - [ ] Implement file upload for CMS images
@@ -128,7 +137,6 @@ Build and deploy a mobile-first web application for UK military veterans providi
 
 ### P3 - Future
 - [ ] In-App Chat/Messaging (user chose to skip for now)
-- [ ] **Twilio Integration** - For actual call routing and full call tracking
 
 ---
 
@@ -143,14 +151,15 @@ Build and deploy a mobile-first web application for UK military veterans providi
 ---
 
 ## Key Files Reference
-- `/app/frontend/app/admin.tsx` - Admin dashboard with combined user/staff creation + call metrics
+- `/app/frontend/app/admin.tsx` - Admin dashboard with Resources tab, call metrics
+- `/app/frontend/app/organizations.tsx` - Public organizations page (fetches from API)
 - `/app/frontend/app/login.tsx` - Staff login page
 - `/app/frontend/app/crisis-support.tsx` - Crisis support page with call logging
 - `/app/frontend/app/peer-support.tsx` - Peer support page with call logging
 - `/app/frontend/src/components/Toast.tsx` - Toast notification component
-- `/app/backend/server.py` - All API endpoints including call logging
+- `/app/backend/server.py` - All API endpoints including organizations seed
 
 ---
 
 ## Last Updated
-2026-02-16 - Added Toast notifications, Call Intent Logging with metrics dashboard
+2026-02-16 - Fixed CMS Organizations management, researched VoIP options
