@@ -101,15 +101,6 @@ export default function SplashScreen() {
 
   const styles = createStyles(colors, isDark);
 
-  if (!isReady) {
-    return (
-      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-        <StatusBar barStyle="light-content" backgroundColor="#0d1b2a" />
-        <View style={styles.container} />
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <StatusBar barStyle="light-content" backgroundColor="#0d1b2a" />
