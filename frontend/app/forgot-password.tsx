@@ -14,8 +14,6 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Platform } from 'react-native';
-
 const API_URL = Platform.select({
   web: process.env.EXPO_PUBLIC_BACKEND_URL || '',
   default: process.env.EXPO_PUBLIC_BACKEND_URL || ''

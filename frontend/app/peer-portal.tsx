@@ -7,12 +7,11 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../src/context/AuthContext';
-
-import { Platform } from 'react-native';
 
 const API_URL = Platform.select({
   web: process.env.EXPO_PUBLIC_BACKEND_URL || '',
