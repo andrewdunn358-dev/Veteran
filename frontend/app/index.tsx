@@ -120,11 +120,16 @@ export default function SplashScreen() {
           </View>
         </View>
       )}
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#0d1b2a',
+  },
   container: {
     flex: 1,
     backgroundColor: '#0d1b2a',
