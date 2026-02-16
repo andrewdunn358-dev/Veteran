@@ -344,6 +344,55 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleAddResource = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/resources`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: formData.name,
+          description: formData.description,
+          category: formData.specialization || 'General',
+          link: formData.whatsapp || null,
+        }),
+      });
+
+      if (response.ok) {
+        showToast('Resource added successfully', 'success');
+        setShowAddModal(false);
+        resetForm();
+        fetchData();
+      } else {
+        const error = await response.json();
+        showToast(error.detail || 'Failed to add resource', 'error');
+      }
+    } catch (error) {
+      showToast('Network error', 'error');
+    }
+  };
+
+  const handleSeedResources = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/resources/seed`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        showToast(data.message, 'success');
+        fetchData();
+      } else {
+        showToast('Failed to seed resources', 'error');
+      }
+    } catch (error) {
+      showToast('Network error', 'error');
+    }
+  };
+
   const handleCreateUser = async () => {
     try {
       const response = await fetch(`${API_URL}/api/auth/register`, {
