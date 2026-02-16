@@ -189,6 +189,33 @@ export default function AdminDashboard() {
 
   const handleAddPeer = async () => {
     try {
+      // First create user account if requested
+      let userId = null;
+      if (formData.createAccount && formData.email && formData.password) {
+        const userResponse = await fetch(`${API_URL}/api/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            name: formData.firstName,
+            role: 'peer',
+          }),
+        });
+
+        if (!userResponse.ok) {
+          const error = await userResponse.json();
+          Alert.alert('Error', error.detail || 'Failed to create user account');
+          return;
+        }
+        const userData = await userResponse.json();
+        userId = userData.id;
+      }
+
+      // Then create peer supporter profile
       const response = await fetch(`${API_URL}/api/peer-supporters`, {
         method: 'POST',
         headers: {
@@ -203,11 +230,14 @@ export default function AdminDashboard() {
           phone: formData.phone,
           sms: formData.sms || null,
           whatsapp: formData.whatsapp || null,
+          user_id: userId,
         }),
       });
 
       if (response.ok) {
-        Alert.alert('Success', 'Peer supporter added successfully');
+        Alert.alert('Success', formData.createAccount 
+          ? 'Peer supporter added with login account' 
+          : 'Peer supporter added successfully');
         setShowAddModal(false);
         resetForm();
         fetchData();
