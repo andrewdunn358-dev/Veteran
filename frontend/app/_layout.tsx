@@ -19,6 +19,7 @@ function AppContent() {
         }}
       >
         <Stack.Screen name="index" />
+        <Stack.Screen name="home" />
         <Stack.Screen name="crisis-support" />
         <Stack.Screen name="organizations" />
         <Stack.Screen name="peer-support" />
