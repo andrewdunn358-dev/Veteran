@@ -35,7 +35,7 @@ export default function Resources() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/resources`);
+      const response = await fetch(`${API_URL}/api/resources`);
       if (response.ok) {
         const data = await response.json();
         setResources(data);

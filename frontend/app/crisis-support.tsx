@@ -33,7 +33,7 @@ export default function CrisisSupport() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/counsellors`);
+      const response = await fetch(`${API_URL}/api/counsellors`);
       if (response.ok) {
         const data = await response.json();
         // Filter to show only available and busy counsellors (not 'off')
@@ -83,7 +83,7 @@ export default function CrisisSupport() {
   // Log call intent to backend
   const logCallIntent = async (contactType: string, contactId: string | null, contactName: string, contactPhone: string, callMethod: string) => {
     try {
-      await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/call-logs`, {
+      await fetch(`${API_URL}/api/call-logs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

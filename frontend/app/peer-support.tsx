@@ -38,7 +38,7 @@ export default function PeerSupport() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/peer-supporters`);
+      const response = await fetch(`${API_URL}/api/peer-supporters`);
       if (response.ok) {
         const data = await response.json();
         setPeerSupporters(data);
@@ -81,7 +81,7 @@ export default function PeerSupport() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/peer-support/register`, {
+      const response = await fetch(`${API_URL}/api/peer-support/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ export default function PeerSupport() {
   // Log call intent to backend
   const logCallIntent = async (contactType: string, contactId: string | null, contactName: string, contactPhone: string, callMethod: string) => {
     try {
-      await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/call-logs`, {
+      await fetch(`${API_URL}/api/call-logs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
