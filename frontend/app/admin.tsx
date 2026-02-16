@@ -502,14 +502,14 @@ export default function AdminDashboard() {
               onPress={() => setActiveTab(tab)}
             >
               <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-                {tab === 'content' ? 'CMS' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
 
-      {activeTab !== 'content' && (
+      {activeTab !== 'content' && activeTab !== 'metrics' && (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
             <Ionicons name="add" size={20} color="#ffffff" />
@@ -525,6 +525,15 @@ export default function AdminDashboard() {
           <TouchableOpacity style={styles.seedButton} onPress={handleSeedContent}>
             <Ionicons name="refresh" size={20} color="#ffffff" />
             <Text style={styles.addButtonText}>Load Default Content</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {activeTab === 'metrics' && (
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.seedButton} onPress={fetchData}>
+            <Ionicons name="refresh" size={20} color="#ffffff" />
+            <Text style={styles.addButtonText}>Refresh Data</Text>
           </TouchableOpacity>
         </View>
       )}
