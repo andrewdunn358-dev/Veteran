@@ -142,10 +142,11 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [counsellorsRes, peersRes, orgsRes, usersRes, contentRes, metricsRes] = await Promise.all([
+      const [counsellorsRes, peersRes, orgsRes, resourcesRes, usersRes, contentRes, metricsRes] = await Promise.all([
         fetch(`${API_URL}/api/counsellors`),
         fetch(`${API_URL}/api/peer-supporters`),
         fetch(`${API_URL}/api/organizations`),
+        fetch(`${API_URL}/api/resources`),
         fetch(`${API_URL}/api/auth/users`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
@@ -158,6 +159,7 @@ export default function AdminDashboard() {
       if (counsellorsRes.ok) setCounsellors(await counsellorsRes.json());
       if (peersRes.ok) setPeers(await peersRes.json());
       if (orgsRes.ok) setOrganizations(await orgsRes.json());
+      if (resourcesRes.ok) setResources(await resourcesRes.json());
       if (usersRes.ok) setUsers(await usersRes.json());
       if (contentRes.ok) setContent(await contentRes.json());
       if (metricsRes.ok) setCallMetrics(await metricsRes.json());
