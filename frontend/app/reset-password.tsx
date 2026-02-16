@@ -14,7 +14,12 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-const API_URL = 'https://veterans-support-api.onrender.com';
+import { Platform } from 'react-native';
+
+const API_URL = Platform.select({
+  web: process.env.EXPO_PUBLIC_BACKEND_URL || '',
+  default: process.env.EXPO_PUBLIC_BACKEND_URL || ''
+});
 
 export default function ResetPasswordScreen() {
   const [password, setPassword] = useState('');

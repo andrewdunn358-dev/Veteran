@@ -12,7 +12,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../src/context/AuthContext';
 
-const API_URL = 'https://veterans-support-api.onrender.com';
+import { Platform } from 'react-native';
+
+const API_URL = Platform.select({
+  web: process.env.EXPO_PUBLIC_BACKEND_URL || '',
+  default: process.env.EXPO_PUBLIC_BACKEND_URL || ''
+});
 
 interface PeerSupporter {
   id: string;
