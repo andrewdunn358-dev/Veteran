@@ -119,19 +119,23 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [counsellorsRes, peersRes, usersRes, contentRes] = await Promise.all([
+      const [counsellorsRes, peersRes, usersRes, contentRes, metricsRes] = await Promise.all([
         fetch(`${API_URL}/api/counsellors`),
         fetch(`${API_URL}/api/peer-supporters`),
         fetch(`${API_URL}/api/auth/users`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
         fetch(`${API_URL}/api/content`),
+        fetch(`${API_URL}/api/call-logs`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
       ]);
       
       if (counsellorsRes.ok) setCounsellors(await counsellorsRes.json());
       if (peersRes.ok) setPeers(await peersRes.json());
       if (usersRes.ok) setUsers(await usersRes.json());
       if (contentRes.ok) setContent(await contentRes.json());
+      if (metricsRes.ok) setCallMetrics(await metricsRes.json());
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
