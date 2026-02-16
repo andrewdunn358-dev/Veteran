@@ -181,60 +181,55 @@ class PageContent(BaseModel):
 class PageContentUpdate(BaseModel):
     content: str
 
-# SMTP Configuration
-SMTP_HOST = os.getenv("SMTP_HOST", "")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER", "")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
-SMTP_FROM = os.getenv("SMTP_FROM", "noreply@veteran.dbty.co.uk")
+# Resend Configuration
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
+SENDER_EMAIL = os.getenv("SENDER_EMAIL", "noreply@veteran.dbty.co.uk")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://veteran-support.vercel.app")
 
+# Initialize Resend
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
+
 async def send_reset_email(email: str, reset_token: str):
-    """Send password reset email via SMTP"""
-    if not SMTP_HOST:
-        logging.warning("SMTP not configured, skipping email")
+    """Send password reset email via Resend"""
+    if not RESEND_API_KEY:
+        logging.warning("Resend API key not configured, skipping email")
         return False
     
     try:
         reset_link = f"{FRONTEND_URL}/reset-password?token={reset_token}"
         
-        msg = MIMEMultipart()
-        msg['From'] = SMTP_FROM
-        msg['To'] = email
-        msg['Subject'] = "Password Reset - Veterans Support"
-        
-        body = f"""
+        html_content = f"""
         <html>
-        <body>
-        <h2>Password Reset Request</h2>
-        <p>You have requested to reset your password for the Veterans Support portal.</p>
-        <p>Click the link below to reset your password:</p>
-        <p><a href="{reset_link}">Reset Password</a></p>
-        <p>Or copy this link: {reset_link}</p>
-        <p>This link will expire in 1 hour.</p>
-        <p>If you did not request this, please ignore this email.</p>
-        <br>
-        <p>Veterans Support Team</p>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #1a2332;">Password Reset Request</h2>
+            <p>You have requested to reset your password for the Veterans Support portal.</p>
+            <p>Click the button below to reset your password:</p>
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="{reset_link}" style="background-color: #4a90d9; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block;">Reset Password</a>
+            </p>
+            <p style="color: #666; font-size: 14px;">Or copy this link: {reset_link}</p>
+            <p style="color: #666; font-size: 14px;">This link will expire in 1 hour.</p>
+            <p style="color: #666; font-size: 14px;">If you did not request this, please ignore this email.</p>
+            <br>
+            <p style="color: #1a2332;">Veterans Support Team</p>
         </body>
         </html>
         """
         
-        msg.attach(MIMEText(body, 'html'))
+        params = {
+            "from": SENDER_EMAIL,
+            "to": [email],
+            "subject": "Password Reset - Veterans Support",
+            "html": html_content
+        }
         
-        # Use SSL for port 465, TLS for port 587
-        if SMTP_PORT == 465:
-            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
-                server.login(SMTP_USER, SMTP_PASSWORD)
-                server.sendmail(SMTP_FROM, email, msg.as_string())
-        else:
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-                server.starttls()
-                server.login(SMTP_USER, SMTP_PASSWORD)
-                server.sendmail(SMTP_FROM, email, msg.as_string())
-        
+        # Run sync SDK in thread to keep FastAPI non-blocking
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        logging.info(f"Password reset email sent to {email}, ID: {result.get('id')}")
         return True
     except Exception as e:
-        logging.error(f"Failed to send email: {str(e)}")
+        logging.error(f"Failed to send email via Resend: {str(e)}")
         return False
 
 # ============ AUTH FUNCTIONS ============
