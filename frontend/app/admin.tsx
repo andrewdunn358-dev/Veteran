@@ -561,14 +561,14 @@ export default function AdminDashboard() {
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
         <View style={styles.tabs}>
-          {(['counsellors', 'peers', 'users', 'content', 'metrics'] as const).map((tab) => (
+          {(['counsellors', 'peers', 'orgs', 'users', 'content', 'metrics'] as const).map((tab) => (
             <TouchableOpacity
               key={tab}
               style={[styles.tab, activeTab === tab && styles.activeTab]}
               onPress={() => setActiveTab(tab)}
             >
               <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab === 'orgs' ? 'Resources' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>
             </TouchableOpacity>
           ))}
@@ -580,8 +580,17 @@ export default function AdminDashboard() {
           <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
             <Ionicons name="add" size={20} color="#ffffff" />
             <Text style={styles.addButtonText}>
-              Add New {activeTab === 'counsellors' ? 'Counsellor' : activeTab === 'peers' ? 'Peer Supporter' : 'User'}
+              Add New {activeTab === 'counsellors' ? 'Counsellor' : activeTab === 'peers' ? 'Peer Supporter' : activeTab === 'orgs' ? 'Organization' : 'User'}
             </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {activeTab === 'orgs' && (
+        <View style={[styles.actions, { marginTop: -8 }]}>
+          <TouchableOpacity style={styles.seedButton} onPress={handleSeedOrganizations}>
+            <Ionicons name="cloud-download" size={20} color="#ffffff" />
+            <Text style={styles.addButtonText}>Load UK Veteran Resources</Text>
           </TouchableOpacity>
         </View>
       )}
