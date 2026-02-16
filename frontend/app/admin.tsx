@@ -624,21 +624,21 @@ export default function AdminDashboard() {
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
         <View style={styles.tabs}>
-          {(['counsellors', 'peers', 'orgs', 'users', 'content', 'metrics'] as const).map((tab) => (
+          {(['counsellors', 'peers', 'orgs', 'resources', 'users', 'content', 'metrics'] as const).map((tab) => (
             <TouchableOpacity
               key={tab}
               style={[styles.tab, activeTab === tab && styles.activeTab]}
               onPress={() => setActiveTab(tab)}
             >
               <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab === 'orgs' ? 'Resources' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab === 'orgs' ? 'Orgs' : tab === 'resources' ? 'Resources' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
 
-      {activeTab !== 'content' && activeTab !== 'metrics' && (
+      {activeTab !== 'content' && activeTab !== 'metrics' && activeTab !== 'resources' && (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
             <Ionicons name="add" size={20} color="#ffffff" />
@@ -649,11 +649,24 @@ export default function AdminDashboard() {
         </View>
       )}
 
+      {activeTab === 'resources' && (
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
+            <Ionicons name="add" size={20} color="#ffffff" />
+            <Text style={styles.addButtonText}>Add New Resource</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.seedButton, { marginLeft: 8 }]} onPress={handleSeedResources}>
+            <Ionicons name="cloud-download" size={20} color="#ffffff" />
+            <Text style={styles.addButtonText}>Load Defaults</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {activeTab === 'orgs' && (
         <View style={[styles.actions, { marginTop: -8 }]}>
           <TouchableOpacity style={styles.seedButton} onPress={handleSeedOrganizations}>
             <Ionicons name="cloud-download" size={20} color="#ffffff" />
-            <Text style={styles.addButtonText}>Load UK Veteran Resources</Text>
+            <Text style={styles.addButtonText}>Load UK Support Orgs</Text>
           </TouchableOpacity>
         </View>
       )}
