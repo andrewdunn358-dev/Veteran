@@ -146,7 +146,7 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [counsellorsRes, peersRes, orgsRes, resourcesRes, usersRes, contentRes, metricsRes] = await Promise.all([
+      const [counsellorsRes, peersRes, orgsRes, resourcesRes, usersRes, contentRes, metricsRes, callbacksRes, alertsRes] = await Promise.all([
         fetch(`${API_URL}/api/counsellors`),
         fetch(`${API_URL}/api/peer-supporters`),
         fetch(`${API_URL}/api/organizations`),
@@ -158,6 +158,12 @@ export default function AdminDashboard() {
         fetch(`${API_URL}/api/call-logs`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
+        fetch(`${API_URL}/api/callbacks`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${API_URL}/api/panic-alerts`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
       ]);
       
       if (counsellorsRes.ok) setCounsellors(await counsellorsRes.json());
@@ -167,6 +173,8 @@ export default function AdminDashboard() {
       if (usersRes.ok) setUsers(await usersRes.json());
       if (contentRes.ok) setContent(await contentRes.json());
       if (metricsRes.ok) setCallMetrics(await metricsRes.json());
+      if (callbacksRes.ok) setCallbacks(await callbacksRes.json());
+      if (alertsRes.ok) setPanicAlerts(await alertsRes.json());
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
