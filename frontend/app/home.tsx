@@ -29,11 +29,13 @@ export default function Index() {
 
         {/* Header with badge */}
         <View style={styles.header}>
-          <Image 
-            source={{ uri: 'https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/vcqj3xma_logo.png' }}
-            style={styles.badgeImage}
-            resizeMode="contain"
-          />
+          <View style={[styles.logoWrapper, { backgroundColor: theme === 'dark' ? colors.surface : 'transparent' }]}>
+            <Image 
+              source={{ uri: 'https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/vcqj3xma_logo.png' }}
+              style={styles.badgeImage}
+              resizeMode="contain"
+            />
+          </View>
           <Text style={styles.headerTitle}>Veterans Support</Text>
           <Text style={styles.taglineEnglish}>Once in service, forever united</Text>
           <Text style={styles.taglineLatin}>Semel Servientes, Semper Uniti</Text>
