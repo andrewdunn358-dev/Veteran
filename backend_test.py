@@ -10,7 +10,7 @@ from datetime import datetime
 import uuid
 
 # Backend URL from frontend environment
-BACKEND_URL = "https://crisis-hub-8.preview.emergentagent.com/api"
+BACKEND_URL = "https://peer-connect-11.preview.emergentagent.com/api"
 
 # Test data
 TEST_EMAILS = [
