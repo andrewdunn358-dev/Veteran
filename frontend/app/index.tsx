@@ -130,17 +130,6 @@ export default function Index() {
             </View>
             <Text style={styles.toolText}>Resources</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.toolButton}
-            onPress={() => router.push('/settings')}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.toolIconBg, { backgroundColor: '#f3e8ff' }]}>
-              <Ionicons name="settings" size={24} color="#9333ea" />
-            </View>
-            <Text style={styles.toolText}>Settings</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Disclaimer */}
