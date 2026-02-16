@@ -774,6 +774,35 @@ export default function AdminDashboard() {
             )
           )}
 
+          {activeTab === 'resources' && (
+            resources.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="library" size={48} color="#7c9cbf" />
+                <Text style={styles.emptyText}>No resources added yet</Text>
+                <Text style={styles.emptySubtext}>Click "Load Defaults" to add starter resources</Text>
+              </View>
+            ) : (
+              resources.map((res) => (
+                <View key={res.id} style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardName}>{res.title}</Text>
+                    <View style={styles.categoryBadge}>
+                      <Text style={styles.categoryText}>{res.category}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.cardDetail} numberOfLines={2}>{res.description}</Text>
+                  {res.link && <Text style={styles.cardDetailSmall}>Link: {res.link}</Text>}
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDelete('resource', res.id)}
+                  >
+                    <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                  </TouchableOpacity>
+                </View>
+              ))
+            )
+          )}
+
           {activeTab === 'users' && (
             users.length === 0 ? (
               <Text style={styles.emptyText}>No users found</Text>
