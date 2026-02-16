@@ -1634,6 +1634,10 @@ function openAddResourceModal() {
                     <option value="Family Support">
                     <option value="Health & Wellbeing">
                     <option value="Legal Advice">
+                    <option value="Crisis Support">
+                    <option value="Wellness">
+                    <option value="Career & Employment">
+                    <option value="Benefits & Support">
                     <option value="General">
                 </datalist>
             </div>
@@ -1646,17 +1650,25 @@ function openAddResourceModal() {
                 <textarea name="description" rows="4" placeholder="Detailed description or advice..."></textarea>
             </div>
             <div class="form-group">
-                <label>Image URL (optional)</label>
+                <label>Upload Image</label>
+                <div class="image-upload-container">
+                    <input type="file" id="resource-image-file" accept="image/*" onchange="previewResourceImage(this)">
+                    <div id="image-preview-container" style="display:none; margin-top:10px; align-items:center;">
+                        <img id="image-preview" style="max-width:200px; max-height:150px; border-radius:8px;">
+                        <button type="button" class="btn btn-small btn-danger" onclick="clearImagePreview()" style="margin-left:10px;">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                </div>
+                <small style="color: var(--text-muted);">Upload an image (JPG, PNG, GIF - max 2MB)</small>
+            </div>
+            <div class="form-group">
+                <label>Or Image URL</label>
                 <input type="url" name="image_url" placeholder="https://example.com/image.jpg">
-                <small style="color: var(--text-muted);">Paste a direct link to an image</small>
             </div>
             <div class="form-group">
                 <label>External Link (optional)</label>
                 <input type="url" name="link" placeholder="https://example.com/resource">
-            </div>
-            <div class="form-group">
-                <label>Order (for sorting)</label>
-                <input type="number" name="order" value="0" min="0">
             </div>
         </form>
         <div class="modal-footer">
@@ -1666,23 +1678,63 @@ function openAddResourceModal() {
     `);
 }
 
+// Image preview and handling functions
+let selectedImageData = null;
+
+function previewResourceImage(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        
+        // Check file size (2MB max)
+        if (file.size > 2 * 1024 * 1024) {
+            showNotification('Image must be less than 2MB', 'error');
+            input.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            selectedImageData = e.target.result;
+            document.getElementById('image-preview').src = selectedImageData;
+            document.getElementById('image-preview-container').style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function clearImagePreview() {
+    selectedImageData = null;
+    const fileInput = document.getElementById('resource-image-file');
+    if (fileInput) fileInput.value = '';
+    const previewContainer = document.getElementById('image-preview-container');
+    if (previewContainer) previewContainer.style.display = 'none';
+}
+
 async function submitAddResource() {
     const form = document.getElementById('add-resource-form');
     const formData = new FormData(form);
     
     try {
+        const resourceData = {
+            category: formData.get('category'),
+            title: formData.get('title'),
+            description: formData.get('description'),
+            link: formData.get('link') || null
+        };
+        
+        // Use uploaded image if available, otherwise use URL
+        if (selectedImageData) {
+            resourceData.image_data = selectedImageData;
+        } else if (formData.get('image_url')) {
+            resourceData.image_url = formData.get('image_url');
+        }
+        
         await apiCall('/resources', {
             method: 'POST',
-            body: JSON.stringify({
-                category: formData.get('category'),
-                title: formData.get('title'),
-                description: formData.get('description'),
-                image_url: formData.get('image_url') || null,
-                link: formData.get('link') || null,
-                order: parseInt(formData.get('order')) || 0
-            })
+            body: JSON.stringify(resourceData)
         });
         
+        selectedImageData = null; // Reset
         showNotification('Resource added successfully');
         closeModal();
         loadAllData();
