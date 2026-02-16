@@ -11,7 +11,7 @@ const API_URL = 'https://veterans-support-api.onrender.com';
 export default function SplashScreen() {
   const router = useRouter();
   const { colors, theme } = useTheme();
-  const [fadeAnim] = useState(new Animated.Value(0));
+  const [isReady, setIsReady] = useState(false);
   const [showCookieNotice, setShowCookieNotice] = useState(false);
   const [showPanicModal, setShowPanicModal] = useState(false);
   const [panicSubmitting, setPanicSubmitting] = useState(false);
@@ -22,13 +22,9 @@ export default function SplashScreen() {
   useEffect(() => {
     // Check if user has accepted cookies
     checkCookieConsent();
-    
-    // Fade in animation - useNativeDriver: false for web compatibility
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 800,
-      useNativeDriver: false,
-    }).start();
+    // Set ready after a brief delay
+    const timer = setTimeout(() => setIsReady(true), 100);
+    return () => clearTimeout(timer);
   }, []);
 
   const checkCookieConsent = async () => {
