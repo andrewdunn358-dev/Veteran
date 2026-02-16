@@ -535,6 +535,135 @@ export default function AdminDashboard() {
     }
   };
 
+  // Admin Status Management
+  const handleUpdateStaffStatus = async (newStatus: string) => {
+    if (!selectedStaff) return;
+    
+    try {
+      const endpoint = selectedStaff.type === 'counsellor' 
+        ? `admin/counsellors/${selectedStaff.id}/status`
+        : `admin/peer-supporters/${selectedStaff.id}/status`;
+      
+      const response = await fetch(`${API_URL}/api/${endpoint}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        showToast(`${selectedStaff.name}'s status updated to ${newStatus}`, 'success');
+        setShowStatusModal(false);
+        setSelectedStaff(null);
+        fetchData();
+      } else {
+        const error = await response.json();
+        showToast(error.detail || 'Failed to update status', 'error');
+      }
+    } catch (error) {
+      showToast('Network error', 'error');
+    }
+  };
+
+  // Callback Management
+  const handleTakeCallback = async (callbackId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/callbacks/${callbackId}/take`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        showToast('Callback assigned to you', 'success');
+        fetchData();
+      } else {
+        const error = await response.json();
+        showToast(error.detail || 'Failed to take callback', 'error');
+      }
+    } catch (error) {
+      showToast('Network error', 'error');
+    }
+  };
+
+  const handleReleaseCallback = async (callbackId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/callbacks/${callbackId}/release`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        showToast('Callback released', 'success');
+        fetchData();
+      } else {
+        const error = await response.json();
+        showToast(error.detail || 'Failed to release callback', 'error');
+      }
+    } catch (error) {
+      showToast('Network error', 'error');
+    }
+  };
+
+  const handleCompleteCallback = async (callbackId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/callbacks/${callbackId}/complete`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        showToast('Callback completed', 'success');
+        fetchData();
+      } else {
+        const error = await response.json();
+        showToast(error.detail || 'Failed to complete callback', 'error');
+      }
+    } catch (error) {
+      showToast('Network error', 'error');
+    }
+  };
+
+  // Panic Alert Management
+  const handleAcknowledgeAlert = async (alertId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/panic-alerts/${alertId}/acknowledge`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        showToast('Alert acknowledged', 'success');
+        fetchData();
+      } else {
+        const error = await response.json();
+        showToast(error.detail || 'Failed to acknowledge alert', 'error');
+      }
+    } catch (error) {
+      showToast('Network error', 'error');
+    }
+  };
+
+  const handleResolveAlert = async (alertId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/panic-alerts/${alertId}/resolve`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        showToast('Alert resolved', 'success');
+        fetchData();
+      } else {
+        const error = await response.json();
+        showToast(error.detail || 'Failed to resolve alert', 'error');
+      }
+    } catch (error) {
+      showToast('Network error', 'error');
+    }
+  };
+
   const handleDelete = async (type: 'counsellor' | 'peer' | 'org' | 'resource' | 'user', id: string) => {
     Alert.alert(
       'Confirm Delete',
