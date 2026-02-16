@@ -767,6 +767,78 @@ async def delete_organization(
         raise HTTPException(status_code=404, detail="Organization not found")
     return {"message": "Organization deleted successfully"}
 
+@api_router.post("/organizations/seed")
+async def seed_organizations(current_user: User = Depends(require_role("admin"))):
+    """Seed default UK veteran support organizations (admin only)"""
+    default_organizations = [
+        {
+            "name": "Combat Stress",
+            "description": "Leading charity for veterans mental health. Offers support for trauma, anxiety, depression and more.",
+            "phone": "0800 138 1619",
+            "sms": None,
+            "whatsapp": None,
+        },
+        {
+            "name": "Samaritans",
+            "description": "Free 24/7 listening service for anyone who needs to talk. Confidential and non-judgmental support.",
+            "phone": "116 123",
+            "sms": None,
+            "whatsapp": None,
+        },
+        {
+            "name": "Veterans UK",
+            "description": "Government support service offering advice on benefits, compensation, and welfare for veterans.",
+            "phone": "0808 1914 218",
+            "sms": None,
+            "whatsapp": None,
+        },
+        {
+            "name": "CALM",
+            "description": "Campaign Against Living Miserably. Support for men experiencing difficult times, including veterans.",
+            "phone": "0800 58 58 58",
+            "sms": None,
+            "whatsapp": None,
+        },
+        {
+            "name": "SSAFA",
+            "description": "Lifelong support for serving personnel, veterans, and their families. Practical and emotional support.",
+            "phone": "0800 731 4880",
+            "sms": None,
+            "whatsapp": None,
+        },
+        {
+            "name": "Help for Heroes",
+            "description": "Recovery and support for wounded, injured and sick veterans. Physical and mental health services.",
+            "phone": "0800 058 2121",
+            "sms": None,
+            "whatsapp": None,
+        },
+        {
+            "name": "Royal British Legion",
+            "description": "Welfare support, guidance and advice for serving and ex-serving personnel and their families.",
+            "phone": "0808 802 8080",
+            "sms": None,
+            "whatsapp": None,
+        },
+        {
+            "name": "NHS Urgent Mental Health Helpline",
+            "description": "Call 111 and select option 2 for urgent mental health support 24/7.",
+            "phone": "111",
+            "sms": None,
+            "whatsapp": None,
+        },
+    ]
+    
+    added_count = 0
+    for org_data in default_organizations:
+        existing = await db.organizations.find_one({"name": org_data["name"]})
+        if not existing:
+            org_obj = Organization(**org_data)
+            await db.organizations.insert_one(org_obj.dict())
+            added_count += 1
+    
+    return {"message": f"Organizations seeded successfully. Added {added_count} new organizations."}
+
 # ============ PEER SUPPORT REGISTRATION (from app) ============
 
 @api_router.post("/peer-support/register", response_model=PeerSupportRegistration)
