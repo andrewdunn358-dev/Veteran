@@ -1654,6 +1654,83 @@ export default function AdminDashboard() {
           </View>
         </View>
       </Modal>
+
+      {/* Staff Status Change Modal */}
+      <Modal visible={showStatusModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Change Status</Text>
+              <TouchableOpacity onPress={() => { setShowStatusModal(false); setSelectedStaff(null); }}>
+                <Ionicons name="close" size={24} color="#ffffff" />
+              </TouchableOpacity>
+            </View>
+
+            {selectedStaff && (
+              <>
+                <Text style={styles.resetUserInfo}>
+                  Updating status for: {selectedStaff.name}
+                </Text>
+                <Text style={styles.cardDetailSmall}>
+                  Current status: {selectedStaff.currentStatus}
+                </Text>
+
+                <View style={styles.statusOptions}>
+                  {selectedStaff.type === 'counsellor' ? (
+                    <>
+                      <TouchableOpacity 
+                        style={[styles.statusOptionButton, { backgroundColor: '#22c55e' }]}
+                        onPress={() => handleUpdateStaffStatus('available')}
+                      >
+                        <Ionicons name="checkmark-circle" size={24} color="#ffffff" />
+                        <Text style={styles.statusOptionText}>Available</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={[styles.statusOptionButton, { backgroundColor: '#f59e0b' }]}
+                        onPress={() => handleUpdateStaffStatus('busy')}
+                      >
+                        <Ionicons name="time" size={24} color="#ffffff" />
+                        <Text style={styles.statusOptionText}>Busy</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={[styles.statusOptionButton, { backgroundColor: '#ef4444' }]}
+                        onPress={() => handleUpdateStaffStatus('off')}
+                      >
+                        <Ionicons name="moon" size={24} color="#ffffff" />
+                        <Text style={styles.statusOptionText}>Off Duty</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <>
+                      <TouchableOpacity 
+                        style={[styles.statusOptionButton, { backgroundColor: '#22c55e' }]}
+                        onPress={() => handleUpdateStaffStatus('available')}
+                      >
+                        <Ionicons name="checkmark-circle" size={24} color="#ffffff" />
+                        <Text style={styles.statusOptionText}>Available</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={[styles.statusOptionButton, { backgroundColor: '#f59e0b' }]}
+                        onPress={() => handleUpdateStaffStatus('limited')}
+                      >
+                        <Ionicons name="time" size={24} color="#ffffff" />
+                        <Text style={styles.statusOptionText}>Limited</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={[styles.statusOptionButton, { backgroundColor: '#ef4444' }]}
+                        onPress={() => handleUpdateStaffStatus('unavailable')}
+                      >
+                        <Ionicons name="close-circle" size={24} color="#ffffff" />
+                        <Text style={styles.statusOptionText}>Unavailable</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
