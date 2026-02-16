@@ -194,6 +194,10 @@ const createStyles = (colors: any) => StyleSheet.create({
   badgeImage: {
     width: 120,
     height: 120,
+  },
+  logoWrapper: {
+    borderRadius: 60,
+    padding: 8,
     marginBottom: 16,
   },
   badgeContainer: {
