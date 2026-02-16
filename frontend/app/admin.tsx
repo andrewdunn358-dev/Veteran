@@ -74,6 +74,10 @@ export default function AdminDashboard() {
     area: '',
     background: '',
     yearsServed: '',
+    // User account fields
+    createAccount: false,
+    email: '',
+    password: '',
   });
 
   const [userFormData, setUserFormData] = useState({
