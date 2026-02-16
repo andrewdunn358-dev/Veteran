@@ -669,6 +669,35 @@ export default function AdminDashboard() {
             )
           )}
 
+          {activeTab === 'orgs' && (
+            organizations.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="business" size={48} color="#7c9cbf" />
+                <Text style={styles.emptyText}>No organizations added yet</Text>
+                <Text style={styles.emptySubtext}>Click "Load UK Veteran Resources" to add default organizations</Text>
+              </View>
+            ) : (
+              organizations.map((org) => (
+                <View key={org.id} style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardName}>{org.name}</Text>
+                    <Ionicons name="shield-checkmark" size={20} color="#7c9cbf" />
+                  </View>
+                  <Text style={styles.cardDetail} numberOfLines={2}>{org.description}</Text>
+                  <Text style={styles.cardDetail}>{org.phone}</Text>
+                  {org.sms && <Text style={styles.cardDetailSmall}>SMS: {org.sms}</Text>}
+                  {org.whatsapp && <Text style={styles.cardDetailSmall}>WhatsApp: {org.whatsapp}</Text>}
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDelete('org', org.id)}
+                  >
+                    <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                  </TouchableOpacity>
+                </View>
+              ))
+            )
+          )}
+
           {activeTab === 'users' && (
             users.length === 0 ? (
               <Text style={styles.emptyText}>No users found</Text>
