@@ -1630,7 +1630,7 @@ async function loadSettings() {
             logoImg.src = siteSettings.logo_url;
         } else if (logoImg) {
             // Default logo
-            logoImg.src = 'https://static.prod-images.emergentagent.com/jobs/22c2fac2-c7ea-4255-b9fb-379a93a49652/images/b2952f18c7d26f1e02afc6a0e07efe1ee43cd00af073f456000dce29b154ce3a.png';
+            logoImg.src = 'https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/vcqj3xma_logo.png';
         }
     } catch (error) {
         console.error('Error loading settings:', error);
