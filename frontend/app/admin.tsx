@@ -342,10 +342,10 @@ export default function AdminDashboard() {
         setResetPassword('');
       } else {
         const error = await response.json();
-        Alert.alert('Error', error.detail || 'Failed to reset password');
+        showToast(error.detail || 'Failed to reset password', 'error');
       }
     } catch (error) {
-      Alert.alert('Error', 'Network error');
+      showToast('Network error', 'error');
     }
   };
 
@@ -364,15 +364,15 @@ export default function AdminDashboard() {
       );
 
       if (response.ok) {
-        Alert.alert('Success', 'Content updated successfully');
+        showToast('Content updated successfully', 'success');
         setShowContentModal(false);
         fetchData();
       } else {
         const error = await response.json();
-        Alert.alert('Error', error.detail || 'Failed to update content');
+        showToast(error.detail || 'Failed to update content', 'error');
       }
     } catch (error) {
-      Alert.alert('Error', 'Network error');
+      showToast('Network error', 'error');
     }
   };
 
@@ -384,11 +384,11 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        Alert.alert('Success', 'Default content created');
+        showToast('Default content created', 'success');
         fetchData();
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to seed content');
+      showToast('Failed to seed content', 'error');
     }
   };
 
