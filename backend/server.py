@@ -1014,6 +1014,34 @@ async def seed_resources(current_user: User = Depends(require_role("admin"))):
     
     return {"message": f"Resources seeded successfully. Added {added_count} new resources."}
 
+# ============ SITE SETTINGS ============
+
+class SiteSettings(BaseModel):
+    logo_url: Optional[str] = None
+    site_name: Optional[str] = "Veterans Support"
+
+@api_router.get("/settings")
+async def get_settings():
+    """Get site settings (public)"""
+    settings = await db.settings.find_one({"_id": "site_settings"}, {"_id": 0})
+    return settings or {"logo_url": None, "site_name": "Veterans Support"}
+
+@api_router.put("/settings")
+async def update_settings(
+    settings: SiteSettings,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Update site settings (admin only)"""
+    update_data = {k: v for k, v in settings.dict().items() if v is not None}
+    
+    await db.settings.update_one(
+        {"_id": "site_settings"},
+        {"$set": update_data},
+        upsert=True
+    )
+    
+    return {"message": "Settings updated successfully"}
+
 # ============ PEER SUPPORT REGISTRATION (from app) ============
 
 @api_router.post("/peer-support/register", response_model=PeerSupportRegistration)
