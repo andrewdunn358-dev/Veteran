@@ -416,17 +416,13 @@ export default function AdminDashboard() {
         </View>
       </ScrollView>
 
-      {activeTab !== 'content' && activeTab !== 'users' && (
+      {activeTab !== 'content' && (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
             <Ionicons name="add" size={20} color="#ffffff" />
             <Text style={styles.addButtonText}>
-              Add {activeTab === 'counsellors' ? 'Counsellor' : 'Peer'}
+              Add New {activeTab === 'counsellors' ? 'Counsellor' : activeTab === 'peers' ? 'Peer Supporter' : 'User'}
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.userButton} onPress={() => setShowUserModal(true)}>
-            <Ionicons name="person-add" size={20} color="#ffffff" />
-            <Text style={styles.addButtonText}>Create Login</Text>
           </TouchableOpacity>
         </View>
       )}
