@@ -128,6 +128,33 @@ export default function AdminDashboard() {
 
   const handleAddCounsellor = async () => {
     try {
+      // First create user account if requested
+      let userId = null;
+      if (formData.createAccount && formData.email && formData.password) {
+        const userResponse = await fetch(`${API_URL}/api/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            name: formData.name,
+            role: 'counsellor',
+          }),
+        });
+
+        if (!userResponse.ok) {
+          const error = await userResponse.json();
+          Alert.alert('Error', error.detail || 'Failed to create user account');
+          return;
+        }
+        const userData = await userResponse.json();
+        userId = userData.id;
+      }
+
+      // Then create counsellor profile
       const response = await fetch(`${API_URL}/api/counsellors`, {
         method: 'POST',
         headers: {
@@ -140,11 +167,14 @@ export default function AdminDashboard() {
           phone: formData.phone,
           sms: formData.sms || null,
           whatsapp: formData.whatsapp || null,
+          user_id: userId,
         }),
       });
 
       if (response.ok) {
-        Alert.alert('Success', 'Counsellor added successfully');
+        Alert.alert('Success', formData.createAccount 
+          ? 'Counsellor added with login account' 
+          : 'Counsellor added successfully');
         setShowAddModal(false);
         resetForm();
         fetchData();
