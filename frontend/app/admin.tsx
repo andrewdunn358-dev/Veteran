@@ -67,7 +67,7 @@ interface Resource {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'orgs' | 'resources' | 'users' | 'content' | 'metrics'>('counsellors');
+  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'orgs' | 'resources' | 'users' | 'content' | 'metrics' | 'callbacks' | 'alerts'>('counsellors');
   const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
   const [peers, setPeers] = useState<PeerSupporter[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -75,12 +75,16 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [content, setContent] = useState<Record<string, Record<string, string>>>({});
   const [callMetrics, setCallMetrics] = useState<any>(null);
+  const [callbacks, setCallbacks] = useState<any[]>([]);
+  const [panicAlerts, setPanicAlerts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showContentModal, setShowContentModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<{ type: 'counsellor' | 'peer'; id: string; name: string; currentStatus: string } | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editingContent, setEditingContent] = useState({ page: '', section: '', value: '' });
   const { user, token, logout } = useAuth();
