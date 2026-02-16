@@ -209,6 +209,50 @@ class ResourceCreate(BaseModel):
     image_url: Optional[str] = None
     image_data: Optional[str] = None  # Base64 encoded image
 
+# Callback Request Models
+class CallbackRequestCreate(BaseModel):
+    name: str
+    phone: str
+    email: Optional[str] = None
+    message: str
+    request_type: str = Field(..., pattern="^(counsellor|peer)$")  # counsellor or peer
+
+class CallbackRequest(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    phone: str
+    email: Optional[str] = None
+    message: str
+    request_type: str  # counsellor or peer
+    status: str = "pending"  # pending, in_progress, completed, released
+    assigned_to: Optional[str] = None  # ID of counsellor/peer who took control
+    assigned_name: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CallbackStatusUpdate(BaseModel):
+    status: str = Field(..., pattern="^(pending|in_progress|completed|released)$")
+
+# Panic Alert Models
+class PanicAlertCreate(BaseModel):
+    user_name: Optional[str] = None
+    user_phone: Optional[str] = None
+    location: Optional[str] = None
+    message: Optional[str] = None
+
+class PanicAlert(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_name: Optional[str] = None
+    user_phone: Optional[str] = None
+    location: Optional[str] = None
+    message: Optional[str] = None
+    status: str = "active"  # active, acknowledged, resolved
+    acknowledged_by: Optional[str] = None
+    acknowledged_at: Optional[datetime] = None
+    resolved_by: Optional[str] = None
+    resolved_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
 class Resource(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
