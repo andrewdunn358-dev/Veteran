@@ -841,3 +841,48 @@ logger = logging.getLogger(__name__)
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+# ============ IMAGE UPLOAD ENDPOINTS ============
+import base64
+import os
+
+UPLOAD_DIR = "/tmp/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+class ImageUpload(BaseModel):
+    filename: str
+    data: str  # Base64 encoded image
+
+@api_router.post("/upload/image")
+async def upload_image(
+    image: ImageUpload,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Upload an image (admin only)"""
+    try:
+        # Decode base64 data
+        image_data = base64.b64decode(image.data.split(",")[-1] if "," in image.data else image.data)
+        
+        # Generate unique filename
+        import uuid
+        ext = os.path.splitext(image.filename)[1] or ".png"
+        unique_filename = f"{uuid.uuid4().hex}{ext}"
+        filepath = os.path.join(UPLOAD_DIR, unique_filename)
+        
+        # Save file
+        with open(filepath, "wb") as f:
+            f.write(image_data)
+        
+        # Return URL (in production, this would be a CDN URL)
+        return {"url": f"/api/uploads/{unique_filename}", "filename": unique_filename}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload image: {str(e)}")
+
+@api_router.get("/uploads/{filename}")
+async def get_uploaded_image(filename: str):
+    """Serve uploaded image"""
+    from fastapi.responses import FileResponse
+    filepath = os.path.join(UPLOAD_DIR, filename)
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="Image not found")
+    return FileResponse(filepath)
