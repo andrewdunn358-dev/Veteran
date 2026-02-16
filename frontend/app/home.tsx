@@ -30,7 +30,7 @@ export default function Index() {
         {/* Header with badge */}
         <View style={styles.header}>
           <Image 
-            source={require('../assets/images/veteran-badge.png')}
+            source={{ uri: 'https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/vcqj3xma_logo.png' }}
             style={styles.badgeImage}
             resizeMode="contain"
           />
