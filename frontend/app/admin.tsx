@@ -184,18 +184,18 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        Alert.alert('Success', formData.createAccount 
+        showToast(formData.createAccount 
           ? 'Counsellor added with login account' 
-          : 'Counsellor added successfully');
+          : 'Counsellor added successfully', 'success');
         setShowAddModal(false);
         resetForm();
         fetchData();
       } else {
         const error = await response.json();
-        Alert.alert('Error', error.detail || 'Failed to add counsellor');
+        showToast(error.detail || 'Failed to add counsellor', 'error');
       }
     } catch (error) {
-      Alert.alert('Error', 'Network error');
+      showToast('Network error', 'error');
     }
   };
 
