@@ -1086,6 +1086,447 @@ async def update_settings(
     
     return {"message": "Settings updated successfully"}
 
+# ============ CALLBACK REQUEST ENDPOINTS ============
+
+async def send_callback_confirmation_email(email: str, name: str, request_type: str):
+    """Send confirmation email to user who requested callback"""
+    if not RESEND_API_KEY:
+        logging.warning("Resend API key not configured, skipping email")
+        return False
+    
+    try:
+        type_label = "Counsellor" if request_type == "counsellor" else "Peer Supporter"
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #1a2332;">Callback Request Received</h2>
+            <p>Dear {name},</p>
+            <p>Thank you for reaching out. We have received your callback request for a <strong>{type_label}</strong>.</p>
+            <p>One of our team members will contact you as soon as possible. If you're in immediate crisis, please call:</p>
+            <ul>
+                <li><strong>Samaritans:</strong> 116 123 (24/7, free)</li>
+                <li><strong>Combat Stress:</strong> 0800 138 1619</li>
+                <li><strong>Emergency:</strong> 999</li>
+            </ul>
+            <p>You matter, and help is on the way.</p>
+            <br>
+            <p style="color: #1a2332;">Veterans Support Team</p>
+        </body>
+        </html>
+        """
+        
+        params = {
+            "from": SENDER_EMAIL,
+            "to": [email],
+            "subject": f"Callback Request Received - Veterans Support",
+            "html": html_content
+        }
+        
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        logging.info(f"Callback confirmation email sent to {email}, ID: {result.get('id')}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to send callback confirmation email: {str(e)}")
+        return False
+
+async def send_callback_notification_to_staff(callback: dict, staff_type: str):
+    """Send notification to relevant staff about new callback request"""
+    if not RESEND_API_KEY:
+        logging.warning("Resend API key not configured, skipping staff notification")
+        return False
+    
+    try:
+        # Get all staff of the relevant type
+        if staff_type == "counsellor":
+            staff_users = await db.users.find({"role": "counsellor"}).to_list(100)
+        else:
+            staff_users = await db.users.find({"role": "peer"}).to_list(100)
+        
+        if not staff_users:
+            logging.warning(f"No {staff_type} users found to notify")
+            return False
+        
+        staff_emails = [u["email"] for u in staff_users]
+        type_label = "Counsellor" if staff_type == "counsellor" else "Peer Supporter"
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #cc0000;">New Callback Request</h2>
+            <p>A veteran has requested a callback from a <strong>{type_label}</strong>.</p>
+            <div style="background-color: #f5f5f5; padding: 16px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Name:</strong> {callback['name']}</p>
+                <p><strong>Phone:</strong> {callback['phone']}</p>
+                <p><strong>Email:</strong> {callback.get('email', 'Not provided')}</p>
+                <p><strong>Message:</strong> {callback['message']}</p>
+                <p><strong>Time:</strong> {callback['created_at'].strftime('%Y-%m-%d %H:%M')}</p>
+            </div>
+            <p>Please log into the portal to take control of this request.</p>
+            <br>
+            <p style="color: #1a2332;">Veterans Support System</p>
+        </body>
+        </html>
+        """
+        
+        params = {
+            "from": SENDER_EMAIL,
+            "to": staff_emails,
+            "subject": f"[ACTION REQUIRED] New Callback Request - Veterans Support",
+            "html": html_content
+        }
+        
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        logging.info(f"Callback notification sent to {len(staff_emails)} {staff_type}(s), ID: {result.get('id')}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to send staff notification: {str(e)}")
+        return False
+
+@api_router.post("/callbacks")
+async def create_callback_request(callback_input: CallbackRequestCreate):
+    """Create a new callback request (public)"""
+    try:
+        callback = CallbackRequest(**callback_input.dict())
+        await db.callback_requests.insert_one(callback.dict())
+        
+        # Send confirmation email if email provided
+        if callback_input.email:
+            await send_callback_confirmation_email(
+                callback_input.email, 
+                callback_input.name, 
+                callback_input.request_type
+            )
+        
+        # Notify relevant staff
+        await send_callback_notification_to_staff(callback.dict(), callback_input.request_type)
+        
+        logging.info(f"Callback request created: {callback.id} - {callback_input.request_type}")
+        return {"message": "Callback request submitted successfully", "id": callback.id}
+    except Exception as e:
+        logging.error(f"Error creating callback request: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to submit callback request")
+
+@api_router.get("/callbacks")
+async def get_callback_requests(
+    current_user: User = Depends(get_current_user),
+    status: Optional[str] = None,
+    request_type: Optional[str] = None
+):
+    """Get callback requests (staff only, filtered by their role)"""
+    try:
+        query = {}
+        
+        # Filter by type based on user role (unless admin)
+        if current_user.role == "counsellor":
+            query["request_type"] = "counsellor"
+        elif current_user.role == "peer":
+            query["request_type"] = "peer"
+        # Admin sees all
+        
+        if status:
+            query["status"] = status
+        if request_type and current_user.role == "admin":
+            query["request_type"] = request_type
+        
+        callbacks = await db.callback_requests.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+        return callbacks
+    except Exception as e:
+        logging.error(f"Error fetching callback requests: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch callback requests")
+
+@api_router.patch("/callbacks/{callback_id}/take")
+async def take_callback_control(
+    callback_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Take control of a callback request"""
+    try:
+        callback = await db.callback_requests.find_one({"id": callback_id})
+        if not callback:
+            raise HTTPException(status_code=404, detail="Callback request not found")
+        
+        # Check if already assigned
+        if callback.get("status") == "in_progress":
+            raise HTTPException(status_code=400, detail="This callback is already being handled")
+        
+        # Check user has right role for this callback type
+        if current_user.role != "admin":
+            if callback["request_type"] == "counsellor" and current_user.role != "counsellor":
+                raise HTTPException(status_code=403, detail="Only counsellors can handle counsellor callbacks")
+            if callback["request_type"] == "peer" and current_user.role != "peer":
+                raise HTTPException(status_code=403, detail="Only peers can handle peer callbacks")
+        
+        await db.callback_requests.update_one(
+            {"id": callback_id},
+            {"$set": {
+                "status": "in_progress",
+                "assigned_to": current_user.id,
+                "assigned_name": current_user.name,
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
+        return {"message": f"Callback assigned to {current_user.name}"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error taking callback control: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to take control")
+
+@api_router.patch("/callbacks/{callback_id}/release")
+async def release_callback(
+    callback_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Release a callback request back to pool"""
+    try:
+        callback = await db.callback_requests.find_one({"id": callback_id})
+        if not callback:
+            raise HTTPException(status_code=404, detail="Callback request not found")
+        
+        # Only assigned user or admin can release
+        if current_user.role != "admin" and callback.get("assigned_to") != current_user.id:
+            raise HTTPException(status_code=403, detail="You can only release callbacks assigned to you")
+        
+        await db.callback_requests.update_one(
+            {"id": callback_id},
+            {"$set": {
+                "status": "pending",
+                "assigned_to": None,
+                "assigned_name": None,
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
+        return {"message": "Callback released back to pool"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error releasing callback: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to release callback")
+
+@api_router.patch("/callbacks/{callback_id}/complete")
+async def complete_callback(
+    callback_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Mark a callback as completed"""
+    try:
+        callback = await db.callback_requests.find_one({"id": callback_id})
+        if not callback:
+            raise HTTPException(status_code=404, detail="Callback request not found")
+        
+        # Only assigned user or admin can complete
+        if current_user.role != "admin" and callback.get("assigned_to") != current_user.id:
+            raise HTTPException(status_code=403, detail="You can only complete callbacks assigned to you")
+        
+        await db.callback_requests.update_one(
+            {"id": callback_id},
+            {"$set": {
+                "status": "completed",
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
+        return {"message": "Callback marked as completed"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error completing callback: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to complete callback")
+
+# ============ PANIC ALERT ENDPOINTS ============
+
+async def send_panic_alert_to_counsellors(alert: dict):
+    """Send urgent notification to all counsellors about panic alert"""
+    if not RESEND_API_KEY:
+        logging.warning("Resend API key not configured, skipping panic alert email")
+        return False
+    
+    try:
+        # Get all counsellors AND admins for urgent alerts
+        staff_users = await db.users.find({"role": {"$in": ["counsellor", "admin"]}}).to_list(100)
+        
+        if not staff_users:
+            logging.error("No counsellors or admins found to notify about panic alert!")
+            return False
+        
+        staff_emails = [u["email"] for u in staff_users]
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff5f5;">
+            <h2 style="color: #cc0000;">🚨 URGENT: Panic Alert Triggered</h2>
+            <p style="font-size: 18px; color: #cc0000;">A veteran has pressed the panic button and needs immediate assistance.</p>
+            <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #cc0000;">
+                <p><strong>Name:</strong> {alert.get('user_name', 'Anonymous')}</p>
+                <p><strong>Phone:</strong> {alert.get('user_phone', 'Not provided')}</p>
+                <p><strong>Location:</strong> {alert.get('location', 'Not provided')}</p>
+                <p><strong>Message:</strong> {alert.get('message', 'No message')}</p>
+                <p><strong>Time:</strong> {alert['created_at'].strftime('%Y-%m-%d %H:%M:%S')}</p>
+            </div>
+            <p style="font-size: 16px;"><strong>Please take immediate action.</strong></p>
+            <p>Log into the portal to acknowledge this alert.</p>
+            <br>
+            <p style="color: #1a2332;">Veterans Support Emergency System</p>
+        </body>
+        </html>
+        """
+        
+        params = {
+            "from": SENDER_EMAIL,
+            "to": staff_emails,
+            "subject": f"🚨 URGENT: Panic Alert - Immediate Assistance Required",
+            "html": html_content
+        }
+        
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        logging.info(f"Panic alert sent to {len(staff_emails)} counsellors/admins, ID: {result.get('id')}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to send panic alert email: {str(e)}")
+        return False
+
+@api_router.post("/panic-alert")
+async def create_panic_alert(alert_input: PanicAlertCreate):
+    """Create a panic alert (public - for users in crisis)"""
+    try:
+        alert = PanicAlert(**alert_input.dict())
+        await db.panic_alerts.insert_one(alert.dict())
+        
+        # Send urgent notification to counsellors
+        await send_panic_alert_to_counsellors(alert.dict())
+        
+        logging.warning(f"PANIC ALERT CREATED: {alert.id}")
+        
+        return {
+            "message": "Alert sent. Help is on the way. If you're in immediate danger, call 999.",
+            "id": alert.id,
+            "crisis_numbers": {
+                "emergency": "999",
+                "samaritans": "116 123",
+                "combat_stress": "0800 138 1619"
+            }
+        }
+    except Exception as e:
+        logging.error(f"Error creating panic alert: {str(e)}")
+        raise HTTPException(status_code=500, detail="Alert system error. Please call 999 or 116 123.")
+
+@api_router.get("/panic-alerts")
+async def get_panic_alerts(
+    current_user: User = Depends(get_current_user),
+    status: Optional[str] = None
+):
+    """Get panic alerts (counsellors and admins only)"""
+    if current_user.role not in ["admin", "counsellor"]:
+        raise HTTPException(status_code=403, detail="Only counsellors and admins can view panic alerts")
+    
+    try:
+        query = {}
+        if status:
+            query["status"] = status
+        
+        alerts = await db.panic_alerts.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+        return alerts
+    except Exception as e:
+        logging.error(f"Error fetching panic alerts: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch panic alerts")
+
+@api_router.patch("/panic-alerts/{alert_id}/acknowledge")
+async def acknowledge_panic_alert(
+    alert_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Acknowledge a panic alert"""
+    if current_user.role not in ["admin", "counsellor"]:
+        raise HTTPException(status_code=403, detail="Only counsellors and admins can acknowledge alerts")
+    
+    try:
+        alert = await db.panic_alerts.find_one({"id": alert_id})
+        if not alert:
+            raise HTTPException(status_code=404, detail="Alert not found")
+        
+        await db.panic_alerts.update_one(
+            {"id": alert_id},
+            {"$set": {
+                "status": "acknowledged",
+                "acknowledged_by": current_user.name,
+                "acknowledged_at": datetime.utcnow()
+            }}
+        )
+        
+        return {"message": f"Alert acknowledged by {current_user.name}"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error acknowledging alert: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to acknowledge alert")
+
+@api_router.patch("/panic-alerts/{alert_id}/resolve")
+async def resolve_panic_alert(
+    alert_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Resolve a panic alert"""
+    if current_user.role not in ["admin", "counsellor"]:
+        raise HTTPException(status_code=403, detail="Only counsellors and admins can resolve alerts")
+    
+    try:
+        await db.panic_alerts.update_one(
+            {"id": alert_id},
+            {"$set": {
+                "status": "resolved",
+                "resolved_by": current_user.name,
+                "resolved_at": datetime.utcnow()
+            }}
+        )
+        
+        return {"message": f"Alert resolved by {current_user.name}"}
+    except Exception as e:
+        logging.error(f"Error resolving alert: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to resolve alert")
+
+# ============ ADMIN STATUS MANAGEMENT ============
+
+@api_router.patch("/admin/counsellors/{counsellor_id}/status")
+async def admin_update_counsellor_status(
+    counsellor_id: str,
+    status_update: CounsellorStatusUpdate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Admin can update any counsellor's status"""
+    counsellor = await db.counsellors.find_one({"id": counsellor_id})
+    if not counsellor:
+        raise HTTPException(status_code=404, detail="Counsellor not found")
+    
+    await db.counsellors.update_one(
+        {"id": counsellor_id},
+        {"$set": status_update.dict(exclude_unset=True)}
+    )
+    
+    updated = await db.counsellors.find_one({"id": counsellor_id}, {"_id": 0})
+    return updated
+
+@api_router.patch("/admin/peer-supporters/{peer_id}/status")
+async def admin_update_peer_status(
+    peer_id: str,
+    status_update: PeerSupporterStatusUpdate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Admin can update any peer supporter's status"""
+    peer = await db.peer_supporters.find_one({"id": peer_id})
+    if not peer:
+        raise HTTPException(status_code=404, detail="Peer supporter not found")
+    
+    await db.peer_supporters.update_one(
+        {"id": peer_id},
+        {"$set": status_update.dict(exclude_unset=True)}
+    )
+    
+    updated = await db.peer_supporters.find_one({"id": peer_id}, {"_id": 0})
+    return updated
+
 # ============ PEER SUPPORT REGISTRATION (from app) ============
 
 @api_router.post("/peer-support/register", response_model=PeerSupportRegistration)
