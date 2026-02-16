@@ -311,4 +311,50 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flex: 1,
   },
+  loadingContainer: {
+    alignItems: 'center',
+    padding: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#b0c4de',
+  },
+  errorContainer: {
+    alignItems: 'center',
+    padding: 40,
+    gap: 12,
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#ef4444',
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#4a90e2',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    padding: 40,
+    gap: 12,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#ffffff',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#b0c4de',
+    textAlign: 'center',
+  },
 });
