@@ -75,15 +75,38 @@ export default function CrisisSupport() {
     },
   ];
 
-  const handleCall = (number: string) => {
+  // Log call intent to backend
+  const logCallIntent = async (contactType: string, contactId: string | null, contactName: string, contactPhone: string, callMethod: string) => {
+    try {
+      await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/call-logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contact_type: contactType,
+          contact_id: contactId,
+          contact_name: contactName,
+          contact_phone: contactPhone,
+          call_method: callMethod,
+        }),
+      });
+    } catch (err) {
+      // Silent fail - don't block the user from making the call
+      console.log('Failed to log call intent:', err);
+    }
+  };
+
+  const handleCall = (number: string, contactName: string = 'Unknown', contactType: string = 'crisis_line', contactId: string | null = null) => {
+    logCallIntent(contactType, contactId, contactName, number, 'phone');
     Linking.openURL(`tel:${number}`);
   };
 
-  const handleSMS = (number: string) => {
+  const handleSMS = (number: string, contactName: string = 'Unknown', contactType: string = 'crisis_line', contactId: string | null = null) => {
+    logCallIntent(contactType, contactId, contactName, number, 'sms');
     Linking.openURL(`sms:${number}`);
   };
 
-  const handleWhatsApp = (number: string) => {
+  const handleWhatsApp = (number: string, contactName: string = 'Unknown', contactType: string = 'crisis_line', contactId: string | null = null) => {
+    logCallIntent(contactType, contactId, contactName, number, 'whatsapp');
     const formattedNumber = number.replace(/\s/g, '');
     const whatsappUrl = `https://wa.me/${formattedNumber}`;
     Linking.openURL(whatsappUrl);
