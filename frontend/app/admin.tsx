@@ -1494,6 +1494,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'capitalize',
   },
+  categoryBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#22c55e',
+  },
+  categoryText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
   cardDetail: {
     color: '#8899a6',
     marginBottom: 4,
