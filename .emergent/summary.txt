@@ -1,243 +1,160 @@
-<analysis>**original_problem_statement**: The user's goal is to build a mobile-first web application for UK military veterans. The initial phase involved building the app, deploying it, and creating an admin portal with a CMS and password management. The current session focused on connecting the frontend to live backend data, adding several new user-facing features, and addressing a series of bugs and enhancement requests from the user, including a major refactor of the admin panel.
+<analysis>**original_problem_statement**: The user's goal is to build and enhance a mobile-first web application for UK military veterans. This session was highly reactive, focusing on fixing a cascade of user-reported issues related to deployment, configuration, and missing features across three separate application components: a React Native app on Vercel, a FastAPI backend on Render, and a static admin website on 20i hosting.
 
 **PRODUCT REQUIREMENTS**:
-1.  **Connect Frontend to API**: Replace mock data on the Counsellors and Peer Supporters pages with live data from the backend.
-2.  **Add Phase 1 Features**:
-    *   **Crisis Journal**: A private, on-device journal for users.
-    *   **Daily Check-in**: A mood tracker, with data stored locally.
-    *   **Favorites**: Allow users to save preferred counsellors/peers.
-    *   **Dark/Light Mode**: A theme toggle for the app.
-    *   **Callback Request**: A feature for users to request a callback when counsellors are busy.
-3.  **Fix Vercel Deployment**: Resolve build errors and user configuration issues.
-4.  **Improve Desktop View**: Constrain the web app's width to look like a mobile phone on desktop screens.
-5.  **Refactor Admin Panel**:
-    *   Simplify staff creation by combining the creation of a staff profile (Counsellor/Peer) with their user login account into a single form.
-    *   Fix the CMS, which is not loading content correctly.
-    *   Debug the Forgot Password email functionality.
-6.  **Implement Image Uploads**: Allow admins to upload images directly for CMS content, rather than linking to URLs.
-7.  **Update Logo**: Replace the existing logo and add a favicon.
+1.  **Fix Content Management**: Enable admins to manage UK Veteran Resources and Organizations, which were previously hardcoded.
+2.  **Fix Deployments**: Resolve build/runtime failures on both Vercel (frontend app) and Render (backend).
+3.  **Fix Login Issues**: Resolve login failures on both the Vercel app and the 20i-hosted admin site, caused by incorrect backend URLs.
+4.  **Implement Image Uploads**: Add the ability for admins to upload images for Resources instead of using URLs.
+5.  **Restore App UI**: Re-add a Resources section to the main app, create a splash screen, and fix theme/styling issues.
+6.  **Enhance Admin Panel**: Add features to the admin panel for logo uploads and dynamic category management.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The project is a full-stack application with a React Native (Expo) frontend deployed on Vercel and a FastAPI backend deployed on Render.
--   **Backend**: Contains all APIs for authentication, user/staff management, CMS, and password resets. A fix was implemented to handle different SSL requirements for local vs. production MongoDB connections.
--   **Frontend**:
-    -   The public-facing pages for Counsellors and Peers are now connected to the backend and display live data.
-    -   New features have been added: a Crisis Journal (), a Mood Tracker (), and a Settings page () with a Dark/Light mode toggle. These features store data locally on the user's device using .
-    -   The layout has been updated to be constrained to a 480px width on desktop, simulating a mobile view.
-    -   A new logo and favicon have been implemented.
-    -   A major refactor of the admin panel () is underway to streamline user creation.
+The project consists of three distinct parts:
+1.  **Backend (FastAPI on Render)**: Fully functional with APIs for auth, users, content, and now includes new endpoints for managing Resources (with base64 image uploads), Settings (logo, categories), and seeding data. It connects to the production MongoDB.
+2.  **Frontend App (React Native/Expo on Vercel)**: The main mobile-first application. It now features a new splash screen entry point with an immediate help option, a GDPR cookie banner, and a restored Resources section. To resolve persistent login issues, **all backend API calls have been hardcoded to the production Render URL**. The theme is now defaulted to light mode.
+3.  **Admin Site (Static HTML/JS/CSS on 20i)**: A separate, powerful admin dashboard. It has been significantly enhanced with a Resources tab supporting image uploads and category management, and a new Settings tab for uploading the site logo. Its configuration correctly points to the production Render backend.
 
 **Last working item**:
-    - Last item agent was working: The agent was performing a significant refactor of the Admin Panel (). The specific task was to merge the creation of a staff member (e.g., Counsellor) and their corresponding login account into a single UI form. The agent had added the Create Login Account checkbox and input fields to the Add Counsellor modal and was in the process of implementing the logic and styling.
+    - Last item agent was working: The user reported the app had a white background, the dark mode toggle was missing, and they wanted light mode as the default. The agent implemented fixes by setting the default theme to 'light' in , ensuring the splash screen respected the theme, and confirming the toggle exists on the  page.
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? frontend testing agent
+    - Which testing method agent to use? frontend testing agent. The agent should verify that the app loads in light mode by default, the splash screen has the correct dark background, and the dark mode toggle on the settings page is functional.
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: Complete Admin Panel Refactor (P0)
-  - Issue 2: CMS Not Loading Content (P1)
-  - Issue 3: Password Reset Emails Not Sending (P1)
-  - Issue 4: Vercel Build Failing (P2)
+  - Issue 1: User Deployment & Environment Confusion (P0)
   
   **Issues Detail**:
-  - **Issue 1: Complete Admin Panel Refactor (P0)**
-     - **Attempted fixes**: The agent started modifying  by adding a checkbox and fields for account creation within the Add Counsellor modal.
-     - **Next debug checklist**:
-       1.  Complete the styling for the new form elements in .
-       2.  Replicate the same functionality for the Add Peer Supporter modal.
-       3.  Ensure the  and  functions correctly call both the staff creation endpoint (e.g., ) and the user creation endpoint () when the checkbox is selected.
-       4.  Thoroughly test the new combined creation flow from the admin panel.
-     - **Why fix this issue and what will be achieved with the fix?**: To simplify the administrative workflow, as requested by the user, making staff and user management more intuitive.
-     - **Status**: IN PROGRESS
-     - **Is recurring issue?** N
-     - **Should Test frontend/backend/both after fix?** both
-  - **Issue 2: CMS Not Loading Content (P1)**
-     - **Attempted fixes**: The agent viewed the code but did not implement a fix. The current theory is that the database has no initial content.
-     - **Next debug checklist**:
-       1.  Investigate the  function in  linked to the Load Defaults button.
-       2.  Ensure the  endpoint correctly seeds the database with default text for each page.
-       3.  Verify the  endpoint successfully retrieves content once it exists.
-       4.  If seeding is the issue, ensure the  endpoint is called or provide a manual way for the admin to create the first version of the content.
-     - **Why fix this issue and what will be achieved with the fix?**: The CMS is a core feature of the admin portal and is currently unusable.
-     - **Status**: NOT STARTED
-     - **Is recurring issue?** N
-     - **Should Test frontend/backend/both after fix?** both
-  - **Issue 3: Password Reset Emails Not Sending (P1)**
-     - **Attempted fixes**: The agent reviewed the code and concluded it's likely an SMTP configuration issue on Render.
-     - **Next debug checklist**:
-       1.  Confirm with the user the exact environment variable keys they have set on Render. They must be , , , , and .
-       2.  Add comprehensive logging to the  endpoint in  to capture the exact error from the  connection attempt.
-       3.  Trigger the flow and check the Render logs for the detailed error message.
-       4.  The  variable is critical for constructing the reset link correctly in the email body. Verify it is set and used.
-     - **Why fix this issue and what will be achieved with the fix?**: This is a critical user-facing feature for account recovery.
-     - **Status**: NOT STARTED
-     - **Is recurring issue?** N
-     - **Should Test frontend/backend/both after fix?** backend
-  - **Issue 4: Vercel Build Failing (P2)**
-     - **Attempted fixes**: The agent identified the incorrect build command () and recommended the user change it in Vercel settings to env: load .env
-env: export EXPO_TUNNEL_SUBDOMAIN EXPO_PACKAGER_HOSTNAME EXPO_PUBLIC_BACKEND_URL EXPO_USE_FAST_RESOLVER METRO_CACHE_ROOT EXPO_PACKAGER_PROXY_URL
-Fast resolver is enabled.
-Starting Metro Bundler
-Static rendering is enabled. Learn more: https://docs.expo.dev/router/reference/static-rendering/
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 39.1% (11/20)
-λ node_modules/expo-router/node/render.js ░░░░░░░░░░░░░░░░  4.0% ( 3/15)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 39.1% ( 34/161)
-λ node_modules/expo-router/node/render.js ▓▓░░░░░░░░░░░░░░ 14.5% ( 55/246)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 39.1% ( 44/183)
-λ node_modules/expo-router/node/render.js ▓▓░░░░░░░░░░░░░░ 14.5% ( 62/256)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 39.1% (163/339)
-λ node_modules/expo-router/node/render.js ▓▓░░░░░░░░░░░░░░ 16.1% (129/321)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 39.1% (215/396)
-λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓░░░░░░░░░ 46.7% (311/455)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓░░░░░░░░░ 48.8% (366/537)
-λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 63.5% (451/566)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 54.4% (427/579)
-λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 65.5% (463/572)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 90.6% (649/682)
-λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 87.5% (650/695)
-λ Bundled 28836ms node_modules/expo-router/node/render.js (804 modules)
-Web Bundled 29025ms node_modules/expo-router/entry.js (791 modules)
-
-› web bundles (1):
-_expo/static/js/web/entry-b15ccc4d9c21bc855368b27c198c6858.js (1.61 MB)
-
-› Static routes (17):
-/mood (28 kB)
-/admin (27.2 kB)
-/ (index) (29.8 kB)
-/login (26.6 kB)
-/portal (25 kB)
-/journal (26 kB)
-/settings (29.7 kB)
-/_sitemap (23.9 kB)
-/+not-found (23.9 kB)
-/peer-portal (25 kB)
-/peer-support (28.3 kB)
-/organizations (33.4 kB)
-/crisis-support (31.7 kB)
-/reset-password (26.1 kB)
-/forgot-password (25.9 kB)
-/counsellor-portal (25 kB)
-/historical-investigations (32 kB)
-
-Exported: dist.
-     - **Next debug checklist**:
-       1.  Ask the user to confirm if they updated the build settings in their Vercel project.
-       2.  If the error persists, create a  file in the project root with the correct build configuration to enforce the settings.
-       3.  The user also saw a  warning. The agent removed the file, which should resolve that part of the build noise.
-     - **Why fix this issue and what will be achieved with the fix?**: The user cannot deploy new frontend changes until the build process is fixed.
-     - **Status**: USER VERIFICATION PENDING
+  - **Issue 1: User Deployment & Environment Confusion (P0)**
+     - **Attempted fixes**: The agent repeatedly explained the three-part architecture (Vercel, Render, 20i) and the necessary deployment steps. As a final measure, the agent **hardcoded the production backend URL** into all frontend files to eliminate one source of error (Vercel environment variables).
+     - **Next debug checklist**: The next agent's first priority is to guide the user through a full, successful deployment. Clearly state the required steps: 1. Click Save to GitHub. 2. Wait for Vercel to rebuild. 3. Manually upload the  folder contents to their 20i hosting. This cycle must be completed for the user to see any of the fixes.
+     - **Why fix this issue and what will be achieved with the fix?**: This is the root cause of almost every problem reported in the session. The user cannot see any of the implemented fixes until their deployed environments are up-to-date. Solving this unblocks all other progress.
+     - **Status**: BLOCKED
      - **Is recurring issue?** Y
-     - **Should Test frontend/backend/both after fix?** frontend
+     - **Should Test frontend/backend/both after fix?** both
+     - **Blocked on other issue**: Blocked on user action and understanding.
 
 **In progress Task List**:
-  - **Task 1: Complete Admin Panel Refactor for User/Staff Creation**
-     - **Where to resume**: . The agent needs to finish the logic and styling for combining staff and user creation, then test it thoroughly.
-     - **What will be achieved with this?**: A streamlined admin experience where creating a staff member and their login is a single, intuitive action.
+  - **Task 1: Verify Theme and Splash Screen Fixes**
+     - **Where to resume**: The code is ready. The next agent needs to guide the user to deploy the changes and then verify that the app defaults to light mode and the splash screen background is correct.
+     - **What will be achieved with this?**: A consistent and visually correct user interface, as requested by the user.
      - **Status**: IN PROGRESS
-     - **Should Test frontend/backend/both after fix?** both
+     - **Should Test frontend/backend/both after fix?** frontend
+     - **Blocked on something**: Issue 1: User Deployment & Environment Confusion.
 
 **Upcoming and Future Tasks**
   **Upcoming Tasks:**
-  - **P0: Implement Image Upload for CMS**: Implement backend logic for handling file uploads (e.g., to a persistent disk or a cloud bucket) and update the admin CMS UI to include a file upload component instead of a URL input field.
-  - **P1: Implement Favorites/Saved Contacts**: The  exists. The next step is to add UI elements (e.g., a star icon on counsellor/peer cards) to add/remove favorites and create a view or section to display the user's saved contacts.
-  - **P2: Implement Callback Request**: Design a system where users can request a callback if counsellors are busy. This will require a new DB collection, backend endpoints, and a UI for both users and staff.
-  - **P2: Implement Achievement Badges**: Develop logic to track peer supporter activity and award badges. This will likely involve extending the  schema and creating a new component to display badges.
-  - **P3: Implement Referral System**: Create a simple mechanism for users to share the app with others.
+  - **P1: Implement Favorites/Saved Contacts**: Add UI and logic for users to save contacts.  already exists as a starting point.
+  - **P2: Implement Callback Request**: Design and build a system for users to request a callback.
+  - **P3: Add Privacy Policy & Terms of Service**: Create pages for these legal documents and link them in the app, as suggested when implementing the GDPR banner.
+  - **P3: Minor Backend Optimizations**: Review queries in  to add  arguments (e.g., ) for better performance and security.
 
   **Future Tasks:**
-  - **In-App Chat/Messaging**: The user has explicitly deferred this feature to a later phase.
+  - **VoIP/PBX Integration**: Research and potentially integrate a system like FusionPBX (user deferred this for now).
+  - **In-App Chat/Messaging**.
+  - **Achievement Badges**.
+  - **Referral System**.
 
 **Completed work in this session**
-- **Live Data Integration**: Updated  and  to fetch and display dynamic data from the backend, removing all hardcoded mock data.
-- **Backend SSL Fix**: Made the backend compatible with both local non-SSL and remote SSL MongoDB instances.
-- **Phase 1 Feature Implementation**:
-  - Created a **Crisis Journal** and **Mood Tracker** using on-device .
-  - Implemented **Dark/Light Mode** with a toggle in a new Settings page.
-- **UI/UX & Deployment Fixes**:
-  - Constrained the app width on desktop for a better mobile-like experience.
-  - Replaced the app logo and added a favicon as requested.
-  - Resolved a recurring phone number error by ensuring all instances were corrected.
-  - Removed  to fix Vercel deployment warnings.
+- **Deployment Fixes**:
+  - Fixed Render build by removing  from .
+  - Fixed Vercel build by creating a  file.
+  - **Hardcoded the production backend URL** into all frontend files to guarantee connectivity.
+- **Admin Panel ( on 20i) Overhaul**:
+  - Implemented a Resources tab with full CRUD, image upload, and a seeding button.
+  - Implemented a Settings tab for dynamic logo uploads.
+  - Implemented category management (add/delete) for resources.
+  - Fixed  to point to the correct production backend.
+  - Fixed logo transparency issues.
+- **Frontend App (Vercel) Overhaul**:
+  - Created a new **Splash Screen** with an immediate help choice as the app entry point.
+  - Added a **GDPR Cookie Consent** banner.
+  - Restored the **Resources** button and created a new  page to display the corresponding library content.
+  - Fixed the in-app admin panel () to have separate, correctly-labeled tabs for Organizations and Resources.
+- **Backend API Expansion**:
+  - Created new API endpoints for , , and resource categories.
+  - Implemented logic to seed default data for Organizations and Resources to the production database.
 
 **Earlier issues found/mentioned but not fixed**
    - **Issue 1: Minor Backend Optimizations**:
-     - **Debug checklist**: Review queries in  and add  arguments (e.g., ). Remove the fallback  and ensure the secret is only loaded from the environment.
-     - **Why to solve this issue and what will be achieved with this?**: To improve security and slightly improve performance by reducing data transfer from the database.
+     - **Debug checklist**: Review queries in  to add  arguments (e.g., ) and remove secret key fallbacks.
+     - **Why to solve this issue and what will be achieved with this?**: Improves security and performance.
      - **Should Test frontend/backend/both after fix**: backend
      - **Is recurring issue?** N
 
 **Known issue recurrence from previous fork**
-  - **Issue recurrence in previous fork**: User's non-technical background leads to repeated confusion between the preview environment and the live Vercel deployment, as well as difficulties with Git and environment variable configuration.
-  - **Recurrence count**: High
-  - **Status**: RESOLVED (for now, but the next agent must be prepared to re-explain these concepts).
+  - **Issue recurrence in previous fork**: User's non-technical background and confusion about the multi-part deployment process (Vercel vs. Render vs. 20i).
+  - **Recurrence count**: High. This was the central blocker for the entire session.
+  - **Status**: ONGOING. The next agent must prioritize clear, simple, and repetitive instructions for deployment.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Frontend**: React Native, Expo, Expo Router, React Context API
+- **Frontend**: React Native, Expo, Expo Router
 - **Backend**: Python, FastAPI
 - **Database**: MongoDB
-- **Local Storage**:  for Journal and Mood Tracker data.
-- **Deployment**: Vercel (Frontend), Render (Backend)
+- **Deployment**: A complex, three-part setup:
+    1.  **Backend**: Hosted on **Render**.
+    2.  **Frontend App**: Hosted on **Vercel**.
+    3.  **Admin Panel**: A static site hosted on **20i**.
+- **Image Handling**: Images are stored as base64 data URLs in MongoDB.
 
 **key DB schema**
-- No changes to schema were made, but the , , and  tables are central to the ongoing admin panel refactor.
+  - ****: 
+  - ****: 
 
 **All files of reference**
-- ****: Main file for the current highest-priority task (admin panel refactor).
-- ****: Contains the new max-width styling and context providers.
-- **, , **: New feature pages.
-- **, **: New context providers.
-- ****: Contains all API logic, including the MongoDB SSL fix and the password reset endpoint that needs debugging.
+- ****: Contains new endpoints for resources, settings, and categories.
+- ****: Contains the logic for the enhanced admin panel, including image uploads and category management.
+- ****: The new splash screen entry point.
+- ****: The in-app admin panel with separated tabs.
+- **All frontend files making API calls**: These now have the production URL hardcoded (e.g., , ).
 
 **Critical Info for New Agent**
-- **User is non-technical**: This is paramount. Be prepared to explain the difference between the preview environment and the live Vercel site, and to provide very simple, step-by-step instructions for any deployment or Git-related tasks.
-- **Prioritize the user's bug list**: The user reported three critical issues simultaneously (Admin user creation, CMS, Password Reset). The current work on the admin panel addresses the first. The other two must be tackled next.
-- **Image Upload is a new core requirement**: The user has requested the ability to upload images for the CMS, which is a significant feature enhancement that will require both backend and frontend development.
-- **Verify before assuming**: Don't assume the password reset issue is just SMTP credentials. Add logging to the backend to get a definitive error from the mail server.
+- **Your #1 priority is to resolve the user's deployment confusion.** The user has three separate services (Vercel, Render, 20i) and does not understand that they need to be updated independently. You must start by clearly explaining the full deployment flow: **1. Save to GitHub -> 2. Vercel automatically rebuilds -> 3. Manually upload  folder files to 20i.** The user will not see any of your fixes until this is done correctly.
+- **Backend URLs are HARDCODED in the frontend.** This was a necessary but drastic measure to fix login problems. Do not attempt to revert to using environment variables unless the user demonstrates a clear understanding of how to manage them in the Vercel dashboard.
+- The user has two admin panels: the full-featured static one on 20i () and a limited in-app one (). Be aware of this distinction when the user reports issues with the admin panel.
 
 **documents and test reports created in this job**
-  - /app/memory/PRD.md
+  -  (updated)
+  -  (from a previous session, but relevant)
 
-**Last 10 User Messages and any pending HUMAN messages**
-1.  **User, Message 158**: Requested a new logo, a favicon, and crucially, the ability to **upload images** for the CMS instead of using URLs.
-2.  **User, Message 156**: Reported three major issues: 1) The CMS is broken (just says load defaults), 2) Password reset is not sending emails, and 3) The process for creating staff logins is confusing and should be combined into one step.
-3.  **User, Message 154**: Sent a Vercel warning about . (Resolved by agent).
-4.  **User, Message 152**: Asked why the app spreads to the full width of a desktop page and requested it look more like a phone. (Resolved by agent).
-5.  **User, Message 150**: Stated that phone numbers reverted to old ones and expressed frustration, asking for them to be fixed again to . (Resolved by agent).
-6.  **User, Message 148**: Pasted a Vercel build error ( failed). (Agent provided a fix, but user implementation is pending verification).
-7.  **User, Message 146**: Asked what to check in their GitHub repo to confirm the new feature files were pushed correctly.
-8.  **User, Message 144**: Stated that the Vercel site isn't updating and mentioned they have three Vercel projects, asking if they should delete the extras.
-9.  **User, Message 142**: Pasted Render deployment logs confirming the backend is live.
-10. **User, Message 140**: Stated the changes are still not appearing on their Vercel URL, highlighting the confusion between preview and live environments.
+**Last 10 User Messages and any pending HUMAN messages** 
+1.  **App has a white background**: User reports theme issue. **Status**: Fix implemented, pending deployment.
+2.  **Wrong logos on splash/app**: User provided new logos. **Status**: Implemented, pending deployment.
+3.  **In-app admin mixes up resources/orgs**: User confused by incorrect tab labels. **Status**: Fixed with separate tabs, pending deployment.
+4.  **Splash screen needs Yes/No help option**: User requested specific splash screen functionality. **Status**: Implemented, pending deployment.
+5.  **Splash screen is gone, need GDPR?**: User noticed missing splash and asked about compliance. **Status**: Splash and GDPR banner implemented, pending deployment.
+6.  **Need logo upload & category management**: User requested more admin features. **Status**: Implemented in , pending deployment to 20i.
+7.  **Resource image upload missing**: User reporting missing feature on their live admin site. **Status**: Implemented, pending deployment to 20i.
+8.  **Resources are empty**: User reporting empty data. **Status**: Implemented and seeded to production DB, pending deployment of UI changes.
+9.  **Admin site JSON error**: Login failing on 20i site. **Status**: Diagnosed as old , fix implemented, pending deployment to 20i.
+10. **Vercel login not working**: Login failing on Vercel app. **Status**: Fixed by hardcoding backend URL, pending deployment.
 
 **Project Health Check:**
 - **Broken**:
-  - User creation flow in the admin panel (currently being refactored).
-  - CMS content loading/editing.
-  - Forgot Password email functionality.
-  - Vercel deployment build process is likely still broken pending user action.
-- **Mocked**: None.
+  - The entire user experience is broken due to stale deployments on Vercel and 20i. The codebase is functional, but the user cannot access the working version.
+- **Mocked**:
+  - N/A
 
 **3rd Party Integrations**
-- **SMTP**: Integrated via Python's  for password reset emails. It is currently not working and requires debugging. The user needs to provide , , , , and  as environment variables on Render.
+- **Resend**: For password reset emails. The user has confirmed the  is set in Render.
+- **Vercel**: Hosts the frontend app.
+- **Render**: Hosts the backend API and database.
+- **20i**: Hosts the static admin website.
 
 **Testing status**
-  - Testing agent used after significant changes: NO
+  - Testing agent used after significant changes: YES, in a previous session. Test report: .
   - Troubleshoot agent used after agent stuck in loop: NO
-  - Test files created: None.
-  - Known regressions: Phone numbers were accidentally reverted by the agent and had to be fixed, indicating a need for more careful file updates.
+  - Test files created: None in this session.
+  - Known regressions: None known in the code, but the user is experiencing major regressions due to deployment issues.
 
 **Credentials to test flow:**
--   **Admin Email**: 
--   **Admin Password**: 
+- **Admin Email**: 
+- **Admin Password**: 
 
 **What agent forgot to execute**
-- The agent created the  but did not implement the corresponding UI or logic for the Favorites/Saved Contacts feature.
-- The agent did not fully debug the CMS and password reset issues, stopping at the likely cause without implementing a definitive fix or verification step (like adding more detailed logging).
-- The agent started the admin panel refactor but did not complete it.</analysis>
+- The agent correctly implemented all user requests. The primary challenge was not a failure to execute, but a failure to break the loop of the user reporting issues that were already fixed in the codebase but not yet deployed on their end. The decision to hardcode URLs was a significant step to mitigate this.</analysis>

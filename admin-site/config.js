@@ -6,7 +6,7 @@ const CONFIG = {
     API_URL: 'https://veterans-support-api.onrender.com',
     
     // For Preview environment, use:
-    // API_URL: 'https://peer-connect-11.preview.emergentagent.com',
+    // API_URL: 'https://ops-veterans-demo.preview.emergentagent.com',
     
     // For local development, use:
     // API_URL: 'http://localhost:8001',
