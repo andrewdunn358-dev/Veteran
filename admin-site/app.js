@@ -1758,6 +1758,9 @@ function openEditResourceModal(resourceId) {
     const resource = resources.find(r => r.id === resourceId);
     if (!resource) return;
     
+    // Reset selected image
+    selectedImageData = null;
+    
     // Get unique categories
     const existingCategories = [...new Set(resources.map(r => r.category).filter(Boolean))];
     const categoryOptions = existingCategories.map(c => `<option value="${c}">${c}</option>`).join('');
@@ -1781,6 +1784,10 @@ function openEditResourceModal(resourceId) {
                     <option value="Family Support">
                     <option value="Health & Wellbeing">
                     <option value="Legal Advice">
+                    <option value="Crisis Support">
+                    <option value="Wellness">
+                    <option value="Career & Employment">
+                    <option value="Benefits & Support">
                     <option value="General">
                 </datalist>
             </div>
@@ -1793,17 +1800,33 @@ function openEditResourceModal(resourceId) {
                 <textarea name="description" rows="4">${resource.description || ''}</textarea>
             </div>
             <div class="form-group">
-                <label>Image URL (optional)</label>
-                <input type="url" name="image_url" value="${resource.image_url || ''}">
-                ${resource.image_url ? `<img src="${resource.image_url}" style="max-width: 200px; margin-top: 10px; border-radius: 8px;">` : ''}
+                <label>Content (detailed information)</label>
+                <textarea name="content" rows="6">${resource.content || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Current Image</label>
+                ${resource.image_url ? `<img src="${resource.image_url}" style="max-width: 200px; margin-top: 10px; border-radius: 8px;">` : '<p style="color: var(--text-muted);">No image</p>'}
+            </div>
+            <div class="form-group">
+                <label>Upload New Image</label>
+                <div class="image-upload-container">
+                    <input type="file" id="edit-resource-image-file" accept="image/*" onchange="previewEditResourceImage(this)">
+                    <div id="edit-image-preview-container" style="display:none; margin-top:10px; align-items:center;">
+                        <img id="edit-image-preview" style="max-width:200px; max-height:150px; border-radius:8px;">
+                        <button type="button" class="btn btn-small btn-danger" onclick="clearEditImagePreview()" style="margin-left:10px;">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                </div>
+                <small style="color: var(--text-muted);">Upload to replace current image (max 2MB)</small>
+            </div>
+            <div class="form-group">
+                <label>Or Image URL</label>
+                <input type="url" name="image_url" value="${resource.image_url || ''}" placeholder="https://example.com/image.jpg">
             </div>
             <div class="form-group">
                 <label>External Link (optional)</label>
                 <input type="url" name="link" value="${resource.link || ''}">
-            </div>
-            <div class="form-group">
-                <label>Order (for sorting)</label>
-                <input type="number" name="order" value="${resource.order || 0}" min="0">
             </div>
         </form>
         <div class="modal-footer">
@@ -1813,24 +1836,59 @@ function openEditResourceModal(resourceId) {
     `);
 }
 
+function previewEditResourceImage(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.size > 2 * 1024 * 1024) {
+            showNotification('Image must be less than 2MB', 'error');
+            input.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            selectedImageData = e.target.result;
+            document.getElementById('edit-image-preview').src = selectedImageData;
+            document.getElementById('edit-image-preview-container').style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function clearEditImagePreview() {
+    selectedImageData = null;
+    const fileInput = document.getElementById('edit-resource-image-file');
+    if (fileInput) fileInput.value = '';
+    const previewContainer = document.getElementById('edit-image-preview-container');
+    if (previewContainer) previewContainer.style.display = 'none';
+}
+
 async function submitEditResource() {
     const form = document.getElementById('edit-resource-form');
     const formData = new FormData(form);
     const resourceId = formData.get('id');
     
     try {
+        const updateData = {
+            category: formData.get('category'),
+            title: formData.get('title'),
+            description: formData.get('description'),
+            content: formData.get('content'),
+            link: formData.get('link') || null
+        };
+        
+        // Use uploaded image if available, otherwise use URL field
+        if (selectedImageData) {
+            updateData.image_data = selectedImageData;
+        } else if (formData.get('image_url')) {
+            updateData.image_url = formData.get('image_url');
+        }
+        
         await apiCall(`/resources/${resourceId}`, {
             method: 'PUT',
-            body: JSON.stringify({
-                category: formData.get('category'),
-                title: formData.get('title'),
-                description: formData.get('description'),
-                image_url: formData.get('image_url') || null,
-                link: formData.get('link') || null,
-                order: parseInt(formData.get('order')) || 0
-            })
+            body: JSON.stringify(updateData)
         });
         
+        selectedImageData = null;
         showNotification('Resource updated successfully');
         closeModal();
         loadAllData();
