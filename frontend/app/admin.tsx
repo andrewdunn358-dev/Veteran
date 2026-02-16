@@ -1195,6 +1195,61 @@ const styles = StyleSheet.create({
   editIcon: {
     marginLeft: 8,
   },
+  accountSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#3d4f5f',
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 12,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#7c9cbf',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: '#4a90e2',
+    borderColor: '#4a90e2',
+  },
+  checkboxLabel: {
+    color: '#ffffff',
+    fontSize: 14,
+  },
+  roleSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginVertical: 8,
+    flexWrap: 'wrap',
+  },
+  roleLabel: {
+    color: '#b0c4de',
+    fontSize: 14,
+    marginRight: 8,
+  },
+  roleButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#3d4f5f',
+  },
+  roleButtonActive: {
+    backgroundColor: '#4a90e2',
+  },
+  roleButtonText: {
+    color: '#ffffff',
+    fontSize: 12,
+    textTransform: 'capitalize',
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.7)',
