@@ -413,10 +413,11 @@ export default function AdminDashboard() {
                 headers: { 'Authorization': `Bearer ${token}` },
               });
               if (response.ok) {
+                showToast('Deleted successfully', 'success');
                 fetchData();
               }
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete');
+              showToast('Failed to delete', 'error');
             }
           },
         },
