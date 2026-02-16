@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar, Alert, Modal, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar, Alert, Modal, TextInput, ActivityIndicator, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 
-const API_URL = 'https://veterans-support-api.onrender.com';
+const API_URL = Platform.select({
+  web: process.env.EXPO_PUBLIC_BACKEND_URL || '',
+  default: process.env.EXPO_PUBLIC_BACKEND_URL || ''
+});
 
 export default function SplashScreen() {
   const router = useRouter();
