@@ -795,9 +795,19 @@ export default function AdminDashboard() {
 
             <TouchableOpacity
               style={styles.saveButton}
-              onPress={activeTab === 'counsellors' ? handleAddCounsellor : handleAddPeer}
+              onPress={() => {
+                if (activeTab === 'counsellors') {
+                  handleAddCounsellor();
+                } else if (activeTab === 'peers') {
+                  handleAddPeer();
+                } else if (activeTab === 'users') {
+                  handleCreateUser();
+                }
+              }}
             >
-              <Text style={styles.saveButtonText}>Save</Text>
+              <Text style={styles.saveButtonText}>
+                {activeTab === 'users' ? 'Create User' : 'Save'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
