@@ -23,11 +23,11 @@ export default function SplashScreen() {
     // Check if user has accepted cookies
     checkCookieConsent();
     
-    // Fade in animation
+    // Fade in animation - useNativeDriver: false for web compatibility
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 800,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
   }, []);
 
