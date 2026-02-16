@@ -14,7 +14,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://veterans-support-api.onrender.com';
+const API_URL = 'https://veterans-support-api.onrender.com';
 
 export default function ResetPasswordScreen() {
   const [password, setPassword] = useState('');
