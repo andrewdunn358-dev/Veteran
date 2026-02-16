@@ -220,7 +220,7 @@ export default function CrisisSupport() {
                   {counsellor.whatsapp && (
                     <TouchableOpacity
                       style={styles.counsellorSecondaryButton}
-                      onPress={() => handleWhatsApp(counsellor.whatsapp!)}
+                      onPress={() => handleWhatsApp(counsellor.whatsapp!, counsellor.name, 'counsellor', counsellor.id)}
                       activeOpacity={0.8}
                     >
                       <Ionicons name="logo-whatsapp" size={18} color="#7c9cbf" />
@@ -255,7 +255,7 @@ export default function CrisisSupport() {
             <View style={styles.contactButtons}>
               <TouchableOpacity
                 style={styles.contactButton}
-                onPress={() => handleCall(service.phone)}
+                onPress={() => handleCall(service.phone, service.name, 'crisis_line', null)}
                 activeOpacity={0.8}
               >
                 <Ionicons name="call" size={24} color="#ffffff" />
@@ -265,7 +265,7 @@ export default function CrisisSupport() {
               {service.sms && (
                 <TouchableOpacity
                   style={[styles.contactButton, styles.contactButtonSecondary]}
-                  onPress={() => handleSMS(service.sms!)}
+                  onPress={() => handleSMS(service.sms!, service.name, 'crisis_line', null)}
                   activeOpacity={0.8}
                 >
                   <Ionicons name="chatbubble" size={24} color="#7c9cbf" />
@@ -276,7 +276,7 @@ export default function CrisisSupport() {
               {service.whatsapp && (
                 <TouchableOpacity
                   style={[styles.contactButton, styles.contactButtonSecondary]}
-                  onPress={() => handleWhatsApp(service.whatsapp!)}
+                  onPress={() => handleWhatsApp(service.whatsapp!, service.name, 'crisis_line', null)}
                   activeOpacity={0.8}
                 >
                   <Ionicons name="logo-whatsapp" size={24} color="#7c9cbf" />
