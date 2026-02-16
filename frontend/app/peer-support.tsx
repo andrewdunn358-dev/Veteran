@@ -238,7 +238,7 @@ export default function PeerSupport() {
                   {veteran.sms && (
                     <TouchableOpacity
                       style={styles.veteranSecondaryButton}
-                      onPress={() => handleSMS(veteran.sms!)}
+                      onPress={() => handleSMS(veteran.sms!, veteran.firstName, veteran.id)}
                       activeOpacity={0.8}
                     >
                       <Ionicons name="chatbubble" size={18} color="#7c9cbf" />
@@ -249,7 +249,7 @@ export default function PeerSupport() {
                   {veteran.whatsapp && (
                     <TouchableOpacity
                       style={styles.veteranSecondaryButton}
-                      onPress={() => handleWhatsApp(veteran.whatsapp!)}
+                      onPress={() => handleWhatsApp(veteran.whatsapp!, veteran.firstName, veteran.id)}
                       activeOpacity={0.8}
                     >
                       <Ionicons name="logo-whatsapp" size={18} color="#7c9cbf" />
