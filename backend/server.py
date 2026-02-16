@@ -799,6 +799,67 @@ async def get_peer_support_registrations(current_user: User = Depends(require_ro
         logging.error(f"Error retrieving registrations: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to retrieve registrations.")
 
+# ============ CALL INTENT LOGGING ENDPOINTS ============
+
+@api_router.post("/call-logs", response_model=CallIntent)
+async def log_call_intent(call_input: CallIntentCreate):
+    """Log a call intent (public - for app users)"""
+    try:
+        call_obj = CallIntent(**call_input.dict())
+        await db.call_logs.insert_one(call_obj.dict())
+        logging.info(f"Call intent logged: {call_input.contact_type} - {call_input.contact_name}")
+        return call_obj
+    except Exception as e:
+        logging.error(f"Error logging call intent: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to log call")
+
+@api_router.get("/call-logs")
+async def get_call_logs(
+    current_user: User = Depends(require_role("admin")),
+    days: int = 30,
+    contact_type: Optional[str] = None
+):
+    """Get call logs with metrics (admin only)"""
+    try:
+        from_date = datetime.utcnow() - timedelta(days=days)
+        
+        query = {"timestamp": {"$gte": from_date}}
+        if contact_type:
+            query["contact_type"] = contact_type
+        
+        logs = await db.call_logs.find(query, {"_id": 0}).sort("timestamp", -1).to_list(1000)
+        
+        # Calculate metrics
+        total_calls = len(logs)
+        calls_by_type = {}
+        calls_by_method = {}
+        calls_by_day = {}
+        
+        for log in logs:
+            # By type
+            ct = log.get("contact_type", "unknown")
+            calls_by_type[ct] = calls_by_type.get(ct, 0) + 1
+            
+            # By method
+            cm = log.get("call_method", "phone")
+            calls_by_method[cm] = calls_by_method.get(cm, 0) + 1
+            
+            # By day
+            day = log.get("timestamp", datetime.utcnow()).strftime("%Y-%m-%d")
+            calls_by_day[day] = calls_by_day.get(day, 0) + 1
+        
+        return {
+            "total_calls": total_calls,
+            "period_days": days,
+            "calls_by_type": calls_by_type,
+            "calls_by_method": calls_by_method,
+            "calls_by_day": dict(sorted(calls_by_day.items())),
+            "recent_logs": logs[:50]  # Last 50 logs
+        }
+    except Exception as e:
+        logging.error(f"Error retrieving call logs: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve call logs")
+
 # ============ SETUP/SEED ENDPOINTS ============
 
 @api_router.api_route("/setup/init", methods=["GET", "POST"])
