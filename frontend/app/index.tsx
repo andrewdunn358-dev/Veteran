@@ -53,26 +53,28 @@ export default function SplashScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-        {/* Logo */}
-        <View style={styles.logoContainer}>
-          <Image 
-            source={{ uri: 'https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/gsdv90d5_splash.png' }}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <StatusBar barStyle="light-content" backgroundColor="#0d1b2a" />
+      <View style={styles.container}>
+        <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+          {/* Logo */}
+          <View style={styles.logoContainer}>
+            <Image 
+              source={{ uri: 'https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/gsdv90d5_splash.png' }}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
 
-        {/* Title */}
-        <Text style={styles.title}>Radio Check</Text>
-        <Text style={styles.subtitle}>Veterans Support Network</Text>
+          {/* Title */}
+          <Text style={styles.title}>Radio Check</Text>
+          <Text style={styles.subtitle}>Veterans Support Network</Text>
 
-        {/* Question */}
-        <View style={styles.questionContainer}>
-          <Ionicons name="heart" size={32} color="#ef4444" style={styles.heartIcon} />
-          <Text style={styles.question}>
-            Are you in need of immediate help?
+          {/* Question */}
+          <View style={styles.questionContainer}>
+            <Ionicons name="heart" size={32} color="#ef4444" style={styles.heartIcon} />
+            <Text style={styles.question}>
+              Are you in need of immediate help?
           </Text>
         </View>
 
