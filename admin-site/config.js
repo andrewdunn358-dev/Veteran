@@ -2,11 +2,11 @@
 // Update this URL to point to your backend API
 
 const CONFIG = {
-    // Backend API URL - Preview environment
-    API_URL: 'https://radio-check-callback.preview.emergentagent.com',
+    // Backend API URL - Render production
+    API_URL: 'https://veterans-support-api.onrender.com',
     
-    // For Render production, use:
-    // API_URL: 'https://veterans-support-api.onrender.com',
+    // For Preview environment, use:
+    // API_URL: 'https://peer-connect-11.preview.emergentagent.com',
     
     // For local development, use:
     // API_URL: 'http://localhost:8001',
