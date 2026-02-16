@@ -43,6 +43,16 @@ Build and deploy a mobile-first web application for UK military veterans providi
 - [x] **Combined Staff + User Creation** - Single form with "Create login account" checkbox
 - [x] CMS for editing page content - NOW WORKING
 - [x] Password management (change password, admin reset)
+- [x] **Toast Notifications** - Visual feedback on successful actions
+- [x] **Call Metrics Tab** - View call logs, stats by type/method, recent activity
+
+### Call Intent Logging - NEW Feb 2026
+- [x] Log all call intents (phone, SMS, WhatsApp) to database
+- [x] Metrics dashboard for admins showing:
+  - Total calls (30 days)
+  - Calls by contact type (counsellor, peer, crisis_line)
+  - Calls by method (phone, sms, whatsapp)
+  - Recent activity log
 
 ### Staff Portals
 - [x] Counsellor portal (/counsellor-portal) - update availability status
@@ -53,11 +63,6 @@ Build and deploy a mobile-first web application for UK military veterans providi
 - [x] Admin password reset
 - [x] **Forgot password email flow - Now using Resend** (requires RESEND_API_KEY on Render)
 
-### Content Management
-- [x] Phone numbers updated to 01912704378
-- [x] 999 call functionality disabled (text-only notice)
-- [x] CMS Default Content Seeding - Working
-
 ---
 
 ## API Endpoints
@@ -67,7 +72,7 @@ Build and deploy a mobile-first web application for UK military veterans providi
 - `GET /api/peer-supporters` - List all peer supporters
 - `GET /api/organizations` - List all organizations
 - `GET /api/content` - Get all CMS content
-- `GET /api/content/{page}` - Get page content
+- `POST /api/call-logs` - Log a call intent (no auth required)
 
 ### Auth APIs
 - `POST /api/auth/login` - Staff login
@@ -80,6 +85,7 @@ Build and deploy a mobile-first web application for UK military veterans providi
 - `POST /api/auth/register` - Create new user (admin only)
 - `GET /api/auth/users` - List all users (admin only)
 - `DELETE /api/auth/users/{id}` - Delete user (admin only)
+- `GET /api/call-logs` - Get call metrics with stats (admin only)
 - Full CRUD for counsellors, peer supporters, organizations
 - `POST /api/content/seed` - Seed default CMS content
 - `PUT /api/content/{page}/{section}` - Update CMS content
@@ -94,6 +100,7 @@ Build and deploy a mobile-first web application for UK military veterans providi
 - **organizations**: {name, description, phone}
 - **page_content**: {page_name, section, content}
 - **password_resets**: {token, email, expires}
+- **call_logs**: {id, contact_type, contact_id, contact_name, contact_phone, call_method, timestamp}
 
 ---
 
@@ -103,12 +110,11 @@ Build and deploy a mobile-first web application for UK military veterans providi
 - [ ] **Resend API Key Configuration**: Add `RESEND_API_KEY` to Render environment variables
   - Get key from: https://resend.com/api-keys
   - Add to Render: `RESEND_API_KEY=re_your_api_key_here`
-  - Also add: `SENDER_EMAIL=noreply@yourdomain.com`
+  - Also add: `SENDER_EMAIL=noreply@veteran.dbty.co.uk`
   - And: `FRONTEND_URL=https://your-vercel-url.com`
 
 ### P1 - Image Upload for CMS
 - [ ] Implement file upload for CMS images
-- [ ] Backend endpoint exists: `/api/upload/image` (base64)
 - [ ] Frontend UI needs file picker integration
 
 ### P1 - Favorites UI
@@ -122,14 +128,14 @@ Build and deploy a mobile-first web application for UK military veterans providi
 
 ### P3 - Future
 - [ ] In-App Chat/Messaging (user chose to skip for now)
-- [ ] Break down admin.tsx into smaller components
+- [ ] **Twilio Integration** - For actual call routing and full call tracking
 
 ---
 
 ## Tech Stack
 - **Frontend**: React Native (Expo), Expo Router, AsyncStorage
 - **Backend**: Python, FastAPI
-- **Database**: MongoDB Atlas
+- **Database**: MongoDB
 - **Auth**: JWT with role-based access
 - **Email**: Resend (for password reset)
 - **Deployment**: Render (backend), Vercel (frontend)
@@ -137,19 +143,14 @@ Build and deploy a mobile-first web application for UK military veterans providi
 ---
 
 ## Key Files Reference
-- `/app/frontend/app/admin.tsx` - Admin dashboard with combined user/staff creation
+- `/app/frontend/app/admin.tsx` - Admin dashboard with combined user/staff creation + call metrics
 - `/app/frontend/app/login.tsx` - Staff login page
-- `/app/backend/server.py` - All API endpoints
-- `/app/backend/tests/test_veterans_admin.py` - Backend test suite
-
----
-
-## Testing
-- Backend tests: `/app/backend/tests/test_veterans_admin.py`
-- Test reports: `/app/test_reports/iteration_1.json`
-- Run tests: `cd /app/backend && pytest tests/ -v`
+- `/app/frontend/app/crisis-support.tsx` - Crisis support page with call logging
+- `/app/frontend/app/peer-support.tsx` - Peer support page with call logging
+- `/app/frontend/src/components/Toast.tsx` - Toast notification component
+- `/app/backend/server.py` - All API endpoints including call logging
 
 ---
 
 ## Last Updated
-2026-02-16 - Fixed admin panel refactor, CMS loading, password reset (Resend integration)
+2026-02-16 - Added Toast notifications, Call Intent Logging with metrics dashboard
