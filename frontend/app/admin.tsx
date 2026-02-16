@@ -56,11 +56,22 @@ interface Organization {
   whatsapp?: string;
 }
 
+interface Resource {
+  id: string;
+  title: string;
+  description?: string;
+  category: string;
+  content?: string;
+  link?: string;
+  image_url?: string;
+}
+
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'orgs' | 'users' | 'content' | 'metrics'>('counsellors');
+  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'orgs' | 'resources' | 'users' | 'content' | 'metrics'>('counsellors');
   const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
   const [peers, setPeers] = useState<PeerSupporter[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [resources, setResources] = useState<Resource[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [content, setContent] = useState<Record<string, Record<string, string>>>({});
   const [callMetrics, setCallMetrics] = useState<any>(null);
