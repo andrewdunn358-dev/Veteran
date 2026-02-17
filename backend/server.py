@@ -503,6 +503,67 @@ async def send_reset_email(email: str, reset_token: str):
         logging.error(f"Failed to send email via Resend: {str(e)}")
         return False
 
+async def send_safeguarding_email_notification(alert: SafeguardingAlert):
+    """Send urgent safeguarding alert email to admins/counsellors"""
+    if not RESEND_API_KEY:
+        logging.warning("Resend API key not configured, skipping safeguarding email")
+        return False
+    
+    try:
+        # Get admin notification email from settings
+        settings = await db.settings.find_one({})
+        admin_email = settings.get("admin_notification_email", "") if settings else ""
+        
+        if not admin_email:
+            logging.warning("No admin notification email configured for safeguarding alerts")
+            return False
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #dc2626; color: white; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <h2 style="margin: 0;">⚠️ SAFEGUARDING ALERT</h2>
+            </div>
+            
+            <p style="color: #1a2332; font-size: 16px;"><strong>A safeguarding concern has been detected in an AI Battle Buddies conversation.</strong></p>
+            
+            <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; margin: 20px 0;">
+                <p style="margin: 0 0 8px 0;"><strong>Alert ID:</strong> {alert.id}</p>
+                <p style="margin: 0 0 8px 0;"><strong>Session:</strong> {alert.session_id[:8]}...</p>
+                <p style="margin: 0 0 8px 0;"><strong>Character:</strong> {alert.character.capitalize()}</p>
+                <p style="margin: 0 0 8px 0;"><strong>Time:</strong> {alert.created_at.strftime('%d %b %Y at %H:%M')}</p>
+            </div>
+            
+            <div style="background-color: #f3f4f6; padding: 16px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0 0 8px 0; font-weight: bold; color: #dc2626;">Triggering Message:</p>
+                <p style="margin: 0; font-style: italic; color: #374151;">"{alert.triggering_message}"</p>
+            </div>
+            
+            <p style="color: #666;">The user has been shown support options including crisis helplines and the option to speak with a real person.</p>
+            
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="{FRONTEND_URL}/login" style="background-color: #dc2626; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block;">View in Staff Portal</a>
+            </p>
+            
+            <p style="color: #666; font-size: 12px;">This is an automated safeguarding notification from Radio Check Veterans Support.</p>
+        </body>
+        </html>
+        """
+        
+        params = {
+            "from": SENDER_EMAIL,
+            "to": [admin_email],
+            "subject": "⚠️ URGENT: Safeguarding Alert - Radio Check",
+            "html": html_content
+        }
+        
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        logging.info(f"Safeguarding alert email sent, ID: {result.get('id')}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to send safeguarding email: {str(e)}")
+        return False
+
 # ============ AUTH FUNCTIONS ============
 
 def hash_password(password: str) -> str:
