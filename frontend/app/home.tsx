@@ -336,6 +336,26 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderColor: '#22c55e',
     borderWidth: 1,
   },
+  aiBuddiesButton: {
+    borderColor: '#3b82f6',
+    borderWidth: 2,
+    backgroundColor: '#1a2744',
+  },
+  aiBuddiesIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  aiBuddyMiniAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#1a2744',
+  },
+  aiBuddyMiniAvatarOverlap: {
+    marginLeft: -12,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
