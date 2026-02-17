@@ -1944,9 +1944,9 @@ async def reset_buddy_session(request: BuddyChatRequest):
 
 # Keep old Smudge endpoint for backwards compatibility (redirects to Tommy)
 @api_router.post("/smudge/chat")
-async def smudge_chat_legacy(request: BuddyChatRequest):
+async def smudge_chat_legacy(message: str = "", sessionId: str = "", character: str = "tommy"):
     """Legacy Smudge endpoint - redirects to Tommy"""
-    request.character = "tommy"
+    request = BuddyChatRequest(message=message, sessionId=sessionId, character="tommy")
     return await buddy_chat(request)
 
 # ============ ADMIN STATUS MANAGEMENT ============
