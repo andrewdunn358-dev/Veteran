@@ -1754,13 +1754,11 @@ def get_or_create_session(session_id: str) -> Dict[str, Any]:
     smudge_sessions[session_id]["last_active"] = now
     return smudge_sessions[session_id]
 
-# Initialize OpenAI client for Smudge (using Emergent LLM Key as proxy)
+# Initialize OpenAI client for Smudge (using Emergent LLM Key)
 def get_openai_client():
     if EMERGENT_LLM_KEY:
-        return OpenAI(
-            api_key=EMERGENT_LLM_KEY,
-            base_url="https://api.emergentmethods.ai/v1"
-        )
+        # Emergent key works directly with OpenAI API
+        return OpenAI(api_key=EMERGENT_LLM_KEY)
     return None
 
 smudge_openai_client = get_openai_client()
