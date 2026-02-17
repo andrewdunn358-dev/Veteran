@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
   StyleSheet,
   Image,
+  Modal,
+  Linking,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -37,6 +39,7 @@ export default function AIChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [characterInfo, setCharacterInfo] = useState<CharacterInfo>({ name: 'Tommy', avatar: '' });
   const [sessionId] = useState(() => `${character}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+  const [showSafeguardingModal, setShowSafeguardingModal] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
