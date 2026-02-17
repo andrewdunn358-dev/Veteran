@@ -1776,7 +1776,7 @@ async def smudge_chat(request: SmudgeChatRequest):
         )
     
     if not smudge_openai_client:
-        raise HTTPException(status_code=503, detail="Smudge is currently unavailable")
+        raise HTTPException(status_code=503, detail="Smudge is currently unavailable - API key not configured")
     
     if not request.message or not request.sessionId:
         raise HTTPException(status_code=400, detail="Invalid request")
