@@ -87,6 +87,60 @@
         </nav>
 
         <main class="dashboard-content">
+            <!-- My Portal Tab (For Counsellors and Peers) -->
+            <div id="myportal-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2 id="portal-title">My Portal</h2>
+                    <div class="tab-actions">
+                        <div id="my-status-buttons" class="status-toggle">
+                            <button class="status-btn available" onclick="updateMyStatus('available')">
+                                <i class="fas fa-check-circle"></i> Available
+                            </button>
+                            <button class="status-btn busy" onclick="updateMyStatus('busy')">
+                                <i class="fas fa-clock"></i> Busy
+                            </button>
+                            <button class="status-btn off" onclick="updateMyStatus('off')">
+                                <i class="fas fa-moon"></i> Off
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Panic Alerts Section (Counsellors Only) -->
+                <div id="panic-alerts-section" class="portal-section" style="display: none;">
+                    <h3 class="section-title alert-title">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        PANIC ALERTS <span id="alert-count" class="badge badge-danger"></span>
+                    </h3>
+                    <div id="panic-alerts-list" class="alerts-grid"></div>
+                </div>
+                
+                <!-- My Active Callbacks -->
+                <div class="portal-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-phone-volume"></i> My Active Callbacks
+                    </h3>
+                    <div id="my-callbacks-list" class="callbacks-grid"></div>
+                </div>
+                
+                <!-- Pending Callbacks -->
+                <div class="portal-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-phone"></i> Pending Callbacks <span id="pending-count" class="badge"></span>
+                    </h3>
+                    <div id="pending-callbacks-list" class="callbacks-grid"></div>
+                </div>
+                
+                <!-- Panic Button (Peers Only) -->
+                <div id="panic-button-section" class="portal-section" style="display: none;">
+                    <button class="panic-button" onclick="triggerPanicAlert()">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        NEED COUNSELLOR HELP
+                        <span>Alert a counsellor for assistance</span>
+                    </button>
+                </div>
+            </div>
+
             <!-- Counsellors Tab -->
             <div id="counsellors-tab" class="tab-content active">
                 <div class="tab-header">
