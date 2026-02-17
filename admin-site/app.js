@@ -88,26 +88,34 @@ function switchTab(tabName) {
 }
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     // Check if logged in
     if (token && currentUser) {
         showScreen('dashboard-screen');
-        document.getElementById('user-name').textContent = `Welcome, ${currentUser.name}`;
-        setupRoleBasedUI();
+        document.getElementById('user-name').textContent = 'Welcome, ' + currentUser.name;
+        if (typeof setupRoleBasedUI === 'function') {
+            setupRoleBasedUI();
+        }
         loadAllData();
     } else {
         showScreen('login-screen');
     }
     
     // Login form handler
-    document.getElementById('login-form').addEventListener('submit', handleLogin);
+    var loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
     
     // Logout handler
-    document.getElementById('logout-btn').addEventListener('click', handleLogout);
+    var logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
     
     // Tab navigation
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
             switchTab(btn.dataset.tab);
         });
     });
