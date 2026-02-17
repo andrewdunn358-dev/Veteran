@@ -10,40 +10,56 @@ Build and enhance a mobile-first web application for UK military veterans provid
 4. Panic button for emergencies
 5. Admin panel for managing staff status
 6. Organization and resource directory
+7. Email notification system for admin alerts
 
 ## What's Been Implemented
 
 ### Backend (FastAPI)
 - **Authentication**: JWT-based auth with admin/counsellor/peer roles
-- **Callback Request System** (NEW - December 2025):
+- **Callback Request System**:
   - POST /api/callbacks - Create callback requests (counsellor or peer type)
   - GET /api/callbacks - List callbacks (filtered by role)
   - PATCH /api/callbacks/{id}/take - Take control of callback
   - PATCH /api/callbacks/{id}/release - Release callback
   - PATCH /api/callbacks/{id}/complete - Complete callback
-- **Panic Alert System** (NEW - December 2025):
+- **Panic Alert System**:
   - POST /api/panic-alert - Create panic alert
   - GET /api/panic-alerts - List alerts (admin/counsellor only)
   - PATCH /api/panic-alerts/{id}/acknowledge - Acknowledge alert
   - PATCH /api/panic-alerts/{id}/resolve - Resolve alert
-- **Admin Status Management** (NEW - December 2025):
+- **Admin Status Management**:
   - PATCH /api/admin/counsellors/{id}/status - Update counsellor status
   - PATCH /api/admin/peer-supporters/{id}/status - Update peer status
-- Email notifications via Resend (when configured)
+- **Peer Support Registration** (UPDATED Feb 2026):
+  - POST /api/peer-support/register - Register interest with email notification to admin
+  - GET /api/peer-support/registrations - List all registrations (admin only)
+- **Site Settings** (UPDATED Feb 2026):
+  - GET /api/settings - Get site settings (includes notification email)
+  - PUT /api/settings - Update settings (logo, notification email)
+  - `peer_registration_notification_email` - Configurable admin notification email
 
 ### Frontend (React Native/Expo)
 - **Callback Request Page** (/callback) - Form with counsellor/peer selection
 - **Home Page** - Updated with "Request a Callback" button
 - **Admin Panel** - Added Callbacks and Alerts tabs, status change modals
 - **Splash Screen** - Panic button with alert modal
+- **Peer Support Page** - Registration form for becoming a peer supporter
 - Theme support (light/dark mode)
 - Logo wrapper for theme compatibility
+- **Fixed**: `useNativeDriver` warning on web (Feb 2026)
+
+### Admin Site (Static HTML)
+- **Settings Section** (UPDATED Feb 2026):
+  - Branding: Logo upload
+  - Notifications: Peer registration notification email configuration
 
 ### Database Collections
 - users, counsellors, peer_supporters, organizations, resources
-- callback_requests (NEW)
-- panic_alerts (NEW)
-- settings, call_logs
+- callback_requests
+- panic_alerts
+- peer_support_registrations
+- settings (includes peer_registration_notification_email)
+- call_logs
 
 ## Testing Status
 - Backend: 100% (24/24 tests passed)
@@ -78,6 +94,10 @@ Build and enhance a mobile-first web application for UK military veterans provid
 - frontend/app/callback.tsx - Callback request form
 - frontend/app/admin.tsx - Admin panel with status management
 - frontend/app/index.tsx - Splash screen with panic button
+- frontend/app/peer-support.tsx - Peer support registration
+- frontend/src/components/Toast.tsx - Toast notifications (fixed useNativeDriver)
+- admin-site/app.js - Admin site functionality
+- admin-site/index.html - Admin site UI
 - frontend/app/home.tsx - Main home page
 
 ## Environment Variables
