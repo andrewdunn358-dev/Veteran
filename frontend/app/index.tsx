@@ -75,23 +75,33 @@ export default function SplashScreen() {
             </Text>
           </View>
 
-          {/* Main Entry Button */}
+          {/* Question */}
+          <View style={styles.questionContainer}>
+            <Text style={styles.questionText}>
+              Do you need to speak with someone right now?
+            </Text>
+          </View>
+
+          {/* Two Clear Options */}
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.enterButton} onPress={handleNo} data-testid="splash-enter-btn">
-              <Ionicons name="arrow-forward-circle" size={24} color="#ffffff" />
-              <Text style={styles.enterButtonText}>Enter the App</Text>
+            <TouchableOpacity style={styles.yesButton} onPress={handleYes} data-testid="splash-yes-btn">
+              <Ionicons name="chatbubbles" size={22} color="#ffffff" />
+              <Text style={styles.yesButtonText}>Yes, connect me now</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.helpButton} onPress={handleYes} data-testid="splash-help-btn">
-              <Ionicons name="heart-outline" size={20} color="#94a3b8" />
-              <Text style={styles.helpButtonText}>I need to talk to someone now</Text>
+            <TouchableOpacity style={styles.noButton} onPress={handleNo} data-testid="splash-no-btn">
+              <Ionicons name="apps" size={20} color="#94a3b8" />
+              <Text style={styles.noButtonText}>No, I'll explore the app</Text>
             </TouchableOpacity>
           </View>
 
           {/* Subtle Emergency Notice */}
-          <Text style={styles.emergencyNote}>
-            In an emergency, always call 999
-          </Text>
+          <View style={styles.emergencyNotice}>
+            <Ionicons name="shield-checkmark" size={16} color="#64748b" />
+            <Text style={styles.emergencyNote}>
+              In an emergency, always call 999
+            </Text>
+          </View>
       </View>
 
       {/* GDPR Cookie Notice */}
