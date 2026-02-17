@@ -44,6 +44,11 @@ Build and enhance a mobile-first web application for UK military veterans provid
 - **Admin Panel** - Added Callbacks and Alerts tabs, status change modals
 - **Splash Screen** - Clean entry point with Yes/No help buttons (panic button removed from public view)
 - **Peer Support Page** - Registration form for becoming a peer supporter
+- **Counsellor Portal** (/counsellor-portal) - UPDATED Feb 2026:
+  - **PANIC ALERTS section** - Shows active panic alerts from peer supporters with Acknowledge/Resolve actions
+  - Auto-polls every 10 seconds for new alerts
+  - View and manage assigned callbacks (take, complete)
+  - Status update (available/busy/off)
 - **Peer Portal** (/peer-portal) - UPDATED Feb 2026:
   - Panic button to alert counsellors for help during calls
   - View and manage assigned callbacks (take, release, complete)
