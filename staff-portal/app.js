@@ -408,3 +408,254 @@ async function triggerPanic() {
         showNotification('Failed to send alert', 'error');
     }
 }
+
+// ============ NOTES FUNCTIONALITY ============
+
+var staffUsers = [];
+var allCallbacks = [];
+var currentNotesTab = 'my';
+var editingNoteId = null;
+
+// Load Notes
+async function loadNotes() {
+    try {
+        var notes = await apiCall('/notes?include_shared=true');
+        var myNotes = notes.filter(function(n) { return n.author_id === currentUser.id; });
+        var sharedNotes = notes.filter(function(n) { 
+            return n.author_id !== currentUser.id && 
+                   (n.shared_with.includes(currentUser.id) || !n.is_private);
+        });
+        
+        // For admin, show all notes in "shared" tab
+        if (currentUser.role === 'admin') {
+            sharedNotes = notes.filter(function(n) { return n.author_id !== currentUser.id; });
+        }
+        
+        document.getElementById('notes-count').textContent = myNotes.length || '';
+        
+        if (currentNotesTab === 'my') {
+            renderNotes(myNotes, false);
+        } else {
+            renderNotes(sharedNotes, true);
+        }
+    } catch (error) {
+        console.error('Error loading notes:', error);
+    }
+}
+
+// Render Notes
+function renderNotes(notes, isSharedTab) {
+    var container = document.getElementById('notes-list');
+    
+    if (notes.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-sticky-note"></i><p>' + 
+            (isSharedTab ? 'No notes shared with you' : 'No notes yet. Create one!') + '</p></div>';
+        return;
+    }
+    
+    container.innerHTML = notes.map(function(note) {
+        var isOwner = note.author_id === currentUser.id;
+        var cardClass = 'card note-card' + (note.shared_with.length > 0 || !note.is_private ? ' shared' : '');
+        
+        var badgeHtml = note.is_private 
+            ? '<span class="note-badge private"><i class="fas fa-lock"></i> Private</span>'
+            : '<span class="note-badge shared"><i class="fas fa-share"></i> Shared</span>';
+        
+        var callbackInfo = '';
+        if (note.callback_id) {
+            var cb = allCallbacks.find(function(c) { return c.id === note.callback_id; });
+            if (cb) {
+                callbackInfo = '<span><i class="fas fa-phone"></i> Linked to: ' + cb.name + '</span>';
+            }
+        }
+        
+        var actions = '';
+        if (isOwner || currentUser.role === 'admin') {
+            actions = '<div class="card-actions">' +
+                '<button class="btn btn-small btn-secondary" onclick="editNote(\'' + note.id + '\')"><i class="fas fa-edit"></i> Edit</button>' +
+                '<button class="btn btn-small btn-danger" onclick="deleteNote(\'' + note.id + '\')"><i class="fas fa-trash"></i> Delete</button>' +
+                '</div>';
+        }
+        
+        return '<div class="' + cardClass + '">' +
+            '<div class="card-header">' +
+                '<span class="card-name">' + note.title + '</span>' +
+                badgeHtml +
+            '</div>' +
+            '<div class="card-message">' + note.content.replace(/\n/g, '<br>') + '</div>' +
+            '<div class="note-meta">' +
+                '<span><i class="fas fa-user"></i> ' + note.author_name + '</span>' +
+                '<span><i class="fas fa-clock"></i> ' + new Date(note.created_at).toLocaleString() + '</span>' +
+                callbackInfo +
+            '</div>' +
+            actions +
+        '</div>';
+    }).join('');
+}
+
+// Switch Notes Tab
+function switchNotesTab(tab) {
+    currentNotesTab = tab;
+    document.querySelectorAll('.notes-tab').forEach(function(t) {
+        t.classList.remove('active');
+    });
+    document.querySelector('.notes-tab[data-tab="' + tab + '"]').classList.add('active');
+    loadNotes();
+}
+
+// Load Staff Users for sharing dropdown
+async function loadStaffUsers() {
+    try {
+        staffUsers = await apiCall('/staff-users');
+    } catch (error) {
+        console.error('Error loading staff users:', error);
+    }
+}
+
+// Open Note Modal
+function openNoteModal(noteId) {
+    editingNoteId = noteId || null;
+    
+    // Populate callbacks dropdown
+    var callbackSelect = document.getElementById('note-callback');
+    callbackSelect.innerHTML = '<option value="">None</option>' + 
+        allCallbacks.map(function(cb) {
+            return '<option value="' + cb.id + '">' + cb.name + ' - ' + cb.phone + '</option>';
+        }).join('');
+    
+    // Populate share dropdown (exclude current user)
+    var shareSelect = document.getElementById('note-share');
+    shareSelect.innerHTML = staffUsers
+        .filter(function(u) { return u.id !== currentUser.id; })
+        .map(function(u) {
+            return '<option value="' + u.id + '">' + u.name + ' (' + u.role + ')</option>';
+        }).join('');
+    
+    if (noteId) {
+        // Edit mode - fetch note and populate form
+        document.getElementById('note-modal-title').innerHTML = '<i class="fas fa-edit"></i> Edit Note';
+        apiCall('/notes/' + noteId).then(function(note) {
+            document.getElementById('note-title').value = note.title;
+            document.getElementById('note-content').value = note.content;
+            document.getElementById('note-callback').value = note.callback_id || '';
+            document.getElementById('note-private').checked = note.is_private;
+            toggleShareGroup();
+            
+            // Select shared users
+            if (note.shared_with && note.shared_with.length > 0) {
+                var options = shareSelect.options;
+                for (var i = 0; i < options.length; i++) {
+                    if (note.shared_with.includes(options[i].value)) {
+                        options[i].selected = true;
+                    }
+                }
+            }
+        });
+    } else {
+        // Create mode - clear form
+        document.getElementById('note-modal-title').innerHTML = '<i class="fas fa-sticky-note"></i> New Note';
+        document.getElementById('note-title').value = '';
+        document.getElementById('note-content').value = '';
+        document.getElementById('note-callback').value = '';
+        document.getElementById('note-private').checked = true;
+        toggleShareGroup();
+    }
+    
+    document.getElementById('note-modal').classList.remove('hidden');
+}
+
+// Close Note Modal
+function closeNoteModal() {
+    document.getElementById('note-modal').classList.add('hidden');
+    editingNoteId = null;
+}
+
+// Toggle Share Group visibility
+function toggleShareGroup() {
+    var isPrivate = document.getElementById('note-private').checked;
+    document.getElementById('share-group').style.display = isPrivate ? 'none' : 'block';
+}
+
+// Save Note
+async function saveNote() {
+    var title = document.getElementById('note-title').value.trim();
+    var content = document.getElementById('note-content').value.trim();
+    var callbackId = document.getElementById('note-callback').value || null;
+    var isPrivate = document.getElementById('note-private').checked;
+    
+    // Get selected users to share with
+    var sharedWith = [];
+    if (!isPrivate) {
+        var shareSelect = document.getElementById('note-share');
+        for (var i = 0; i < shareSelect.options.length; i++) {
+            if (shareSelect.options[i].selected) {
+                sharedWith.push(shareSelect.options[i].value);
+            }
+        }
+    }
+    
+    if (!title || !content) {
+        showNotification('Please enter title and content', 'error');
+        return;
+    }
+    
+    try {
+        if (editingNoteId) {
+            // Update existing note
+            await apiCall('/notes/' + editingNoteId, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    title: title,
+                    content: content,
+                    is_private: isPrivate,
+                    shared_with: sharedWith
+                })
+            });
+            showNotification('Note updated');
+        } else {
+            // Create new note
+            await apiCall('/notes', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: title,
+                    content: content,
+                    callback_id: callbackId,
+                    is_private: isPrivate,
+                    shared_with: sharedWith
+                })
+            });
+            showNotification('Note created');
+        }
+        
+        closeNoteModal();
+        loadNotes();
+    } catch (error) {
+        showNotification('Failed: ' + error.message, 'error');
+    }
+}
+
+// Edit Note
+function editNote(noteId) {
+    openNoteModal(noteId);
+}
+
+// Delete Note
+async function deleteNote(noteId) {
+    if (!confirm('Are you sure you want to delete this note?')) return;
+    
+    try {
+        await apiCall('/notes/' + noteId, { method: 'DELETE' });
+        showNotification('Note deleted');
+        loadNotes();
+    } catch (error) {
+        showNotification('Failed: ' + error.message, 'error');
+    }
+}
+
+// Setup private checkbox listener
+document.addEventListener('DOMContentLoaded', function() {
+    var privateCheckbox = document.getElementById('note-private');
+    if (privateCheckbox) {
+        privateCheckbox.addEventListener('change', toggleShareGroup);
+    }
+});
