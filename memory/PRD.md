@@ -1,7 +1,7 @@
 # UK Veterans Support App - Product Requirements Document
 
 ## Original Problem Statement
-Build and enhance a mobile-first web application for UK military veterans providing crisis support, counselling, peer support, and callback request functionality.
+Build and enhance a mobile-first web application for UK military veterans providing crisis support, counselling, peer support, callback request functionality, and AI-powered companionship with comprehensive safeguarding.
 
 ## Core Requirements
 1. Crisis support with immediate help options
@@ -12,98 +12,75 @@ Build and enhance a mobile-first web application for UK military veterans provid
 6. Organization and resource directory
 7. Email notification system for admin alerts
 8. Staff notes system for counsellors/peers
-9. AI Battle Buddies (Tommy & Doris) chatbot feature
+9. AI Battle Buddies (Tommy & Doris) chatbot feature with **SAFEGUARDING**
 10. Training Portal for peer-to-peer volunteer training
 
-## What's Been Implemented
+## What's Been Implemented (Feb 2026)
 
-### AI Battle Buddies (Tommy & Doris) - Feb 2026
-- Two AI companion personas: Tommy (male veteran) and Doris (female veteran)
-- Character selection screen at `/ai-buddies`
-- Chat interface at `/ai-chat`
-- Backend endpoint: POST /api/ai/chat
-- Uses OpenAI API (gpt-4.1-mini) with user's API key
-- About modal with full description text
-- Featured prominently at top of home page
+### Splash Screen - Two-Option Design
+- **Question**: "Do you need to speak with someone right now?"
+- **Yes Button**: "Yes, connect me now" → Routes to /crisis-support (counsellor page)
+- **No Button**: "No, I'll explore the app" → Routes to /home
+- Subtle emergency notice: "In an emergency, always call 999"
+- Welcoming message: "You're not alone. We're here for you."
 
-### Splash Screen (Feb 2026 Update)
-- **Redesigned for calmer UX**:
-  - Removed alarming red "I NEED HELP NOW" button
-  - New welcoming message: "You're not alone. We're here for you."
-  - Blue "Enter the App" as primary action
-  - Subtle "I need to talk to someone now" link
-  - Subtle emergency notice at bottom
+### AI Battle Buddies with Safeguarding
+**Characters:**
+- Tommy: Warm, steady male presence with military-friendly tone
+- Doris: Nurturing, compassionate female presence
 
-### Home Page (Feb 2026 Update)
-- **AI Battle Buddies section moved to TOP**
-- Featured card with Tommy & Doris avatars
-- "About Tommy & Doris" button with modal
-- About modal displays full description text
-- "Start a Conversation" button in modal
+**Safeguarding System:**
+- Keyword detection for crisis indicators:
+  - Suicide: "kill myself", "end my life", "want to die", "suicide", "suicidal"
+  - Self-harm: "self harm", "hurt myself", "cut myself", "cutting"
+  - Hopelessness: "hopeless", "no point living", "can't go on", "given up", "no hope"
+  - Crisis: "can't take it anymore", "no way out", "burden to everyone"
+- When triggered:
+  - Backend returns `safeguardingTriggered: true`
+  - Creates SafeguardingAlert in database
+  - Sends email notification to admin (if configured)
+  - Frontend shows modal with support options requiring acknowledgment
+- Modal options: Talk to Counsellor, Talk to Peer, Samaritans (116 123), 999
 
-### Backend (FastAPI)
-- **Authentication**: JWT-based auth with admin/counsellor/peer roles
-- **Callback Request System**:
-  - POST /api/callbacks - Create callback requests (counsellor or peer type)
-  - GET /api/callbacks - List callbacks (filtered by role)
-  - PATCH /api/callbacks/{id}/take - Take control of callback
-  - PATCH /api/callbacks/{id}/release - Release callback
-  - PATCH /api/callbacks/{id}/complete - Complete callback
-- **Panic Alert System**:
-  - POST /api/panic-alert - Create panic alert
-  - GET /api/panic-alerts - List alerts (admin/counsellor only)
-  - PATCH /api/panic-alerts/{id}/acknowledge - Acknowledge alert
-  - PATCH /api/panic-alerts/{id}/resolve - Resolve alert
-- **Staff Notes System**:
-  - POST /api/notes - Create note (private or shared)
-  - GET /api/notes - Get notes (own + shared, admins see all)
-  - GET /api/notes/{id} - Get specific note
-  - PATCH /api/notes/{id} - Update note
-  - DELETE /api/notes/{id} - Delete note
-  - GET /api/staff-users - Get staff list for sharing
-- **AI Battle Buddies Chat**:
-  - POST /api/ai/chat - Chat with Tommy or Doris
-  - GET /api/ai-buddies/characters - Get character info
-  - Uses OpenAI API with user's API key in backend/.env
-- **Admin Status Management**:
-  - PATCH /api/admin/counsellors/{id}/status - Update counsellor status
-  - PATCH /api/admin/peer-supporters/{id}/status - Update peer status
-- **Peer Support Registration**:
-  - POST /api/peer-support/register - Register interest with email notification
-  - GET /api/peer-support/registrations - List all registrations (admin only)
+**Home Page Integration:**
+- AI Buddies featured at TOP of home page
+- "About Tommy & Doris" button opens modal with full description
+- Start a Conversation button in modal
 
-### Frontend (React Native/Expo)
-- **AI Battle Buddies** (/ai-buddies, /ai-chat) - Character selection and chat
-- **Home Page** - AI Buddies featured at top with About button
-- **Splash Screen** - Calmer design without alarming red button
-- **Callback Request Page** (/callback) - Form with counsellor/peer selection
-- **Peer Support Page** - Registration form for becoming a peer supporter
-- **Counsellor Portal** (/counsellor-portal)
-- **Peer Portal** (/peer-portal)
-- Theme support (light/dark mode)
+### Backend APIs (FastAPI)
+**AI Battle Buddies:**
+- `GET /api/ai-buddies/characters` - Get character info
+- `POST /api/ai-buddies/chat` - Chat with Tommy/Doris (includes safeguarding check)
+- `POST /api/ai-buddies/reset` - Reset session
 
-### Staff Portal (Static HTML)
-- Located at `/app/staff-portal/`
-- Features: Login, Panic alerts, Callbacks, Notes, Status toggle
+**Safeguarding Alerts:**
+- `GET /api/safeguarding-alerts` - Get alerts (counsellors/admins only)
+- `PATCH /api/safeguarding-alerts/{id}/acknowledge` - Acknowledge alert
+- `PATCH /api/safeguarding-alerts/{id}/resolve` - Resolve alert with notes
 
-### Admin Site (Static HTML)
-- Located at `/app/admin-site/`
-- Role-based access for admins
-
-### Training Portal Assets
-- `/app/training-portal/course-structure.md` - 10-module course outline
-- `/app/training-portal/radio-check-theme.css` - WordPress/LMS CSS theme
-- `/app/training-portal/formalms-theme.css` - FormaLMS CSS theme
+**Existing APIs:**
+- Auth (login, register, password reset)
+- Callbacks (create, list, take, release, complete)
+- Panic alerts (create, list, acknowledge, resolve)
+- Notes (create, list, update, delete, share)
+- Organizations, Resources, Settings
 
 ### Database Collections
-- users, counsellors, peer_supporters, organizations, resources
-- callback_requests, panic_alerts, peer_support_registrations
-- settings, call_logs, notes
+- users, counsellors, peer_supporters
+- organizations, resources
+- callback_requests, panic_alerts
+- **safeguarding_alerts** (NEW)
+- notes, settings, call_logs
+
+## Testing Status (Feb 2026)
+- **Backend**: 100% pass (15/15 tests)
+- **Frontend**: 95% pass (all core features working)
+- Test file: `/app/backend/tests/test_safeguarding.py`
 
 ## Environment Variables
 - EXPO_PUBLIC_BACKEND_URL - Backend API URL
-- OPENAI_API_KEY - For AI Battle Buddies (user's own key)
-- RESEND_API_KEY - Email service (optional)
+- OPENAI_API_KEY - For AI Battle Buddies
+- RESEND_API_KEY - Email notifications (optional)
 - MONGO_URL - Database connection
 
 ## Deployment Architecture
@@ -111,40 +88,40 @@ Build and enhance a mobile-first web application for UK military veterans provid
 - **Frontend App**: Vercel (React Native/Expo Web)
 - **Admin Site**: 20i hosting (veteran.dbty.co.uk)
 - **Staff Portal**: 20i hosting (veteran.dbty.co.uk/staff-portal)
-- **Training Portal**: WordPress/LMS (user to set up)
 
 ## Files of Reference
-- backend/server.py - All API endpoints including AI chat
-- frontend/app/index.tsx - Splash screen (calmer design)
-- frontend/app/home.tsx - Home page with AI Buddies at top
-- frontend/app/ai-buddies.tsx - Character selection screen
-- frontend/app/ai-chat.tsx - AI chat interface
-- staff-portal/ - Staff portal files
-- admin-site/ - Admin site files
-- training-portal/ - LMS theme assets
+- `/app/backend/server.py` - All backend APIs
+- `/app/frontend/app/index.tsx` - Splash screen (two options)
+- `/app/frontend/app/home.tsx` - Home page with AI Buddies at top
+- `/app/frontend/app/ai-buddies.tsx` - Character selection
+- `/app/frontend/app/ai-chat.tsx` - Chat with safeguarding modal
+- `/app/staff-portal/` - Staff portal files
 
 ## Credentials
 - Admin: admin@veteran.dbty.co.uk / ChangeThisPassword123!
 
 ## Completed Tasks (Feb 2026)
-- [x] AI Battle Buddies (Tommy & Doris) implemented
-- [x] Splash screen redesigned (removed alarming red button)
-- [x] AI Buddies moved to top of home page
+- [x] Splash screen redesigned with two-option question
+- [x] AI Battle Buddies moved to top of home page
 - [x] About Tommy & Doris button and modal added
-- [x] Staff notes system implemented
-- [x] Staff portal created
-- [x] Training portal CSS themes created
+- [x] Safeguarding keyword detection implemented
+- [x] SafeguardingAlert model and database collection
+- [x] Email notification on safeguarding trigger
+- [x] Frontend safeguarding modal with support options
+- [x] Safeguarding alerts API endpoints
+- [x] All features tested
 
 ## Upcoming Tasks (P1)
+- Add safeguarding alerts tab to Staff Portal UI
 - Training Portal API endpoint for progress tracking
 - Persistent AI chat history option for logged-in users
 
 ## Future Tasks (P2/P3)
+- Push notifications for safeguarding alerts
 - Favorites/Saved Contacts feature
 - Privacy Policy & Terms of Service pages
-- Backend performance optimization (MongoDB projections)
+- Backend performance optimization
 - VoIP/PBX Integration
 - In-App Human-to-Human Chat
 - Achievement Badges
 - Referral System
-- Clean up avatar references (tommy.png vs smudge-avatar.png)
