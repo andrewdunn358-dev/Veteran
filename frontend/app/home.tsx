@@ -153,27 +153,6 @@ export default function Index() {
               <Text style={styles.secondaryButtonText}>Request a Callback</Text>
               <Text style={styles.secondaryButtonSubtext}>We'll call you back</Text>
             </TouchableOpacity>
-
-            {/* AI Battle Buddies - Main Section */}
-            <TouchableOpacity 
-              style={[styles.secondaryButton, styles.aiBuddiesButton]}
-              onPress={() => router.push('/ai-buddies')}
-              activeOpacity={0.8}
-              data-testid="ai-buddies-btn"
-            >
-              <View style={styles.aiBuddiesIcons}>
-                <Image 
-                  source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png' }}
-                  style={styles.aiBuddyMiniAvatar}
-                />
-                <Image 
-                  source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png' }}
-                  style={[styles.aiBuddyMiniAvatar, styles.aiBuddyMiniAvatarOverlap]}
-                />
-              </View>
-              <Text style={styles.secondaryButtonText}>AI Battle Buddies</Text>
-              <Text style={styles.secondaryButtonSubtext}>Chat with Tommy or Doris</Text>
-            </TouchableOpacity>
           </View>
         </View>
 
