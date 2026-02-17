@@ -58,7 +58,14 @@ Build and enhance a mobile-first web application for UK military veterans provid
 - **Fixed**: `useNativeDriver` warning on web (Feb 2026)
 
 ### Admin Site (Static HTML)
-- **Settings Section** (UPDATED Feb 2026):
+- **Role-based access** (UPDATED Feb 2026):
+  - Admins see all tabs (Counsellors, Peers, Orgs, Resources, Users, CMS, Settings)
+  - Counsellors and Peers see "My Portal" tab
+- **My Portal Tab** (NEW Feb 2026):
+  - For Counsellors: Panic alerts section, callbacks management, status toggle
+  - For Peers: Panic button, callbacks management, status toggle
+  - Auto-polls every 10 seconds for new alerts/callbacks
+- **Settings Section**:
   - Branding: Logo upload
   - Notifications: Peer registration notification email configuration
 
