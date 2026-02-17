@@ -347,6 +347,20 @@ class PanicAlert(BaseModel):
     resolved_at: Optional[datetime] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+class SafeguardingAlert(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    session_id: str
+    character: str
+    triggering_message: str
+    ai_response: str
+    status: str = "active"  # active, acknowledged, resolved
+    acknowledged_by: Optional[str] = None
+    acknowledged_at: Optional[datetime] = None
+    resolved_by: Optional[str] = None
+    resolved_at: Optional[datetime] = None
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
 class Resource(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
