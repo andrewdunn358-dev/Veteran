@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (token && currentUser) {
         showScreen('dashboard-screen');
         document.getElementById('user-name').textContent = 'Welcome, ' + currentUser.name;
+        setupRoleBasedUI();
         loadAllData();
     } else {
         showScreen('login-screen');
