@@ -125,7 +125,7 @@ export default function CrisisSupport() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.replace('/home')} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#7c9cbf" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Crisis Support</Text>
