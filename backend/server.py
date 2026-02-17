@@ -1743,7 +1743,11 @@ def get_or_create_session(session_id: str) -> Dict[str, Any]:
     if session_id not in smudge_sessions:
         smudge_sessions[session_id] = {
             "message_count": 0,
-            "history": [],
+            "chat": LlmChat(
+                api_key=EMERGENT_LLM_KEY,
+                session_id=session_id,
+                system_message=SMUDGE_SYSTEM_PROMPT
+            ).with_model("openai", "gpt-4o-mini"),
             "last_active": now,
             "created_at": now
         }
@@ -1755,7 +1759,7 @@ def get_or_create_session(session_id: str) -> Dict[str, Any]:
 async def smudge_chat(request: SmudgeChatRequest):
     """Chat with Smudge AI listener - no authentication required"""
     
-    if not openai_client:
+    if not EMERGENT_LLM_KEY:
         raise HTTPException(status_code=503, detail="Smudge is currently unavailable")
     
     if not request.message or not request.sessionId:
@@ -1772,29 +1776,9 @@ async def smudge_chat(request: SmudgeChatRequest):
                 sessionId=request.sessionId
             )
         
-        # Build conversation history for context
-        messages = [{"role": "system", "content": SMUDGE_SYSTEM_PROMPT}]
-        
-        # Add conversation history (keep last 10 exchanges for context)
-        for msg in session["history"][-20:]:
-            messages.append(msg)
-        
-        # Add current user message
-        messages.append({"role": "user", "content": request.message})
-        
-        # Call OpenAI
-        completion = openai_client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages,
-            max_tokens=200,
-            temperature=0.4
-        )
-        
-        reply = completion.choices[0].message.content or ""
-        
-        # Store in history
-        session["history"].append({"role": "user", "content": request.message})
-        session["history"].append({"role": "assistant", "content": reply})
+        # Send message using emergentintegrations
+        user_message = UserMessage(text=request.message)
+        reply = await session["chat"].send_message(user_message)
         
         return SmudgeChatResponse(
             reply=reply,
