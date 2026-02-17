@@ -295,6 +295,83 @@ export default function AIChat() {
           <FontAwesome5 name="paper-plane" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      {/* Safeguarding Support Modal */}
+      <Modal
+        visible={showSafeguardingModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => {}}
+      >
+        <View style={styles.safeguardingOverlay}>
+          <View style={styles.safeguardingModal}>
+            <View style={styles.safeguardingHeader}>
+              <FontAwesome5 name="heart" size={32} color="#dc2626" />
+              <Text style={styles.safeguardingTitle}>We're Here For You</Text>
+            </View>
+            
+            <Text style={styles.safeguardingText}>
+              It sounds like you might be going through something really difficult right now. 
+              You don't have to face this alone.
+            </Text>
+            
+            <Text style={styles.safeguardingSubtext}>
+              Real people are available and ready to support you:
+            </Text>
+            
+            <View style={styles.safeguardingOptions}>
+              <TouchableOpacity
+                style={styles.safeguardingOption}
+                onPress={() => {
+                  setShowSafeguardingModal(false);
+                  router.push('/crisis-support');
+                }}
+              >
+                <FontAwesome5 name="user-md" size={24} color="#2563eb" />
+                <Text style={styles.safeguardingOptionTitle}>Talk to a Counsellor</Text>
+                <Text style={styles.safeguardingOptionDesc}>Professional support available now</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.safeguardingOption}
+                onPress={() => {
+                  setShowSafeguardingModal(false);
+                  router.push('/peer-support');
+                }}
+              >
+                <FontAwesome5 name="users" size={24} color="#16a34a" />
+                <Text style={styles.safeguardingOptionTitle}>Talk to a Peer</Text>
+                <Text style={styles.safeguardingOptionDesc}>Connect with another veteran</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.safeguardingOption}
+                onPress={() => Linking.openURL('tel:116123')}
+              >
+                <FontAwesome5 name="phone-alt" size={24} color="#7c3aed" />
+                <Text style={styles.safeguardingOptionTitle}>Samaritans</Text>
+                <Text style={styles.safeguardingOptionDesc}>Call 116 123 (free, 24/7)</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.emergencyNote}>
+              <FontAwesome5 name="exclamation-triangle" size={14} color="#f59e0b" />
+              <Text style={styles.emergencyNoteText}>
+                If you're in immediate danger, please call 999
+              </Text>
+            </View>
+            
+            <TouchableOpacity
+              style={styles.safeguardingContinue}
+              onPress={() => setShowSafeguardingModal(false)}
+            >
+              <Text style={styles.safeguardingContinueText}>
+                I understand, continue chatting
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
