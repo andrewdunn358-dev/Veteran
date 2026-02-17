@@ -133,6 +133,11 @@ export default function AIChat() {
           timestamp: new Date(),
         };
         setMessages(prev => [...prev, buddyMessage]);
+        
+        // Check if safeguarding was triggered
+        if (data.safeguardingTriggered) {
+          setShowSafeguardingModal(true);
+        }
       } else {
         const errorMessage: Message = {
           id: `error-${Date.now()}`,
