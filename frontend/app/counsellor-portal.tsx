@@ -220,7 +220,7 @@ export default function CounsellorPortal() {
     );
   }
 
-  const activeAlerts = panicAlerts.filter(a => a.status === 'pending' || a.status === 'acknowledged');
+  const activeAlerts = panicAlerts.filter(a => a.status === 'active' || a.status === 'acknowledged');
   const pendingCallbacks = callbacks.filter(c => c.status === 'pending');
   const myCallbacks = callbacks.filter(c => c.assigned_to === user?.id && c.status === 'in_progress');
 
