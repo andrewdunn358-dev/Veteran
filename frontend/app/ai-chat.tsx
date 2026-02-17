@@ -567,4 +567,88 @@ const styles = StyleSheet.create({
   sendButtonDisabled: {
     backgroundColor: '#94a3b8',
   },
+  // Safeguarding Modal Styles
+  safeguardingOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  safeguardingModal: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 24,
+    maxHeight: '90%',
+  },
+  safeguardingHeader: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  safeguardingTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  safeguardingText: {
+    fontSize: 16,
+    color: '#475569',
+    lineHeight: 24,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  safeguardingSubtext: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  safeguardingOptions: {
+    gap: 12,
+    marginBottom: 20,
+  },
+  safeguardingOption: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  safeguardingOptionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginTop: 8,
+  },
+  safeguardingOptionDesc: {
+    fontSize: 13,
+    color: '#64748b',
+    marginTop: 4,
+  },
+  emergencyNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fef3c7',
+    padding: 12,
+    borderRadius: 8,
+    gap: 8,
+    marginBottom: 16,
+  },
+  emergencyNoteText: {
+    fontSize: 13,
+    color: '#92400e',
+    fontWeight: '500',
+  },
+  safeguardingContinue: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  safeguardingContinueText: {
+    fontSize: 14,
+    color: '#64748b',
+    textDecorationLine: 'underline',
+  },
 });
