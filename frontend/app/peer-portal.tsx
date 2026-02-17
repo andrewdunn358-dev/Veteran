@@ -8,6 +8,9 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  ScrollView,
+  Modal,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -28,10 +31,27 @@ interface PeerSupporter {
   phone: string;
 }
 
+interface CallbackRequest {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  message: string;
+  request_type: string;
+  status: string;
+  assigned_to?: string;
+  assigned_name?: string;
+  created_at: string;
+}
+
 export default function PeerPortal() {
   const [peer, setPeer] = useState<PeerSupporter | null>(null);
+  const [callbacks, setCallbacks] = useState<CallbackRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showPanicModal, setShowPanicModal] = useState(false);
+  const [panicSubmitting, setPanicSubmitting] = useState(false);
+  const [panicMessage, setPanicMessage] = useState('');
   const { user, token, logout } = useAuth();
   const router = useRouter();
 
@@ -40,24 +60,31 @@ export default function PeerPortal() {
       router.replace('/login');
       return;
     }
-    fetchPeer();
+    fetchData();
   }, [user]);
 
-  const fetchPeer = async () => {
+  const fetchData = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/peer-supporters`);
-      if (response.ok) {
-        const peers = await response.json();
-        // Find peer linked to this user
+      // Fetch peer profile
+      const peersResponse = await fetch(`${API_URL}/api/peer-supporters`);
+      if (peersResponse.ok) {
+        const peers = await peersResponse.json();
         const myPeer = peers.find((p: any) => p.user_id === user?.id);
         if (myPeer) {
           setPeer(myPeer);
-        } else {
-          Alert.alert('Notice', 'No peer profile linked to your account. Contact admin.');
         }
       }
+      
+      // Fetch callback requests assigned to peer
+      const callbacksResponse = await fetch(`${API_URL}/api/callbacks`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (callbacksResponse.ok) {
+        const data = await callbacksResponse.json();
+        setCallbacks(data);
+      }
     } catch (error) {
-      console.error('Error fetching peer:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -91,6 +118,88 @@ export default function PeerPortal() {
     }
   };
 
+  const takeCallback = async (callbackId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/callbacks/${callbackId}/take`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        Alert.alert('Success', 'Callback assigned to you');
+        fetchData();
+      } else {
+        const error = await response.json();
+        Alert.alert('Error', error.detail || 'Failed to take callback');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error');
+    }
+  };
+
+  const releaseCallback = async (callbackId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/callbacks/${callbackId}/release`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        Alert.alert('Success', 'Callback released');
+        fetchData();
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error');
+    }
+  };
+
+  const completeCallback = async (callbackId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/callbacks/${callbackId}/complete`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        Alert.alert('Success', 'Callback marked as complete');
+        fetchData();
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error');
+    }
+  };
+
+  const submitPanicAlert = async () => {
+    setPanicSubmitting(true);
+    try {
+      const response = await fetch(`${API_URL}/api/panic-alert`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          user_name: user?.name || peer?.firstName,
+          user_phone: peer?.phone,
+          message: panicMessage || 'Peer supporter needs immediate counsellor assistance',
+        }),
+      });
+
+      if (response.ok) {
+        setShowPanicModal(false);
+        setPanicMessage('');
+        Alert.alert(
+          'Alert Sent',
+          'A counsellor has been notified and will assist you shortly.',
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert('Error', 'Could not send alert. Please try again or call directly.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error. Please call a counsellor directly.');
+    } finally {
+      setPanicSubmitting(false);
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     router.replace('/');
@@ -104,6 +213,15 @@ export default function PeerPortal() {
     }
   };
 
+  const getCallbackStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return '#f59e0b';
+      case 'in_progress': return '#4a90d9';
+      case 'completed': return '#22c55e';
+      default: return '#8899a6';
+    }
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -111,6 +229,9 @@ export default function PeerPortal() {
       </SafeAreaView>
     );
   }
+
+  const pendingCallbacks = callbacks.filter(c => c.status === 'pending');
+  const myCallbacks = callbacks.filter(c => c.assigned_to === user?.id && c.status === 'in_progress');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -124,56 +245,133 @@ export default function PeerPortal() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.content}>
+      <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* PANIC BUTTON - Always visible */}
+        <TouchableOpacity 
+          style={styles.panicButton}
+          onPress={() => setShowPanicModal(true)}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="warning" size={28} color="#ffffff" />
+          <View style={styles.panicTextContainer}>
+            <Text style={styles.panicButtonText}>NEED COUNSELLOR HELP</Text>
+            <Text style={styles.panicButtonSubtext}>Alert a counsellor for assistance</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Profile Card */}
         <View style={styles.profileCard}>
-          <Ionicons name="people-circle" size={80} color="#22c55e" />
-          <Text style={styles.profileName}>{peer?.firstName || user?.name}</Text>
-          <Text style={styles.profileDetail}>
-            {peer ? `${peer.background} - ${peer.yearsServed} years` : 'Peer Supporter'}
-          </Text>
-          {peer?.area && <Text style={styles.profileArea}>{peer.area}</Text>}
-          
-          <View style={styles.currentStatus}>
-            <Text style={styles.statusLabel}>Current Status:</Text>
-            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(peer?.status || 'unavailable') }]}>
-              <Text style={styles.statusText}>{peer?.status || 'Not Set'}</Text>
-            </View>
+          <Ionicons name="people-circle" size={60} color="#22c55e" />
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{peer?.firstName || user?.name}</Text>
+            <Text style={styles.profileDetail}>
+              {peer ? `${peer.background}` : 'Peer Supporter'}
+            </Text>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(peer?.status || 'unavailable') }]}>
+            <Text style={styles.statusText}>{peer?.status || 'Not Set'}</Text>
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>Update Your Status</Text>
-
-        <View style={styles.statusButtons}>
+        {/* Status Update Buttons */}
+        <Text style={styles.sectionTitle}>Your Status</Text>
+        <View style={styles.statusButtonsRow}>
           <TouchableOpacity
-            style={[styles.statusButton, styles.availableButton]}
+            style={[styles.statusButtonSmall, peer?.status === 'available' && styles.statusButtonActive, { backgroundColor: '#22c55e' }]}
             onPress={() => updateStatus('available')}
             disabled={isUpdating}
           >
-            <Ionicons name="checkmark-circle" size={32} color="#ffffff" />
-            <Text style={styles.statusButtonText}>Available</Text>
-            <Text style={styles.statusButtonSubtext}>Ready to chat</Text>
+            <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
+            <Text style={styles.statusButtonSmallText}>Available</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.statusButton, styles.limitedButton]}
+            style={[styles.statusButtonSmall, peer?.status === 'limited' && styles.statusButtonActive, { backgroundColor: '#f59e0b' }]}
             onPress={() => updateStatus('limited')}
             disabled={isUpdating}
           >
-            <Ionicons name="time" size={32} color="#ffffff" />
-            <Text style={styles.statusButtonText}>Limited</Text>
-            <Text style={styles.statusButtonSubtext}>May be slow to respond</Text>
+            <Ionicons name="time" size={20} color="#ffffff" />
+            <Text style={styles.statusButtonSmallText}>Limited</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.statusButton, styles.unavailableButton]}
+            style={[styles.statusButtonSmall, peer?.status === 'unavailable' && styles.statusButtonActive, { backgroundColor: '#ef4444' }]}
             onPress={() => updateStatus('unavailable')}
             disabled={isUpdating}
           >
-            <Ionicons name="close-circle" size={32} color="#ffffff" />
-            <Text style={styles.statusButtonText}>Unavailable</Text>
-            <Text style={styles.statusButtonSubtext}>Not taking calls</Text>
+            <Ionicons name="close-circle" size={20} color="#ffffff" />
+            <Text style={styles.statusButtonSmallText}>Unavailable</Text>
           </TouchableOpacity>
         </View>
+
+        {/* My Active Callbacks */}
+        {myCallbacks.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Your Active Callbacks</Text>
+            {myCallbacks.map((callback) => (
+              <View key={callback.id} style={styles.callbackCard}>
+                <View style={styles.callbackHeader}>
+                  <Text style={styles.callbackName}>{callback.name}</Text>
+                  <View style={[styles.callbackStatusBadge, { backgroundColor: getCallbackStatusColor(callback.status) }]}>
+                    <Text style={styles.callbackStatusText}>{callback.status.replace('_', ' ')}</Text>
+                  </View>
+                </View>
+                <Text style={styles.callbackPhone}>{callback.phone}</Text>
+                <Text style={styles.callbackMessage} numberOfLines={2}>{callback.message}</Text>
+                <View style={styles.callbackActions}>
+                  <TouchableOpacity 
+                    style={styles.callbackActionButton}
+                    onPress={() => completeCallback(callback.id)}
+                  >
+                    <Ionicons name="checkmark" size={18} color="#22c55e" />
+                    <Text style={[styles.callbackActionText, { color: '#22c55e' }]}>Complete</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.callbackActionButton}
+                    onPress={() => releaseCallback(callback.id)}
+                  >
+                    <Ionicons name="arrow-undo" size={18} color="#f59e0b" />
+                    <Text style={[styles.callbackActionText, { color: '#f59e0b' }]}>Release</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </>
+        )}
+
+        {/* Pending Callbacks */}
+        <Text style={styles.sectionTitle}>
+          Pending Callbacks {pendingCallbacks.length > 0 && `(${pendingCallbacks.length})`}
+        </Text>
+        {pendingCallbacks.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="checkmark-circle" size={32} color="#22c55e" />
+            <Text style={styles.emptyStateText}>No pending callbacks</Text>
+          </View>
+        ) : (
+          pendingCallbacks.map((callback) => (
+            <View key={callback.id} style={styles.callbackCard}>
+              <View style={styles.callbackHeader}>
+                <Text style={styles.callbackName}>{callback.name}</Text>
+                <View style={[styles.callbackStatusBadge, { backgroundColor: getCallbackStatusColor(callback.status) }]}>
+                  <Text style={styles.callbackStatusText}>Pending</Text>
+                </View>
+              </View>
+              <Text style={styles.callbackPhone}>{callback.phone}</Text>
+              <Text style={styles.callbackMessage} numberOfLines={2}>{callback.message}</Text>
+              <Text style={styles.callbackTime}>
+                {new Date(callback.created_at).toLocaleString()}
+              </Text>
+              <TouchableOpacity 
+                style={styles.takeCallbackButton}
+                onPress={() => takeCallback(callback.id)}
+              >
+                <Ionicons name="hand-left" size={18} color="#ffffff" />
+                <Text style={styles.takeCallbackText}>Take This Callback</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
 
         {isUpdating && (
           <View style={styles.updatingOverlay}>
@@ -181,7 +379,58 @@ export default function PeerPortal() {
             <Text style={styles.updatingText}>Updating...</Text>
           </View>
         )}
-      </View>
+      </ScrollView>
+
+      {/* Panic Modal */}
+      <Modal visible={showPanicModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Ionicons name="warning" size={32} color="#ef4444" />
+              <Text style={styles.modalTitle}>Alert Counsellor</Text>
+            </View>
+            
+            <Text style={styles.modalSubtext}>
+              A counsellor will be notified immediately to assist you with your current call.
+            </Text>
+
+            <TextInput
+              style={styles.modalInput}
+              placeholder="What do you need help with? (optional)"
+              placeholderTextColor="#8899a6"
+              value={panicMessage}
+              onChangeText={setPanicMessage}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={styles.modalCancelButton}
+                onPress={() => setShowPanicModal(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.modalSendButton}
+                onPress={submitPanicAlert}
+                disabled={panicSubmitting}
+              >
+                {panicSubmitting ? (
+                  <ActivityIndicator color="#ffffff" />
+                ) : (
+                  <>
+                    <Ionicons name="send" size={18} color="#ffffff" />
+                    <Text style={styles.modalSendText}>Send Alert</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
