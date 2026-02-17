@@ -146,7 +146,7 @@ export default function Index() {
           <TouchableOpacity 
             style={styles.toolButton}
             onPress={() => router.push('/journal')}
-            activeOpacity={0.8}}
+            activeOpacity={0.8}
           >
             <View style={[styles.toolIconBg, { backgroundColor: '#dbeafe' }]}>
               <Ionicons name="book" size={24} color="#3b82f6" />
