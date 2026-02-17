@@ -273,6 +273,33 @@ class ResourceUpdate(BaseModel):
     image_url: Optional[str] = None
     image_data: Optional[str] = None  # Base64 encoded image for updates
 
+# Staff Notes Models
+class NoteCreate(BaseModel):
+    title: str
+    content: str
+    is_private: bool = True  # True = personal, False = can be shared
+    shared_with: Optional[List[str]] = None  # List of user IDs to share with
+    callback_id: Optional[str] = None  # Optional link to a callback
+
+class Note(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    content: str
+    is_private: bool = True
+    shared_with: List[str] = Field(default_factory=list)
+    callback_id: Optional[str] = None
+    author_id: str
+    author_name: str
+    author_role: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class NoteUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    is_private: Optional[bool] = None
+    shared_with: Optional[List[str]] = None
+
 # Resend Configuration
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL", "noreply@veteran.dbty.co.uk")
