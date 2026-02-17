@@ -274,6 +274,12 @@ const createStyles = (colors: any) => StyleSheet.create({
   mainActions: {
     marginBottom: 32,
   },
+  emergencyNote: {
+    fontSize: 13,
+    color: '#94a3b8',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
   primaryButton: {
     backgroundColor: '#2563eb',
     borderRadius: 16,
