@@ -17,16 +17,16 @@
                 <p>Radio Check - Veterans Support</p>
             </div>
             <div class="login-card">
-                <form id="login-form" method="POST" action="javascript:void(0);" onsubmit="handleLogin(event); return false;">
+                <form id="login-form">
                     <div class="form-group">
                         <label for="email"><i class="fas fa-envelope"></i> Email</label>
-                        <input type="email" id="email" name="email" required placeholder="Enter your email" autocomplete="off">
+                        <input type="email" id="email" name="email" required placeholder="Enter your email">
                     </div>
                     <div class="form-group">
                         <label for="password"><i class="fas fa-lock"></i> Password</label>
-                        <input type="password" id="password" name="password" required placeholder="Enter your password" autocomplete="off">
+                        <input type="password" id="password" name="password" required placeholder="Enter your password">
                     </div>
-                    <button type="button" class="btn btn-primary btn-block" onclick="handleLogin(event)">
+                    <button type="submit" class="btn btn-primary btn-block">
                         <i class="fas fa-sign-in-alt"></i> Sign In
                     </button>
                     <div id="login-error" class="error-message hidden"></div>
@@ -59,88 +59,30 @@
         </header>
 
         <nav class="tab-nav">
-            <!-- My Portal Tab - For Counsellors and Peers -->
-            <button class="tab-btn" data-tab="myportal" id="myportal-tab-btn" style="display: none;">
-                <i class="fas fa-home"></i> My Portal
-            </button>
-            <button class="tab-btn active" data-tab="counsellors" id="counsellors-tab-btn">
+            <button class="tab-btn active" data-tab="counsellors">
                 <i class="fas fa-user-md"></i> Counsellors
             </button>
-            <button class="tab-btn" data-tab="peers" id="peers-tab-btn">
+            <button class="tab-btn" data-tab="peers">
                 <i class="fas fa-users"></i> Peers
             </button>
-            <button class="tab-btn" data-tab="orgs" id="orgs-tab-btn">
+            <button class="tab-btn" data-tab="orgs">
                 <i class="fas fa-building"></i> Orgs
             </button>
-            <button class="tab-btn" data-tab="resources" id="resources-tab-btn">
+            <button class="tab-btn" data-tab="resources">
                 <i class="fas fa-book-open"></i> Resources
             </button>
-            <button class="tab-btn" data-tab="users" id="users-tab-btn">
+            <button class="tab-btn" data-tab="users">
                 <i class="fas fa-user-cog"></i> Users
             </button>
-            <button class="tab-btn" data-tab="cms" id="cms-tab-btn">
+            <button class="tab-btn" data-tab="cms">
                 <i class="fas fa-edit"></i> CMS
             </button>
-            <button class="tab-btn" data-tab="settings" id="settings-tab-btn">
+            <button class="tab-btn" data-tab="settings">
                 <i class="fas fa-cog"></i> Settings
             </button>
         </nav>
 
         <main class="dashboard-content">
-            <!-- My Portal Tab (For Counsellors and Peers) -->
-            <div id="myportal-tab" class="tab-content">
-                <div class="tab-header">
-                    <h2 id="portal-title">My Portal</h2>
-                    <div class="tab-actions">
-                        <div id="my-status-buttons" class="status-toggle">
-                            <button class="status-btn available" onclick="updateMyStatus('available')">
-                                <i class="fas fa-check-circle"></i> Available
-                            </button>
-                            <button class="status-btn busy" onclick="updateMyStatus('busy')">
-                                <i class="fas fa-clock"></i> Busy
-                            </button>
-                            <button class="status-btn off" onclick="updateMyStatus('off')">
-                                <i class="fas fa-moon"></i> Off
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Panic Alerts Section (Counsellors Only) -->
-                <div id="panic-alerts-section" class="portal-section" style="display: none;">
-                    <h3 class="section-title alert-title">
-                        <i class="fas fa-exclamation-triangle"></i> 
-                        PANIC ALERTS <span id="alert-count" class="badge badge-danger"></span>
-                    </h3>
-                    <div id="panic-alerts-list" class="alerts-grid"></div>
-                </div>
-                
-                <!-- My Active Callbacks -->
-                <div class="portal-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-phone-volume"></i> My Active Callbacks
-                    </h3>
-                    <div id="my-callbacks-list" class="callbacks-grid"></div>
-                </div>
-                
-                <!-- Pending Callbacks -->
-                <div class="portal-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-phone"></i> Pending Callbacks <span id="pending-count" class="badge"></span>
-                    </h3>
-                    <div id="pending-callbacks-list" class="callbacks-grid"></div>
-                </div>
-                
-                <!-- Panic Button (Peers Only) -->
-                <div id="panic-button-section" class="portal-section" style="display: none;">
-                    <button class="panic-button" onclick="triggerPanicAlert()">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        NEED COUNSELLOR HELP
-                        <span>Alert a counsellor for assistance</span>
-                    </button>
-                </div>
-            </div>
-
             <!-- Counsellors Tab -->
             <div id="counsellors-tab" class="tab-content active">
                 <div class="tab-header">
@@ -279,23 +221,6 @@
                     <button class="btn btn-primary" onclick="saveLogo()" style="margin-top: 15px;">
                         <i class="fas fa-save"></i> Save Logo
                     </button>
-                    
-                    <hr style="margin: 30px 0; border-color: var(--border-color);">
-                    
-                    <h3 style="margin-bottom: 15px; color: var(--text-primary);">Notifications</h3>
-                    
-                    <!-- Peer Registration Notification Email -->
-                    <div class="form-group" style="margin-bottom: 20px;">
-                        <label>Peer Registration Notification Email</label>
-                        <p style="color: var(--text-secondary); margin: 5px 0 10px; font-size: 13px;">
-                            When someone registers interest to become a peer supporter, a notification will be sent to this email address.
-                        </p>
-                        <input type="email" id="peer-notification-email" placeholder="admin@example.com" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary);">
-                    </div>
-                    
-                    <button class="btn btn-primary" onclick="saveNotificationSettings()" style="margin-top: 10px;">
-                        <i class="fas fa-save"></i> Save Notification Settings
-                    </button>
                 </div>
             </div>
         </main>
@@ -329,5 +254,3 @@
     <script src="app.js"></script>
 </body>
 </html>
-
-<!-- Version: 20260217-105151 -->
