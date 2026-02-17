@@ -1746,17 +1746,24 @@ def get_or_create_session(session_id: str) -> Dict[str, Any]:
     if session_id not in smudge_sessions:
         smudge_sessions[session_id] = {
             "message_count": 0,
-            "chat": LlmChat(
-                api_key=EMERGENT_LLM_KEY,
-                session_id=session_id,
-                system_message=SMUDGE_SYSTEM_PROMPT
-            ).with_model("openai", "gpt-4o-mini"),
+            "history": [],  # Store conversation history
             "last_active": now,
             "created_at": now
         }
     
     smudge_sessions[session_id]["last_active"] = now
     return smudge_sessions[session_id]
+
+# Initialize OpenAI client for Smudge (using Emergent LLM Key as proxy)
+def get_openai_client():
+    if EMERGENT_LLM_KEY:
+        return OpenAI(
+            api_key=EMERGENT_LLM_KEY,
+            base_url="https://api.emergentmethods.ai/v1"
+        )
+    return None
+
+smudge_openai_client = get_openai_client()
 
 @api_router.post("/smudge/chat", response_model=SmudgeChatResponse)
 async def smudge_chat(request: SmudgeChatRequest):
@@ -1769,7 +1776,7 @@ async def smudge_chat(request: SmudgeChatRequest):
             sessionId=request.sessionId
         )
     
-    if not EMERGENT_LLM_KEY:
+    if not smudge_openai_client:
         raise HTTPException(status_code=503, detail="Smudge is currently unavailable")
     
     if not request.message or not request.sessionId:
@@ -1786,9 +1793,29 @@ async def smudge_chat(request: SmudgeChatRequest):
                 sessionId=request.sessionId
             )
         
-        # Send message using emergentintegrations
-        user_message = UserMessage(text=request.message)
-        reply = await session["chat"].send_message(user_message)
+        # Build messages with history
+        messages = [{"role": "system", "content": SMUDGE_SYSTEM_PROMPT}]
+        
+        # Add conversation history (last 20 messages for context)
+        for msg in session["history"][-20:]:
+            messages.append(msg)
+        
+        # Add current user message
+        messages.append({"role": "user", "content": request.message})
+        
+        # Call OpenAI via Emergent proxy
+        completion = smudge_openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            max_tokens=200,
+            temperature=0.4
+        )
+        
+        reply = completion.choices[0].message.content or ""
+        
+        # Store in history
+        session["history"].append({"role": "user", "content": request.message})
+        session["history"].append({"role": "assistant", "content": reply})
         
         return SmudgeChatResponse(
             reply=reply,
