@@ -221,6 +221,23 @@
                     <button class="btn btn-primary" onclick="saveLogo()" style="margin-top: 15px;">
                         <i class="fas fa-save"></i> Save Logo
                     </button>
+                    
+                    <hr style="margin: 30px 0; border-color: var(--border-color);">
+                    
+                    <h3 style="margin-bottom: 15px; color: var(--text-primary);">Notifications</h3>
+                    
+                    <!-- Peer Registration Notification Email -->
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label>Peer Registration Notification Email</label>
+                        <p style="color: var(--text-secondary); margin: 5px 0 10px; font-size: 13px;">
+                            When someone registers interest to become a peer supporter, a notification will be sent to this email address.
+                        </p>
+                        <input type="email" id="peer-notification-email" placeholder="admin@example.com" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary);">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="saveNotificationSettings()" style="margin-top: 10px;">
+                        <i class="fas fa-save"></i> Save Notification Settings
+                    </button>
                 </div>
             </div>
         </main>
