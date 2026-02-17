@@ -9,6 +9,7 @@ import {
   Platform,
   ActivityIndicator,
   StyleSheet,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
