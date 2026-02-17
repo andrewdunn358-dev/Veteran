@@ -25,8 +25,9 @@ SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
-# Emergent LLM Key for Smudge AI
+# Emergent LLM Key (for local development) or OpenAI key (for production)
 EMERGENT_LLM_KEY = os.getenv("EMERGENT_LLM_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # Smudge Kill Switch - set SMUDGE_DISABLED=true in env to disable
 SMUDGE_DISABLED = os.getenv("SMUDGE_DISABLED", "false").lower() == "true"
