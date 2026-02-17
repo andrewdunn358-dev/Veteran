@@ -329,6 +329,20 @@ class NoteUpdate(BaseModel):
     is_private: Optional[bool] = None
     shared_with: Optional[List[str]] = None
 
+# Smudge AI Chat Models
+class SmudgeChatRequest(BaseModel):
+    message: str
+    sessionId: str
+
+class SmudgeChatResponse(BaseModel):
+    reply: str
+    sessionId: str
+
+# In-memory rate limiting and conversation history for Smudge
+smudge_sessions: Dict[str, Dict[str, Any]] = {}
+SMUDGE_MAX_MESSAGES = 30
+SMUDGE_SESSION_TIMEOUT_MINUTES = 60
+
 # Resend Configuration
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL", "noreply@veteran.dbty.co.uk")
