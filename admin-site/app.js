@@ -154,8 +154,6 @@ async function handleLogin(e) {
         
         showScreen('dashboard-screen');
         loadAllData();
-        showScreen('dashboard-screen');
-        loadAllData();
         
     } catch (error) {
         errorEl.textContent = error.message;
