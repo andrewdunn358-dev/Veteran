@@ -307,6 +307,11 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     gap: 6,
   },
+  smudgeLabelAvatar: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+  },
   smudgeLabelText: {
     fontSize: 11,
     color: '#4a90d9',
