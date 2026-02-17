@@ -275,14 +275,14 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginBottom: 32,
   },
   primaryButton: {
-    backgroundColor: '#cc0000',
+    backgroundColor: '#2563eb',
     borderRadius: 16,
     padding: 32,
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 12,
     ...Platform.select({
       ios: {
-        shadowColor: '#cc0000',
+        shadowColor: '#2563eb',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
