@@ -248,7 +248,7 @@ export default function CounsellorPortal() {
               <View key={alert.id} style={styles.alertCard}>
                 <View style={styles.alertCardHeader}>
                   <Text style={styles.alertName}>{alert.user_name || 'Peer Supporter'}</Text>
-                  <View style={[styles.alertStatusBadge, { backgroundColor: alert.status === 'pending' ? '#ef4444' : '#f59e0b' }]}>
+                  <View style={[styles.alertStatusBadge, { backgroundColor: alert.status === 'active' ? '#ef4444' : '#f59e0b' }]}>
                     <Text style={styles.alertStatusText}>{alert.status}</Text>
                   </View>
                 </View>
