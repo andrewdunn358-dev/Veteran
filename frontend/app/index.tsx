@@ -139,16 +139,6 @@ export default function SplashScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Panic Button */}
-        <TouchableOpacity 
-          style={styles.panicButton} 
-          onPress={handlePanicButton}
-          data-testid="panic-button"
-        >
-          <Ionicons name="warning" size={24} color="#ffffff" />
-          <Text style={styles.panicButtonText}>PANIC - Alert Counsellor</Text>
-        </TouchableOpacity>
-
         {/* Emergency Notice */}
         <View style={styles.emergencyNotice}>
           <Ionicons name="warning" size={16} color="#f59e0b" />
