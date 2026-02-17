@@ -15,7 +15,7 @@ import jwt
 import secrets
 import resend
 import asyncio
-from openai import OpenAI
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -25,9 +25,8 @@ SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
-# OpenAI Configuration
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-openai_client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+# Emergent LLM Key for Smudge AI
+EMERGENT_LLM_KEY = os.getenv("EMERGENT_LLM_KEY", "")
 
 # Smudge AI System Prompt
 SMUDGE_SYSTEM_PROMPT = """
