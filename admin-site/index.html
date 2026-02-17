@@ -17,14 +17,14 @@
                 <p>Radio Check - Veterans Support</p>
             </div>
             <div class="login-card">
-                <form id="login-form">
+                <form id="login-form" method="POST" action="javascript:void(0);" onsubmit="return false;">
                     <div class="form-group">
                         <label for="email"><i class="fas fa-envelope"></i> Email</label>
-                        <input type="email" id="email" name="email" required placeholder="Enter your email">
+                        <input type="email" id="email" name="email" required placeholder="Enter your email" autocomplete="email">
                     </div>
                     <div class="form-group">
                         <label for="password"><i class="fas fa-lock"></i> Password</label>
-                        <input type="password" id="password" name="password" required placeholder="Enter your password">
+                        <input type="password" id="password" name="password" required placeholder="Enter your password" autocomplete="current-password">
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">
                         <i class="fas fa-sign-in-alt"></i> Sign In
