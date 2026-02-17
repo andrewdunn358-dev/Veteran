@@ -47,45 +47,6 @@ export default function SplashScreen() {
     // Go to main app
     router.replace('/home');
   };
-  };
-
-  const submitPanicAlert = async () => {
-    setPanicSubmitting(true);
-    try {
-      const response = await fetch(`${API_URL}/api/panic-alert`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_name: panicData.name || null,
-          user_phone: panicData.phone || null,
-          message: panicData.message || null,
-        }),
-      });
-
-      const result = await response.json();
-      
-      setShowPanicModal(false);
-      setPanicData({ name: '', phone: '', message: '' });
-      
-      Alert.alert(
-        'Alert Sent',
-        'Help is on the way. A counsellor has been notified.\n\nIf you are in immediate danger, please call 999.',
-        [
-          { text: 'Call 999', onPress: () => {} },
-          { text: 'Call Samaritans (116 123)', onPress: () => {} },
-          { text: 'OK', style: 'default' }
-        ]
-      );
-    } catch (error) {
-      Alert.alert(
-        'Error',
-        'Could not send alert. Please call 999 or Samaritans at 116 123.',
-        [{ text: 'OK' }]
-      );
-    } finally {
-      setPanicSubmitting(false);
-    }
-  };
 
   const styles = createStyles(colors, isDark);
 
