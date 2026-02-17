@@ -135,9 +135,9 @@ async function handleLogin(e) {
             throw new Error(data.detail || 'Login failed');
         }
         
-        // Check if admin
-        if (data.user.role !== 'admin') {
-            throw new Error('Access denied. Admin only.');
+        // Allow admin, counsellor, and peer roles
+        if (!['admin', 'counsellor', 'peer'].includes(data.user.role)) {
+            throw new Error('Access denied. Staff only.');
         }
         
         // Save token and user
@@ -148,6 +148,12 @@ async function handleLogin(e) {
         
         // Show dashboard
         document.getElementById('user-name').textContent = `Welcome, ${currentUser.name}`;
+        
+        // Setup role-based UI
+        setupRoleBasedUI();
+        
+        showScreen('dashboard-screen');
+        loadAllData();
         showScreen('dashboard-screen');
         loadAllData();
         
