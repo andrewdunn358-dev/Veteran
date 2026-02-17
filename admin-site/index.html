@@ -17,16 +17,16 @@
                 <p>Radio Check - Veterans Support</p>
             </div>
             <div class="login-card">
-                <form id="login-form" method="POST" action="javascript:void(0);" onsubmit="return false;">
+                <form id="login-form" method="POST" action="javascript:void(0);" onsubmit="handleLogin(event); return false;">
                     <div class="form-group">
                         <label for="email"><i class="fas fa-envelope"></i> Email</label>
-                        <input type="email" id="email" name="email" required placeholder="Enter your email" autocomplete="email">
+                        <input type="email" id="email" name="email" required placeholder="Enter your email" autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="password"><i class="fas fa-lock"></i> Password</label>
-                        <input type="password" id="password" name="password" required placeholder="Enter your password" autocomplete="current-password">
+                        <input type="password" id="password" name="password" required placeholder="Enter your password" autocomplete="off">
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">
+                    <button type="button" class="btn btn-primary btn-block" onclick="handleLogin(event)">
                         <i class="fas fa-sign-in-alt"></i> Sign In
                     </button>
                     <div id="login-error" class="error-message hidden"></div>
