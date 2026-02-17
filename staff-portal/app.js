@@ -138,8 +138,12 @@ async function initPortal() {
     // Load profile to get current status
     await loadMyProfile();
     
+    // Load staff users for sharing
+    await loadStaffUsers();
+    
     // Load data
     loadCallbacks();
+    loadNotes();
     if (role === 'counsellor' || role === 'admin') {
         loadPanicAlerts();
     }
@@ -147,6 +151,7 @@ async function initPortal() {
     // Auto-refresh every 30 seconds
     setInterval(function() {
         loadCallbacks();
+        loadNotes();
         if (role === 'counsellor' || role === 'admin') {
             loadPanicAlerts();
         }
