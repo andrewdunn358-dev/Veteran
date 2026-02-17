@@ -66,7 +66,7 @@ export default function SplashScreen() {
 
           {/* Title */}
           <Text style={styles.title}>Radio Check</Text>
-          <Text style={styles.subtitle}>Veterans Support Network</Text>
+          <Text style={styles.subtitle}>Your Support Network</Text>
 
           {/* Welcoming Message */}
           <View style={styles.welcomeContainer}>
