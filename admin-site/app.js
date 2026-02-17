@@ -1689,6 +1689,28 @@ async function saveLogo() {
     }
 }
 
+async function saveNotificationSettings() {
+    const notificationEmail = document.getElementById('peer-notification-email').value.trim();
+    
+    if (notificationEmail && !notificationEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        showNotification('Please enter a valid email address', 'error');
+        return;
+    }
+    
+    try {
+        await apiCall('/settings', {
+            method: 'PUT',
+            body: JSON.stringify({
+                peer_registration_notification_email: notificationEmail || null
+            })
+        });
+        
+        showNotification('Notification settings saved successfully!');
+    } catch (error) {
+        showNotification('Failed to save notification settings: ' + error.message, 'error');
+    }
+}
+
 // Update loadAllData to include settings and categories
 const originalLoadAllData = loadAllData;
 loadAllData = async function() {
