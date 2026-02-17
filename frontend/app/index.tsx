@@ -1,23 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar, Alert, Modal, TextInput, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 
-const API_URL = Platform.select({
-  web: process.env.EXPO_PUBLIC_BACKEND_URL || '',
-  default: process.env.EXPO_PUBLIC_BACKEND_URL || ''
-});
-
 export default function SplashScreen() {
   const router = useRouter();
   const { colors, theme } = useTheme();
   const [showCookieNotice, setShowCookieNotice] = useState(false);
-  const [showPanicModal, setShowPanicModal] = useState(false);
-  const [panicSubmitting, setPanicSubmitting] = useState(false);
-  const [panicData, setPanicData] = useState({ name: '', phone: '', message: '' });
   
   const isDark = theme === 'dark';
   
@@ -55,9 +47,6 @@ export default function SplashScreen() {
     // Go to main app
     router.replace('/home');
   };
-
-  const handlePanicButton = () => {
-    setShowPanicModal(true);
   };
 
   const submitPanicAlert = async () => {
