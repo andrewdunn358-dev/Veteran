@@ -153,7 +153,7 @@ export default function SmudgeChat() {
           >
             {message.sender === 'smudge' && (
               <View style={styles.smudgeLabel}>
-                <FontAwesome5 name="robot" size={12} color="#4a90d9" />
+                <Image source={{ uri: SMUDGE_AVATAR }} style={styles.smudgeLabelAvatar} />
                 <Text style={styles.smudgeLabelText}>Smudge (AI listener)</Text>
               </View>
             )}
