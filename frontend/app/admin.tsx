@@ -2076,30 +2076,6 @@ const styles = StyleSheet.create({
     color: '#8899a6',
     marginBottom: 16,
   },
-  roleSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginTop: 8,
-  },
-  roleLabel: {
-    color: '#ffffff',
-    fontSize: 16,
-  },
-  roleButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#243447',
-    borderRadius: 8,
-  },
-  roleButtonActive: {
-    backgroundColor: '#4a90d9',
-  },
-  roleButtonText: {
-    color: '#ffffff',
-    textTransform: 'capitalize',
-  },
   saveButton: {
     backgroundColor: '#4a90d9',
     borderRadius: 8,
