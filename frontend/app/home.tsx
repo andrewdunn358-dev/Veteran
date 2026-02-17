@@ -210,6 +210,52 @@ export default function Index() {
           <Text style={styles.staffLoginText}>Staff Portal Login</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* About Tommy & Doris Modal */}
+      <Modal
+        visible={showAboutModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowAboutModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <View style={styles.modalAvatars}>
+                <Image 
+                  source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png' }}
+                  style={styles.modalAvatar}
+                />
+                <Image 
+                  source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png' }}
+                  style={[styles.modalAvatar, styles.modalAvatarOverlap]}
+                />
+              </View>
+              <TouchableOpacity 
+                style={styles.modalCloseButton}
+                onPress={() => setShowAboutModal(false)}
+              >
+                <Ionicons name="close" size={24} color="#94a3b8" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+              <Text style={styles.modalTitle}>Meet Tommy & Doris</Text>
+              <Text style={styles.modalSubtitle}>Your AI Battle Buddies</Text>
+              <Text style={styles.modalText}>{ABOUT_TOMMY_DORIS}</Text>
+            </ScrollView>
+            <TouchableOpacity 
+              style={styles.modalChatButton}
+              onPress={() => {
+                setShowAboutModal(false);
+                router.push('/ai-buddies');
+              }}
+            >
+              <Text style={styles.modalChatButtonText}>Start a Conversation</Text>
+              <Ionicons name="chatbubbles" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
