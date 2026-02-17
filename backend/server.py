@@ -1795,71 +1795,109 @@ async def get_staff_users(
         logging.error(f"Error fetching staff users: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch staff users")
 
-# ============ SMUDGE AI CHAT ENDPOINTS ============
+# ============ AI BATTLE BUDDIES CHAT ENDPOINTS ============
 
-def get_or_create_session(session_id: str) -> Dict[str, Any]:
-    """Get or create a Smudge chat session"""
+def get_or_create_buddy_session(session_id: str, character: str) -> Dict[str, Any]:
+    """Get or create an AI Battle Buddy chat session"""
     now = datetime.utcnow()
     
     # Clean up old sessions
     expired = []
-    for sid, session in smudge_sessions.items():
-        if (now - session["last_active"]).total_seconds() > SMUDGE_SESSION_TIMEOUT_MINUTES * 60:
+    for sid, session in buddy_sessions.items():
+        if (now - session["last_active"]).total_seconds() > BUDDY_SESSION_TIMEOUT_MINUTES * 60:
             expired.append(sid)
     for sid in expired:
-        del smudge_sessions[sid]
+        del buddy_sessions[sid]
     
     # Get or create session
-    if session_id not in smudge_sessions:
-        smudge_sessions[session_id] = {
+    if session_id not in buddy_sessions:
+        buddy_sessions[session_id] = {
             "message_count": 0,
-            "history": [],  # Store conversation history
+            "history": [],
+            "character": character,
             "last_active": now,
             "created_at": now
         }
     
-    smudge_sessions[session_id]["last_active"] = now
-    return smudge_sessions[session_id]
+    buddy_sessions[session_id]["last_active"] = now
+    return buddy_sessions[session_id]
 
-# Initialize OpenAI client for Smudge
-# Uses OPENAI_API_KEY for production (Render), works with standard OpenAI API
+# Initialize OpenAI client
 def get_openai_client():
     if OPENAI_API_KEY:
         return OpenAI(api_key=OPENAI_API_KEY)
     return None
 
-smudge_openai_client = get_openai_client()
+buddy_openai_client = get_openai_client()
 
-@api_router.post("/smudge/chat", response_model=SmudgeChatResponse)
-async def smudge_chat(request: SmudgeChatRequest):
-    """Chat with Smudge AI listener - no authentication required"""
+@api_router.get("/ai-buddies/characters")
+async def get_ai_characters():
+    """Get available AI Battle Buddy characters"""
+    return {
+        "characters": [
+            {
+                "id": "tommy",
+                "name": "Tommy",
+                "description": "A warm, steady presence - like a reliable mate who's been through it.",
+                "avatar": AI_CHARACTERS["tommy"]["avatar"]
+            },
+            {
+                "id": "doris", 
+                "name": "Doris",
+                "description": "A nurturing, compassionate presence who creates a safe space to talk.",
+                "avatar": AI_CHARACTERS["doris"]["avatar"]
+            }
+        ],
+        "about": {
+            "title": "Meet Tommy & Doris – Your AI Battle Buddies",
+            "description": "Tommy and Doris are dedicated AI companions built to support UK veterans and serving personnel—whenever and wherever they need it most.\n\nDesigned with an understanding of military culture, transition challenges, and the weight many carry long after service, they exist for one simple reason: no veteran should feel alone.\n\nWhether it's a late-night \"radio check,\" signposting to trusted support, or simply a steady presence in difficult moments, Tommy and Doris provide immediate, confidential connection—bridging the gap between struggle and support.\n\nThey don't replace human contact.\nThey help you reach it.\n\nBecause service doesn't end when the uniform comes off—and neither should support."
+        }
+    }
+
+@api_router.post("/ai-buddies/chat", response_model=BuddyChatResponse)
+async def buddy_chat(request: BuddyChatRequest):
+    """Chat with Tommy or Doris AI Battle Buddy - no authentication required"""
     
     # Kill switch check
-    if SMUDGE_DISABLED:
-        return SmudgeChatResponse(
-            reply="Smudge is offline right now. A real person is available and ready to talk. Please use the buttons below to connect with a peer or counsellor.",
-            sessionId=request.sessionId
+    if AI_BUDDIES_DISABLED:
+        char = AI_CHARACTERS.get(request.character, AI_CHARACTERS["tommy"])
+        return BuddyChatResponse(
+            reply=f"{char['name']} is offline right now. A real person is available and ready to talk. Please use the buttons below to connect with a peer or counsellor.",
+            sessionId=request.sessionId,
+            character=request.character,
+            characterName=char["name"],
+            characterAvatar=char["avatar"]
         )
     
-    if not smudge_openai_client:
-        raise HTTPException(status_code=503, detail="Smudge is currently unavailable - API key not configured")
+    if not buddy_openai_client:
+        raise HTTPException(status_code=503, detail="AI Battle Buddies are currently unavailable - API key not configured")
     
     if not request.message or not request.sessionId:
         raise HTTPException(status_code=400, detail="Invalid request")
     
+    # Validate character
+    character = request.character.lower()
+    if character not in AI_CHARACTERS:
+        character = "tommy"
+    
+    char_config = AI_CHARACTERS[character]
+    
     try:
-        session = get_or_create_session(request.sessionId)
+        session = get_or_create_buddy_session(request.sessionId, character)
         session["message_count"] += 1
         
         # Rate limit check
-        if session["message_count"] > SMUDGE_MAX_MESSAGES:
-            return SmudgeChatResponse(
-                reply="Let's pause here for now. If you want to talk more, a real person is available and I can help connect you. You can use the 'Talk to a real person' button below.",
-                sessionId=request.sessionId
+        if session["message_count"] > BUDDY_MAX_MESSAGES:
+            return BuddyChatResponse(
+                reply=f"Let's pause here for now. If you want to talk more, a real person is available and I can help connect you. You can use the 'Talk to a real person' button below.",
+                sessionId=request.sessionId,
+                character=character,
+                characterName=char_config["name"],
+                characterAvatar=char_config["avatar"]
             )
         
-        # Build messages with history
-        messages = [{"role": "system", "content": SMUDGE_SYSTEM_PROMPT}]
+        # Build messages with character-specific system prompt
+        messages = [{"role": "system", "content": char_config["prompt"]}]
         
         # Add conversation history (last 20 messages for context)
         for msg in session["history"][-20:]:
@@ -1868,12 +1906,12 @@ async def smudge_chat(request: SmudgeChatRequest):
         # Add current user message
         messages.append({"role": "user", "content": request.message})
         
-        # Call OpenAI via Emergent proxy
-        completion = smudge_openai_client.chat.completions.create(
+        # Call OpenAI
+        completion = buddy_openai_client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
-            max_tokens=200,
-            temperature=0.4
+            max_tokens=250,
+            temperature=0.5
         )
         
         reply = completion.choices[0].message.content or ""
@@ -1882,24 +1920,34 @@ async def smudge_chat(request: SmudgeChatRequest):
         session["history"].append({"role": "user", "content": request.message})
         session["history"].append({"role": "assistant", "content": reply})
         
-        return SmudgeChatResponse(
+        return BuddyChatResponse(
             reply=reply,
-            sessionId=request.sessionId
+            sessionId=request.sessionId,
+            character=character,
+            characterName=char_config["name"],
+            characterAvatar=char_config["avatar"]
         )
         
     except Exception as e:
-        logging.error(f"Smudge chat error: {str(e)}")
+        logging.error(f"AI Buddy chat error: {str(e)}")
         raise HTTPException(
             status_code=500, 
-            detail="Smudge is having trouble right now. If you need support, please use the 'Talk to a real person' button."
+            detail=f"{char_config['name']} is having trouble right now. If you need support, please use the 'Talk to a real person' button."
         )
 
-@api_router.post("/smudge/reset")
-async def reset_smudge_session(request: SmudgeChatRequest):
-    """Reset a Smudge session"""
-    if request.sessionId in smudge_sessions:
-        del smudge_sessions[request.sessionId]
+@api_router.post("/ai-buddies/reset")
+async def reset_buddy_session(request: BuddyChatRequest):
+    """Reset an AI Battle Buddy session"""
+    if request.sessionId in buddy_sessions:
+        del buddy_sessions[request.sessionId]
     return {"message": "Session reset", "sessionId": request.sessionId}
+
+# Keep old Smudge endpoint for backwards compatibility (redirects to Tommy)
+@api_router.post("/smudge/chat")
+async def smudge_chat_legacy(request: BuddyChatRequest):
+    """Legacy Smudge endpoint - redirects to Tommy"""
+    request.character = "tommy"
+    return await buddy_chat(request)
 
 # ============ ADMIN STATUS MANAGEMENT ============
 
