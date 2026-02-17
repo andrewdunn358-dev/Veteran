@@ -68,34 +68,30 @@ export default function SplashScreen() {
           <Text style={styles.title}>Radio Check</Text>
           <Text style={styles.subtitle}>Veterans Support Network</Text>
 
-          {/* Question */}
-          <View style={styles.questionContainer}>
-            <Ionicons name="heart" size={32} color="#ef4444" style={styles.heartIcon} />
-            <Text style={styles.question}>
-              Are you in need of immediate help?
-          </Text>
-        </View>
+          {/* Welcoming Message */}
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeText}>
+              You're not alone. We're here for you.
+            </Text>
+          </View>
 
-        {/* Yes/No Buttons */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.yesButton} onPress={handleYes} data-testid="splash-yes-btn">
-            <Ionicons name="checkmark-circle" size={24} color="#ffffff" />
-            <Text style={styles.yesButtonText}>Yes, I need help now</Text>
-          </TouchableOpacity>
+          {/* Main Entry Button */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.enterButton} onPress={handleNo} data-testid="splash-enter-btn">
+              <Ionicons name="arrow-forward-circle" size={24} color="#ffffff" />
+              <Text style={styles.enterButtonText}>Enter the App</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.noButton} onPress={handleNo} data-testid="splash-no-btn">
-            <Text style={styles.noButtonText}>No, continue to app</Text>
-            <Ionicons name="arrow-forward" size={20} color="#7c9cbf" />
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity style={styles.helpButton} onPress={handleYes} data-testid="splash-help-btn">
+              <Ionicons name="heart-outline" size={20} color="#94a3b8" />
+              <Text style={styles.helpButtonText}>I need to talk to someone now</Text>
+            </TouchableOpacity>
+          </View>
 
-        {/* Emergency Notice */}
-        <View style={styles.emergencyNotice}>
-          <Ionicons name="warning" size={16} color="#f59e0b" />
-          <Text style={styles.emergencyText}>
+          {/* Subtle Emergency Notice */}
+          <Text style={styles.emergencyNote}>
             In an emergency, always call 999
           </Text>
-        </View>
       </View>
 
       {/* GDPR Cookie Notice */}
