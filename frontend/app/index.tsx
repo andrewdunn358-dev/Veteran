@@ -160,71 +160,56 @@ const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     marginBottom: 32,
     textAlign: 'center',
   },
-  questionContainer: {
+  welcomeContainer: {
     alignItems: 'center',
     marginBottom: 32,
   },
-  heartIcon: {
-    marginBottom: 12,
-  },
-  question: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: '#ffffff',
+  welcomeText: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#b0c4de',
     textAlign: 'center',
-    lineHeight: 30,
+    lineHeight: 26,
   },
   buttonContainer: {
     width: '100%',
     gap: 16,
     marginBottom: 24,
   },
-  yesButton: {
+  enterButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ef4444',
+    backgroundColor: '#2563eb',
     paddingVertical: 18,
     paddingHorizontal: 32,
     borderRadius: 12,
     gap: 10,
   },
-  yesButtonText: {
+  enterButtonText: {
     fontSize: 18,
     fontWeight: '600',
     color: '#ffffff',
   },
-  noButton: {
+  helpButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#2d3e50',
     gap: 8,
   },
-  noButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#7c9cbf',
-  },
-  emergencyNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(245, 158, 11, 0.1)',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.3)',
-  },
-  emergencyText: {
+  helpButtonText: {
     fontSize: 14,
-    color: '#f59e0b',
+    fontWeight: '500',
+    color: '#94a3b8',
+  },
+  emergencyNote: {
+    fontSize: 13,
+    color: '#64748b',
+    textAlign: 'center',
   },
   cookieNotice: {
     position: 'absolute',
