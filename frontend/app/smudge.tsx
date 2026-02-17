@@ -119,9 +119,7 @@ export default function SmudgeChat() {
           <FontAwesome5 name="arrow-left" size={20} color="#fff" />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <View style={styles.avatarContainer}>
-            <FontAwesome5 name="robot" size={24} color="#4a90d9" />
-          </View>
+          <Image source={{ uri: SMUDGE_AVATAR }} style={styles.avatarImage} />
           <View>
             <Text style={styles.headerTitle}>Smudge</Text>
             <Text style={styles.headerSubtitle}>AI Listener</Text>
