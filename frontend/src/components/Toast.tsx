@@ -1,6 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Text, StyleSheet, View } from 'react-native';
+import { Animated, Text, StyleSheet, View, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+
+// Use native driver on native platforms, but not on web (causes warnings)
+const useNativeDriver = Platform.OS !== 'web';
 
 interface ToastProps {
   visible: boolean;
@@ -26,12 +29,12 @@ export const Toast: React.FC<ToastProps> = ({
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 300,
-          useNativeDriver: true,
+          useNativeDriver,
         }),
         Animated.timing(translateY, {
           toValue: 0,
           duration: 300,
-          useNativeDriver: true,
+          useNativeDriver,
         }),
       ]).start();
 
@@ -40,12 +43,12 @@ export const Toast: React.FC<ToastProps> = ({
           Animated.timing(fadeAnim, {
             toValue: 0,
             duration: 300,
-            useNativeDriver: true,
+            useNativeDriver,
           }),
           Animated.timing(translateY, {
             toValue: -100,
             duration: 300,
-            useNativeDriver: true,
+            useNativeDriver,
           }),
         ]).start(() => onHide());
       }, duration);
