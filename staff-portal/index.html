@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal - Radio Check</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <div class="login-header">
+                <img src="https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/vcqj3xma_logo.png" alt="Radio Check Logo" class="login-logo">
+                <h1>Staff Portal</h1>
+                <p>Radio Check - Veterans Support</p>
+            </div>
+            <div class="login-card">
+                <form id="login-form" onsubmit="return handleLogin(event)">
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="email" required placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" id="password" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+                    <div id="login-error" class="error-message hidden"></div>
+                </form>
+            </div>
+            <p class="login-footer">For Counsellors & Peer Supporters</p>
+        </div>
+    </div>
+
+    <!-- Portal Screen -->
+    <div id="portal-screen" class="screen">
+        <header class="portal-header">
+            <div class="header-left">
+                <img src="https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/vcqj3xma_logo.png" alt="Logo" class="header-logo">
+                <div>
+                    <h1 id="portal-title">Staff Portal</h1>
+                    <span id="user-role-badge" class="role-badge"></span>
+                </div>
+            </div>
+            <div class="header-right">
+                <span id="user-name">Welcome</span>
+                <button class="btn btn-outline" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <main class="portal-content">
+            <!-- Status Section -->
+            <div class="status-section">
+                <span class="status-label">My Status:</span>
+                <div class="status-buttons">
+                    <button class="status-btn available" onclick="updateMyStatus('available')">
+                        <i class="fas fa-check-circle"></i> Available
+                    </button>
+                    <button class="status-btn busy" onclick="updateMyStatus('busy')">
+                        <i class="fas fa-clock"></i> Busy
+                    </button>
+                    <button class="status-btn off" onclick="updateMyStatus('off')">
+                        <i class="fas fa-moon"></i> Off Duty
+                    </button>
+                </div>
+                <span id="current-status" class="current-status"></span>
+            </div>
+
+            <!-- Panic Alerts Section (Counsellors Only) -->
+            <div id="panic-section" class="section panic-section" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Panic Alerts</h2>
+                    <span id="panic-count" class="badge danger"></span>
+                </div>
+                <div id="panic-list" class="cards-list"></div>
+            </div>
+
+            <!-- Panic Button (Peers Only) -->
+            <div id="panic-button-section" class="section" style="display: none;">
+                <button class="panic-button" onclick="triggerPanic()">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span class="panic-text">NEED COUNSELLOR HELP</span>
+                    <span class="panic-subtext">Click to alert a counsellor for assistance</span>
+                </button>
+            </div>
+
+            <!-- My Active Callbacks -->
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-phone-volume"></i> My Active Callbacks</h2>
+                    <span id="active-count" class="badge"></span>
+                </div>
+                <div id="active-callbacks" class="cards-list"></div>
+            </div>
+
+            <!-- Pending Callbacks -->
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-phone"></i> Pending Callbacks</h2>
+                    <span id="pending-count" class="badge"></span>
+                    <button class="btn btn-small btn-secondary" onclick="loadCallbacks()">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+                <div id="pending-callbacks" class="cards-list"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification hidden"></div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
