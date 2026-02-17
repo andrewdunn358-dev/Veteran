@@ -41,27 +41,23 @@ export default function Index() {
           <Text style={styles.taglineLatin}>Semel Servientes, Semper Uniti</Text>
         </View>
 
-        {/* Emergency Notice - Display only, no call functionality */}
-        <View style={styles.emergencyNotice}>
-          <Ionicons name="alert-circle" size={24} color="#ff4444" />
-          <View style={styles.emergencyTextContainer}>
-            <Text style={styles.emergencyTitle}>Immediate Danger?</Text>
-            <Text style={styles.emergencyText}>Dial 999 for emergency services</Text>
-          </View>
-        </View>
-
         {/* Main Actions */}
         <View style={styles.mainActions}>
-          {/* Primary Help Button */}
+          {/* Primary Help Button - Softer approach */}
           <TouchableOpacity 
             style={styles.primaryButton}
             onPress={() => router.push('/crisis-support')}
             activeOpacity={0.9}
           >
-            <Ionicons name="help-circle" size={48} color="#ffffff" />
-            <Text style={styles.primaryButtonText}>I NEED HELP NOW</Text>
-            <Text style={styles.primaryButtonSubtext}>24/7 Crisis Support</Text>
+            <Ionicons name="heart" size={48} color="#ffffff" />
+            <Text style={styles.primaryButtonText}>Need to Talk?</Text>
+            <Text style={styles.primaryButtonSubtext}>Connect with support now</Text>
           </TouchableOpacity>
+
+          {/* Emergency info - subtle text only */}
+          <Text style={styles.emergencyNote}>
+            In immediate danger? Call 999
+          </Text>
 
           {/* Secondary Actions */}
           <View style={styles.secondaryActions}>
