@@ -1519,6 +1519,170 @@ async def resolve_panic_alert(
         logging.error(f"Error resolving alert: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to resolve alert")
 
+# ============ STAFF NOTES ENDPOINTS ============
+
+@api_router.post("/notes")
+async def create_note(
+    note_input: NoteCreate,
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new note (staff only)"""
+    if current_user.role not in ["admin", "counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Only staff can create notes")
+    
+    try:
+        note = Note(
+            title=note_input.title,
+            content=note_input.content,
+            is_private=note_input.is_private,
+            shared_with=note_input.shared_with or [],
+            callback_id=note_input.callback_id,
+            author_id=current_user.id,
+            author_name=current_user.name,
+            author_role=current_user.role
+        )
+        
+        await db.notes.insert_one(note.dict())
+        return note.dict()
+    except Exception as e:
+        logging.error(f"Error creating note: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to create note")
+
+@api_router.get("/notes")
+async def get_notes(
+    current_user: User = Depends(get_current_user),
+    callback_id: Optional[str] = None,
+    include_shared: bool = True
+):
+    """Get notes - own notes + notes shared with me (admins see all)"""
+    if current_user.role not in ["admin", "counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Only staff can view notes")
+    
+    try:
+        if current_user.role == "admin":
+            # Admins can see all notes
+            query = {}
+        else:
+            # Staff see their own notes + notes shared with them
+            if include_shared:
+                query = {
+                    "$or": [
+                        {"author_id": current_user.id},
+                        {"shared_with": current_user.id},
+                        {"is_private": False, "shared_with": []}  # Public notes
+                    ]
+                }
+            else:
+                query = {"author_id": current_user.id}
+        
+        # Filter by callback if specified
+        if callback_id:
+            query["callback_id"] = callback_id
+        
+        notes = await db.notes.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+        return notes
+    except Exception as e:
+        logging.error(f"Error fetching notes: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch notes")
+
+@api_router.get("/notes/{note_id}")
+async def get_note(
+    note_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Get a specific note"""
+    if current_user.role not in ["admin", "counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Only staff can view notes")
+    
+    try:
+        note = await db.notes.find_one({"id": note_id}, {"_id": 0})
+        if not note:
+            raise HTTPException(status_code=404, detail="Note not found")
+        
+        # Check access
+        if current_user.role != "admin":
+            if note["author_id"] != current_user.id and current_user.id not in note.get("shared_with", []):
+                if note.get("is_private", True):
+                    raise HTTPException(status_code=403, detail="Access denied")
+        
+        return note
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error fetching note: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch note")
+
+@api_router.patch("/notes/{note_id}")
+async def update_note(
+    note_id: str,
+    note_update: NoteUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    """Update a note (author or admin only)"""
+    try:
+        note = await db.notes.find_one({"id": note_id})
+        if not note:
+            raise HTTPException(status_code=404, detail="Note not found")
+        
+        # Only author or admin can update
+        if note["author_id"] != current_user.id and current_user.role != "admin":
+            raise HTTPException(status_code=403, detail="Only the author or admin can update this note")
+        
+        update_data = note_update.dict(exclude_unset=True)
+        update_data["updated_at"] = datetime.utcnow()
+        
+        await db.notes.update_one({"id": note_id}, {"$set": update_data})
+        
+        updated_note = await db.notes.find_one({"id": note_id}, {"_id": 0})
+        return updated_note
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error updating note: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update note")
+
+@api_router.delete("/notes/{note_id}")
+async def delete_note(
+    note_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a note (author or admin only)"""
+    try:
+        note = await db.notes.find_one({"id": note_id})
+        if not note:
+            raise HTTPException(status_code=404, detail="Note not found")
+        
+        # Only author or admin can delete
+        if note["author_id"] != current_user.id and current_user.role != "admin":
+            raise HTTPException(status_code=403, detail="Only the author or admin can delete this note")
+        
+        await db.notes.delete_one({"id": note_id})
+        return {"message": "Note deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error deleting note: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete note")
+
+@api_router.get("/staff-users")
+async def get_staff_users(
+    current_user: User = Depends(get_current_user)
+):
+    """Get list of staff users for sharing notes"""
+    if current_user.role not in ["admin", "counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Only staff can view staff list")
+    
+    try:
+        # Get all staff users (for note sharing dropdown)
+        staff = await db.users.find(
+            {"role": {"$in": ["admin", "counsellor", "peer"]}},
+            {"_id": 0, "id": 1, "name": 1, "role": 1}
+        ).to_list(100)
+        return staff
+    except Exception as e:
+        logging.error(f"Error fetching staff users: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch staff users")
+
 # ============ ADMIN STATUS MANAGEMENT ============
 
 @api_router.patch("/admin/counsellors/{counsellor_id}/status")
