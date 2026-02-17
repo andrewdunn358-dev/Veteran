@@ -1,13 +1,27 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking, Platform, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking, Platform, Image, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 
+const ABOUT_TOMMY_DORIS = `Meet Tommy & Doris – Your AI Battle Buddies
+
+Tommy and Doris are dedicated AI companions built to support UK veterans and serving personnel—whenever and wherever they need it most.
+
+Designed with an understanding of military culture, transition challenges, and the weight many carry long after service, they exist for one simple reason: no veteran should feel alone.
+
+Whether it's a late-night "radio check," signposting to trusted support, or simply a steady presence in difficult moments, Tommy and Doris provide immediate, confidential connection—bridging the gap between struggle and support.
+
+They don't replace human contact.
+They help you reach it.
+
+Because service doesn't end when the uniform comes off—and neither should support.`;
+
 export default function Index() {
   const router = useRouter();
   const { colors, theme } = useTheme();
+  const [showAboutModal, setShowAboutModal] = useState(false);
   const styles = createStyles(colors);
 
   return (
