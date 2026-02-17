@@ -406,6 +406,32 @@ class BuddyChatResponse(BaseModel):
     character: str
     characterName: str
     characterAvatar: str
+    safeguardingTriggered: bool = False
+    safeguardingAlertId: Optional[str] = None
+
+# Safeguarding keywords and phrases for veterans
+SAFEGUARDING_KEYWORDS = [
+    # Suicide/Self-harm related
+    "kill myself", "end my life", "want to die", "don't want to be here",
+    "better off dead", "suicide", "suicidal", "end it all", "take my own life",
+    "self harm", "self-harm", "hurt myself", "cut myself", "cutting",
+    "no point living", "no reason to live", "can't go on", "not worth living",
+    # Crisis indicators
+    "goodbye", "final goodbye", "last message", "can't take it anymore",
+    "no way out", "no hope", "hopeless", "given up", "giving up",
+    "nobody cares", "no one would miss me", "burden to everyone",
+    # PTSD/Trauma crisis
+    "flashbacks won't stop", "can't escape", "nightmares every night",
+    "reliving it", "can't cope anymore",
+]
+
+def check_safeguarding(message: str) -> bool:
+    """Check if message contains safeguarding concerns"""
+    message_lower = message.lower()
+    for keyword in SAFEGUARDING_KEYWORDS:
+        if keyword in message_lower:
+            return True
+    return False
 
 # In-memory rate limiting and conversation history for AI Buddies
 buddy_sessions: Dict[str, Dict[str, Any]] = {}
