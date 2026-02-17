@@ -15,6 +15,9 @@ import { FontAwesome5 } from '@expo/vector-icons';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://veterans-support-api.onrender.com';
 
+// Smudge avatar image
+const SMUDGE_AVATAR = 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/p19mvb79_Gemini_Generated_Image_aoryglaoryglaory.png';
+
 interface Message {
   id: string;
   text: string;
