@@ -1726,6 +1726,96 @@ async def get_staff_users(
         logging.error(f"Error fetching staff users: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch staff users")
 
+# ============ SMUDGE AI CHAT ENDPOINTS ============
+
+def get_or_create_session(session_id: str) -> Dict[str, Any]:
+    """Get or create a Smudge chat session"""
+    now = datetime.utcnow()
+    
+    # Clean up old sessions
+    expired = []
+    for sid, session in smudge_sessions.items():
+        if (now - session["last_active"]).total_seconds() > SMUDGE_SESSION_TIMEOUT_MINUTES * 60:
+            expired.append(sid)
+    for sid in expired:
+        del smudge_sessions[sid]
+    
+    # Get or create session
+    if session_id not in smudge_sessions:
+        smudge_sessions[session_id] = {
+            "message_count": 0,
+            "history": [],
+            "last_active": now,
+            "created_at": now
+        }
+    
+    smudge_sessions[session_id]["last_active"] = now
+    return smudge_sessions[session_id]
+
+@api_router.post("/smudge/chat", response_model=SmudgeChatResponse)
+async def smudge_chat(request: SmudgeChatRequest):
+    """Chat with Smudge AI listener - no authentication required"""
+    
+    if not openai_client:
+        raise HTTPException(status_code=503, detail="Smudge is currently unavailable")
+    
+    if not request.message or not request.sessionId:
+        raise HTTPException(status_code=400, detail="Invalid request")
+    
+    try:
+        session = get_or_create_session(request.sessionId)
+        session["message_count"] += 1
+        
+        # Rate limit check
+        if session["message_count"] > SMUDGE_MAX_MESSAGES:
+            return SmudgeChatResponse(
+                reply="Let's pause here for now. If you want to talk more, a real person is available and I can help connect you. You can use the 'Talk to a real person' button below.",
+                sessionId=request.sessionId
+            )
+        
+        # Build conversation history for context
+        messages = [{"role": "system", "content": SMUDGE_SYSTEM_PROMPT}]
+        
+        # Add conversation history (keep last 10 exchanges for context)
+        for msg in session["history"][-20:]:
+            messages.append(msg)
+        
+        # Add current user message
+        messages.append({"role": "user", "content": request.message})
+        
+        # Call OpenAI
+        completion = openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            max_tokens=200,
+            temperature=0.4
+        )
+        
+        reply = completion.choices[0].message.content or ""
+        
+        # Store in history
+        session["history"].append({"role": "user", "content": request.message})
+        session["history"].append({"role": "assistant", "content": reply})
+        
+        return SmudgeChatResponse(
+            reply=reply,
+            sessionId=request.sessionId
+        )
+        
+    except Exception as e:
+        logging.error(f"Smudge chat error: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail="Smudge is having trouble right now. If you need support, please use the 'Talk to a real person' button."
+        )
+
+@api_router.post("/smudge/reset")
+async def reset_smudge_session(request: SmudgeChatRequest):
+    """Reset a Smudge session"""
+    if request.sessionId in smudge_sessions:
+        del smudge_sessions[request.sessionId]
+    return {"message": "Session reset", "sessionId": request.sessionId}
+
 # ============ ADMIN STATUS MANAGEMENT ============
 
 @api_router.patch("/admin/counsellors/{counsellor_id}/status")
