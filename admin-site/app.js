@@ -2409,4 +2409,259 @@ async function submitEditResource() {
     } catch (error) {
         showNotification('Failed to update resource: ' + error.message, 'error');
     }
+
+
+// ============ MY PORTAL FUNCTIONS ============
+
+let portalPollingInterval = null;
+
+function setupRoleBasedUI() {
+    const role = currentUser?.role;
+    const isAdmin = role === 'admin';
+    const isCounsellor = role === 'counsellor';
+    const isPeer = role === 'peer';
+    
+    // Show/hide tabs based on role
+    const adminOnlyTabs = ['counsellors-tab-btn', 'peers-tab-btn', 'orgs-tab-btn', 'resources-tab-btn', 'users-tab-btn', 'cms-tab-btn', 'settings-tab-btn'];
+    
+    adminOnlyTabs.forEach(tabId => {
+        const tab = document.getElementById(tabId);
+        if (tab) {
+            tab.style.display = isAdmin ? '' : 'none';
+        }
+    });
+    
+    // Show My Portal tab for counsellors and peers
+    const myPortalTab = document.getElementById('myportal-tab-btn');
+    if (myPortalTab) {
+        myPortalTab.style.display = (isCounsellor || isPeer) ? '' : 'none';
+    }
+    
+    // Set portal title based on role
+    const portalTitle = document.getElementById('portal-title');
+    if (portalTitle) {
+        if (isCounsellor) {
+            portalTitle.textContent = 'Counsellor Portal';
+        } else if (isPeer) {
+            portalTitle.textContent = 'Peer Support Portal';
+        }
+    }
+    
+    // Show panic alerts section for counsellors only
+    const panicAlertsSection = document.getElementById('panic-alerts-section');
+    if (panicAlertsSection) {
+        panicAlertsSection.style.display = isCounsellor ? '' : 'none';
+    }
+    
+    // Show panic button for peers only
+    const panicButtonSection = document.getElementById('panic-button-section');
+    if (panicButtonSection) {
+        panicButtonSection.style.display = isPeer ? '' : 'none';
+    }
+    
+    // Update status button labels for peers
+    const statusButtons = document.getElementById('my-status-buttons');
+    if (statusButtons && isPeer) {
+        statusButtons.innerHTML = '<button class="status-btn available" onclick="updateMyStatus(\'available\')"><i class="fas fa-check-circle"></i> Available</button><button class="status-btn busy" onclick="updateMyStatus(\'limited\')"><i class="fas fa-clock"></i> Limited</button><button class="status-btn off" onclick="updateMyStatus(\'unavailable\')"><i class="fas fa-moon"></i> Unavailable</button>';
+    }
+    
+    // If counsellor or peer, default to My Portal tab
+    if (isCounsellor || isPeer) {
+        switchTab('myportal');
+        loadPortalData();
+        
+        // Start polling for new alerts/callbacks
+        if (portalPollingInterval) clearInterval(portalPollingInterval);
+        portalPollingInterval = setInterval(loadPortalData, 10000);
+    }
+}
+
+async function loadPortalData() {
+    try {
+        const role = currentUser?.role;
+        
+        // Load callbacks
+        const callbacks = await apiCall('/callbacks');
+        renderCallbacks(callbacks);
+        
+        // Load panic alerts for counsellors
+        if (role === 'counsellor') {
+            const alerts = await apiCall('/panic-alerts');
+            renderPanicAlerts(alerts);
+        }
+    } catch (error) {
+        console.error('Error loading portal data:', error);
+    }
+}
+
+function renderPanicAlerts(alerts) {
+    const activeAlerts = alerts.filter(a => a.status === 'active' || a.status === 'acknowledged');
+    const container = document.getElementById('panic-alerts-list');
+    const countBadge = document.getElementById('alert-count');
+    const section = document.getElementById('panic-alerts-section');
+    
+    if (!container) return;
+    
+    if (countBadge) {
+        countBadge.textContent = activeAlerts.length > 0 ? activeAlerts.length : '';
+    }
+    
+    if (section && activeAlerts.length === 0) {
+        section.style.display = 'none';
+        return;
+    } else if (section) {
+        section.style.display = '';
+    }
+    
+    container.innerHTML = activeAlerts.map(alert => '<div class="alert-card"><div class="alert-card-header"><span class="alert-name">' + (alert.user_name || 'Peer Supporter') + '</span><span class="alert-status ' + alert.status + '">' + alert.status + '</span></div>' + (alert.user_phone ? '<div class="alert-phone"><i class="fas fa-phone"></i> ' + alert.user_phone + '</div>' : '') + '<div class="alert-message">' + (alert.message || 'Peer needs immediate assistance') + '</div><div class="alert-time">' + new Date(alert.created_at).toLocaleString() + '</div>' + (alert.acknowledged_name ? '<div class="alert-acknowledged-by">Acknowledged by: ' + alert.acknowledged_name + '</div>' : '') + '<div class="alert-actions">' + (alert.status === 'active' ? '<button class="btn btn-warning" onclick="acknowledgeAlert(\'' + alert.id + '\')"><i class="fas fa-hand-paper"></i> Acknowledge</button>' : '') + '<button class="btn btn-success" onclick="resolveAlert(\'' + alert.id + '\')"><i class="fas fa-check"></i> Resolve</button></div></div>').join('');
+}
+
+function renderCallbacks(callbacks) {
+    const userId = currentUser?.id;
+    const role = currentUser?.role;
+    
+    let filteredCallbacks = callbacks;
+    if (role === 'peer') {
+        filteredCallbacks = callbacks.filter(c => c.request_type === 'peer');
+    } else if (role === 'counsellor') {
+        filteredCallbacks = callbacks.filter(c => c.request_type === 'counsellor');
+    }
+    
+    const myCallbacks = filteredCallbacks.filter(c => c.assigned_to === userId && c.status === 'in_progress');
+    const pendingCallbacks = filteredCallbacks.filter(c => c.status === 'pending');
+    
+    const myContainer = document.getElementById('my-callbacks-list');
+    const pendingContainer = document.getElementById('pending-callbacks-list');
+    const pendingCount = document.getElementById('pending-count');
+    
+    if (myContainer) {
+        if (myCallbacks.length === 0) {
+            myContainer.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No active callbacks</p></div>';
+        } else {
+            myContainer.innerHTML = myCallbacks.map(cb => '<div class="callback-card"><div class="callback-header"><span class="callback-name">' + cb.name + '</span><span class="callback-status in_progress">In Progress</span></div><div class="callback-phone"><i class="fas fa-phone"></i> ' + cb.phone + '</div><div class="callback-message">' + (cb.message || 'No message') + '</div><div class="callback-actions"><button class="btn btn-success" onclick="completeCallback(\'' + cb.id + '\')"><i class="fas fa-check"></i> Complete</button><button class="btn btn-secondary" onclick="releaseCallback(\'' + cb.id + '\')"><i class="fas fa-undo"></i> Release</button></div></div>').join('');
+        }
+    }
+    
+    if (pendingContainer) {
+        if (pendingCount) {
+            pendingCount.textContent = pendingCallbacks.length > 0 ? pendingCallbacks.length : '';
+        }
+        
+        if (pendingCallbacks.length === 0) {
+            pendingContainer.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>No pending callbacks</p></div>';
+        } else {
+            pendingContainer.innerHTML = pendingCallbacks.map(cb => '<div class="callback-card"><div class="callback-header"><span class="callback-name">' + cb.name + '</span><span class="callback-status pending">Pending</span></div><div class="callback-phone"><i class="fas fa-phone"></i> ' + cb.phone + '</div><div class="callback-message">' + (cb.message || 'No message') + '</div><div class="callback-time">' + new Date(cb.created_at).toLocaleString() + '</div><div class="callback-actions"><button class="btn btn-primary" onclick="takeCallback(\'' + cb.id + '\')"><i class="fas fa-hand-paper"></i> Take This Callback</button></div></div>').join('');
+        }
+    }
+}
+
+async function updateMyStatus(newStatus) {
+    try {
+        const role = currentUser?.role;
+        let endpoint;
+        
+        if (role === 'counsellor') {
+            const counsellors = await apiCall('/counsellors');
+            const myCounsellor = counsellors.find(c => c.user_id === currentUser.id);
+            if (!myCounsellor) {
+                showNotification('Counsellor profile not found', 'error');
+                return;
+            }
+            endpoint = '/counsellors/' + myCounsellor.id + '/status';
+        } else if (role === 'peer') {
+            const peers = await apiCall('/peer-supporters');
+            const myPeer = peers.find(p => p.user_id === currentUser.id);
+            if (!myPeer) {
+                showNotification('Peer supporter profile not found', 'error');
+                return;
+            }
+            endpoint = '/peer-supporters/' + myPeer.id + '/status';
+        }
+        
+        await apiCall(endpoint, {
+            method: 'PATCH',
+            body: JSON.stringify({ status: newStatus })
+        });
+        
+        showNotification('Status updated to ' + newStatus);
+    } catch (error) {
+        showNotification('Failed to update status: ' + error.message, 'error');
+    }
+}
+
+async function acknowledgeAlert(alertId) {
+    try {
+        await apiCall('/panic-alerts/' + alertId + '/acknowledge', { method: 'PATCH' });
+        showNotification('Alert acknowledged - please contact the peer supporter');
+        loadPortalData();
+    } catch (error) {
+        showNotification('Failed to acknowledge alert: ' + error.message, 'error');
+    }
+}
+
+async function resolveAlert(alertId) {
+    try {
+        await apiCall('/panic-alerts/' + alertId + '/resolve', { method: 'PATCH' });
+        showNotification('Alert resolved');
+        loadPortalData();
+    } catch (error) {
+        showNotification('Failed to resolve alert: ' + error.message, 'error');
+    }
+}
+
+async function takeCallback(callbackId) {
+    try {
+        await apiCall('/callbacks/' + callbackId + '/take', { method: 'PATCH' });
+        showNotification('Callback assigned to you');
+        loadPortalData();
+    } catch (error) {
+        showNotification('Failed to take callback: ' + error.message, 'error');
+    }
+}
+
+async function releaseCallback(callbackId) {
+    try {
+        await apiCall('/callbacks/' + callbackId + '/release', { method: 'PATCH' });
+        showNotification('Callback released');
+        loadPortalData();
+    } catch (error) {
+        showNotification('Failed to release callback: ' + error.message, 'error');
+    }
+}
+
+async function completeCallback(callbackId) {
+    try {
+        await apiCall('/callbacks/' + callbackId + '/complete', { method: 'PATCH' });
+        showNotification('Callback completed');
+        loadPortalData();
+    } catch (error) {
+        showNotification('Failed to complete callback: ' + error.message, 'error');
+    }
+}
+
+async function triggerPanicAlert() {
+    const message = prompt('What do you need help with? (optional)');
+    
+    try {
+        const peers = await apiCall('/peer-supporters');
+        const myPeer = peers.find(p => p.user_id === currentUser.id);
+        
+        await fetch(CONFIG.API_URL + '/api/panic-alert', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                user_name: currentUser.name,
+                user_phone: myPeer ? myPeer.phone : null,
+                message: message || 'Peer supporter needs immediate counsellor assistance'
+            })
+        });
+        
+        showNotification('Alert sent! A counsellor has been notified.');
+    } catch (error) {
+        showNotification('Failed to send alert: ' + error.message, 'error');
+    }
+}
 }
