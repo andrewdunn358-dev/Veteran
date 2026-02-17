@@ -168,21 +168,32 @@ const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
   },
   welcomeContainer: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
   },
   welcomeText: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '500',
     color: '#b0c4de',
     textAlign: 'center',
     lineHeight: 26,
   },
-  buttonContainer: {
-    width: '100%',
-    gap: 16,
+  questionContainer: {
+    alignItems: 'center',
     marginBottom: 24,
   },
-  enterButton: {
+  questionText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#ffffff',
+    textAlign: 'center',
+    lineHeight: 28,
+  },
+  buttonContainer: {
+    width: '100%',
+    gap: 12,
+    marginBottom: 24,
+  },
+  yesButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -192,30 +203,37 @@ const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     borderRadius: 12,
     gap: 10,
   },
-  enterButtonText: {
-    fontSize: 18,
+  yesButtonText: {
+    fontSize: 17,
     fontWeight: '600',
     color: '#ffffff',
   },
-  helpButton: {
+  noButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#374151',
     gap: 8,
   },
-  helpButtonText: {
-    fontSize: 14,
+  noButtonText: {
+    fontSize: 15,
     fontWeight: '500',
     color: '#94a3b8',
+  },
+  emergencyNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   },
   emergencyNote: {
     fontSize: 13,
     color: '#64748b',
-    textAlign: 'center',
   },
   cookieNotice: {
     position: 'absolute',
