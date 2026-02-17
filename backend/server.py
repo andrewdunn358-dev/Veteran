@@ -1762,6 +1762,13 @@ def get_or_create_session(session_id: str) -> Dict[str, Any]:
 async def smudge_chat(request: SmudgeChatRequest):
     """Chat with Smudge AI listener - no authentication required"""
     
+    # Kill switch check
+    if SMUDGE_DISABLED:
+        return SmudgeChatResponse(
+            reply="Smudge is offline right now. A real person is available and ready to talk. Please use the buttons below to connect with a peer or counsellor.",
+            sessionId=request.sessionId
+        )
+    
     if not EMERGENT_LLM_KEY:
         raise HTTPException(status_code=503, detail="Smudge is currently unavailable")
     
