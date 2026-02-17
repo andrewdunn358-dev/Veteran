@@ -1534,6 +1534,57 @@ async def admin_update_peer_status(
 
 # ============ PEER SUPPORT REGISTRATION (from app) ============
 
+async def send_peer_registration_notification(email: str, registration_time: datetime):
+    """Send notification to admin when someone registers for peer support"""
+    try:
+        # Get notification email from settings
+        settings = await db.settings.find_one({"_id": "site_settings"})
+        notification_email = settings.get("peer_registration_notification_email") if settings else None
+        
+        # If no notification email configured, try to notify admins
+        if not notification_email:
+            admin_users = await db.users.find({"role": "admin"}).to_list(10)
+            if admin_users:
+                notification_email = admin_users[0].get("email")
+        
+        if not notification_email:
+            logging.warning("No notification email configured for peer registration")
+            return False
+        
+        if not RESEND_API_KEY:
+            logging.warning("Resend API key not configured, skipping peer registration notification")
+            return False
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #1a2332;">New Peer Support Registration</h2>
+            <p>Someone has expressed interest in becoming a peer supporter.</p>
+            <div style="background-color: #f5f5f5; padding: 16px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Email:</strong> {email}</p>
+                <p><strong>Registration Time:</strong> {registration_time.strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
+            </div>
+            <p>You can view all registrations in the admin portal under "Peer Support Registrations".</p>
+            <br>
+            <p style="color: #1a2332;">Veterans Support System</p>
+        </body>
+        </html>
+        """
+        
+        params = {
+            "from": SENDER_EMAIL,
+            "to": [notification_email],
+            "subject": "New Peer Support Registration - Veterans Support",
+            "html": html_content
+        }
+        
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        logging.info(f"Peer registration notification sent to {notification_email}, ID: {result.get('id')}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to send peer registration notification: {str(e)}")
+        return False
+
 @api_router.post("/peer-support/register", response_model=PeerSupportRegistration)
 async def register_peer_support(input: PeerSupportRegistrationCreate):
     """Register interest for peer support programme (public)"""
@@ -1545,6 +1596,9 @@ async def register_peer_support(input: PeerSupportRegistrationCreate):
         registration_dict = input.dict()
         registration_obj = PeerSupportRegistration(**registration_dict)
         await db.peer_support_registrations.insert_one(registration_obj.dict())
+        
+        # Send notification to admin
+        await send_peer_registration_notification(input.email, registration_obj.timestamp)
         
         logging.info(f"Peer support registration: {input.email}")
         return registration_obj
