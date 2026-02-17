@@ -11,10 +11,35 @@ Build and enhance a mobile-first web application for UK military veterans provid
 5. Admin panel for managing staff status
 6. Organization and resource directory
 7. Email notification system for admin alerts
-8. **NEW (Feb 2026)**: Staff notes system for counsellors/peers
-9. **NEW (Feb 2026)**: Smudge AI chatbot listener
+8. Staff notes system for counsellors/peers
+9. AI Battle Buddies (Tommy & Doris) chatbot feature
+10. Training Portal for peer-to-peer volunteer training
 
 ## What's Been Implemented
+
+### AI Battle Buddies (Tommy & Doris) - Feb 2026
+- Two AI companion personas: Tommy (male veteran) and Doris (female veteran)
+- Character selection screen at `/ai-buddies`
+- Chat interface at `/ai-chat`
+- Backend endpoint: POST /api/ai/chat
+- Uses OpenAI API (gpt-4.1-mini) with user's API key
+- About modal with full description text
+- Featured prominently at top of home page
+
+### Splash Screen (Feb 2026 Update)
+- **Redesigned for calmer UX**:
+  - Removed alarming red "I NEED HELP NOW" button
+  - New welcoming message: "You're not alone. We're here for you."
+  - Blue "Enter the App" as primary action
+  - Subtle "I need to talk to someone now" link
+  - Subtle emergency notice at bottom
+
+### Home Page (Feb 2026 Update)
+- **AI Battle Buddies section moved to TOP**
+- Featured card with Tommy & Doris avatars
+- "About Tommy & Doris" button with modal
+- About modal displays full description text
+- "Start a Conversation" button in modal
 
 ### Backend (FastAPI)
 - **Authentication**: JWT-based auth with admin/counsellor/peer roles
@@ -29,75 +54,55 @@ Build and enhance a mobile-first web application for UK military veterans provid
   - GET /api/panic-alerts - List alerts (admin/counsellor only)
   - PATCH /api/panic-alerts/{id}/acknowledge - Acknowledge alert
   - PATCH /api/panic-alerts/{id}/resolve - Resolve alert
-- **Staff Notes System** (NEW Feb 2026):
+- **Staff Notes System**:
   - POST /api/notes - Create note (private or shared)
   - GET /api/notes - Get notes (own + shared, admins see all)
   - GET /api/notes/{id} - Get specific note
   - PATCH /api/notes/{id} - Update note
   - DELETE /api/notes/{id} - Delete note
   - GET /api/staff-users - Get staff list for sharing
-- **Smudge AI Chat** (NEW Feb 2026):
-  - POST /api/smudge/chat - Send message to Smudge AI listener
-  - POST /api/smudge/reset - Reset chat session
-  - Uses GPT-4o-mini via Emergent LLM Key
-  - Rate limited to 30 messages per session
-  - System prompt enforces safe, empathetic listening without advice
+- **AI Battle Buddies Chat**:
+  - POST /api/ai/chat - Chat with Tommy or Doris
+  - GET /api/ai-buddies/characters - Get character info
+  - Uses OpenAI API with user's API key in backend/.env
 - **Admin Status Management**:
   - PATCH /api/admin/counsellors/{id}/status - Update counsellor status
   - PATCH /api/admin/peer-supporters/{id}/status - Update peer status
 - **Peer Support Registration**:
   - POST /api/peer-support/register - Register interest with email notification
   - GET /api/peer-support/registrations - List all registrations (admin only)
-- **Site Settings**:
-  - GET /api/settings - Get site settings
-  - PUT /api/settings - Update settings
 
 ### Frontend (React Native/Expo)
-- **Smudge Chat** (/smudge) - NEW Feb 2026:
-  - AI listener chatbot interface
-  - Multi-turn conversation with context
-  - "Talk to a peer" and "Talk to a counsellor" buttons always visible
-  - Disclaimer that Smudge is AI and cannot provide advice
-- **Home Page** - "Talk to Smudge" button added to Self-Care Tools
+- **AI Battle Buddies** (/ai-buddies, /ai-chat) - Character selection and chat
+- **Home Page** - AI Buddies featured at top with About button
+- **Splash Screen** - Calmer design without alarming red button
 - **Callback Request Page** (/callback) - Form with counsellor/peer selection
-- **Admin Panel** - Callbacks and Alerts tabs, status change modals
-- **Splash Screen** - Clean entry point with Yes/No help buttons
 - **Peer Support Page** - Registration form for becoming a peer supporter
-- **Counsellor Portal** (/counsellor-portal):
-  - PANIC ALERTS section with Acknowledge/Resolve actions
-  - Auto-polls every 10 seconds
-  - Callbacks management
-- **Peer Portal** (/peer-portal):
-  - Panic button to alert counsellors
-  - Callbacks management
+- **Counsellor Portal** (/counsellor-portal)
+- **Peer Portal** (/peer-portal)
 - Theme support (light/dark mode)
 
-### Staff Portal (NEW Feb 2026 - Static HTML)
-- Located at `/app/staff-portal/` - Deploy to `veteran.dbty.co.uk/staff-portal`
-- Features:
-  - Login for counsellors/peers (admins can access for testing)
-  - Panic button (peers) / Panic alerts (counsellors)
-  - Callbacks management
-  - Status toggle (available/busy/off)
-  - **Notes section**: Create, edit, delete, share notes
-  - Notes tabs: "My Notes" and "Shared With Me"
-  - Link notes to callbacks
-  - Auto-refresh every 30 seconds
+### Staff Portal (Static HTML)
+- Located at `/app/staff-portal/`
+- Features: Login, Panic alerts, Callbacks, Notes, Status toggle
 
 ### Admin Site (Static HTML)
-- Located at `/app/admin-site/` - Deployed to `veteran.dbty.co.uk`
+- Located at `/app/admin-site/`
 - Role-based access for admins
-- Restored to working version from Feb 16, 2026
+
+### Training Portal Assets
+- `/app/training-portal/course-structure.md` - 10-module course outline
+- `/app/training-portal/radio-check-theme.css` - WordPress/LMS CSS theme
+- `/app/training-portal/formalms-theme.css` - FormaLMS CSS theme
 
 ### Database Collections
 - users, counsellors, peer_supporters, organizations, resources
 - callback_requests, panic_alerts, peer_support_registrations
-- settings, call_logs
-- **notes** (NEW Feb 2026)
+- settings, call_logs, notes
 
 ## Environment Variables
 - EXPO_PUBLIC_BACKEND_URL - Backend API URL
-- EMERGENT_LLM_KEY - For Smudge AI (GPT-4o-mini)
+- OPENAI_API_KEY - For AI Battle Buddies (user's own key)
 - RESEND_API_KEY - Email service (optional)
 - MONGO_URL - Database connection
 
@@ -106,24 +111,40 @@ Build and enhance a mobile-first web application for UK military veterans provid
 - **Frontend App**: Vercel (React Native/Expo Web)
 - **Admin Site**: 20i hosting (veteran.dbty.co.uk)
 - **Staff Portal**: 20i hosting (veteran.dbty.co.uk/staff-portal)
+- **Training Portal**: WordPress/LMS (user to set up)
 
 ## Files of Reference
-- backend/server.py - All API endpoints including Smudge AI
-- frontend/app/smudge.tsx - Smudge AI chat interface
-- frontend/app/home.tsx - Home page with Smudge button
-- staff-portal/ - Staff portal files (index.html, app.js, styles.css, config.js)
+- backend/server.py - All API endpoints including AI chat
+- frontend/app/index.tsx - Splash screen (calmer design)
+- frontend/app/home.tsx - Home page with AI Buddies at top
+- frontend/app/ai-buddies.tsx - Character selection screen
+- frontend/app/ai-chat.tsx - AI chat interface
+- staff-portal/ - Staff portal files
 - admin-site/ - Admin site files
+- training-portal/ - LMS theme assets
 
 ## Credentials
 - Admin: admin@veteran.dbty.co.uk / ChangeThisPassword123!
 
+## Completed Tasks (Feb 2026)
+- [x] AI Battle Buddies (Tommy & Doris) implemented
+- [x] Splash screen redesigned (removed alarming red button)
+- [x] AI Buddies moved to top of home page
+- [x] About Tommy & Doris button and modal added
+- [x] Staff notes system implemented
+- [x] Staff portal created
+- [x] Training portal CSS themes created
+
 ## Upcoming Tasks (P1)
-- Implement "Favorites/Saved Contacts" feature
-- Add Privacy Policy & Terms of Service pages
-- Backend performance optimization (MongoDB projections)
+- Training Portal API endpoint for progress tracking
+- Persistent AI chat history option for logged-in users
 
 ## Future Tasks (P2/P3)
+- Favorites/Saved Contacts feature
+- Privacy Policy & Terms of Service pages
+- Backend performance optimization (MongoDB projections)
 - VoIP/PBX Integration
-- In-App Chat/Messaging
+- In-App Human-to-Human Chat
 - Achievement Badges
 - Referral System
+- Clean up avatar references (tommy.png vs smudge-avatar.png)
