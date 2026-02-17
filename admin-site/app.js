@@ -115,22 +115,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Login
 async function handleLogin(e) {
-    e.preventDefault();
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
     
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const errorEl = document.getElementById('login-error');
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
+    var errorEl = document.getElementById('login-error');
+    
+    // Validate inputs
+    if (!email || !password) {
+        errorEl.textContent = 'Please enter email and password';
+        errorEl.classList.remove('hidden');
+        return false;
+    }
     
     try {
         errorEl.classList.add('hidden');
         
-        const response = await fetch(`${CONFIG.API_URL}/api/auth/login`, {
+        console.log('Attempting login to:', CONFIG.API_URL + '/api/auth/login');
+        
+        var response = await fetch(CONFIG.API_URL + '/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email: email, password: password })
         });
         
-        const data = await response.json();
+        var data = await response.json();
         
         if (!response.ok) {
             throw new Error(data.detail || 'Login failed');
@@ -148,7 +160,7 @@ async function handleLogin(e) {
         localStorage.setItem('current_user', JSON.stringify(currentUser));
         
         // Show dashboard
-        document.getElementById('user-name').textContent = `Welcome, ${currentUser.name}`;
+        document.getElementById('user-name').textContent = 'Welcome, ' + currentUser.name;
         
         // Setup role-based UI
         setupRoleBasedUI();
@@ -157,9 +169,12 @@ async function handleLogin(e) {
         loadAllData();
         
     } catch (error) {
-        errorEl.textContent = error.message;
+        console.error('Login error:', error);
+        errorEl.textContent = error.message || 'Login failed. Please try again.';
         errorEl.classList.remove('hidden');
     }
+    
+    return false;
 }
 
 // Logout
