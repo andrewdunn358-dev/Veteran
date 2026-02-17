@@ -42,8 +42,12 @@ Build and enhance a mobile-first web application for UK military veterans provid
 - **Callback Request Page** (/callback) - Form with counsellor/peer selection
 - **Home Page** - Updated with "Request a Callback" button
 - **Admin Panel** - Added Callbacks and Alerts tabs, status change modals
-- **Splash Screen** - Clean entry point with Yes/No help buttons (panic button REMOVED - Feb 2026)
+- **Splash Screen** - Clean entry point with Yes/No help buttons (panic button removed from public view)
 - **Peer Support Page** - Registration form for becoming a peer supporter
+- **Peer Portal** (/peer-portal) - UPDATED Feb 2026:
+  - Panic button to alert counsellors for help during calls
+  - View and manage assigned callbacks (take, release, complete)
+  - Status update (available/limited/unavailable)
 - Theme support (light/dark mode)
 - Logo wrapper for theme compatibility
 - **Fixed**: `useNativeDriver` warning on web (Feb 2026)
