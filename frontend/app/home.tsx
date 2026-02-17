@@ -498,4 +498,143 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.textMuted,
     fontSize: 14,
   },
+  // AI Battle Buddies Featured Section
+  aiBuddiesSection: {
+    marginBottom: 24,
+  },
+  aiBuddiesCard: {
+    backgroundColor: '#1a2744',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: '#3b82f6',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#3b82f6',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
+  },
+  aiBuddiesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  aiBuddiesAvatars: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  aiBuddyAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 3,
+    borderColor: '#1a2744',
+  },
+  aiBuddyAvatarOverlap: {
+    marginLeft: -16,
+  },
+  aiBuddiesTextContainer: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  aiBuddiesTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  aiBuddiesSubtitle: {
+    fontSize: 14,
+    color: '#94a3b8',
+    marginTop: 2,
+  },
+  aboutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    paddingVertical: 8,
+    gap: 6,
+  },
+  aboutButtonText: {
+    fontSize: 14,
+    color: '#3b82f6',
+    fontWeight: '500',
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#1a2332',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    maxHeight: '85%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  modalAvatars: {
+    flexDirection: 'row',
+  },
+  modalAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 3,
+    borderColor: '#1a2332',
+  },
+  modalAvatarOverlap: {
+    marginLeft: -20,
+  },
+  modalCloseButton: {
+    padding: 8,
+  },
+  modalScroll: {
+    maxHeight: 400,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#3b82f6',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  modalText: {
+    fontSize: 15,
+    color: '#b0c4de',
+    lineHeight: 24,
+    marginBottom: 20,
+  },
+  modalChatButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3b82f6',
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 10,
+    marginTop: 16,
+  },
+  modalChatButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
 });
