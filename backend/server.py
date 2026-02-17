@@ -1732,6 +1732,87 @@ async def resolve_panic_alert(
         logging.error(f"Error resolving alert: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to resolve alert")
 
+# ============ SAFEGUARDING ALERTS ENDPOINTS ============
+
+@api_router.get("/safeguarding-alerts")
+async def get_safeguarding_alerts(
+    status: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Get safeguarding alerts - counsellors and admins only"""
+    if current_user.role not in ["admin", "counsellor"]:
+        raise HTTPException(status_code=403, detail="Only counsellors and admins can view safeguarding alerts")
+    
+    try:
+        query = {}
+        if status:
+            query["status"] = status
+        
+        alerts = await db.safeguarding_alerts.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+        return alerts
+    except Exception as e:
+        logging.error(f"Error fetching safeguarding alerts: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch safeguarding alerts")
+
+@api_router.patch("/safeguarding-alerts/{alert_id}/acknowledge")
+async def acknowledge_safeguarding_alert(
+    alert_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Acknowledge a safeguarding alert"""
+    if current_user.role not in ["admin", "counsellor"]:
+        raise HTTPException(status_code=403, detail="Only counsellors and admins can acknowledge safeguarding alerts")
+    
+    try:
+        alert = await db.safeguarding_alerts.find_one({"id": alert_id})
+        if not alert:
+            raise HTTPException(status_code=404, detail="Alert not found")
+        
+        await db.safeguarding_alerts.update_one(
+            {"id": alert_id},
+            {"$set": {
+                "status": "acknowledged",
+                "acknowledged_by": current_user.name,
+                "acknowledged_at": datetime.utcnow()
+            }}
+        )
+        
+        return {"message": f"Safeguarding alert acknowledged by {current_user.name}"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error acknowledging safeguarding alert: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to acknowledge safeguarding alert")
+
+@api_router.patch("/safeguarding-alerts/{alert_id}/resolve")
+async def resolve_safeguarding_alert(
+    alert_id: str,
+    notes: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Resolve a safeguarding alert with optional notes"""
+    if current_user.role not in ["admin", "counsellor"]:
+        raise HTTPException(status_code=403, detail="Only counsellors and admins can resolve safeguarding alerts")
+    
+    try:
+        update_data = {
+            "status": "resolved",
+            "resolved_by": current_user.name,
+            "resolved_at": datetime.utcnow()
+        }
+        if notes:
+            update_data["notes"] = notes
+        
+        await db.safeguarding_alerts.update_one(
+            {"id": alert_id},
+            {"$set": update_data}
+        )
+        
+        return {"message": f"Safeguarding alert resolved by {current_user.name}"}
+    except Exception as e:
+        logging.error(f"Error resolving safeguarding alert: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to resolve safeguarding alert")
+
 # ============ STAFF NOTES ENDPOINTS ============
 
 @api_router.post("/notes")
