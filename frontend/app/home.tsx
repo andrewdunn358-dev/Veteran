@@ -55,6 +55,44 @@ export default function Index() {
           <Text style={styles.taglineLatin}>Semel Servientes, Semper Uniti</Text>
         </View>
 
+        {/* AI Battle Buddies - Featured at Top */}
+        <View style={styles.aiBuddiesSection}>
+          <TouchableOpacity 
+            style={styles.aiBuddiesCard}
+            onPress={() => router.push('/ai-buddies')}
+            activeOpacity={0.9}
+            data-testid="ai-buddies-main-btn"
+          >
+            <View style={styles.aiBuddiesHeader}>
+              <View style={styles.aiBuddiesAvatars}>
+                <Image 
+                  source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png' }}
+                  style={styles.aiBuddyAvatar}
+                />
+                <Image 
+                  source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png' }}
+                  style={[styles.aiBuddyAvatar, styles.aiBuddyAvatarOverlap]}
+                />
+              </View>
+              <View style={styles.aiBuddiesTextContainer}>
+                <Text style={styles.aiBuddiesTitle}>AI Battle Buddies</Text>
+                <Text style={styles.aiBuddiesSubtitle}>Chat with Tommy or Doris</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#64748b" />
+            </View>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.aboutButton}
+            onPress={() => setShowAboutModal(true)}
+            activeOpacity={0.7}
+            data-testid="ai-buddies-about-btn"
+          >
+            <Ionicons name="information-circle-outline" size={18} color="#3b82f6" />
+            <Text style={styles.aboutButtonText}>About Tommy & Doris</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Main Actions */}
         <View style={styles.mainActions}>
           {/* Primary Help Button - Softer approach */}
