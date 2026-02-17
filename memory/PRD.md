@@ -42,7 +42,7 @@ Build and enhance a mobile-first web application for UK military veterans provid
 - **Callback Request Page** (/callback) - Form with counsellor/peer selection
 - **Home Page** - Updated with "Request a Callback" button
 - **Admin Panel** - Added Callbacks and Alerts tabs, status change modals
-- **Splash Screen** - Panic button with alert modal
+- **Splash Screen** - Clean entry point with Yes/No help buttons (panic button REMOVED - Feb 2026)
 - **Peer Support Page** - Registration form for becoming a peer supporter
 - Theme support (light/dark mode)
 - Logo wrapper for theme compatibility
