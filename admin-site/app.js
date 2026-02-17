@@ -1,6 +1,5 @@
 // Veterans Support Admin Portal - Minimal Working Version
-// Configuration
-var CONFIG = window.CONFIG || { API_URL: 'https://veterans-support-api.onrender.com' };
+// CONFIG is loaded from config.js
 
 // State
 var token = localStorage.getItem('auth_token');
