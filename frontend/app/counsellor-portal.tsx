@@ -265,7 +265,7 @@ export default function CounsellorPortal() {
                   </Text>
                 )}
                 <View style={styles.alertActions}>
-                  {alert.status === 'pending' && (
+                  {alert.status === 'active' && (
                     <TouchableOpacity 
                       style={styles.acknowledgeButton}
                       onPress={() => acknowledgeAlert(alert.id)}
