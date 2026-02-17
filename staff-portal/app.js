@@ -231,6 +231,7 @@ async function updateMyStatus(newStatus) {
 async function loadCallbacks() {
     try {
         var callbacks = await apiCall('/callbacks');
+        allCallbacks = callbacks; // Store for notes dropdown
         var role = currentUser.role;
         var userId = currentUser.id;
         
