@@ -113,6 +113,18 @@ export default function Index() {
         <View style={styles.toolsRow}>
           <TouchableOpacity 
             style={styles.toolButton}
+            onPress={() => router.push('/smudge')}
+            activeOpacity={0.8}
+            data-testid="smudge-chat-btn"
+          >
+            <View style={[styles.toolIconBg, { backgroundColor: '#e0f2fe' }]}>
+              <Ionicons name="chatbubble-ellipses" size={24} color="#0284c7" />
+            </View>
+            <Text style={styles.toolText}>Talk to{'\n'}Smudge</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.toolButton}
             onPress={() => router.push('/mood')}
             activeOpacity={0.8}
           >
