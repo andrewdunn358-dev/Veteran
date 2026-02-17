@@ -1063,12 +1063,17 @@ async def seed_resources(current_user: User = Depends(require_role("admin"))):
 class SiteSettings(BaseModel):
     logo_url: Optional[str] = None
     site_name: Optional[str] = "Veterans Support"
+    peer_registration_notification_email: Optional[str] = None  # Email to notify when someone registers for peer support
 
 @api_router.get("/settings")
 async def get_settings():
     """Get site settings (public)"""
     settings = await db.settings.find_one({"_id": "site_settings"}, {"_id": 0})
-    return settings or {"logo_url": None, "site_name": "Veterans Support"}
+    return settings or {
+        "logo_url": None, 
+        "site_name": "Veterans Support",
+        "peer_registration_notification_email": None
+    }
 
 @api_router.put("/settings")
 async def update_settings(
