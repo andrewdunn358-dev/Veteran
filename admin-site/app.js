@@ -167,9 +167,6 @@ async function handleLogin(e) {
         // Show dashboard
         document.getElementById('user-name').textContent = 'Welcome, ' + currentUser.name;
         
-        // Setup role-based UI
-        setupRoleBasedUI();
-        
         showScreen('dashboard-screen');
         loadAllData();
         
