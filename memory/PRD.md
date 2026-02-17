@@ -11,6 +11,8 @@ Build and enhance a mobile-first web application for UK military veterans provid
 5. Admin panel for managing staff status
 6. Organization and resource directory
 7. Email notification system for admin alerts
+8. **NEW (Feb 2026)**: Staff notes system for counsellors/peers
+9. **NEW (Feb 2026)**: Smudge AI chatbot listener
 
 ## What's Been Implemented
 
@@ -27,96 +29,101 @@ Build and enhance a mobile-first web application for UK military veterans provid
   - GET /api/panic-alerts - List alerts (admin/counsellor only)
   - PATCH /api/panic-alerts/{id}/acknowledge - Acknowledge alert
   - PATCH /api/panic-alerts/{id}/resolve - Resolve alert
+- **Staff Notes System** (NEW Feb 2026):
+  - POST /api/notes - Create note (private or shared)
+  - GET /api/notes - Get notes (own + shared, admins see all)
+  - GET /api/notes/{id} - Get specific note
+  - PATCH /api/notes/{id} - Update note
+  - DELETE /api/notes/{id} - Delete note
+  - GET /api/staff-users - Get staff list for sharing
+- **Smudge AI Chat** (NEW Feb 2026):
+  - POST /api/smudge/chat - Send message to Smudge AI listener
+  - POST /api/smudge/reset - Reset chat session
+  - Uses GPT-4o-mini via Emergent LLM Key
+  - Rate limited to 30 messages per session
+  - System prompt enforces safe, empathetic listening without advice
 - **Admin Status Management**:
   - PATCH /api/admin/counsellors/{id}/status - Update counsellor status
   - PATCH /api/admin/peer-supporters/{id}/status - Update peer status
-- **Peer Support Registration** (UPDATED Feb 2026):
-  - POST /api/peer-support/register - Register interest with email notification to admin
+- **Peer Support Registration**:
+  - POST /api/peer-support/register - Register interest with email notification
   - GET /api/peer-support/registrations - List all registrations (admin only)
-- **Site Settings** (UPDATED Feb 2026):
-  - GET /api/settings - Get site settings (includes notification email)
-  - PUT /api/settings - Update settings (logo, notification email)
-  - `peer_registration_notification_email` - Configurable admin notification email
+- **Site Settings**:
+  - GET /api/settings - Get site settings
+  - PUT /api/settings - Update settings
 
 ### Frontend (React Native/Expo)
+- **Smudge Chat** (/smudge) - NEW Feb 2026:
+  - AI listener chatbot interface
+  - Multi-turn conversation with context
+  - "Talk to a peer" and "Talk to a counsellor" buttons always visible
+  - Disclaimer that Smudge is AI and cannot provide advice
+- **Home Page** - "Talk to Smudge" button added to Self-Care Tools
 - **Callback Request Page** (/callback) - Form with counsellor/peer selection
-- **Home Page** - Updated with "Request a Callback" button
-- **Admin Panel** - Added Callbacks and Alerts tabs, status change modals
-- **Splash Screen** - Clean entry point with Yes/No help buttons (panic button removed from public view)
+- **Admin Panel** - Callbacks and Alerts tabs, status change modals
+- **Splash Screen** - Clean entry point with Yes/No help buttons
 - **Peer Support Page** - Registration form for becoming a peer supporter
-- **Counsellor Portal** (/counsellor-portal) - UPDATED Feb 2026:
-  - **PANIC ALERTS section** - Shows active panic alerts from peer supporters with Acknowledge/Resolve actions
-  - Auto-polls every 10 seconds for new alerts
-  - View and manage assigned callbacks (take, complete)
-  - Status update (available/busy/off)
-- **Peer Portal** (/peer-portal) - UPDATED Feb 2026:
-  - Panic button to alert counsellors for help during calls
-  - View and manage assigned callbacks (take, release, complete)
-  - Status update (available/limited/unavailable)
+- **Counsellor Portal** (/counsellor-portal):
+  - PANIC ALERTS section with Acknowledge/Resolve actions
+  - Auto-polls every 10 seconds
+  - Callbacks management
+- **Peer Portal** (/peer-portal):
+  - Panic button to alert counsellors
+  - Callbacks management
 - Theme support (light/dark mode)
-- Logo wrapper for theme compatibility
-- **Fixed**: `useNativeDriver` warning on web (Feb 2026)
+
+### Staff Portal (NEW Feb 2026 - Static HTML)
+- Located at `/app/staff-portal/` - Deploy to `veteran.dbty.co.uk/staff-portal`
+- Features:
+  - Login for counsellors/peers (admins can access for testing)
+  - Panic button (peers) / Panic alerts (counsellors)
+  - Callbacks management
+  - Status toggle (available/busy/off)
+  - **Notes section**: Create, edit, delete, share notes
+  - Notes tabs: "My Notes" and "Shared With Me"
+  - Link notes to callbacks
+  - Auto-refresh every 30 seconds
 
 ### Admin Site (Static HTML)
-- **Role-based access** (UPDATED Feb 2026):
-  - Admins see all tabs (Counsellors, Peers, Orgs, Resources, Users, CMS, Settings)
-  - Counsellors and Peers see "My Portal" tab
-- **My Portal Tab** (NEW Feb 2026):
-  - For Counsellors: Panic alerts section, callbacks management, status toggle
-  - For Peers: Panic button, callbacks management, status toggle
-  - Auto-polls every 10 seconds for new alerts/callbacks
-- **Settings Section**:
-  - Branding: Logo upload
-  - Notifications: Peer registration notification email configuration
+- Located at `/app/admin-site/` - Deployed to `veteran.dbty.co.uk`
+- Role-based access for admins
+- Restored to working version from Feb 16, 2026
 
 ### Database Collections
 - users, counsellors, peer_supporters, organizations, resources
-- callback_requests
-- panic_alerts
-- peer_support_registrations
-- settings (includes peer_registration_notification_email)
-- call_logs
+- callback_requests, panic_alerts, peer_support_registrations
+- settings, call_logs
+- **notes** (NEW Feb 2026)
 
-## Testing Status
-- Backend: 100% (24/24 tests passed)
-- Frontend: 80% (Callback form works, minor React Native Web issues)
-
-## Known Issues
-1. Splash screen (index.tsx) has rendering issue where content doesn't appear
-2. React Native Web TouchableOpacity click events have automation issues
-3. Resend API key not configured (emails won't send until configured)
+## Environment Variables
+- EXPO_PUBLIC_BACKEND_URL - Backend API URL
+- EMERGENT_LLM_KEY - For Smudge AI (GPT-4o-mini)
+- RESEND_API_KEY - Email service (optional)
+- MONGO_URL - Database connection
 
 ## Deployment Architecture
 - **Backend**: Render (FastAPI + MongoDB)
 - **Frontend App**: Vercel (React Native/Expo Web)
-- **Admin Site**: 20i hosting (static HTML/JS)
+- **Admin Site**: 20i hosting (veteran.dbty.co.uk)
+- **Staff Portal**: 20i hosting (veteran.dbty.co.uk/staff-portal)
+
+## Files of Reference
+- backend/server.py - All API endpoints including Smudge AI
+- frontend/app/smudge.tsx - Smudge AI chat interface
+- frontend/app/home.tsx - Home page with Smudge button
+- staff-portal/ - Staff portal files (index.html, app.js, styles.css, config.js)
+- admin-site/ - Admin site files
 
 ## Credentials
 - Admin: admin@veteran.dbty.co.uk / ChangeThisPassword123!
 
 ## Upcoming Tasks (P1)
-- Fix splash screen rendering issue
 - Implement "Favorites/Saved Contacts" feature
 - Add Privacy Policy & Terms of Service pages
+- Backend performance optimization (MongoDB projections)
 
 ## Future Tasks (P2/P3)
 - VoIP/PBX Integration
 - In-App Chat/Messaging
 - Achievement Badges
 - Referral System
-
-## Files of Reference
-- backend/server.py - All API endpoints
-- frontend/app/callback.tsx - Callback request form
-- frontend/app/admin.tsx - Admin panel with status management
-- frontend/app/index.tsx - Splash screen with panic button
-- frontend/app/peer-support.tsx - Peer support registration
-- frontend/src/components/Toast.tsx - Toast notifications (fixed useNativeDriver)
-- admin-site/app.js - Admin site functionality
-- admin-site/index.html - Admin site UI
-- frontend/app/home.tsx - Main home page
-
-## Environment Variables
-- EXPO_PUBLIC_BACKEND_URL - Backend API URL
-- RESEND_API_KEY - Email service (optional)
-- MONGO_URL - Database connection
