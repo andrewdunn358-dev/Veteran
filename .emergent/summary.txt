@@ -1,160 +1,201 @@
-<analysis>**original_problem_statement**: The user's goal is to build and enhance a mobile-first web application for UK military veterans. This session was highly reactive, focusing on fixing a cascade of user-reported issues related to deployment, configuration, and missing features across three separate application components: a React Native app on Vercel, a FastAPI backend on Render, and a static admin website on 20i hosting.
+<analysis>**original_problem_statement**: The user's goal is to build and enhance a mobile-first web application for UK military veterans. The scope has expanded to include:
 
-**PRODUCT REQUIREMENTS**:
-1.  **Fix Content Management**: Enable admins to manage UK Veteran Resources and Organizations, which were previously hardcoded.
-2.  **Fix Deployments**: Resolve build/runtime failures on both Vercel (frontend app) and Render (backend).
-3.  **Fix Login Issues**: Resolve login failures on both the Vercel app and the 20i-hosted admin site, caused by incorrect backend URLs.
-4.  **Implement Image Uploads**: Add the ability for admins to upload images for Resources instead of using URLs.
-5.  **Restore App UI**: Re-add a Resources section to the main app, create a splash screen, and fix theme/styling issues.
-6.  **Enhance Admin Panel**: Add features to the admin panel for logo uploads and dynamic category management.
+**PRODUCT REQUIREMENTS:**
+1.  **Callback/Panic System**:
+    *   Users can request a Counsellor or Peer-to-Peer callback.
+    *   A high-visibility panic button allows logged-in **Peer Supporters** to request immediate help from a **Counsellor** during a call.
+    *   Counsellors must be able to see and manage incoming panic alerts.
+2.  **Role-Based Portals (Mobile & Web)**:
+    *   Counsellors and Peer Supporters need dedicated portals, accessible via both the mobile app and the admin website.
+    *   These portals should display relevant information: callback requests and panic alerts.
+3.  **Admin Configuration**:
+    *   Admins must be able to configure a notification email address.
+    *   This email address receives a notification whenever a new user registers for peer support.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The project consists of three distinct parts:
-1.  **Backend (FastAPI on Render)**: Fully functional with APIs for auth, users, content, and now includes new endpoints for managing Resources (with base64 image uploads), Settings (logo, categories), and seeding data. It connects to the production MongoDB.
-2.  **Frontend App (React Native/Expo on Vercel)**: The main mobile-first application. It now features a new splash screen entry point with an immediate help option, a GDPR cookie banner, and a restored Resources section. To resolve persistent login issues, **all backend API calls have been hardcoded to the production Render URL**. The theme is now defaulted to light mode.
-3.  **Admin Site (Static HTML/JS/CSS on 20i)**: A separate, powerful admin dashboard. It has been significantly enhanced with a Resources tab supporting image uploads and category management, and a new Settings tab for uploading the site logo. Its configuration correctly points to the production Render backend.
+The backend () has been updated with endpoints for peer registration notifications, panic alerts, and callbacks. The mobile app front-end () has been updated with portals for Counsellors () and Peers () which display callbacks and panic buttons/alerts as required.
+
+The static admin website () has been completely overhauled with new HTML and JavaScript () to provide the same role-based portal functionality for Counsellors and Peers, allowing them to log in from a desktop browser. However, this admin website is currently non-functional on the user's live hosting due to severe deployment and file corruption issues.
 
 **Last working item**:
-    - Last item agent was working: The user reported the app had a white background, the dark mode toggle was missing, and they wanted light mode as the default. The agent implemented fixes by setting the default theme to 'light' in , ensuring the splash screen respected the theme, and confirming the toggle exists on the  page.
+    - Last item agent was working: Fixing the completely broken admin website login. The user is stuck in a loop where they cannot log in to  due to a series of JavaScript errors (, ). The root cause is that an incomplete, truncated, or corrupted version of  is on the user's 20i hosting, compounded by aggressive server-side and browser caching. The agent's attempts to provide the correct file via chat and GitHub have failed due to user copy-paste errors and file transfer issues.
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? frontend testing agent. The agent should verify that the app loads in light mode by default, the splash screen has the correct dark background, and the dark mode toggle on the settings page is functional.
+    - Which testing method agent to use? manual testing by curl. The next agent's primary task is to provide the user with a foolproof method to deploy the correct and complete files for the admin website.
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: User Deployment & Environment Confusion (P0)
+  - Issue 1: Admin Website is Completely Broken and Unusable (P0 - CRITICAL BLOCKER)
   
   **Issues Detail**:
-  - **Issue 1: User Deployment & Environment Confusion (P0)**
-     - **Attempted fixes**: The agent repeatedly explained the three-part architecture (Vercel, Render, 20i) and the necessary deployment steps. As a final measure, the agent **hardcoded the production backend URL** into all frontend files to eliminate one source of error (Vercel environment variables).
-     - **Next debug checklist**: The next agent's first priority is to guide the user through a full, successful deployment. Clearly state the required steps: 1. Click Save to GitHub. 2. Wait for Vercel to rebuild. 3. Manually upload the  folder contents to their 20i hosting. This cycle must be completed for the user to see any of the fixes.
-     - **Why fix this issue and what will be achieved with the fix?**: This is the root cause of almost every problem reported in the session. The user cannot see any of the implemented fixes until their deployed environments are up-to-date. Solving this unblocks all other progress.
-     - **Status**: BLOCKED
+  - **Issue 1: Admin Website is Completely Broken and Unusable (P0)**
+     - **Attempted fixes**: The agent has gone through an extensive and frustrating loop with the user, attempting to fix a series of JavaScript errors. This included: providing full file contents in chat (leading to user copy-paste errors, including pasting markdown backticks and agent's chat text into the code), creating minimal test files, and repeatedly instructing the user to clear cache. The core issue is that the  file on the user's live server is consistently incorrect, either truncated, corrupted, or an old cached version.
+     - **Next debug checklist**:
+        1.  Acknowledge the user's extreme frustration and reassure them this is a solvable file deployment problem.
+        2.  Create a fresh, complete, and validated version of .
+        3.  **CRITICAL:** Do NOT provide the code in chat. Instead, create a downloadable ZIP archive containing all four necessary files (, , , ). This will prevent any further copy-paste errors.
+        4.  Provide clear, step-by-step instructions:
+            - Delete ALL files and folders inside your directory on 20i hosting.
+            - Upload the file I provide.
+            - Unzip the file on the server.
+            - Open a new **Incognito/Private** browser window to test the login.
+     - **Why fix this issue and what will be achieved with the fix?**: This is the primary blocker preventing the user from testing or using any of the newly developed web portal features. Resolving this will restore access and allow progress on verifying the role-based portals.
+     - **Status**: IN PROGRESS
      - **Is recurring issue?** Y
-     - **Should Test frontend/backend/both after fix?** both
-     - **Blocked on other issue**: Blocked on user action and understanding.
+     - **Should Test frontend/backend/both after fix?** frontend
+     - **Blocked on other issue**: This is the main blocker.
 
 **In progress Task List**:
-  - **Task 1: Verify Theme and Splash Screen Fixes**
-     - **Where to resume**: The code is ready. The next agent needs to guide the user to deploy the changes and then verify that the app defaults to light mode and the splash screen background is correct.
-     - **What will be achieved with this?**: A consistent and visually correct user interface, as requested by the user.
-     - **Status**: IN PROGRESS
+  - **Task 1: Verify Role-Based Portals on Admin Website**
+     - **Where to resume**: This task is ready for user verification once the login issue is resolved.
+     - **What will be achieved with this?**: This will confirm that Counsellors and Peers can log in to the website and see a simplified portal with only their relevant tools (callbacks, panic alerts), mirroring the mobile app's functionality, while Admins see the full dashboard.
+     - **Status**: BLOCKED
      - **Should Test frontend/backend/both after fix?** frontend
-     - **Blocked on something**: Issue 1: User Deployment & Environment Confusion.
+     - **Blocked on something**: Issue 1: Admin Website is Completely Broken and Unusable
 
 **Upcoming and Future Tasks**
-  **Upcoming Tasks:**
-  - **P1: Implement Favorites/Saved Contacts**: Add UI and logic for users to save contacts.  already exists as a starting point.
-  - **P2: Implement Callback Request**: Design and build a system for users to request a callback.
-  - **P3: Add Privacy Policy & Terms of Service**: Create pages for these legal documents and link them in the app, as suggested when implementing the GDPR banner.
-  - **P3: Minor Backend Optimizations**: Review queries in  to add  arguments (e.g., ) for better performance and security.
+**Upcoming Tasks:**
+- **P1: Implement Favorites/Saved Contacts**: Add UI and logic for users to save contacts.  exists as a starting point.
+- **P2: Add Privacy Policy & Terms of Service**: Create static pages for these legal documents and link them appropriately in the app.
+- **P3: Backend Performance Optimization**: Review MongoDB queries in  to add  arguments (e.g., ) to exclude unnecessary data and improve performance.
 
-  **Future Tasks:**
-  - **VoIP/PBX Integration**: Research and potentially integrate a system like FusionPBX (user deferred this for now).
-  - **In-App Chat/Messaging**.
-  - **Achievement Badges**.
-  - **Referral System**.
+**Future Tasks:**
+- **VoIP/PBX Integration**: Research and potentially integrate a system like FusionPBX.
+- **In-App Chat/Messaging**.
+- **Achievement Badges**.
+- **Referral System**.
 
 **Completed work in this session**
-- **Deployment Fixes**:
-  - Fixed Render build by removing  from .
-  - Fixed Vercel build by creating a  file.
-  - **Hardcoded the production backend URL** into all frontend files to guarantee connectivity.
-- **Admin Panel ( on 20i) Overhaul**:
-  - Implemented a Resources tab with full CRUD, image upload, and a seeding button.
-  - Implemented a Settings tab for dynamic logo uploads.
-  - Implemented category management (add/delete) for resources.
-  - Fixed  to point to the correct production backend.
-  - Fixed logo transparency issues.
-- **Frontend App (Vercel) Overhaul**:
-  - Created a new **Splash Screen** with an immediate help choice as the app entry point.
-  - Added a **GDPR Cookie Consent** banner.
-  - Restored the **Resources** button and created a new  page to display the corresponding library content.
-  - Fixed the in-app admin panel () to have separate, correctly-labeled tabs for Organizations and Resources.
-- **Backend API Expansion**:
-  - Created new API endpoints for , , and resource categories.
-  - Implemented logic to seed default data for Organizations and Resources to the production database.
+- **Peer/Counsellor Portal (Mobile App)**:
+  - Implemented a Panic Button for peer supporters to alert counsellors ().
+  - Implemented a Panic Alerts view for counsellors to see and manage incoming alerts ().
+  - Implemented callback list viewing and management in both portals.
+- **Peer/Counsellor Portal (Web)**:
+  - Overhauled the  with HTML, CSS, and JS to be role-aware, allowing peers and counsellors to log in and see a dedicated portal view (currently broken due to deployment issues).
+- **Admin Notifications**:
+  - Implemented a backend endpoint to send an email notification when a new peer supporter registers.
+  - Added a field to the  settings page for admins to configure the recipient email for these notifications.
+- **Bug Fixes & Refactoring**:
+  - Moved the Panic Button from the public splash screen () to the authenticated peer portal, as per user's corrected requirement.
+  - Fixed  warnings on the web build by conditionally applying the property in .
+  - Fixed multiple TypeScript build errors in the frontend.
 
 **Earlier issues found/mentioned but not fixed**
    - **Issue 1: Minor Backend Optimizations**:
-     - **Debug checklist**: Review queries in  to add  arguments (e.g., ) and remove secret key fallbacks.
-     - **Why to solve this issue and what will be achieved with this?**: Improves security and performance.
+     - **Debug checklist**: Review queries in  to add  arguments (e.g., ).
+     - **Why to solve this issue and what will be achieved with this?**: Improves security by not leaking DB s and slightly improves performance.
      - **Should Test frontend/backend/both after fix**: backend
      - **Is recurring issue?** N
 
 **Known issue recurrence from previous fork**
-  - **Issue recurrence in previous fork**: User's non-technical background and confusion about the multi-part deployment process (Vercel vs. Render vs. 20i).
-  - **Recurrence count**: High. This was the central blocker for the entire session.
-  - **Status**: ONGOING. The next agent must prioritize clear, simple, and repetitive instructions for deployment.
+  - **Issue recurrence in previous fork**: The user's struggle with the multi-part deployment process, file management, and caching has been the single biggest source of problems and frustration in this session. The previous summary noted this as a high risk, and it has fully materialized.
+  - **Recurrence count**: Extremely High.
+  - **Status**: ONGOING. The next agent must adopt a more robust strategy (e.g., providing a complete ZIP archive) to mitigate user error in file deployment.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Frontend**: React Native, Expo, Expo Router
+- **Frontend (Mobile)**: React Native, Expo, Expo Router, TypeScript
+- **Frontend (Web Admin)**: Vanilla JavaScript (ES6), HTML, CSS
 - **Backend**: Python, FastAPI
 - **Database**: MongoDB
-- **Deployment**: A complex, three-part setup:
-    1.  **Backend**: Hosted on **Render**.
-    2.  **Frontend App**: Hosted on **Vercel**.
-    3.  **Admin Panel**: A static site hosted on **20i**.
-- **Image Handling**: Images are stored as base64 data URLs in MongoDB.
+- **Deployment**: Vercel (Frontend App), Render (Backend), **20i (Static Admin Panel - location of current issue)**
 
 **key DB schema**
-  - ****: 
-  - ****: 
+  - ****: Modified to include .
 
 **All files of reference**
-- ****: Contains new endpoints for resources, settings, and categories.
-- ****: Contains the logic for the enhanced admin panel, including image uploads and category management.
-- ****: The new splash screen entry point.
-- ****: The in-app admin panel with separated tabs.
-- **All frontend files making API calls**: These now have the production URL hardcoded (e.g., , ).
+- ****: The source of all current login issues.
+- ****: Contains the login form and portal UI structure.
+- ****: The mobile app portal for counsellors.
+- ****: The mobile app portal for peer supporters.
+- ****: Contains the logic for notifications.
 
 **Critical Info for New Agent**
-- **Your #1 priority is to resolve the user's deployment confusion.** The user has three separate services (Vercel, Render, 20i) and does not understand that they need to be updated independently. You must start by clearly explaining the full deployment flow: **1. Save to GitHub -> 2. Vercel automatically rebuilds -> 3. Manually upload  folder files to 20i.** The user will not see any of your fixes until this is done correctly.
-- **Backend URLs are HARDCODED in the frontend.** This was a necessary but drastic measure to fix login problems. Do not attempt to revert to using environment variables unless the user demonstrates a clear understanding of how to manage them in the Vercel dashboard.
-- The user has two admin panels: the full-featured static one on 20i () and a limited in-app one (). Be aware of this distinction when the user reports issues with the admin panel.
-
-**documents and test reports created in this job**
-  -  (updated)
-  -  (from a previous session, but relevant)
+- The user is extremely frustrated with the  login problems. Do not underestimate this. Your first response must acknowledge this frustration and propose a clear, simple, and new plan to fix it.
+- The root cause is **file deployment**, not incorrect code. The files in the workspace are likely correct, but the user is failing to get them onto their 20i hosting correctly. This is due to a combination of user copy-paste errors, file truncation, and aggressive caching.
+- **Do not provide code in chat.** This has failed repeatedly. Your immediate plan should be to create a single, downloadable  file containing the complete, correct  directory. This is the most reliable way to ensure the user has all the right files.
+- Instruct the user to **delete all existing files** on their server before uploading the new ones from the zip, and to test **exclusively in an incognito window**.
 
 **Last 10 User Messages and any pending HUMAN messages** 
-1.  **App has a white background**: User reports theme issue. **Status**: Fix implemented, pending deployment.
-2.  **Wrong logos on splash/app**: User provided new logos. **Status**: Implemented, pending deployment.
-3.  **In-app admin mixes up resources/orgs**: User confused by incorrect tab labels. **Status**: Fixed with separate tabs, pending deployment.
-4.  **Splash screen needs Yes/No help option**: User requested specific splash screen functionality. **Status**: Implemented, pending deployment.
-5.  **Splash screen is gone, need GDPR?**: User noticed missing splash and asked about compliance. **Status**: Splash and GDPR banner implemented, pending deployment.
-6.  **Need logo upload & category management**: User requested more admin features. **Status**: Implemented in , pending deployment to 20i.
-7.  **Resource image upload missing**: User reporting missing feature on their live admin site. **Status**: Implemented, pending deployment to 20i.
-8.  **Resources are empty**: User reporting empty data. **Status**: Implemented and seeded to production DB, pending deployment of UI changes.
-9.  **Admin site JSON error**: Login failing on 20i site. **Status**: Diagnosed as old , fix implemented, pending deployment to 20i.
-10. **Vercel login not working**: Login failing on Vercel app. **Status**: Fixed by hardcoding backend URL, pending deployment.
+1.  **User**: States they've cleared cache and put the site in developer mode, but it's still getting a  and . **Status**: UNRESOLVED.
+2.  **Agent**: Correctly deduces the user has uploaded chat text instead of code. Provides the full, correct code for  again in the chat. **This is a repeated mistake.**
+3.  **User**: Pastes the start of the  file from their server, confirming it's corrupted/incomplete. **Status**: UNRESOLVED.
+4.  **User**: Reports the GitHub commit dates haven't changed, indicating the files aren't being pushed. **Status**: UNRESOLVED.
+5.  **User**: Asks for all correct code to be pushed to GitHub so they can delete everything and re-upload. **Status**: UNRESOLVED.
+6.  **User**: Reports that even the minimal  isn't working, citing a  error. **Status**: RESOLVED (Agent fixed this).
+7.  **User**: Expresses frustration and asks the agent to remake the site admin files, test them, and push them as fresh files to GitHub. **Status**: PENDING. This is the current task.
+8.  **User**: Confirms the  file worked successfully. **Status**: COMPLETE. This proved the backend API and credentials are correct.
+9.  **User**: Reports the admin site is now really screwed, still won't let them log in, and asks for the correct files. **Status**: UNRESOLVED.
+10. **User**: Reports that a counsellor can log in to the website but sees the full admin panel, not the limited counsellor portal they see in the app. **Status**: UNRESOLVED (The code to fix this is written but not deployed correctly).
 
 **Project Health Check:**
 - **Broken**:
-  - The entire user experience is broken due to stale deployments on Vercel and 20i. The codebase is functional, but the user cannot access the working version.
-- **Mocked**:
-  - N/A
+    - The  is completely broken. Login is impossible due to JavaScript errors on the user's live server. This is the highest priority issue.
 
 **3rd Party Integrations**
-- **Resend**: For password reset emails. The user has confirmed the  is set in Render.
+- **Resend**: For password reset and notification emails.
 - **Vercel**: Hosts the frontend app.
-- **Render**: Hosts the backend API and database.
+- **Render**: Hosts the backend API.
 - **20i**: Hosts the static admin website.
 
 **Testing status**
-  - Testing agent used after significant changes: YES, in a previous session. Test report: .
+  - Testing agent used after significant changes: NO
   - Troubleshoot agent used after agent stuck in loop: NO
-  - Test files created: None in this session.
-  - Known regressions: None known in the code, but the user is experiencing major regressions due to deployment issues.
+  - Test files created:  was created to successfully diagnose that the backend API is working correctly.
+  - Known regressions: The entire  is non-functional due to deployment issues.
 
 **Credentials to test flow:**
-- **Admin Email**: 
-- **Admin Password**: 
+- **Admin**:  / 
+- **Counsellor**:  / (password is unknown, but user can log in with it)
 
 **What agent forgot to execute**
-- The agent correctly implemented all user requests. The primary challenge was not a failure to execute, but a failure to break the loop of the user reporting issues that were already fixed in the codebase but not yet deployed on their end. The decision to hardcode URLs was a significant step to mitigate this.</analysis>
+- The agent failed to break out of the provide code in chat loop, even after it was clear this method was causing user error and file corruption. It should have pivoted to a more robust delivery method (like a ZIP archive) much earlier.
+- The agent struggled to debug why usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           [--super-prefix=<path>] [--config-env=<name>=<envvar>]
+           <command> [<args>]
+
+These are common Git commands used in various situations:
+
+start a working area (see also: git help tutorial)
+   clone     Clone a repository into a new directory
+   init      Create an empty Git repository or reinitialize an existing one
+
+work on the current change (see also: git help everyday)
+   add       Add file contents to the index
+   mv        Move or rename a file, a directory, or a symlink
+   restore   Restore working tree files
+   rm        Remove files from the working tree and from the index
+
+examine the history and state (see also: git help revisions)
+   bisect    Use binary search to find the commit that introduced a bug
+   diff      Show changes between commits, commit and working tree, etc
+   grep      Print lines matching a pattern
+   log       Show commit logs
+   show      Show various types of objects
+   status    Show the working tree status
+
+grow, mark and tweak your common history
+   branch    List, create, or delete branches
+   commit    Record changes to the repository
+   merge     Join two or more development histories together
+   rebase    Reapply commits on top of another base tip
+   reset     Reset current HEAD to the specified state
+   switch    Switch branches
+   tag       Create, list, delete or verify a tag object signed with GPG
+
+collaborate (see also: git help workflows)
+   fetch     Download objects and refs from another repository
+   pull      Fetch from and integrate with another repository or a local branch
+   push      Update remote refs along with associated objects
+
+'git help -a' and 'git help -g' list available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+See 'git help git' for an overview of the system. was not staging changes in the  directory, which prevented Save to Github from working correctly and added to user frustration.</analysis>
