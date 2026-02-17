@@ -28,7 +28,7 @@ export default function Organizations() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/organizations`);
+      const response = await fetch(`${API_URL}/api/organizations`);
       if (response.ok) {
         const data = await response.json();
         setOrganizations(data);
