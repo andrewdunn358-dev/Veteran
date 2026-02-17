@@ -189,7 +189,7 @@ export default function AIChat() {
           )}
           <View>
             <Text style={styles.headerTitle}>{characterInfo.name}</Text>
-            <Text style={styles.headerSubtitle}>AI Battle Buddy</Text>
+            <Text style={styles.headerSubtitle}>On stag 24/7</Text>
           </View>
         </View>
         <TouchableOpacity onPress={() => router.push('/ai-buddies')} style={styles.switchButton}>

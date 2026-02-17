@@ -75,7 +75,7 @@ export default function Index() {
                 />
               </View>
               <View style={styles.aiBuddiesTextContainer}>
-                <Text style={styles.aiBuddiesTitle}>AI Battle Buddies</Text>
+                <Text style={styles.aiBuddiesTitle}>We're on stag 24/7</Text>
                 <Text style={styles.aiBuddiesSubtitle}>Chat with Tommy or Doris</Text>
               </View>
               <Ionicons name="chevron-forward" size={24} color="#64748b" />
@@ -240,7 +240,7 @@ export default function Index() {
             </View>
             <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
               <Text style={styles.modalTitle}>Meet Tommy & Doris</Text>
-              <Text style={styles.modalSubtitle}>Your AI Battle Buddies</Text>
+              <Text style={styles.modalSubtitle}>We're on stag 24/7</Text>
               <Text style={styles.modalText}>{ABOUT_TOMMY_DORIS}</Text>
             </ScrollView>
             <TouchableOpacity 

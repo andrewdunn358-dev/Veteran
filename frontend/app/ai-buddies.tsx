@@ -69,7 +69,7 @@ export default function AIBuddies() {
         <TouchableOpacity onPress={() => router.replace('/home')} style={styles.backButton}>
           <FontAwesome5 name="arrow-left" size={20} color="#94a3b8" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>AI Battle Buddies</Text>
+        <Text style={styles.headerTitle}>We're on stag 24/7</Text>
         <TouchableOpacity onPress={() => setShowAbout(!showAbout)} style={styles.infoButton}>
           <FontAwesome5 name="info-circle" size={22} color="#3b82f6" />
         </TouchableOpacity>
