@@ -28,6 +28,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 # Emergent LLM Key for Smudge AI
 EMERGENT_LLM_KEY = os.getenv("EMERGENT_LLM_KEY", "")
 
+# Smudge Kill Switch - set SMUDGE_DISABLED=true in env to disable
+SMUDGE_DISABLED = os.getenv("SMUDGE_DISABLED", "false").lower() == "true"
+
 # Smudge AI System Prompt
 SMUDGE_SYSTEM_PROMPT = """
 You are Smudge, an AI listener used within a veteran support app.
