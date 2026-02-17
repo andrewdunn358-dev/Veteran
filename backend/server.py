@@ -394,19 +394,23 @@ class NoteUpdate(BaseModel):
     is_private: Optional[bool] = None
     shared_with: Optional[List[str]] = None
 
-# Smudge AI Chat Models
-class SmudgeChatRequest(BaseModel):
+# AI Battle Buddy Chat Models
+class BuddyChatRequest(BaseModel):
     message: str
     sessionId: str
+    character: str = "tommy"  # "tommy" or "doris"
 
-class SmudgeChatResponse(BaseModel):
+class BuddyChatResponse(BaseModel):
     reply: str
     sessionId: str
+    character: str
+    characterName: str
+    characterAvatar: str
 
-# In-memory rate limiting and conversation history for Smudge
-smudge_sessions: Dict[str, Dict[str, Any]] = {}
-SMUDGE_MAX_MESSAGES = 30
-SMUDGE_SESSION_TIMEOUT_MINUTES = 60
+# In-memory rate limiting and conversation history for AI Buddies
+buddy_sessions: Dict[str, Dict[str, Any]] = {}
+BUDDY_MAX_MESSAGES = 30
+BUDDY_SESSION_TIMEOUT_MINUTES = 60
 
 # Resend Configuration
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
