@@ -298,7 +298,7 @@ body {
 }
 
 /* Responsive: Stack on smaller screens */
-@media (max-width: 1200px) {
+@media (max-width: 900px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
@@ -308,7 +308,7 @@ body {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     .portal-content {
         padding: 16px;
     }
