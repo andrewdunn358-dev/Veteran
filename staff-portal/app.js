@@ -481,11 +481,28 @@ function renderSafeguardingAlerts(alerts) {
             '<div class="contact-captured"><i class="fas fa-check-circle" style="color:#22c55e"></i> Contact details captured</div>' :
             '<div class="contact-not-captured"><i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i> NO CONTACT DETAILS - Anonymous user</div>';
         
+        // Geolocation info
+        var locationHtml = '';
+        if (alert.geo_city || alert.geo_country) {
+            var locationParts = [];
+            if (alert.geo_city) locationParts.push(alert.geo_city);
+            if (alert.geo_region) locationParts.push(alert.geo_region);
+            if (alert.geo_country) locationParts.push(alert.geo_country);
+            locationHtml = '<div class="location-info"><i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> ' + locationParts.join(', ') + '</div>';
+            if (alert.geo_isp) {
+                locationHtml += '<div class="location-info"><i class="fas fa-wifi"></i> <strong>ISP:</strong> ' + escapeHtml(alert.geo_isp) + '</div>';
+            }
+            if (alert.geo_timezone) {
+                locationHtml += '<div class="location-info"><i class="fas fa-clock"></i> <strong>Timezone:</strong> ' + alert.geo_timezone + '</div>';
+            }
+        }
+        
         // Client tracking info
         var trackingInfo = '';
-        if (alert.client_ip || alert.user_agent) {
+        if (alert.client_ip || alert.user_agent || locationHtml) {
             trackingInfo = '<div class="tracking-info">' +
                 '<div class="tracking-header"><i class="fas fa-fingerprint"></i> Tracking Information</div>' +
+                locationHtml +
                 (alert.client_ip ? '<div class="tracking-item"><strong>IP Address:</strong> ' + alert.client_ip + '</div>' : '') +
                 (alert.user_agent ? '<div class="tracking-item"><strong>Device:</strong> ' + escapeHtml(alert.user_agent.substring(0, 100)) + (alert.user_agent.length > 100 ? '...' : '') + '</div>' : '') +
             '</div>';
@@ -512,7 +529,7 @@ function renderSafeguardingAlerts(alerts) {
             '</div>';
         }
         
-        return '<div class="card safeguarding-card ' + alert.status + ' risk-' + riskClass + '">' +
+        return '<div class="card safeguarding-card ' + alert.status + ' risk-' + riskClass + '" data-alert-id="' + alert.id + '">' +
             '<div class="card-header">' +
                 '<span class="card-name"><i class="fas ' + characterIcon + '"></i> Chat with ' + characterName + '</span>' +
                 '<span class="risk-badge" style="background-color:' + riskBadgeColor + '">' + riskLevel + ' (' + riskScore + ')</span>' +
