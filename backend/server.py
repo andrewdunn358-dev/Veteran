@@ -1771,7 +1771,9 @@ async def create_callback_request(callback_input: CallbackRequestCreate):
     """Create a new callback request (public)"""
     try:
         callback = CallbackRequest(**callback_input.dict())
-        await db.callback_requests.insert_one(callback.dict())
+        # Encrypt sensitive fields before storing
+        encrypted_data = encrypt_document('callbacks', callback.dict())
+        await db.callback_requests.insert_one(encrypted_data)
         
         # Send confirmation email if email provided
         if callback_input.email:
@@ -1813,7 +1815,8 @@ async def get_callback_requests(
             query["request_type"] = request_type
         
         callbacks = await db.callback_requests.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
-        return callbacks
+        # Decrypt sensitive fields when retrieving
+        return [decrypt_document('callbacks', c) for c in callbacks]
     except Exception as e:
         logging.error(f"Error fetching callback requests: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch callback requests")
