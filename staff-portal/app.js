@@ -481,12 +481,37 @@ async function triggerPanic() {
 // ============ SAFEGUARDING ALERTS ============
 
 // Load Safeguarding Alerts (Counsellors/Admins)
-async function loadSafeguardingAlerts() {
+async function loadSafeguardingAlerts(isPolling) {
     try {
         var alerts = await apiCall('/safeguarding-alerts');
         var active = alerts.filter(function(a) { 
             return a.status === 'active' || a.status === 'acknowledged'; 
         });
+        
+        // Check for new alerts (only during polling)
+        if (isPolling) {
+            var newAlerts = active.filter(function(a) {
+                return a.status === 'active' && !knownAlertIds.has(a.id);
+            });
+            
+            if (newAlerts.length > 0) {
+                // Play sound for new alerts
+                playAlertSound();
+                
+                // Show notification banner
+                showNewAlertBanner(newAlerts.length);
+                
+                // Highlight new alert cards
+                newAlerts.forEach(function(a) {
+                    knownAlertIds.add(a.id);
+                });
+            }
+        } else {
+            // Initial load - just track IDs without alerting
+            active.forEach(function(a) {
+                knownAlertIds.add(a.id);
+            });
+        }
         
         renderSafeguardingAlerts(active);
         document.getElementById('safeguarding-count').textContent = active.length || '';
@@ -501,6 +526,52 @@ async function loadSafeguardingAlerts() {
         
     } catch (error) {
         console.error('Error loading safeguarding alerts:', error);
+    }
+}
+
+// Show new alert notification banner
+function showNewAlertBanner(count) {
+    var banner = document.getElementById('new-alert-banner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'new-alert-banner';
+        banner.className = 'new-alert-banner';
+        document.body.appendChild(banner);
+    }
+    
+    banner.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + count + ' NEW SAFEGUARDING ALERT' + (count > 1 ? 'S' : '') + ' <button onclick="dismissAlertBanner()">View</button>';
+    banner.classList.add('show');
+    
+    // Auto-dismiss after 10 seconds
+    setTimeout(function() {
+        banner.classList.remove('show');
+    }, 10000);
+}
+
+function dismissAlertBanner() {
+    var banner = document.getElementById('new-alert-banner');
+    if (banner) {
+        banner.classList.remove('show');
+    }
+    // Switch to safeguarding tab
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.section').forEach(function(s) { s.style.display = 'none'; });
+    document.querySelector('.tab[data-section="safeguarding"]').classList.add('active');
+    document.getElementById('safeguarding-section').style.display = 'block';
+}
+
+// Start/stop alert polling
+function startAlertPolling() {
+    if (alertPollingInterval) return;
+    alertPollingInterval = setInterval(function() {
+        loadSafeguardingAlerts(true);
+    }, 30000); // Poll every 30 seconds
+}
+
+function stopAlertPolling() {
+    if (alertPollingInterval) {
+        clearInterval(alertPollingInterval);
+        alertPollingInterval = null;
     }
 }
 
