@@ -713,16 +713,44 @@ def calculate_safeguarding_score(message: str, session_id: str) -> Dict[str, Any
         "session_history_count": len(session_risk_history.get(session_id, []))
     }
 
-def check_safeguarding(message: str, session_id: str = "default") -> tuple:
+def check_safeguarding(message: str, session_id: str = "default", user_id: str = "anonymous") -> tuple:
     """
-    Check if message contains safeguarding concerns.
+    Check if message contains safeguarding concerns using BOTH:
+    1. Original weighted indicator system (BACP-aligned)
+    2. Enhanced Zentrafuge safety monitor (negation-aware, context multipliers)
+    
     Returns: (should_escalate: bool, risk_data: dict)
     """
+    # Original safeguarding check
     risk_data = calculate_safeguarding_score(message, session_id)
     
-    # Only escalate (show modal) on RED - AMBER is logged but doesn't interrupt
-    # This prevents the modal popping up too early
-    should_escalate = risk_data["risk_level"] == "RED"
+    # Enhanced safety check from Zentrafuge Veteran AI Safety Layer
+    enhanced_safety = assess_message_safety(message, user_id=user_id)
+    
+    # Merge the enhanced safety data into risk_data
+    risk_data["enhanced_safety"] = enhanced_safety
+    risk_data["enhanced_risk_level"] = enhanced_safety.get("risk_level", "none")
+    risk_data["enhanced_triggers"] = enhanced_safety.get("specific_triggers", [])
+    risk_data["intervention_type"] = enhanced_safety.get("intervention_type", "none")
+    
+    # Escalate if EITHER system flags concern:
+    # - Original system: RED level
+    # - Enhanced system: HIGH or CRITICAL
+    original_escalate = risk_data["risk_level"] == "RED"
+    enhanced_escalate = enhanced_safety.get("requires_intervention", False)
+    
+    should_escalate = original_escalate or enhanced_escalate
+    
+    # If enhanced system found something the original missed, log it
+    if enhanced_escalate and not original_escalate:
+        logging.warning(
+            f"Enhanced safety monitor detected risk not caught by original: "
+            f"session={session_id} level={enhanced_safety.get('risk_level')}"
+        )
+        # Upgrade risk level if enhanced system found higher risk
+        if enhanced_safety.get("risk_level") in ["critical", "high"]:
+            risk_data["risk_level"] = "RED"
+            risk_data["is_red_flag"] = True
     
     return should_escalate, risk_data
 
