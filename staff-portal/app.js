@@ -922,8 +922,32 @@ function getWaitingTime(createdAt) {
 
 // Join Live Chat
 async function joinLiveChat(roomId) {
-    currentChatRoom = roomId;
-    showLiveChatModal(roomId);
+    try {
+        // First, join the chat room (assign this staff member)
+        await apiCall('/live-chat/rooms/' + roomId + '/join', {
+            method: 'POST',
+            body: JSON.stringify({
+                staff_id: currentUser.id,
+                staff_name: currentUser.name
+            })
+        });
+        
+        currentChatRoom = roomId;
+        showLiveChatModal(roomId);
+        showNotification('You have joined the chat', 'success');
+        
+        // Refresh the live chats list
+        loadLiveChats(false);
+        
+    } catch (error) {
+        console.error('Error joining chat:', error);
+        if (error.message && error.message.includes('already has a staff member')) {
+            showNotification('This chat has already been taken by another staff member', 'error');
+            loadLiveChats(false); // Refresh list
+        } else {
+            showNotification('Failed to join chat: ' + error.message, 'error');
+        }
+    }
 }
 
 // Show Live Chat Modal
