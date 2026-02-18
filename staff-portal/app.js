@@ -132,6 +132,8 @@ async function initPortal() {
     // Show/hide sections based on role
     document.getElementById('panic-section').style.display = 
         (role === 'counsellor' || role === 'admin') ? 'block' : 'none';
+    document.getElementById('safeguarding-section').style.display = 
+        (role === 'counsellor' || role === 'admin') ? 'block' : 'none';
     document.getElementById('panic-button-section').style.display = 
         role === 'peer' ? 'block' : 'none';
     
