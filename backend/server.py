@@ -2293,8 +2293,14 @@ async def get_ai_characters():
     }
 
 @api_router.post("/ai-buddies/chat", response_model=BuddyChatResponse)
-async def buddy_chat(request: BuddyChatRequest):
+async def buddy_chat(request: BuddyChatRequest, req: Request):
     """Chat with Tommy or Doris AI Battle Buddy - no authentication required"""
+    
+    # Capture client info for safeguarding
+    client_ip = req.headers.get("x-forwarded-for", req.client.host if req.client else "unknown")
+    if client_ip and "," in client_ip:
+        client_ip = client_ip.split(",")[0].strip()  # Get first IP if multiple
+    user_agent = req.headers.get("user-agent", "unknown")
     
     # Kill switch check
     if AI_BUDDIES_DISABLED:
