@@ -202,6 +202,21 @@ class CounsellorStatusUpdate(BaseModel):
     status: str = Field(..., pattern="^(available|busy|off)$")
     next_available: Optional[str] = None
 
+# Public (safe) response models - no sensitive data
+class CounsellorPublic(BaseModel):
+    """Safe public view - no phone numbers or contact details"""
+    id: str
+    name: str
+    specialization: str
+    status: str
+
+class PeerSupporterPublic(BaseModel):
+    """Safe public view - no phone numbers or contact details"""
+    id: str
+    firstName: str
+    area: str
+    status: str
+
 # Peer Supporter Models
 class PeerSupporterCreate(BaseModel):
     firstName: str
