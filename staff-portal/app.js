@@ -772,19 +772,98 @@ async function resolveSafeguardingAlert(id) {
 // ============ LIVE CHAT FUNCTIONALITY ============
 
 var activeLiveChats = [];
+var knownLiveChatIds = new Set();
 var currentChatRoom = null;
 var chatPollingInterval = null;
+var liveChatPollingInterval = null;
+
+// Start polling for new live chats (with sound alerts)
+function startLiveChatPolling() {
+    if (liveChatPollingInterval) return;
+    liveChatPollingInterval = setInterval(function() {
+        loadLiveChats(true); // true = check for new chats with sound
+    }, 10000); // Poll every 10 seconds for live chats (more urgent than safeguarding)
+}
 
 // Load Live Chats
-async function loadLiveChats() {
+async function loadLiveChats(isPolling) {
     try {
         var rooms = await apiCall('/live-chat/rooms');
-        activeLiveChats = rooms.filter(function(r) { return r.status === 'active'; });
-        renderLiveChats(activeLiveChats);
-        document.getElementById('livechat-count').textContent = activeLiveChats.length || '';
+        var activeRooms = rooms.filter(function(r) { return r.status === 'active'; });
+        
+        // Check for new chats (only during polling)
+        if (isPolling) {
+            var newChats = activeRooms.filter(function(r) {
+                return !knownLiveChatIds.has(r.id);
+            });
+            
+            if (newChats.length > 0) {
+                // Play sound alert
+                playAlertSound();
+                
+                // Show notification banner
+                showNewLiveChatBanner(newChats.length);
+                
+                // Track new chats
+                newChats.forEach(function(r) {
+                    knownLiveChatIds.add(r.id);
+                });
+            }
+        } else {
+            // Initial load - track IDs without alerting
+            activeRooms.forEach(function(r) {
+                knownLiveChatIds.add(r.id);
+            });
+        }
+        
+        activeLiveChats = activeRooms;
+        renderLiveChats(activeRooms);
+        document.getElementById('livechat-count').textContent = activeRooms.length || '';
+        
+        // Add pulsing effect if there are active chats waiting
+        var waitingChats = activeRooms.filter(function(r) {
+            return !r.messages || r.messages.length === 0 || 
+                   r.messages.every(function(m) { return m.sender === 'user'; });
+        });
+        
+        var section = document.getElementById('livechat-section');
+        if (waitingChats.length > 0) {
+            section.classList.add('has-waiting');
+        } else {
+            section.classList.remove('has-waiting');
+        }
+        
     } catch (error) {
         console.error('Error loading live chats:', error);
     }
+}
+
+// Show new live chat notification banner
+function showNewLiveChatBanner(count) {
+    var banner = document.getElementById('new-livechat-banner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'new-livechat-banner';
+        banner.className = 'new-livechat-banner';
+        document.body.appendChild(banner);
+    }
+    
+    banner.innerHTML = '<i class="fas fa-comments"></i> ' + count + ' NEW LIVE CHAT' + (count > 1 ? 'S' : '') + ' - Someone needs help now! <button onclick="dismissLiveChatBanner()">View</button>';
+    banner.classList.add('show');
+    
+    // Auto-dismiss after 15 seconds
+    setTimeout(function() {
+        banner.classList.remove('show');
+    }, 15000);
+}
+
+function dismissLiveChatBanner() {
+    var banner = document.getElementById('new-livechat-banner');
+    if (banner) {
+        banner.classList.remove('show');
+    }
+    // Scroll to live chat section
+    document.getElementById('livechat-section').scrollIntoView({ behavior: 'smooth' });
 }
 
 // Render Live Chats
