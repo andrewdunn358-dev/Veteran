@@ -1326,13 +1326,11 @@ async def update_peer_supporter(
         {"id": peer_id},
         {"$set": encrypted_data}
     )
-        {"$set": peer_input.dict(exclude_unset=True)}
-    )
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Peer supporter not found")
     
     updated = await db.peer_supporters.find_one({"id": peer_id})
-    return PeerSupporter(**updated)
+    return PeerSupporter(**decrypt_document('peer_supporters', updated))
 
 @api_router.patch("/peer-supporters/{peer_id}/status", response_model=PeerSupporter)
 async def update_peer_supporter_status(
