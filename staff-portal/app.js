@@ -6,6 +6,65 @@ let token = localStorage.getItem('staff_token');
 let currentUser = JSON.parse(localStorage.getItem('staff_user') || 'null');
 let myProfile = null;
 
+// Real-time alert tracking
+let knownAlertIds = new Set();
+let alertPollingInterval = null;
+let soundEnabled = localStorage.getItem('alert_sound') !== 'false';
+
+// Alert sound (using Web Audio API for more reliable playback)
+let audioContext = null;
+function playAlertSound() {
+    if (!soundEnabled) return;
+    
+    try {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        // Create an urgent alert tone (three ascending beeps)
+        var now = audioContext.currentTime;
+        
+        for (var i = 0; i < 3; i++) {
+            var oscillator = audioContext.createOscillator();
+            var gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800 + (i * 200); // 800Hz, 1000Hz, 1200Hz
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, now + (i * 0.15));
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + (i * 0.15) + 0.12);
+            
+            oscillator.start(now + (i * 0.15));
+            oscillator.stop(now + (i * 0.15) + 0.12);
+        }
+    } catch (e) {
+        console.log('Audio playback failed:', e);
+    }
+}
+
+// Toggle sound
+function toggleAlertSound() {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem('alert_sound', soundEnabled);
+    updateSoundButton();
+    if (soundEnabled) {
+        playAlertSound(); // Play test sound
+    }
+}
+
+function updateSoundButton() {
+    var btn = document.getElementById('sound-toggle');
+    if (btn) {
+        btn.innerHTML = soundEnabled ? 
+            '<i class="fas fa-volume-up"></i>' : 
+            '<i class="fas fa-volume-mute"></i>';
+        btn.title = soundEnabled ? 'Sound ON - Click to mute' : 'Sound OFF - Click to enable';
+    }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
     if (token && currentUser) {
