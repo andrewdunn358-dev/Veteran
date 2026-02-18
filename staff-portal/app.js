@@ -473,7 +473,43 @@ function renderSafeguardingAlerts(alerts) {
         // Format indicators
         var indicatorsHtml = '';
         if (alert.triggered_indicators && alert.triggered_indicators.length > 0) {
-            indicatorsHtml = '<div class="card-indicators"><i class="fas fa-exclamation-circle"></i> ' + alert.triggered_indicators.slice(0, 3).join(', ') + '</div>';
+            indicatorsHtml = '<div class="card-indicators"><i class="fas fa-exclamation-circle"></i> ' + alert.triggered_indicators.slice(0, 5).join(', ') + '</div>';
+        }
+        
+        // Contact captured status
+        var contactStatus = alert.contact_captured ? 
+            '<div class="contact-captured"><i class="fas fa-check-circle" style="color:#22c55e"></i> Contact details captured</div>' :
+            '<div class="contact-not-captured"><i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i> NO CONTACT DETAILS - Anonymous user</div>';
+        
+        // Client tracking info
+        var trackingInfo = '';
+        if (alert.client_ip || alert.user_agent) {
+            trackingInfo = '<div class="tracking-info">' +
+                '<div class="tracking-header"><i class="fas fa-fingerprint"></i> Tracking Information</div>' +
+                (alert.client_ip ? '<div class="tracking-item"><strong>IP Address:</strong> ' + alert.client_ip + '</div>' : '') +
+                (alert.user_agent ? '<div class="tracking-item"><strong>Device:</strong> ' + escapeHtml(alert.user_agent.substring(0, 100)) + (alert.user_agent.length > 100 ? '...' : '') + '</div>' : '') +
+            '</div>';
+        }
+        
+        // Conversation history preview
+        var historyHtml = '';
+        if (alert.conversation_history && alert.conversation_history.length > 0) {
+            var lastMessages = alert.conversation_history.slice(-6);
+            historyHtml = '<div class="conversation-history">' +
+                '<div class="history-header" onclick="toggleHistory(\'' + alert.id + '\')">' +
+                    '<i class="fas fa-comments"></i> View Conversation History (' + alert.conversation_history.length + ' messages)' +
+                    '<i class="fas fa-chevron-down"></i>' +
+                '</div>' +
+                '<div class="history-content" id="history-' + alert.id + '" style="display:none;">' +
+                lastMessages.map(function(msg) {
+                    var isUser = msg.role === 'user';
+                    return '<div class="history-message ' + (isUser ? 'user' : 'assistant') + '">' +
+                        '<span class="msg-role">' + (isUser ? 'User' : characterName) + ':</span> ' +
+                        escapeHtml(msg.content.substring(0, 200)) + (msg.content.length > 200 ? '...' : '') +
+                    '</div>';
+                }).join('') +
+                '</div>' +
+            '</div>';
         }
         
         return '<div class="card safeguarding-card ' + alert.status + ' risk-' + riskClass + '">' +
@@ -481,17 +517,28 @@ function renderSafeguardingAlerts(alerts) {
                 '<span class="card-name"><i class="fas ' + characterIcon + '"></i> Chat with ' + characterName + '</span>' +
                 '<span class="risk-badge" style="background-color:' + riskBadgeColor + '">' + riskLevel + ' (' + riskScore + ')</span>' +
             '</div>' +
-            '<div class="card-session"><i class="fas fa-fingerprint"></i> Session: ' + alert.session_id.substring(0, 12) + '...</div>' +
+            contactStatus +
+            '<div class="card-session"><i class="fas fa-fingerprint"></i> Session: ' + alert.session_id + '</div>' +
             indicatorsHtml +
             '<div class="card-trigger">' +
                 '<label><i class="fas fa-quote-left"></i> Triggering Message:</label>' +
                 '<div class="trigger-message">"' + escapeHtml(alert.triggering_message) + '"</div>' +
             '</div>' +
+            trackingInfo +
+            historyHtml +
             '<div class="card-time"><i class="fas fa-clock"></i> ' + new Date(alert.created_at).toLocaleString() + '</div>' +
             (alert.acknowledged_by ? '<div class="card-ack"><i class="fas fa-user-check"></i> Acknowledged by ' + alert.acknowledged_by + '</div>' : '') +
             '<div class="card-actions">' + actions + '</div>' +
         '</div>';
     }).join('');
+}
+
+// Toggle conversation history visibility
+function toggleHistory(alertId) {
+    var historyEl = document.getElementById('history-' + alertId);
+    if (historyEl) {
+        historyEl.style.display = historyEl.style.display === 'none' ? 'block' : 'none';
+    }
 }
 
 // Escape HTML to prevent XSS
