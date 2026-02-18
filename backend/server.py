@@ -1201,8 +1201,10 @@ async def get_available_counsellors():
     return counsellors
 
 @api_router.get("/counsellors/{counsellor_id}", response_model=Counsellor)
-async def get_counsellor(counsellor_id: str, current_user: User = Depends(require_role("admin"))):
-    """Get a specific counsellor - ADMIN ONLY"""
+async def get_counsellor(counsellor_id: str, current_user: User = Depends(get_current_user)):
+    """Get a specific counsellor - Requires authentication"""
+    if current_user.role not in ["admin", "counsellor"]:
+        raise HTTPException(status_code=403, detail="Access denied")
     counsellor = await db.counsellors.find_one({"id": counsellor_id})
     if not counsellor:
         raise HTTPException(status_code=404, detail="Counsellor not found")
