@@ -373,6 +373,13 @@ class SafeguardingAlert(BaseModel):
     resolved_by: Optional[str] = None
     resolved_at: Optional[datetime] = None
     notes: Optional[str] = None
+    # Enhanced tracking fields
+    client_ip: Optional[str] = None
+    user_agent: Optional[str] = None
+    conversation_history: Optional[List[Dict[str, str]]] = None  # Last N messages for context
+    callback_requested: bool = False
+    callback_id: Optional[str] = None
+    contact_captured: bool = False
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class Resource(BaseModel):
