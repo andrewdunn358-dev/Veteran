@@ -207,16 +207,18 @@ async function initPortal() {
     loadNotes();
     if (role === 'counsellor' || role === 'admin') {
         loadPanicAlerts();
-        loadSafeguardingAlerts();
+        loadSafeguardingAlerts(false); // Initial load, no sound
+        startAlertPolling(); // Start real-time polling
+        updateSoundButton(); // Update sound toggle button
     }
     
-    // Auto-refresh every 30 seconds
+    // Auto-refresh every 30 seconds for callbacks/notes
     setInterval(function() {
         loadCallbacks();
         loadNotes();
         if (role === 'counsellor' || role === 'admin') {
             loadPanicAlerts();
-            loadSafeguardingAlerts();
+            // Note: Safeguarding alerts are polled separately with sound support
         }
     }, 30000);
 }
