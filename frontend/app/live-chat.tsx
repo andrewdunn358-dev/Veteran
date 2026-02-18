@@ -27,8 +27,6 @@ interface Message {
 export default function LiveChat() {
   const router = useRouter();
   const params = useLocalSearchParams<{
-    staffId: string;
-    staffName: string;
     staffType: string;
     alertId: string;
     sessionId: string;
@@ -38,14 +36,12 @@ export default function LiveChat() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  const [staffInfo, setStaffInfo] = useState<any>(null);
   const [chatRoomId, setChatRoomId] = useState<string | null>(null);
+  const [waitingForStaff, setWaitingForStaff] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
-  const staffName = params.staffName || 'Support Staff';
   const staffType = params.staffType || 'counsellor';
-  const staffId = params.staffId || '';
   const alertId = params.alertId || '';
   const sessionId = params.sessionId || '';
 
@@ -62,15 +58,14 @@ export default function LiveChat() {
   const initializeChat = async () => {
     setIsLoading(true);
     try {
-      // Create a live chat room
+      // Create a live chat room - no specific staff assigned
+      // All staff will see this and can pick it up
       const response = await fetch(`${API_URL}/api/live-chat/rooms`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          staff_id: staffId,
-          staff_name: staffName,
           staff_type: staffType,
-          safeguarding_alert_id: alertId,
+          safeguarding_alert_id: alertId || null,
           ai_session_id: sessionId,
         }),
       });
