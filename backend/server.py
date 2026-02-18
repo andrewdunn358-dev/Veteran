@@ -1291,8 +1291,10 @@ async def get_available_peer_supporters():
     return peers
 
 @api_router.get("/peer-supporters/{peer_id}", response_model=PeerSupporter)
-async def get_peer_supporter(peer_id: str, current_user: User = Depends(require_role("admin"))):
-    """Get a specific peer supporter - ADMIN ONLY"""
+async def get_peer_supporter(peer_id: str, current_user: User = Depends(get_current_user)):
+    """Get a specific peer supporter - Requires authentication"""
+    if current_user.role not in ["admin", "peer"]:
+        raise HTTPException(status_code=403, detail="Access denied")
     peer = await db.peer_supporters.find_one({"id": peer_id})
     if not peer:
         raise HTTPException(status_code=404, detail="Peer supporter not found")
