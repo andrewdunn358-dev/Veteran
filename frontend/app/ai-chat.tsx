@@ -148,10 +148,10 @@ export default function AIChat() {
         body: JSON.stringify({
           name: callbackName.trim() || 'Anonymous',
           phone: callbackPhone.trim(),
-          callback_type: 'counsellor',
-          notes: `Safeguarding callback request from AI chat. Session: ${sessionId}. Alert ID: ${currentAlertId || 'N/A'}`,
+          request_type: 'counsellor',
+          message: `Safeguarding callback request from AI chat. Session: ${sessionId}. Alert ID: ${currentAlertId || 'N/A'}`,
           is_urgent: true,
-          safeguarding_alert_id: currentAlertId
+          safeguarding_alert_id: currentAlertId || null
         }),
       });
 
@@ -167,9 +167,12 @@ export default function AIChat() {
           }}]
         );
       } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Callback error:', errorData);
         Alert.alert('Error', 'Failed to submit callback request. Please try again or call 116 123.');
       }
     } catch (error) {
+      console.error('Callback error:', error);
       Alert.alert('Error', 'Failed to submit callback request. Please try again or call 116 123.');
     }
   };
