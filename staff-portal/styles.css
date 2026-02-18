@@ -846,3 +846,121 @@ body {
     background: rgba(220, 38, 38, 0.05);
     border-radius: 4px;
 }
+
+/* Contact Captured Status */
+.contact-captured {
+    background: #dcfce7;
+    color: #166534;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 8px 0;
+}
+
+.contact-not-captured {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 8px 0;
+    border: 1px solid #fcd34d;
+}
+
+/* Tracking Information */
+.tracking-info {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 12px 0;
+}
+
+.tracking-header {
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.tracking-header i {
+    margin-right: 6px;
+    color: #6366f1;
+}
+
+.tracking-item {
+    font-size: 12px;
+    color: #64748b;
+    padding: 4px 0;
+    word-break: break-all;
+}
+
+.tracking-item strong {
+    color: #334155;
+}
+
+/* Conversation History */
+.conversation-history {
+    margin: 12px 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: #f8fafc;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    transition: background 0.2s;
+}
+
+.history-header:hover {
+    background: #e2e8f0;
+}
+
+.history-header i:first-child {
+    margin-right: 8px;
+    color: #6366f1;
+}
+
+.history-content {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 12px;
+    background: #fff;
+}
+
+.history-message {
+    padding: 8px 12px;
+    margin: 4px 0;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.history-message.user {
+    background: #dbeafe;
+    margin-left: 20px;
+}
+
+.history-message.assistant {
+    background: #f1f5f9;
+    margin-right: 20px;
+}
+
+.msg-role {
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+    color: #64748b;
+}
