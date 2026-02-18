@@ -816,3 +816,33 @@ body {
 .card-ack i {
     margin-right: 4px;
 }
+
+/* Risk Level Badges */
+.risk-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+}
+
+.safeguarding-card.risk-red {
+    border-left-color: #dc2626;
+    background: linear-gradient(90deg, #fee2e2 0%, var(--bg-card) 15%);
+}
+
+.safeguarding-card.risk-amber {
+    border-left-color: #f59e0b;
+    background: linear-gradient(90deg, #fef3c7 0%, var(--bg-card) 15%);
+}
+
+.card-indicators {
+    font-size: 12px;
+    color: #dc2626;
+    margin: 8px 0;
+    padding: 8px;
+    background: rgba(220, 38, 38, 0.05);
+    border-radius: 4px;
+}
