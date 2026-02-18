@@ -1275,11 +1275,14 @@ async def get_peer_supporters():
     peers = await db.peer_supporters.find().to_list(1000)
     return [PeerSupporter(**p) for p in peers]
 
-@api_router.get("/peer-supporters/available", response_model=List[PeerSupporter])
+@api_router.get("/peer-supporters/available", response_model=List[PeerSupporterPublic])
 async def get_available_peer_supporters():
-    """Get only available peer supporters"""
-    peers = await db.peer_supporters.find({"status": {"$in": ["available", "limited"]}}).to_list(1000)
-    return [PeerSupporter(**p) for p in peers]
+    """Get only available peer supporters - PUBLIC SAFE VIEW (no contact details)"""
+    peers = await db.peer_supporters.find(
+        {"status": {"$in": ["available", "limited"]}},
+        {"id": 1, "firstName": 1, "area": 1, "status": 1, "_id": 0}
+    ).to_list(1000)
+    return peers
 
 @api_router.get("/peer-supporters/{peer_id}", response_model=PeerSupporter)
 async def get_peer_supporter(peer_id: str):
