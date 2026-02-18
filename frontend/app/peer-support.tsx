@@ -36,7 +36,8 @@ export default function PeerSupport() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/api/peer-supporters`);
+      // Use /available endpoint - returns only public-safe data
+      const response = await fetch(`${API_URL}/api/peer-supporters/available`);
       if (response.ok) {
         const data = await response.json();
         setPeerSupporters(data);
