@@ -251,6 +251,8 @@ export default function AIChat() {
         
         // Check if safeguarding was triggered
         if (data.safeguardingTriggered) {
+          setCurrentAlertId(data.safeguardingAlertId);
+          checkAvailability(); // Check who's available
           setShowSafeguardingModal(true);
         }
       } else {
