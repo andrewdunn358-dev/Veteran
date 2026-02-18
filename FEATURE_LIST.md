@@ -18,6 +18,7 @@
 - "Need to Talk?" button → Crisis support
 - "Talk to Another Veteran" → Peer support
 - "Request a Callback" → Callback request form
+- **"Friends & Family"** → New section for concerned loved ones
 - Self-Care Tools section:
   - Mood tracker
   - Journal
@@ -42,37 +43,85 @@
 **Safeguarding System (BACP-Aligned):**
 - Weighted risk scoring (0-100+)
 - Risk levels: GREEN (0-29), YELLOW (30-59), AMBER (60-89), RED (90+)
-- RED indicators: suicide ideation, method references, self-harm, weapon access
-- AMBER indicators: numbness, PTSD symptoms, isolation, substance misuse
-- Modifiers: dark humour, minimisation, repeated indicators
+- **RED indicators**: suicide ideation, method references, self-harm, weapon access
+- **AMBER indicators**: 
+  - Emotional: numbness, identity collapse
+  - PTSD: flashbacks, nightmares, hypervigilance
+  - Isolation: withdrawal, pushing people away
+  - **Addiction**: drinking to cope, drugs, gambling
+  - **Offending**: legal trouble, prison, anger issues
+  - **Self-care deterioration**: not eating, not showering, staying in bed
+  - **Sleep changes**: insomnia, sleeping all day
+  - **Pride/Stigma**: "too proud to ask", "sign of weakness", "others had it worse"
+- **Modifiers**: dark humour, minimisation, repeated indicators
 - **When triggered, modal appears with:**
   - "Request a Callback" - capture phone number
   - "Connect Now" - shows available counsellors/peers
   - Samaritans link (116 123)
   - 999 emergency notice
 
-### 1.4 Crisis Support Page
+### 1.4 Friends & Family Section (NEW)
+**Main Page:**
+- "Worried About Someone?" intro
+- Three main options:
+  1. **Raise a Concern** - Form to report worries about a veteran
+  2. **Signs to Look For** - Education on warning signs
+  3. **Support Services** - Resources (Op Courage, Combat Stress, Men's Sheds, etc.)
+
+**Raise a Concern Form:**
+- Your name, email, phone
+- Your relationship to the veteran
+- Veteran's name (optional)
+- Description of concerns
+- Signs noticed (multi-select):
+  - Withdrawing from friends/family
+  - Sleeping more or less than usual
+  - Drinking more than usual
+  - Increased anger or irritability
+  - Neglecting self-care
+  - Low mood or seeming hopeless
+  - Talking about being a burden
+  - Reckless behaviour
+- How long noticed
+- Urgency level (low/medium/high/urgent)
+- Consent checkbox (veteran knows they're reaching out)
+
+**Signs to Look For:**
+- Visual list of warning signs
+- Additional signs: dark humour, giving possessions away, sudden calm
+- Tip about veterans masking distress
+
+**Support Services:**
+- Op Courage (NHS)
+- Combat Stress
+- SSAFA
+- Royal British Legion
+- Men's Sheds
+- Samaritans
+- Armed Forces Covenant info
+
+### 1.5 Crisis Support Page
 - Direct access to counsellor support
 - Emergency contacts
 - Back navigation to home
 
-### 1.5 Peer Support Page
+### 1.6 Peer Support Page
 - Connect with peer supporters
 - Registration form for becoming a peer
 
-### 1.6 Callback Request
+### 1.7 Callback Request
 - Name and phone number form
 - Choice: Counsellor or Peer callback
 - Optional notes
 - Creates callback in system for staff to action
 
-### 1.7 Self-Care Tools
+### 1.8 Self-Care Tools
 - **Mood Tracker**: Log daily moods with notes
 - **Journal**: Private journal entries
 - **Breathing Exercises**: Guided breathing techniques
 - **Resources**: Curated support resources
 
-### 1.8 Settings
+### 1.9 Settings
 - Light/Dark mode toggle
 - App version info
 
