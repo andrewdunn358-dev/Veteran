@@ -684,6 +684,9 @@ function renderSafeguardingAlerts(alerts) {
             '<div class="card-actions">' + actions + '</div>' +
         '</div>';
     }).join('');
+    
+    // Initialize maps after rendering
+    setTimeout(initializeAlertMaps, 100);
 }
 
 // Toggle conversation history visibility
