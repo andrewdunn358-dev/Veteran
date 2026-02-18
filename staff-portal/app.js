@@ -563,11 +563,17 @@ function dismissAlertBanner() {
     if (banner) {
         banner.classList.remove('show');
     }
-    // Switch to safeguarding tab
-    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-    document.querySelectorAll('.section').forEach(function(s) { s.style.display = 'none'; });
-    document.querySelector('.tab[data-section="safeguarding"]').classList.add('active');
-    document.getElementById('safeguarding-section').style.display = 'block';
+    // Make sure safeguarding section is visible and scroll to it
+    var safeguardingSection = document.getElementById('safeguarding-section');
+    if (safeguardingSection) {
+        safeguardingSection.style.display = 'block';
+        safeguardingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Flash the section to draw attention
+        safeguardingSection.style.animation = 'flash 0.5s ease 2';
+        setTimeout(function() {
+            safeguardingSection.style.animation = '';
+        }, 1000);
+    }
 }
 
 // Start/stop alert polling
