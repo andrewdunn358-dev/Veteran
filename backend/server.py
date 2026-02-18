@@ -486,16 +486,40 @@ AMBER_INDICATORS = {
     "isolated": 30, "all alone": 30, "no one around": 30, "pushed everyone away": 30,
     "dont talk to anyone": 30, "don't talk to anyone": 30, "withdrawn": 30,
     "cant face people": 30, "can't face people": 30, "stay in bed": 30,
+    "stopped going out": 30, "dont leave the house": 30, "don't leave the house": 30,
+    "avoiding everyone": 30, "cut everyone off": 30,
     
-    # Substance misuse to cope (+30)
-    "drinking to cope": 30, "need a drink": 30, "drinking every day": 30,
-    "using drugs": 30, "pills to sleep": 30, "self medicating": 30,
-    "drunk": 30, "wasted": 30, "off my face": 30,
+    # Substance misuse / Addiction (+35)
+    "drinking to cope": 35, "need a drink": 30, "drinking every day": 35,
+    "using drugs": 35, "pills to sleep": 30, "self medicating": 35,
+    "drunk": 25, "wasted": 25, "off my face": 30,
+    "addicted": 40, "addiction": 40, "cant stop drinking": 40, "can't stop drinking": 40,
+    "gambling": 30, "lost money gambling": 35, "betting": 25,
+    "drugs every day": 40, "need something to get through": 35,
     
-    # Housing, legal, financial crisis (+25)
-    "about to lose my home": 25, "homeless": 25, "evicted": 25,
-    "lost my job": 25, "no money": 25, "in debt": 25, "court case": 25,
-    "legal trouble": 25, "going to prison": 25,
+    # Offending / Legal issues (+30)
+    "about to lose my home": 25, "homeless": 30, "evicted": 25,
+    "lost my job": 25, "no money": 25, "in debt": 30, "court case": 30,
+    "legal trouble": 30, "going to prison": 35, "prison": 30,
+    "arrested": 30, "police": 25, "probation": 25, "been inside": 30,
+    "assault charge": 35, "got in trouble": 25, "fight": 20,
+    "lost my temper": 30, "anger issues": 30, "rage": 30,
+    
+    # Signs of Change - Self-care deterioration (+25)
+    "stopped showering": 30, "not eating": 30, "cant eat": 25, "can't eat": 25,
+    "not looking after myself": 30, "let myself go": 25, "dont care anymore": 35,
+    "stopped exercising": 25, "no energy": 25, "exhausted": 20,
+    
+    # Signs of Change - Sleep patterns (+25)
+    "sleeping all day": 30, "cant get out of bed": 30, "can't get out of bed": 30,
+    "not sleeping": 30, "insomnia": 30, "sleep all the time": 25,
+    "only sleep a few hours": 25, "awake all night": 25,
+    
+    # Pride / Stigma - Barriers to help (+20)
+    "cant ask for help": 25, "can't ask for help": 25, "too proud": 20,
+    "sign of weakness": 25, "dont want to be a burden": 30,
+    "should be able to handle it": 20, "real men dont": 25,
+    "embarrassed": 20, "ashamed": 25, "dont want anyone to know": 25,
     
     # Crisis language
     "hopeless": 30, "no hope": 30, "no point": 30, "whats the point": 30,
