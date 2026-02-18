@@ -18,6 +18,9 @@ import asyncio
 from openai import OpenAI
 import httpx  # For IP geolocation lookup
 
+# Import encryption utilities
+from encryption import encrypt_field, decrypt_field, encrypt_document, decrypt_document, ENCRYPTED_FIELDS
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
