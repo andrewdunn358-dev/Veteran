@@ -144,31 +144,35 @@ export default function AIChat() {
       return;
     }
 
+    setIsSubmittingCallback(true);
+
     try {
+      // Build the message with user's optional message
+      let fullMessage = `Safeguarding callback request from AI chat. Session: ${sessionId}.`;
+      if (currentAlertId) {
+        fullMessage += ` Alert ID: ${currentAlertId}.`;
+      }
+      if (callbackMessage.trim()) {
+        fullMessage += ` User message: "${callbackMessage.trim()}"`;
+      }
+
       const response = await fetch(`${API_URL}/api/callbacks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: callbackName.trim() || 'Anonymous',
           phone: callbackPhone.trim(),
+          email: callbackEmail.trim() || null,
           request_type: 'counsellor',
-          message: `Safeguarding callback request from AI chat. Session: ${sessionId}. Alert ID: ${currentAlertId || 'N/A'}`,
+          message: fullMessage,
           is_urgent: true,
           safeguarding_alert_id: currentAlertId || null
         }),
       });
 
       if (response.ok) {
-        Alert.alert(
-          'Callback Requested',
-          'Someone will call you back as soon as possible. If you need immediate help, please call 999 or Samaritans on 116 123.',
-          [{ text: 'OK', onPress: () => {
-            setShowSafeguardingModal(false);
-            setSafeguardingView('main');
-            setCallbackPhone('');
-            setCallbackName('');
-          }}]
-        );
+        // Show success view
+        setSafeguardingView('callback_success');
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error('Callback error:', errorData);
@@ -177,6 +181,8 @@ export default function AIChat() {
     } catch (error) {
       console.error('Callback error:', error);
       Alert.alert('Error', 'Failed to submit callback request. Please try again or call 116 123.');
+    } finally {
+      setIsSubmittingCallback(false);
     }
   };
 
