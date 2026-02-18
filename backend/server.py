@@ -24,6 +24,15 @@ load_dotenv(ROOT_DIR / '.env')
 # Import encryption utilities AFTER loading .env
 from encryption import encrypt_field, decrypt_field, encrypt_document, decrypt_document, ENCRYPTED_FIELDS
 
+# Import enhanced safety monitor from Zentrafuge Veteran AI Safety Layer
+from safety import (
+    EnhancedSafetyMonitor,
+    assess_message_safety,
+    format_crisis_message,
+    get_veteran_helplines,
+    get_emergency_number,
+)
+
 # JWT Configuration
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
