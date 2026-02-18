@@ -1214,7 +1214,8 @@ async def get_counsellor(counsellor_id: str, current_user: User = Depends(get_cu
     counsellor = await db.counsellors.find_one({"id": counsellor_id})
     if not counsellor:
         raise HTTPException(status_code=404, detail="Counsellor not found")
-    return Counsellor(**counsellor)
+    # Decrypt sensitive fields
+    return Counsellor(**decrypt_document('counsellors', counsellor))
 
 @api_router.put("/counsellors/{counsellor_id}", response_model=Counsellor)
 async def update_counsellor(
@@ -1223,9 +1224,11 @@ async def update_counsellor(
     current_user: User = Depends(require_role("admin"))
 ):
     """Update a counsellor (admin only)"""
+    # Encrypt sensitive fields before updating
+    encrypted_data = encrypt_document('counsellors', counsellor_input.dict(exclude_unset=True))
     result = await db.counsellors.update_one(
         {"id": counsellor_id},
-        {"$set": counsellor_input.dict(exclude_unset=True)}
+        {"$set": encrypted_data}
     )
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Counsellor not found")
