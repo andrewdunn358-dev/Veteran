@@ -694,6 +694,35 @@ function toggleHistory(alertId) {
     }
 }
 
+// Initialize maps for all alert cards
+var alertMaps = {};
+function initializeAlertMaps() {
+    document.querySelectorAll('.location-map').forEach(function(mapDiv) {
+        var alertId = mapDiv.id.replace('map-', '');
+        var lat = parseFloat(mapDiv.dataset.lat);
+        var lon = parseFloat(mapDiv.dataset.lon);
+        var city = mapDiv.dataset.city;
+        
+        if (lat && lon && !alertMaps[alertId]) {
+            var map = L.map(mapDiv.id, {
+                zoomControl: true,
+                scrollWheelZoom: false
+            }).setView([lat, lon], 10);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+            
+            L.marker([lat, lon])
+                .addTo(map)
+                .bindPopup('<strong>' + city + '</strong><br>Approximate location')
+                .openPopup();
+            
+            alertMaps[alertId] = map;
+        }
+    });
+}
+
 // Escape HTML to prevent XSS
 function escapeHtml(text) {
     var div = document.createElement('div');
