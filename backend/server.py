@@ -1279,7 +1279,9 @@ async def create_peer_supporter(
 ):
     """Create a new peer supporter (admin only)"""
     peer_obj = PeerSupporter(**peer_input.dict())
-    await db.peer_supporters.insert_one(peer_obj.dict())
+    # Encrypt sensitive fields before storing
+    encrypted_data = encrypt_document('peer_supporters', peer_obj.dict())
+    await db.peer_supporters.insert_one(encrypted_data)
     return peer_obj
 
 @api_router.get("/peer-supporters", response_model=List[PeerSupporter])
@@ -1288,7 +1290,8 @@ async def get_peer_supporters(current_user: User = Depends(get_current_user)):
     if current_user.role not in ["admin", "peer"]:
         raise HTTPException(status_code=403, detail="Access denied. Only admins and peers can view this.")
     peers = await db.peer_supporters.find().to_list(1000)
-    return [PeerSupporter(**p) for p in peers]
+    # Decrypt sensitive fields when retrieving
+    return [PeerSupporter(**decrypt_document('peer_supporters', p)) for p in peers]
 
 @api_router.get("/peer-supporters/available", response_model=List[PeerSupporterPublic])
 async def get_available_peer_supporters():
@@ -1307,7 +1310,8 @@ async def get_peer_supporter(peer_id: str, current_user: User = Depends(get_curr
     peer = await db.peer_supporters.find_one({"id": peer_id})
     if not peer:
         raise HTTPException(status_code=404, detail="Peer supporter not found")
-    return PeerSupporter(**peer)
+    # Decrypt sensitive fields
+    return PeerSupporter(**decrypt_document('peer_supporters', peer))
 
 @api_router.put("/peer-supporters/{peer_id}", response_model=PeerSupporter)
 async def update_peer_supporter(
@@ -1316,8 +1320,12 @@ async def update_peer_supporter(
     current_user: User = Depends(require_role("admin"))
 ):
     """Update a peer supporter (admin only)"""
+    # Encrypt sensitive fields before updating
+    encrypted_data = encrypt_document('peer_supporters', peer_input.dict(exclude_unset=True))
     result = await db.peer_supporters.update_one(
         {"id": peer_id},
+        {"$set": encrypted_data}
+    )
         {"$set": peer_input.dict(exclude_unset=True)}
     )
     if result.matched_count == 0:
