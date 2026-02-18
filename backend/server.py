@@ -360,6 +360,9 @@ class SafeguardingAlert(BaseModel):
     character: str
     triggering_message: str
     ai_response: str
+    risk_level: str = "AMBER"  # GREEN, YELLOW, AMBER, RED
+    risk_score: int = 0
+    triggered_indicators: List[str] = []
     status: str = "active"  # active, acknowledged, resolved
     acknowledged_by: Optional[str] = None
     acknowledged_at: Optional[datetime] = None
