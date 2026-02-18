@@ -1389,3 +1389,9 @@ body {
     0%, 100% { background: #1e293b; }
     50% { background: rgba(239, 68, 68, 0.15); }
 }
+
+/* Flash animation for alerts */
+@keyframes flash {
+    0%, 100% { background-color: inherit; }
+    50% { background-color: rgba(239, 68, 68, 0.2); }
+}
