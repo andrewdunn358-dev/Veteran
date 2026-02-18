@@ -432,6 +432,8 @@ class BuddyChatResponse(BaseModel):
     characterAvatar: str
     safeguardingTriggered: bool = False
     safeguardingAlertId: Optional[str] = None
+    riskLevel: str = "GREEN"  # GREEN, YELLOW, AMBER, RED
+    riskScore: int = 0
 
 # ============ SAFEGUARDING TRIAGE SYSTEM ============
 # Weighted risk scoring for UK veteran support platform
