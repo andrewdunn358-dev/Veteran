@@ -77,6 +77,13 @@ When triggered offers:
   - New `/live-chat` page with staff info, secure connection banner, message UI
   - Backend API: `POST /api/live-chat/rooms`, `GET/POST /api/live-chat/rooms/{id}/messages`, `POST /api/live-chat/rooms/{id}/end`
   - Integration with safeguarding flow - "Connect Now" navigates to live chat
+- [x] **Splash Screen Button Update**: Changed "No, I'll explore the app" to "I'm ok, take me to the app"
+- [x] **Substance & Alcohol Support Section**: New section in Friends & Family page with resources:
+  - Tom Harrison House (veteran-specific rehab)
+  - Change Grow Live, Alcoholics Anonymous, FRANK, Drinkline, We Are With You
+- [x] **Criminal Justice Support Section**: New section in Friends & Family page with resources:
+  - NACRO, Forces in Mind Trust, Walking With The Wounded
+  - Project Nova, Probation Services, Veterans' Gateway
 
 ## New API Endpoints (Feb 2026)
 
