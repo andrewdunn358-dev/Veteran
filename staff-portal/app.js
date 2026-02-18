@@ -205,25 +205,28 @@ async function initPortal() {
     // Load data
     loadCallbacks();
     loadNotes();
-    if (role === 'counsellor' || role === 'admin') {
+    
+    // All staff (counsellors, peers, and admins) can see live chats and safeguarding
+    if (role === 'counsellor' || role === 'admin' || role === 'peer') {
         loadPanicAlerts();
         loadSafeguardingAlerts(false); // Initial load, no sound
-        loadLiveChats(); // Load live chat rooms
-        startAlertPolling(); // Start real-time polling
+        loadLiveChats(false); // Initial load, no sound
+        startAlertPolling(); // Start real-time polling for safeguarding
+        startLiveChatPolling(); // Start real-time polling for live chats
         updateSoundButton(); // Update sound toggle button
         
-        // Show live chat section
+        // Show sections
         document.getElementById('livechat-section').style.display = 'block';
+        document.getElementById('safeguarding-section').style.display = 'block';
     }
     
     // Auto-refresh every 30 seconds for callbacks/notes
     setInterval(function() {
         loadCallbacks();
         loadNotes();
-        loadLiveChats(); // Also refresh live chats
-        if (role === 'counsellor' || role === 'admin') {
+        if (role === 'counsellor' || role === 'admin' || role === 'peer') {
             loadPanicAlerts();
-            // Note: Safeguarding alerts are polled separately with sound support
+            // Note: Safeguarding and live chats are polled separately with sound support
         }
     }, 30000);
 }
