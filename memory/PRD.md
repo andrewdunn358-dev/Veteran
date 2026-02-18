@@ -37,7 +37,7 @@ When triggered offers:
 
 | File | Location | Action |
 |------|----------|--------|
-| `staff-portal-safeguarding.zip` | `/app/staff-portal/` | Upload to 20i hosting |
+| `staff-portal-livechat.zip` | `/app/staff-portal/` | Upload to 20i hosting - includes latest live chat flow |
 | `FEATURE_LIST.md` | `/app/` | Complete reference |
 | `DEPLOYMENT_INSTRUCTIONS.md` | `/app/` | Morning setup guide |
 
