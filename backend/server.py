@@ -678,7 +678,7 @@ async def send_reset_email(email: str, reset_token: str):
         logging.error(f"Failed to send email via Resend: {str(e)}")
         return False
 
-async def send_safeguarding_email_notification(alert: SafeguardingAlert):
+async def send_safeguarding_email_notification(alert: SafeguardingAlert, risk_data: Dict = None):
     """Send urgent safeguarding alert email to admins/counsellors"""
     if not RESEND_API_KEY:
         logging.warning("Resend API key not configured, skipping safeguarding email")
@@ -693,31 +693,44 @@ async def send_safeguarding_email_notification(alert: SafeguardingAlert):
             logging.warning("No admin notification email configured for safeguarding alerts")
             return False
         
+        # Determine alert colour based on risk level
+        risk_level = alert.risk_level if hasattr(alert, 'risk_level') else "AMBER"
+        risk_score = alert.risk_score if hasattr(alert, 'risk_score') else 0
+        risk_color = "#dc2626" if risk_level == "RED" else "#f59e0b"  # Red or Amber
+        
+        # Format triggered indicators
+        indicators_html = ""
+        if risk_data and risk_data.get("triggered_indicators"):
+            indicators = [t["indicator"] for t in risk_data["triggered_indicators"][:5]]
+            indicators_html = f'<p style="margin: 0 0 8px 0;"><strong>Detected:</strong> {", ".join(indicators)}</p>'
+        
         html_content = f"""
         <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background-color: #dc2626; color: white; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                <h2 style="margin: 0;">⚠️ SAFEGUARDING ALERT</h2>
+            <div style="background-color: {risk_color}; color: white; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <h2 style="margin: 0;">⚠️ SAFEGUARDING ALERT - {risk_level}</h2>
+                <p style="margin: 8px 0 0 0; font-size: 14px;">Risk Score: {risk_score}</p>
             </div>
             
             <p style="color: #1a2332; font-size: 16px;"><strong>A safeguarding concern has been detected in an AI Battle Buddies conversation.</strong></p>
             
-            <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; margin: 20px 0;">
+            <div style="background-color: #fef2f2; border-left: 4px solid {risk_color}; padding: 16px; margin: 20px 0;">
                 <p style="margin: 0 0 8px 0;"><strong>Alert ID:</strong> {alert.id}</p>
                 <p style="margin: 0 0 8px 0;"><strong>Session:</strong> {alert.session_id[:8]}...</p>
                 <p style="margin: 0 0 8px 0;"><strong>Character:</strong> {alert.character.capitalize()}</p>
                 <p style="margin: 0 0 8px 0;"><strong>Time:</strong> {alert.created_at.strftime('%d %b %Y at %H:%M')}</p>
+                {indicators_html}
             </div>
             
             <div style="background-color: #f3f4f6; padding: 16px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 0 0 8px 0; font-weight: bold; color: #dc2626;">Triggering Message:</p>
+                <p style="margin: 0 0 8px 0; font-weight: bold; color: {risk_color};">Triggering Message:</p>
                 <p style="margin: 0; font-style: italic; color: #374151;">"{alert.triggering_message}"</p>
             </div>
             
             <p style="color: #666;">The user has been shown support options including crisis helplines and the option to speak with a real person.</p>
             
             <p style="text-align: center; margin: 30px 0;">
-                <a href="{FRONTEND_URL}/login" style="background-color: #dc2626; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block;">View in Staff Portal</a>
+                <a href="{FRONTEND_URL}/login" style="background-color: {risk_color}; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block;">View in Staff Portal</a>
             </p>
             
             <p style="color: #666; font-size: 12px;">This is an automated safeguarding notification from Radio Check Veterans Support.</p>
@@ -728,7 +741,7 @@ async def send_safeguarding_email_notification(alert: SafeguardingAlert):
         params = {
             "from": SENDER_EMAIL,
             "to": [admin_email],
-            "subject": "⚠️ URGENT: Safeguarding Alert - Radio Check",
+            "subject": f"⚠️ URGENT: Safeguarding Alert [{risk_level}] - Radio Check",
             "html": html_content
         }
         
