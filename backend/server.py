@@ -701,14 +701,14 @@ def check_safeguarding(message: str, session_id: str = "default") -> tuple:
 async def lookup_ip_geolocation(ip_address: str) -> Dict[str, Any]:
     """
     Lookup geolocation data for an IP address using ip-api.com
-    Returns city, region, country, ISP, timezone
+    Returns city, region, country, ISP, timezone, and coordinates
     """
     if not ip_address or ip_address in ["unknown", "127.0.0.1", "localhost"]:
         return {}
     
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(f"http://ip-api.com/json/{ip_address}?fields=status,city,regionName,country,isp,timezone")
+            response = await client.get(f"http://ip-api.com/json/{ip_address}?fields=status,city,regionName,country,isp,timezone,lat,lon")
             if response.status_code == 200:
                 data = response.json()
                 if data.get("status") == "success":
@@ -717,7 +717,9 @@ async def lookup_ip_geolocation(ip_address: str) -> Dict[str, Any]:
                         "geo_region": data.get("regionName"),
                         "geo_country": data.get("country"),
                         "geo_isp": data.get("isp"),
-                        "geo_timezone": data.get("timezone")
+                        "geo_timezone": data.get("timezone"),
+                        "geo_lat": data.get("lat"),
+                        "geo_lon": data.get("lon")
                     }
     except Exception as e:
         logging.warning(f"IP geolocation lookup failed for {ip_address}: {e}")
