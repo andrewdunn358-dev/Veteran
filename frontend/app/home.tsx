@@ -156,6 +156,23 @@ export default function Index() {
           </View>
         </View>
 
+        {/* Friends & Family Section */}
+        <TouchableOpacity 
+          style={styles.familyFriendsCard}
+          onPress={() => router.push('/family-friends')}
+          activeOpacity={0.8}
+          data-testid="family-friends-btn"
+        >
+          <View style={styles.familyFriendsIcon}>
+            <Ionicons name="people" size={28} color="#7c3aed" />
+          </View>
+          <View style={styles.familyFriendsContent}>
+            <Text style={styles.familyFriendsTitle}>Friends & Family</Text>
+            <Text style={styles.familyFriendsDesc}>Worried about a veteran? Find support and raise a concern</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+        </TouchableOpacity>
+
         {/* Self-Care Tools Section */}
         <Text style={styles.sectionTitle}>Self-Care Tools</Text>
         <View style={styles.toolsRow}>
@@ -192,23 +209,6 @@ export default function Index() {
             <Text style={styles.toolText}>Resources</Text>
           </TouchableOpacity>
         </View>
-
-        {/* Friends & Family Section */}
-        <TouchableOpacity 
-          style={styles.familyFriendsCard}
-          onPress={() => router.push('/family-friends')}
-          activeOpacity={0.8}
-          data-testid="family-friends-btn"
-        >
-          <View style={styles.familyFriendsIcon}>
-            <Ionicons name="people" size={28} color="#7c3aed" />
-          </View>
-          <View style={styles.familyFriendsContent}>
-            <Text style={styles.familyFriendsTitle}>Friends & Family</Text>
-            <Text style={styles.familyFriendsDesc}>Worried about a veteran? Find support and raise a concern</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
-        </TouchableOpacity>
 
         {/* Disclaimer */}
         <View style={styles.disclaimer}>
