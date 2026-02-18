@@ -5,12 +5,45 @@ Build and enhance a mobile-first web application for UK military veterans provid
 
 ## What's Been Implemented (Feb 2026)
 
+### NEW: Zentrafuge Veteran AI Safety Layer Integration
+**Source**: https://github.com/TheAIOldtimer/veteran-ai-safety-layer (MIT License)
+
+Enhanced AI safety features:
+- **Negation-aware detection** - Distinguishes "I want to kill myself" vs "I don't want to kill myself"
+- **Context multipliers** - Escalates risk when substances, isolation, or means mentioned
+- **Multi-level risk** - NONE → LOW → MEDIUM → HIGH → CRITICAL
+- **Fail-safe design** - On error, assumes HIGH risk (never silently passes)
+- **UK Veteran Crisis Resources** - Combat Stress, Veterans Gateway, Op COURAGE, Samaritans
+
+Files added:
+- `/app/backend/safety/safety_monitor.py` - Enhanced crisis detection
+- `/app/backend/safety/crisis_resources.py` - Country-specific helplines
+- `/app/SAFEGUARDING_DISCLAIMER.md` - Legal/liability documentation
+- `/app/ATTRIBUTION.md` - Open source attribution
+
+### NEW: Field-Level Data Encryption (AES-256)
+Sensitive data now encrypted at rest:
+- **Counsellors**: name, phone, sms, whatsapp
+- **Peer Supporters**: firstName, phone, sms, whatsapp
+- **Callbacks**: name, phone, email, message
+- **Notes**: content, subject
+- **Safeguarding Alerts**: ip_address, conversation_history
+
+⚠️ **CRITICAL**: Add `ENCRYPTION_KEY` to Render environment variables
+
+### NEW: API Security Hardening
+- `/api/counsellors` and `/api/peer-supporters` now require authentication
+- Public `/available` endpoints return only safe data (no contact info)
+- Role-based access (admin, counsellor, peer)
+
 ### NEW: Friends & Family Section
 **Purpose**: Support for concerned loved ones
 - **Raise a Concern form** - Family/friends can report worries
 - **Signs to Look For** - Education on warning signs
 - **Support Services** - Op Courage, Combat Stress, Men's Sheds, SSAFA, RBL
 - **Armed Forces Covenant** info
+- **Substance & Alcohol Support** - Tom Harrison House, AA, FRANK
+- **Criminal Justice Support** - NACRO, Project Nova, Walking With The Wounded
 
 ### Enhanced Safeguarding Indicators
 Now detects:
