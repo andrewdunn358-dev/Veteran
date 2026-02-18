@@ -2863,9 +2863,9 @@ async def root():
 live_chat_rooms: Dict[str, Dict[str, Any]] = {}
 
 class LiveChatRoomCreate(BaseModel):
-    staff_id: str
-    staff_name: str
-    staff_type: str  # counsellor or peer
+    staff_id: Optional[str] = None  # Optional - staff joins later
+    staff_name: Optional[str] = None  # Optional - staff joins later
+    staff_type: str = "any"  # counsellor, peer, or any (default)
     safeguarding_alert_id: Optional[str] = None
     ai_session_id: Optional[str] = None
 
