@@ -607,6 +607,19 @@ const styles = StyleSheet.create({
   tipText: { flex: 1, fontSize: 14, color: '#92400e', lineHeight: 20 },
   tipBold: { fontWeight: '700' },
   
+  // Info Card (for addiction & prison sections)
+  infoCard: {
+    backgroundColor: '#f0f9ff',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#bae6fd',
+  },
+  infoText: { flex: 1, fontSize: 14, color: '#0369a1', lineHeight: 20 },
+  
   // Emergency Card
   emergencyCard: {
     backgroundColor: '#fee2e2',
