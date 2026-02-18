@@ -110,6 +110,109 @@ export default function AIChat() {
     }
   };
 
+  // Check for available counsellors/peers
+  const checkAvailability = async () => {
+    setIsCheckingAvailability(true);
+    try {
+      const [counsellorsRes, peersRes] = await Promise.all([
+        fetch(`${API_URL}/api/counsellors/available`),
+        fetch(`${API_URL}/api/peer-supporters/available`)
+      ]);
+      
+      const counsellors = await counsellorsRes.json();
+      const peers = await peersRes.json();
+      
+      setAvailableStaff({
+        counsellors: Array.isArray(counsellors) ? counsellors : [],
+        peers: Array.isArray(peers) ? peers : []
+      });
+    } catch (error) {
+      console.error('Error checking availability:', error);
+      setAvailableStaff({ counsellors: [], peers: [] });
+    } finally {
+      setIsCheckingAvailability(false);
+    }
+  };
+
+  // Submit callback request
+  const submitCallbackRequest = async () => {
+    if (!callbackPhone.trim()) {
+      Alert.alert('Phone Required', 'Please enter your phone number so we can call you back.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/callbacks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: callbackName.trim() || 'Anonymous',
+          phone: callbackPhone.trim(),
+          callback_type: 'counsellor',
+          notes: `Safeguarding callback request from AI chat. Session: ${sessionId}. Alert ID: ${currentAlertId || 'N/A'}`,
+          is_urgent: true,
+          safeguarding_alert_id: currentAlertId
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert(
+          'Callback Requested',
+          'Someone will call you back as soon as possible. If you need immediate help, please call 999 or Samaritans on 116 123.',
+          [{ text: 'OK', onPress: () => {
+            setShowSafeguardingModal(false);
+            setSafeguardingView('main');
+            setCallbackPhone('');
+            setCallbackName('');
+          }}]
+        );
+      } else {
+        Alert.alert('Error', 'Failed to submit callback request. Please try again or call 116 123.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to submit callback request. Please try again or call 116 123.');
+    }
+  };
+
+  // Handle connecting to live person
+  const handleLiveConnect = async (type: 'counsellor' | 'peer', staffMember: any) => {
+    setSafeguardingView('connecting');
+    
+    // Create a callback request marked as urgent for immediate contact
+    try {
+      await fetch(`${API_URL}/api/callbacks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Live Connect Request',
+          phone: 'In-app connection',
+          callback_type: type,
+          notes: `URGENT: Live connect request from AI chat safeguarding. Session: ${sessionId}. Alert: ${currentAlertId}. Assigned to: ${staffMember.name}`,
+          is_urgent: true,
+          assigned_to: staffMember.id,
+          safeguarding_alert_id: currentAlertId
+        }),
+      });
+    } catch (error) {
+      console.error('Error creating live connect request:', error);
+    }
+
+    // Navigate to crisis support with staff info
+    setTimeout(() => {
+      setShowSafeguardingModal(false);
+      setSafeguardingView('main');
+      router.push({
+        pathname: '/crisis-support',
+        params: { 
+          urgent: 'true', 
+          staffType: type,
+          staffName: staffMember.name,
+          fromSafeguarding: 'true'
+        }
+      });
+    }, 2000);
+  };
+
   const sendMessage = async () => {
     if (!inputText.trim() || isLoading) return;
 
