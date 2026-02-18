@@ -146,24 +146,17 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
+      const authHeaders = { 'Authorization': `Bearer ${token}` };
       const [counsellorsRes, peersRes, orgsRes, resourcesRes, usersRes, contentRes, metricsRes, callbacksRes, alertsRes] = await Promise.all([
-        fetch(`${API_URL}/api/counsellors`),
-        fetch(`${API_URL}/api/peer-supporters`),
+        fetch(`${API_URL}/api/counsellors`, { headers: authHeaders }),
+        fetch(`${API_URL}/api/peer-supporters`, { headers: authHeaders }),
         fetch(`${API_URL}/api/organizations`),
         fetch(`${API_URL}/api/resources`),
-        fetch(`${API_URL}/api/auth/users`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
+        fetch(`${API_URL}/api/auth/users`, { headers: authHeaders }),
         fetch(`${API_URL}/api/content`),
-        fetch(`${API_URL}/api/call-logs`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch(`${API_URL}/api/callbacks`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch(`${API_URL}/api/panic-alerts`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
+        fetch(`${API_URL}/api/call-logs`, { headers: authHeaders }),
+        fetch(`${API_URL}/api/callbacks`, { headers: authHeaders }),
+        fetch(`${API_URL}/api/panic-alerts`, { headers: authHeaders }),
       ]);
       
       if (counsellorsRes.ok) setCounsellors(await counsellorsRes.json());
