@@ -148,6 +148,7 @@ async function initPortal() {
     loadNotes();
     if (role === 'counsellor' || role === 'admin') {
         loadPanicAlerts();
+        loadSafeguardingAlerts();
     }
     
     // Auto-refresh every 30 seconds
@@ -156,6 +157,7 @@ async function initPortal() {
         loadNotes();
         if (role === 'counsellor' || role === 'admin') {
             loadPanicAlerts();
+            loadSafeguardingAlerts();
         }
     }, 30000);
 }
