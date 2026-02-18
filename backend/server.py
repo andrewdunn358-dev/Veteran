@@ -1270,8 +1270,8 @@ async def create_peer_supporter(
     return peer_obj
 
 @api_router.get("/peer-supporters", response_model=List[PeerSupporter])
-async def get_peer_supporters():
-    """Get all peer supporters (public - for mobile app)"""
+async def get_peer_supporters(current_user: User = Depends(require_role("admin"))):
+    """Get all peer supporters - ADMIN ONLY (contains sensitive contact info)"""
     peers = await db.peer_supporters.find().to_list(1000)
     return [PeerSupporter(**p) for p in peers]
 
@@ -1285,8 +1285,8 @@ async def get_available_peer_supporters():
     return peers
 
 @api_router.get("/peer-supporters/{peer_id}", response_model=PeerSupporter)
-async def get_peer_supporter(peer_id: str):
-    """Get a specific peer supporter"""
+async def get_peer_supporter(peer_id: str, current_user: User = Depends(require_role("admin"))):
+    """Get a specific peer supporter - ADMIN ONLY"""
     peer = await db.peer_supporters.find_one({"id": peer_id})
     if not peer:
         raise HTTPException(status_code=404, detail="Peer supporter not found")
