@@ -1272,8 +1272,10 @@ async def create_peer_supporter(
     return peer_obj
 
 @api_router.get("/peer-supporters", response_model=List[PeerSupporter])
-async def get_peer_supporters(current_user: User = Depends(require_role("admin"))):
-    """Get all peer supporters - ADMIN ONLY (contains sensitive contact info)"""
+async def get_peer_supporters(current_user: User = Depends(get_current_user)):
+    """Get all peer supporters - Requires authentication (admin or peer)"""
+    if current_user.role not in ["admin", "peer"]:
+        raise HTTPException(status_code=403, detail="Access denied. Only admins and peers can view this.")
     peers = await db.peer_supporters.find().to_list(1000)
     return [PeerSupporter(**p) for p in peers]
 
