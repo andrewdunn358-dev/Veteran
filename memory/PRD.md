@@ -5,81 +5,77 @@ Build and enhance a mobile-first web application for UK military veterans provid
 
 ## What's Been Implemented (Feb 2026)
 
-### Safeguarding Triage System (BACP-Aligned)
-- **Weighted risk scoring** (0-100+)
-- Risk levels: GREEN (0-29), YELLOW (30-59), AMBER (60-89), RED (90+)
-- **RED indicators**: suicide ideation, method references, self-harm, weapon access
-- **AMBER indicators**: numbness, PTSD, isolation, substance misuse, hopelessness
-- **Modifiers**: dark humour, minimisation, repeated indicators
-- Session-based tracking for escalation on repeated distress
+### NEW: Friends & Family Section
+**Purpose**: Support for concerned loved ones
+- **Raise a Concern form** - Family/friends can report worries
+- **Signs to Look For** - Education on warning signs
+- **Support Services** - Op Courage, Combat Stress, Men's Sheds, SSAFA, RBL
+- **Armed Forces Covenant** info
 
-### Enhanced Safeguarding Modal
-When triggered, modal now offers:
-- **Request a Callback** - User enters phone number → Staff can call them back
-- **Connect Now** - Shows available counsellors/peers for live connect
-- **Samaritans** - Direct dial to 116 123
-- **999 notice** - Emergency reminder
-- "I understand, continue chatting" - Acknowledge and continue
+### Enhanced Safeguarding Indicators
+Now detects:
+- **Addiction**: gambling, drinking to cope, drug use, "can't stop drinking"
+- **Offending/Legal**: prison, court cases, anger issues, assault charges
+- **Self-care deterioration**: not eating, not showering, letting go
+- **Sleep changes**: insomnia, sleeping all day, "awake all night"
+- **Isolation**: pushing people away, not leaving house, avoiding everyone
+- **Pride/Stigma barriers**: "too proud to ask", "sign of weakness", "others had it worse", "real men don't"
 
-### Tommy & Doris AI Personalities
-- **Squaddie banter** - Military slang, take the piss (gently)
-- Tommy: "Alright mucker", NAAFI corner energy
-- Doris: "Kettle's on", warm with wit
-- Both drop banter immediately for serious topics
+### Safeguarding Modal Enhanced
+When triggered offers:
+- **Request a Callback** - Captures phone number for staff to call back
+- **Connect Now** - Shows available counsellors/peers online
+- **Samaritans** - Direct dial 116 123
+- **999 notice**
 
-### Staff Portal Updates
-- **Safeguarding Alerts section** with:
-  - Risk level badges (RED/AMBER + score)
-  - Triggered indicators
-  - Acknowledge/Resolve actions
-  - Auto-refresh (30 seconds)
-  - Pulsing animation for active alerts
-
-### UI Updates
-- Splash screen: Two-option question "Do you need to speak with someone right now?"
-- Home page: "We're on stag 24/7" title for AI Buddies
-- "Your Support Network" subtitle under Radio Check
+### Tommy & Doris - Squaddie Personalities
+- Proper military banter and slang
+- "Alright mucker", "brew", "scran", "threaders"
+- Drops banter immediately for serious topics
 
 ## Files to Deploy
 
 | File | Location | Action |
 |------|----------|--------|
 | `staff-portal-safeguarding.zip` | `/app/staff-portal/` | Upload to 20i hosting |
-| `FEATURE_LIST.md` | `/app/` | Reference document |
+| `FEATURE_LIST.md` | `/app/` | Complete reference |
 | `DEPLOYMENT_INSTRUCTIONS.md` | `/app/` | Morning setup guide |
 
-## Key API Endpoints
+## New API Endpoints
 
-### Safeguarding
-- `POST /api/ai-buddies/chat` - Returns `safeguardingTriggered`, `riskLevel`, `riskScore`
-- `GET /api/safeguarding-alerts` - List alerts (staff only)
-- `PATCH /api/safeguarding-alerts/{id}/acknowledge`
-- `PATCH /api/safeguarding-alerts/{id}/resolve`
+### Family/Friends Concerns
+- `POST /api/concerns` - Submit concern (public)
+- `GET /api/concerns` - List concerns (staff only)
+- `PATCH /api/concerns/{id}/status` - Update status
 
-### Availability Check
-- `GET /api/counsellors/available` - Available counsellors
-- `GET /api/peer-supporters/available` - Available peers
+## New Pages
+
+| Page | URL |
+|------|-----|
+| Friends & Family | `/family-friends` |
 
 ## Credentials
 - Admin: admin@veteran.dbty.co.uk / ChangeThisPassword123!
 
 ## Completed This Session
 - [x] BACP-aligned weighted safeguarding scoring
-- [x] Expanded crisis keywords (informal, angry, indirect)
-- [x] Session-based risk tracking with escalation
-- [x] Callback request with phone capture in modal
-- [x] Live connect to available staff
-- [x] Staff portal safeguarding alerts with risk badges
-- [x] Tommy & Doris squaddie banter personalities
+- [x] Addiction and offending behaviour detection
+- [x] Self-care and sleep change detection
+- [x] Pride/stigma barrier detection
+- [x] Friends & Family page with Raise a Concern
+- [x] Signs to Look For education
+- [x] Support services (Op Courage, Men's Sheds, etc.)
+- [x] Armed Forces Covenant info
+- [x] Concern API endpoints
 - [x] Feature list documentation
 - [x] Deployment instructions
 
 ## Upcoming Tasks
+- Add Concerns section to Staff Portal
 - LMS course setup in WordPress/Tutor
-- Training Portal API for progress tracking
-- Push notifications for safeguarding alerts (future)
+- Push notifications for safeguarding alerts
 
 ## Future Tasks
+- Grounding techniques page
+- Local mental health team finder
 - Persistent AI chat history
-- VoIP/PBX integration
-- In-app human-to-human chat
