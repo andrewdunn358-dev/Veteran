@@ -919,9 +919,21 @@ export default function AdminDashboard() {
               </View>
             ) : (
               callbacks.map((cb) => (
-                <View key={cb.id} style={[styles.card, cb.status === 'pending' && styles.urgentCard]}>
+                <View key={cb.id} style={[styles.card, cb.status === 'pending' && styles.urgentCard, cb.is_urgent && styles.safeguardingCard]}>
                   <View style={styles.cardHeader}>
-                    <Text style={styles.cardName}>{cb.name}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      {cb.is_urgent && (
+                        <View style={{ backgroundColor: '#dc2626', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 }}>
+                          <Text style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>URGENT</Text>
+                        </View>
+                      )}
+                      {cb.safeguarding_alert_id && (
+                        <View style={{ backgroundColor: '#f59e0b', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 }}>
+                          <Text style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>SAFEGUARDING</Text>
+                        </View>
+                      )}
+                      <Text style={styles.cardName}>{cb.name}</Text>
+                    </View>
                     <View style={[styles.statusBadge, { 
                       backgroundColor: cb.status === 'pending' ? '#f59e0b' : 
                                        cb.status === 'in_progress' ? '#3b82f6' : '#22c55e' 
