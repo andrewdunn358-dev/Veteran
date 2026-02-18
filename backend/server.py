@@ -2373,6 +2373,9 @@ async def buddy_chat(request: BuddyChatRequest, req: Request):
         
         # If safeguarding triggered (RED or AMBER), create alert and send notification
         if should_escalate:
+            # Get conversation history for context (last 10 exchanges)
+            conversation_history = session["history"][-20:] if "history" in session else []
+            
             alert = SafeguardingAlert(
                 session_id=request.sessionId,
                 character=character,
@@ -2380,11 +2383,14 @@ async def buddy_chat(request: BuddyChatRequest, req: Request):
                 ai_response=reply,
                 risk_level=risk_level,
                 risk_score=risk_data["score"],
-                triggered_indicators=[t["indicator"] for t in risk_data["triggered_indicators"]]
+                triggered_indicators=[t["indicator"] for t in risk_data["triggered_indicators"]],
+                client_ip=client_ip,
+                user_agent=user_agent,
+                conversation_history=conversation_history
             )
             alert_id = alert.id
             await db.safeguarding_alerts.insert_one(alert.dict())
-            logging.warning(f"SAFEGUARDING ALERT [{risk_level}] Score: {risk_data['score']} - Alert: {alert_id} - Session: {request.sessionId}")
+            logging.warning(f"SAFEGUARDING ALERT [{risk_level}] Score: {risk_data['score']} - Alert: {alert_id} - Session: {request.sessionId} - IP: {client_ip}")
             
             # Send email notification to admin (only for RED alerts or first AMBER)
             if risk_level == "RED" or risk_data["session_history_count"] <= 1:
