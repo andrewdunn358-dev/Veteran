@@ -430,49 +430,192 @@ class BuddyChatResponse(BaseModel):
     safeguardingTriggered: bool = False
     safeguardingAlertId: Optional[str] = None
 
-# Safeguarding keywords and phrases for veterans
-SAFEGUARDING_KEYWORDS = [
-    # Suicide/Self-harm - direct
-    "kill myself", "end my life", "want to die", "don't want to be here", "dont want to be here",
-    "better off dead", "suicide", "suicidal", "end it all", "take my own life",
-    "self harm", "self-harm", "hurt myself", "cut myself", "cutting",
-    "no point living", "no reason to live", "can't go on", "cant go on", "not worth living",
-    "rather be dead", "wish i was dead", "wish i were dead",
-    
-    # Suicide/Self-harm - informal/angry
-    "gonna do it", "going to do it", "just do it", "fuck it",
-    "done with life", "done with everything", "done with this shit",
-    "ending it", "ending this", "top myself", "do myself in",
-    "off myself", "check out", "checking out",
-    
-    # Crisis indicators
-    "goodbye", "final goodbye", "last message", "can't take it anymore", "cant take it anymore",
-    "no way out", "no hope", "hopeless", "given up", "giving up",
-    "nobody cares", "no one cares", "no one would miss me", "burden to everyone",
-    "had enough", "can't do this anymore", "cant do this anymore", "can't do this", "cant do this", "what's the point", "whats the point",
-    
-    # Desperation phrases
-    "i give up", "i'm done", "im done", "i quit", "finished",
-    "nothing matters", "nothing left", "got nothing", "lost everything",
-    "can't see a way", "cant see a way", "no future", "no point", "pointless",
-    
-    # PTSD/Trauma crisis
-    "flashbacks won't stop", "flashbacks wont stop", "can't escape", "cant escape", "nightmares every night",
-    "reliving it", "can't cope anymore", "cant cope anymore", "can't cope", "cant cope", "losing it",
-    "going crazy", "losing my mind", "breaking down",
-    
-    # Isolation/Burden
-    "all alone", "completely alone", "no one understands",
-    "burden", "in the way", "better without me", "they'd be better off", "theyd be better off",
-]
+# ============ SAFEGUARDING TRIAGE SYSTEM ============
+# Weighted risk scoring for UK veteran support platform
+# Based on BACP ethical framework and UK safeguarding principles
 
-def check_safeguarding(message: str) -> bool:
-    """Check if message contains safeguarding concerns"""
+# RED INDICATORS - Immediate escalation (any single one = RED regardless of score)
+RED_INDICATORS = {
+    # Direct suicidal ideation (+100)
+    "want to end it": 100, "end it all": 100, "kill myself": 100, "take my own life": 100,
+    "want to die": 100, "going to die": 100, "suicide": 100, "suicidal": 100,
+    
+    # Indirect death wish (+80)
+    "dont want to wake up": 80, "don't want to wake up": 80,
+    "i'm done": 80, "im done": 80, "done with life": 80, "done with everything": 80,
+    "tired of waking up": 80, "wish i didnt wake up": 80, "wish i didn't wake up": 80,
+    "just want peace": 80, "i just want peace": 80, "want it to stop": 80,
+    "past caring": 80, "i'm past caring": 80, "im past caring": 80,
+    
+    # Preparation or method references (+100)
+    "pills": 100, "rope": 100, "bridge": 100, "jump": 100, "hanging": 100,
+    "giving things away": 100, "given my stuff away": 100, "sorted my affairs": 100,
+    "written letters": 100, "written a letter": 100, "final letter": 100,
+    "made a plan": 100, "got a plan": 100, "know how": 100,
+    
+    # Ongoing self-harm (+90)
+    "cutting myself": 90, "cut myself": 90, "hurting myself": 90, "self harm": 90,
+    "self-harm": 90, "burning myself": 90, "hitting myself": 90,
+    
+    # Loss of control / risk to others (+90)
+    "going to hurt someone": 90, "might hurt someone": 90, "losing control": 90,
+    "cant control myself": 90, "can't control myself": 90,
+    
+    # Access to weapons while distressed (+90)
+    "got my gun": 90, "still have my weapon": 90, "got weapons": 90,
+}
+
+# AMBER INDICATORS - High risk (weighted, stackable)
+AMBER_INDICATORS = {
+    # Emotional numbness, emptiness, identity collapse (+40)
+    "feel nothing": 40, "empty inside": 40, "numb": 40, "dont feel anything": 40,
+    "don't feel anything": 40, "lost myself": 40, "dont know who i am": 40,
+    "don't know who i am": 40, "not the same person": 40,
+    
+    # PTSD re-experiencing, flashbacks, hypervigilance (+35)
+    "flashbacks": 35, "nightmares": 35, "cant sleep": 35, "can't sleep": 35,
+    "hypervigilant": 35, "on edge": 35, "constantly alert": 35,
+    "reliving it": 35, "keeps coming back": 35, "haunted": 35,
+    
+    # Isolation, withdrawal, disengagement (+30)
+    "isolated": 30, "all alone": 30, "no one around": 30, "pushed everyone away": 30,
+    "dont talk to anyone": 30, "don't talk to anyone": 30, "withdrawn": 30,
+    "cant face people": 30, "can't face people": 30, "stay in bed": 30,
+    
+    # Substance misuse to cope (+30)
+    "drinking to cope": 30, "need a drink": 30, "drinking every day": 30,
+    "using drugs": 30, "pills to sleep": 30, "self medicating": 30,
+    "drunk": 30, "wasted": 30, "off my face": 30,
+    
+    # Housing, legal, financial crisis (+25)
+    "about to lose my home": 25, "homeless": 25, "evicted": 25,
+    "lost my job": 25, "no money": 25, "in debt": 25, "court case": 25,
+    "legal trouble": 25, "going to prison": 25,
+    
+    # Crisis language
+    "hopeless": 30, "no hope": 30, "no point": 30, "whats the point": 30,
+    "what's the point": 30, "pointless": 30, "burden": 30, "in the way": 30,
+    "better without me": 40, "theyd be better off": 40, "they'd be better off": 40,
+    "cant go on": 35, "can't go on": 35, "cant cope": 35, "can't cope": 35,
+    "breaking down": 30, "falling apart": 30, "at breaking point": 35,
+}
+
+# MODIFIERS - Stackable additions
+MODIFIER_PATTERNS = {
+    # Humour or minimisation masking distress (+20)
+    "just joking": 20, "only joking": 20, "haha": 15, "lol": 15,
+    "not that bad": 20, "its fine": 20, "it's fine": 20, "i'm fine": 20, "im fine": 20,
+    "dont worry": 15, "don't worry": 15,
+    
+    # Downplaying severity (+15)
+    "others had it worse": 15, "shouldnt complain": 15, "shouldn't complain": 15,
+    "not a big deal": 15, "nothing really": 15, "just being dramatic": 15,
+    "man up": 15, "get over it": 15, "soldier on": 15, "crack on": 10,
+    
+    # Dark humour about death (+20)
+    "dark joke": 20, "might not be here": 25, "wont be around": 25, "won't be around": 25,
+    "disappear": 20, "vanish": 20, "not here tomorrow": 25,
+}
+
+# Session risk tracking
+session_risk_history: Dict[str, List[Dict]] = {}
+
+def calculate_safeguarding_score(message: str, session_id: str) -> Dict[str, Any]:
+    """
+    Calculate safeguarding risk score using weighted indicators.
+    Returns: {score, risk_level, triggered_indicators, is_red_flag}
+    """
     message_lower = message.lower()
-    for keyword in SAFEGUARDING_KEYWORDS:
-        if keyword in message_lower:
-            return True
-    return False
+    score = 0
+    triggered = []
+    is_red_flag = False
+    
+    # Check RED indicators first (any single one = immediate RED)
+    for indicator, weight in RED_INDICATORS.items():
+        if indicator in message_lower:
+            score += weight
+            triggered.append({"indicator": indicator, "weight": weight, "level": "RED"})
+            is_red_flag = True
+    
+    # Check AMBER indicators
+    amber_count = 0
+    for indicator, weight in AMBER_INDICATORS.items():
+        if indicator in message_lower:
+            score += weight
+            triggered.append({"indicator": indicator, "weight": weight, "level": "AMBER"})
+            amber_count += 1
+    
+    # Apply modifiers
+    for pattern, weight in MODIFIER_PATTERNS.items():
+        if pattern in message_lower:
+            score += weight
+            triggered.append({"indicator": pattern, "weight": weight, "level": "MODIFIER"})
+    
+    # Stackable modifier: Two or more AMBER indicators (+30)
+    if amber_count >= 2:
+        score += 30
+        triggered.append({"indicator": "multiple_amber_indicators", "weight": 30, "level": "MODIFIER"})
+    
+    # Track session history for repeat indicator detection
+    if session_id not in session_risk_history:
+        session_risk_history[session_id] = []
+    
+    # Check for repeated indicators across session (+20)
+    previous_indicators = set()
+    for prev in session_risk_history[session_id]:
+        for t in prev.get("triggered", []):
+            previous_indicators.add(t["indicator"])
+    
+    for t in triggered:
+        if t["indicator"] in previous_indicators:
+            score += 20
+            triggered.append({"indicator": f"repeated_{t['indicator']}", "weight": 20, "level": "MODIFIER"})
+            break  # Only add once
+    
+    # Store this assessment in history
+    session_risk_history[session_id].append({
+        "message": message[:100],
+        "score": score,
+        "triggered": triggered,
+        "timestamp": datetime.utcnow().isoformat()
+    })
+    
+    # Keep only last 20 messages per session
+    if len(session_risk_history[session_id]) > 20:
+        session_risk_history[session_id] = session_risk_history[session_id][-20:]
+    
+    # Determine risk level
+    # HARD RULE: Any RED indicator = RED regardless of score
+    if is_red_flag:
+        risk_level = "RED"
+    elif score >= 90:
+        risk_level = "RED"
+    elif score >= 60:
+        risk_level = "AMBER"
+    elif score >= 30:
+        risk_level = "YELLOW"
+    else:
+        risk_level = "GREEN"
+    
+    return {
+        "score": score,
+        "risk_level": risk_level,
+        "triggered_indicators": triggered,
+        "is_red_flag": is_red_flag,
+        "session_history_count": len(session_risk_history.get(session_id, []))
+    }
+
+def check_safeguarding(message: str, session_id: str = "default") -> tuple:
+    """
+    Check if message contains safeguarding concerns.
+    Returns: (should_escalate: bool, risk_data: dict)
+    """
+    risk_data = calculate_safeguarding_score(message, session_id)
+    
+    # Escalate on RED or AMBER
+    should_escalate = risk_data["risk_level"] in ["RED", "AMBER"]
+    
+    return should_escalate, risk_data
 
 # In-memory rate limiting and conversation history for AI Buddies
 buddy_sessions: Dict[str, Dict[str, Any]] = {}
