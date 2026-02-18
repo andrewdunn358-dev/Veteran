@@ -418,6 +418,37 @@ class NoteUpdate(BaseModel):
     is_private: Optional[bool] = None
     shared_with: Optional[List[str]] = None
 
+# Family/Friends Concern Model
+class ConcernCreate(BaseModel):
+    your_name: str
+    your_email: Optional[str] = None
+    your_phone: Optional[str] = None
+    relationship: str  # e.g. "spouse", "parent", "friend", "colleague"
+    veteran_name: Optional[str] = None
+    concerns: str  # Description of concerns
+    signs_noticed: Optional[List[str]] = None  # e.g. ["isolation", "drinking", "anger"]
+    how_long: Optional[str] = None  # How long noticed these changes
+    urgency: str = "medium"  # low, medium, high, urgent
+    consent_to_contact: bool = False  # Has the veteran consented to contact?
+
+class Concern(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    your_name: str
+    your_email: Optional[str] = None
+    your_phone: Optional[str] = None
+    relationship: str
+    veteran_name: Optional[str] = None
+    concerns: str
+    signs_noticed: List[str] = Field(default_factory=list)
+    how_long: Optional[str] = None
+    urgency: str = "medium"
+    consent_to_contact: bool = False
+    status: str = "new"  # new, contacted, in_progress, resolved
+    assigned_to: Optional[str] = None
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
 # AI Battle Buddy Chat Models
 class BuddyChatRequest(BaseModel):
     message: str
