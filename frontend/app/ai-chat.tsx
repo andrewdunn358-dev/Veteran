@@ -992,6 +992,51 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  callbackMessageInput: {
+    height: 80,
+    paddingTop: 12,
+  },
+  // Success View Styles
+  successView: {
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
+  successIcon: {
+    marginBottom: 16,
+  },
+  successTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#16a34a',
+    marginBottom: 12,
+  },
+  successText: {
+    fontSize: 16,
+    color: '#1e293b',
+    textAlign: 'center',
+    marginBottom: 8,
+    lineHeight: 24,
+  },
+  successSubtext: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  successCloseButton: {
+    backgroundColor: '#16a34a',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+  },
+  successCloseText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   // Connecting View Styles
   connectingView: {
     alignItems: 'center',
