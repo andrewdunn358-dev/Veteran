@@ -31,11 +31,11 @@ export default function CrisisSupport() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/api/counsellors`);
+      // Use /available endpoint - returns only public-safe data
+      const response = await fetch(`${API_URL}/api/counsellors/available`);
       if (response.ok) {
         const data = await response.json();
-        // Filter to show only available and busy counsellors (not 'off')
-        setCounsellors(data.filter((c: Counsellor) => c.status !== 'off'));
+        setCounsellors(data);
       } else {
         setError('Unable to load counsellors');
       }
