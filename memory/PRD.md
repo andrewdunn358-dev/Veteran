@@ -84,11 +84,22 @@ When triggered offers:
 - [x] **Criminal Justice Support Section**: New section in Friends & Family page with resources:
   - NACRO, Forces in Mind Trust, Walking With The Wounded
   - Project Nova, Probation Services, Veterans' Gateway
+- [x] **Live Chat Handover Flow Enhancement**: 
+  - Staff are NO LONGER auto-assigned - all available staff (counsellors AND peer supporters) see live chat alerts
+  - New `/api/live-chat/rooms/{id}/join` endpoint for staff to claim chats
+  - Staff portal updated with "Join Chat" button that properly assigns staff member
+  - User sees "Waiting for support team member to join..." while waiting
+  - When staff joins, user's UI updates to show staff member name
+- [x] **Live Chat Close Button Fix**: Fixed bug where Close button (X) did nothing on web
+  - Root cause: React Native Web's Alert.alert() is stubbed (does nothing)
+  - Solution: Platform-specific handling - window.confirm() for web, Alert.alert() for mobile
 
 ## New API Endpoints (Feb 2026)
 
 ### Live Chat
-- `POST /api/live-chat/rooms` - Create chat room (public)
+- `POST /api/live-chat/rooms` - Create chat room (staff_id/staff_name now optional)
+- `GET /api/live-chat/rooms/{id}` - Get room details (NEW - for polling staff assignment)
+- `POST /api/live-chat/rooms/{id}/join` - Staff joins chat (NEW - requires auth)
 - `GET /api/live-chat/rooms/{id}/messages` - Get messages (public)
 - `POST /api/live-chat/rooms/{id}/messages` - Send message (public)
 - `POST /api/live-chat/rooms/{id}/end` - End chat session (public)
