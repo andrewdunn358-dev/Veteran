@@ -1189,11 +1189,14 @@ async def get_counsellors():
     counsellors = await db.counsellors.find().to_list(1000)
     return [Counsellor(**c) for c in counsellors]
 
-@api_router.get("/counsellors/available", response_model=List[Counsellor])
+@api_router.get("/counsellors/available", response_model=List[CounsellorPublic])
 async def get_available_counsellors():
-    """Get only available counsellors"""
-    counsellors = await db.counsellors.find({"status": "available"}).to_list(1000)
-    return [Counsellor(**c) for c in counsellors]
+    """Get only available counsellors - PUBLIC SAFE VIEW (no contact details)"""
+    counsellors = await db.counsellors.find(
+        {"status": "available"},
+        {"id": 1, "name": 1, "specialization": 1, "status": 1, "_id": 0}
+    ).to_list(1000)
+    return counsellors
 
 @api_router.get("/counsellors/{counsellor_id}", response_model=Counsellor)
 async def get_counsellor(counsellor_id: str):
