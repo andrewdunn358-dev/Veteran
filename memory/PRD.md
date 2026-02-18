@@ -70,12 +70,42 @@ When triggered offers:
 - [x] Feature list documentation
 - [x] Deployment instructions
 
+## Completed (Feb 18, 2026)
+- [x] **Safeguarding Sensitivity Adjustment**: Raised AMBER threshold to 80+ (was 60), RED threshold to 120+. Modal now only triggers on RED level.
+- [x] **Back Button in Safeguarding Modal**: Added "Go Back" button in the callback request view so users aren't stuck.
+- [x] **Live Chat Feature (P1)**: Complete real-time in-app chat between users and staff
+  - New `/live-chat` page with staff info, secure connection banner, message UI
+  - Backend API: `POST /api/live-chat/rooms`, `GET/POST /api/live-chat/rooms/{id}/messages`, `POST /api/live-chat/rooms/{id}/end`
+  - Integration with safeguarding flow - "Connect Now" navigates to live chat
+
+## New API Endpoints (Feb 2026)
+
+### Live Chat
+- `POST /api/live-chat/rooms` - Create chat room (public)
+- `GET /api/live-chat/rooms/{id}/messages` - Get messages (public)
+- `POST /api/live-chat/rooms/{id}/messages` - Send message (public)
+- `POST /api/live-chat/rooms/{id}/end` - End chat session (public)
+- `GET /api/live-chat/rooms` - List active rooms (staff only)
+
+## New Pages (Feb 2026)
+
+| Page | URL | Description |
+|------|-----|-------------|
+| Live Chat | `/live-chat` | Real-time chat with staff member |
+
 ## Upcoming Tasks
 - Add Concerns section to Staff Portal
 - LMS course setup in WordPress/Tutor
 - Push notifications for safeguarding alerts
+- Training Portal API endpoint for WordPress/Tutor LMS integration
+- Persistent AI Chat History for logged-in users
 
 ## Future Tasks
 - Grounding techniques page
 - Local mental health team finder
-- Persistent AI chat history
+- In-App Human-to-Human Chat (non-crisis)
+- Favorites/Saved Contacts
+- Privacy Policy & Terms pages
+- VoIP/PBX Integration
+- Achievement Badges
+- Referral System
