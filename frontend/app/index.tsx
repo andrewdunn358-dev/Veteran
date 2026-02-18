@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../src/context/ThemeContext';
 
 export default function SplashScreen() {
   const router = useRouter();
-  const { colors, theme } = useTheme();
   const [showCookieNotice, setShowCookieNotice] = useState(false);
   
-  const isDark = theme === 'dark';
-  
   useEffect(() => {
-    // Check if user has accepted cookies
     checkCookieConsent();
   }, []);
 
@@ -39,26 +34,22 @@ export default function SplashScreen() {
   };
 
   const handleYes = () => {
-    // Go straight to crisis support / counsellors
     router.replace('/crisis-support');
   };
 
   const handleNo = () => {
-    // Go to main app
     router.replace('/home');
   };
 
-  const styles = createStyles(colors, isDark);
-
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <StatusBar barStyle="light-content" backgroundColor="#0d1b2a" />
+      <StatusBar barStyle="light-content" backgroundColor="#1a2e44" />
       <View style={styles.container}>
         <View style={styles.content}>
-          {/* Logo - with transparent background handling */}
+          {/* Logo */}
           <View style={styles.logoContainer}>
             <Image 
-              source={{ uri: 'https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/gsdv90d5_splash.png' }}
+              source={{ uri: 'https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/vcqj3xma_logo.png' }}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -82,61 +73,71 @@ export default function SplashScreen() {
             </Text>
           </View>
 
-          {/* Two Clear Options */}
+          {/* Buttons */}
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.yesButton} onPress={handleYes} data-testid="splash-yes-btn">
+            {/* Yes - Primary action - Calming teal/green */}
+            <TouchableOpacity 
+              style={styles.yesButton} 
+              onPress={handleYes} 
+              data-testid="splash-yes-btn"
+              activeOpacity={0.8}
+            >
               <Ionicons name="chatbubbles" size={22} color="#ffffff" />
               <Text style={styles.yesButtonText}>Yes, connect me now</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.noButton} onPress={handleNo} data-testid="splash-no-btn">
-              <Ionicons name="apps" size={20} color="#94a3b8" />
+            {/* No - Secondary action - Clear and visible */}
+            <TouchableOpacity 
+              style={styles.noButton} 
+              onPress={handleNo} 
+              data-testid="splash-no-btn"
+              activeOpacity={0.8}
+            >
+              <Ionicons name="apps" size={20} color="#ffffff" />
               <Text style={styles.noButtonText}>No, I'll explore the app</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Subtle Emergency Notice */}
+          {/* Emergency Notice */}
           <View style={styles.emergencyNotice}>
-            <Ionicons name="shield-checkmark" size={16} color="#64748b" />
-            <Text style={styles.emergencyNote}>
+            <Ionicons name="shield-checkmark" size={16} color="#94a3b8" />
+            <Text style={styles.emergencyText}>
               In an emergency, always call 999
             </Text>
           </View>
-      </View>
+        </View>
 
-      {/* GDPR Cookie Notice */}
-      {showCookieNotice && (
-        <View style={styles.cookieNotice}>
-          <View style={styles.cookieContent}>
-            <Ionicons name="shield-checkmark" size={24} color="#4a90e2" />
-            <View style={styles.cookieTextContainer}>
+        {/* Cookie Notice */}
+        {showCookieNotice && (
+          <View style={styles.cookieNotice}>
+            <View style={styles.cookieContent}>
+              <View style={styles.cookieIcon}>
+                <Ionicons name="shield-checkmark" size={24} color="#3b82f6" />
+              </View>
               <Text style={styles.cookieTitle}>Your Privacy</Text>
               <Text style={styles.cookieText}>
                 We use local storage to save your preferences and journal entries on your device. 
                 No personal data is sent to external servers without your consent.
               </Text>
+              <TouchableOpacity style={styles.cookieAcceptButton} onPress={acceptCookies}>
+                <Text style={styles.cookieAcceptText}>Accept & Continue</Text>
+              </TouchableOpacity>
             </View>
           </View>
-          <View style={styles.cookieButtons}>
-            <TouchableOpacity style={styles.cookieAcceptButton} onPress={acceptCookies}>
-              <Text style={styles.cookieAcceptText}>Accept & Continue</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+        )}
       </View>
     </SafeAreaView>
   );
 }
 
-const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
+const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0d1b2a',
+    backgroundColor: '#1a2e44', // Calming navy blue - fixed, no theme switching
   },
   container: {
     flex: 1,
-    backgroundColor: '#0d1b2a',
+    backgroundColor: '#1a2e44',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -147,11 +148,13 @@ const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
   },
   logoContainer: {
     marginBottom: 20,
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 20,
+    padding: 12,
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 100,
+    height: 100,
   },
   title: {
     fontSize: 32,
@@ -162,24 +165,24 @@ const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#7c9cbf',
+    color: '#8ba4c4',
     marginBottom: 32,
     textAlign: 'center',
   },
   welcomeContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   welcomeText: {
     fontSize: 17,
     fontWeight: '500',
-    color: '#b0c4de',
+    color: '#b8c9dd',
     textAlign: 'center',
     lineHeight: 26,
   },
   questionContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 28,
   },
   questionText: {
     fontSize: 20,
@@ -190,93 +193,109 @@ const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
   },
   buttonContainer: {
     width: '100%',
-    gap: 12,
-    marginBottom: 24,
+    gap: 14,
+    marginBottom: 28,
   },
+  // Primary button - Calming teal that stands out
   yesButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#2563eb',
+    backgroundColor: '#0d9488', // Teal - calming but obvious
     paddingVertical: 18,
     paddingHorizontal: 32,
-    borderRadius: 12,
+    borderRadius: 14,
     gap: 10,
+    shadowColor: '#0d9488',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   yesButtonText: {
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#ffffff',
   },
+  // Secondary button - Clear white outline, visible
   noButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(255,255,255,0.08)',
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#374151',
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.3)',
     gap: 8,
   },
   noButtonText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#94a3b8',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffffff',
   },
   emergencyNotice: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 8,
   },
-  emergencyNote: {
-    fontSize: 13,
-    color: '#64748b',
+  emergencyText: {
+    fontSize: 14,
+    color: '#94a3b8',
   },
+  // Cookie Notice
   cookieNotice: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#1a2634',
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#2d3e50',
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 10,
   },
   cookieContent: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    marginBottom: 16,
+    alignItems: 'center',
   },
-  cookieTextContainer: {
-    flex: 1,
+  cookieIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#eff6ff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   cookieTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-    marginBottom: 4,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 8,
   },
   cookieText: {
-    fontSize: 13,
-    color: '#b0c4de',
-    lineHeight: 18,
-  },
-  cookieButtons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
   },
   cookieAcceptButton: {
-    backgroundColor: '#4a90e2',
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 6,
+    backgroundColor: '#0d9488',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    width: '100%',
+    alignItems: 'center',
   },
   cookieAcceptText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: '#ffffff',
   },
