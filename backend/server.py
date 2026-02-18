@@ -2875,14 +2875,16 @@ class LiveChatMessage(BaseModel):
 
 @api_router.post("/live-chat/rooms")
 async def create_live_chat_room(room_data: LiveChatRoomCreate):
-    """Create a new live chat room for user-staff communication"""
+    """Create a new live chat room for user-staff communication.
+    Staff is NOT pre-assigned - all available staff will see the request and can join.
+    """
     room_id = str(uuid.uuid4())
     
     room = {
         "id": room_id,
-        "staff_id": room_data.staff_id,
-        "staff_name": room_data.staff_name,
-        "staff_type": room_data.staff_type,
+        "staff_id": room_data.staff_id,  # Optional - staff joins later
+        "staff_name": room_data.staff_name,  # Optional - staff joins later
+        "staff_type": room_data.staff_type,  # Preferred type (counsellor, peer, or any)
         "safeguarding_alert_id": room_data.safeguarding_alert_id,
         "ai_session_id": room_data.ai_session_id,
         "messages": [],
@@ -2899,9 +2901,59 @@ async def create_live_chat_room(room_data: LiveChatRoomCreate):
         "created_at": datetime.utcnow(),
     })
     
-    logging.info(f"Live chat room created: {room_id} with staff: {room_data.staff_name}")
+    logging.info(f"Live chat room created: {room_id} (waiting for staff to join)")
     
     return {"room_id": room_id, "status": "active"}
+
+
+class StaffJoinChat(BaseModel):
+    staff_id: str
+    staff_name: str
+
+
+@api_router.post("/live-chat/rooms/{room_id}/join")
+async def staff_join_live_chat(room_id: str, join_data: StaffJoinChat, current_user: User = Depends(get_current_user)):
+    """Staff member joins a live chat room"""
+    if current_user.role not in ["admin", "counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Only staff can join chat rooms")
+    
+    # Check in-memory first
+    if room_id in live_chat_rooms:
+        room = live_chat_rooms[room_id]
+        if room["staff_id"] and room["staff_id"] != join_data.staff_id:
+            raise HTTPException(status_code=400, detail="Chat room already has a staff member assigned")
+        
+        room["staff_id"] = join_data.staff_id
+        room["staff_name"] = join_data.staff_name
+    
+    # Update in database
+    result = await db.live_chat_rooms.update_one(
+        {"id": room_id},
+        {"$set": {"staff_id": join_data.staff_id, "staff_name": join_data.staff_name}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Chat room not found")
+    
+    logging.info(f"Staff {join_data.staff_name} joined chat room: {room_id}")
+    
+    return {"status": "joined", "staff_name": join_data.staff_name}
+
+
+@api_router.get("/live-chat/rooms/{room_id}")
+async def get_live_chat_room(room_id: str):
+    """Get a specific chat room details (for user polling to see when staff joins)"""
+    # Check in-memory first
+    if room_id in live_chat_rooms:
+        room = live_chat_rooms[room_id].copy()
+        return room
+    
+    # Fall back to database
+    room = await db.live_chat_rooms.find_one({"id": room_id}, {"_id": 0})
+    if not room:
+        raise HTTPException(status_code=404, detail="Chat room not found")
+    
+    return room
 
 @api_router.get("/live-chat/rooms/{room_id}/messages")
 async def get_live_chat_messages(room_id: str):
