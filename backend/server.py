@@ -1184,8 +1184,8 @@ async def create_counsellor(
     return counsellor_obj
 
 @api_router.get("/counsellors", response_model=List[Counsellor])
-async def get_counsellors():
-    """Get all counsellors (public - for mobile app)"""
+async def get_counsellors(current_user: User = Depends(require_role("admin"))):
+    """Get all counsellors - ADMIN ONLY (contains sensitive contact info)"""
     counsellors = await db.counsellors.find().to_list(1000)
     return [Counsellor(**c) for c in counsellors]
 
@@ -1199,8 +1199,8 @@ async def get_available_counsellors():
     return counsellors
 
 @api_router.get("/counsellors/{counsellor_id}", response_model=Counsellor)
-async def get_counsellor(counsellor_id: str):
-    """Get a specific counsellor"""
+async def get_counsellor(counsellor_id: str, current_user: User = Depends(require_role("admin"))):
+    """Get a specific counsellor - ADMIN ONLY"""
     counsellor = await db.counsellors.find_one({"id": counsellor_id})
     if not counsellor:
         raise HTTPException(status_code=404, detail="Counsellor not found")
