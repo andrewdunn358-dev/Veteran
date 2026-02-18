@@ -18,11 +18,11 @@ import asyncio
 from openai import OpenAI
 import httpx  # For IP geolocation lookup
 
-# Import encryption utilities
-from encryption import encrypt_field, decrypt_field, encrypt_document, decrypt_document, ENCRYPTED_FIELDS
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+# Import encryption utilities AFTER loading .env
+from encryption import encrypt_field, decrypt_field, encrypt_document, decrypt_document, ENCRYPTED_FIELDS
 
 # JWT Configuration
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
