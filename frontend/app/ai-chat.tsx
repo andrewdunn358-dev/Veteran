@@ -12,6 +12,7 @@ import {
   Image,
   Modal,
   Linking,
+  Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -30,6 +31,11 @@ interface CharacterInfo {
   avatar: string;
 }
 
+interface AvailableStaff {
+  counsellors: any[];
+  peers: any[];
+}
+
 export default function AIChat() {
   const router = useRouter();
   const { character = 'tommy' } = useLocalSearchParams<{ character: string }>();
@@ -40,6 +46,12 @@ export default function AIChat() {
   const [characterInfo, setCharacterInfo] = useState<CharacterInfo>({ name: 'Tommy', avatar: '' });
   const [sessionId] = useState(() => `${character}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   const [showSafeguardingModal, setShowSafeguardingModal] = useState(false);
+  const [safeguardingView, setSafeguardingView] = useState<'main' | 'callback' | 'connecting'>('main');
+  const [callbackPhone, setCallbackPhone] = useState('');
+  const [callbackName, setCallbackName] = useState('');
+  const [availableStaff, setAvailableStaff] = useState<AvailableStaff>({ counsellors: [], peers: [] });
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [currentAlertId, setCurrentAlertId] = useState<string | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
