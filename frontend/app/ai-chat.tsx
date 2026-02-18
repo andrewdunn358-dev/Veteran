@@ -178,39 +178,21 @@ export default function AIChat() {
   const handleLiveConnect = async (type: 'counsellor' | 'peer', staffMember: any) => {
     setSafeguardingView('connecting');
     
-    // Create a callback request marked as urgent for immediate contact
-    try {
-      await fetch(`${API_URL}/api/callbacks`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'Live Connect Request',
-          phone: 'In-app connection',
-          callback_type: type,
-          notes: `URGENT: Live connect request from AI chat safeguarding. Session: ${sessionId}. Alert: ${currentAlertId}. Assigned to: ${staffMember.name}`,
-          is_urgent: true,
-          assigned_to: staffMember.id,
-          safeguarding_alert_id: currentAlertId
-        }),
-      });
-    } catch (error) {
-      console.error('Error creating live connect request:', error);
-    }
-
-    // Navigate to crisis support with staff info
+    // Navigate to live chat with staff info after brief delay
     setTimeout(() => {
       setShowSafeguardingModal(false);
       setSafeguardingView('main');
       router.push({
-        pathname: '/crisis-support',
+        pathname: '/live-chat',
         params: { 
-          urgent: 'true', 
+          staffId: staffMember.id,
+          staffName: staffMember.name || staffMember.firstName,
           staffType: type,
-          staffName: staffMember.name,
-          fromSafeguarding: 'true'
+          alertId: currentAlertId || '',
+          sessionId: sessionId,
         }
       });
-    }, 2000);
+    }, 1500);
   };
 
   const sendMessage = async () => {
