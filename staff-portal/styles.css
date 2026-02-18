@@ -1267,3 +1267,74 @@ body {
     display: flex;
     justify-content: center;
 }
+
+/* New Live Chat Banner */
+.new-livechat-banner {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(59, 130, 246, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 10000;
+    transition: top 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    font-weight: 600;
+    font-size: 16px;
+    animation: pulse-glow-blue 1.5s infinite;
+}
+
+.new-livechat-banner.show {
+    top: 20px;
+}
+
+.new-livechat-banner i {
+    font-size: 24px;
+    animation: shake 0.5s ease-in-out infinite;
+}
+
+.new-livechat-banner button {
+    background: white;
+    color: #3b82f6;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.new-livechat-banner button:hover {
+    transform: scale(1.05);
+}
+
+@keyframes pulse-glow-blue {
+    0%, 100% { box-shadow: 0 10px 40px rgba(59, 130, 246, 0.4); }
+    50% { box-shadow: 0 10px 60px rgba(59, 130, 246, 0.7); }
+}
+
+/* Live chat section with waiting chats */
+.livechat-section.has-waiting {
+    animation: section-pulse 2s infinite;
+}
+
+@keyframes section-pulse {
+    0%, 100% { border-left-color: #3b82f6; }
+    50% { border-left-color: #ef4444; }
+}
+
+/* Waiting chat card */
+.livechat-card.waiting {
+    border-left-color: #ef4444;
+    animation: card-pulse 1.5s infinite;
+}
+
+@keyframes card-pulse {
+    0%, 100% { background: #1e293b; }
+    50% { background: rgba(239, 68, 68, 0.15); }
+}
