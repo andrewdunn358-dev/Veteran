@@ -65,8 +65,10 @@ export default function PeerPortal() {
 
   const fetchData = async () => {
     try {
-      // Fetch peer profile
-      const peersResponse = await fetch(`${API_URL}/api/peer-supporters`);
+      // Fetch peer profile - requires auth now
+      const peersResponse = await fetch(`${API_URL}/api/peer-supporters`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (peersResponse.ok) {
         const peers = await peersResponse.json();
         const myPeer = peers.find((p: any) => p.user_id === user?.id);
