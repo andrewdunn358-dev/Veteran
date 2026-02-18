@@ -2786,6 +2786,117 @@ logger = logging.getLogger(__name__)
 async def shutdown_db_client():
     client.close()
 
+# ============ LIVE CHAT ENDPOINTS ============
+# In-memory storage for live chat rooms (in production, use Redis or database)
+live_chat_rooms: Dict[str, Dict[str, Any]] = {}
+
+class LiveChatRoomCreate(BaseModel):
+    staff_id: str
+    staff_name: str
+    staff_type: str  # counsellor or peer
+    safeguarding_alert_id: Optional[str] = None
+    ai_session_id: Optional[str] = None
+
+class LiveChatMessage(BaseModel):
+    text: str
+    sender: str  # 'user' or 'staff'
+
+@api_router.post("/live-chat/rooms")
+async def create_live_chat_room(room_data: LiveChatRoomCreate):
+    """Create a new live chat room for user-staff communication"""
+    room_id = str(uuid.uuid4())
+    
+    room = {
+        "id": room_id,
+        "staff_id": room_data.staff_id,
+        "staff_name": room_data.staff_name,
+        "staff_type": room_data.staff_type,
+        "safeguarding_alert_id": room_data.safeguarding_alert_id,
+        "ai_session_id": room_data.ai_session_id,
+        "messages": [],
+        "status": "active",  # active, ended
+        "created_at": datetime.utcnow().isoformat(),
+        "ended_at": None,
+    }
+    
+    live_chat_rooms[room_id] = room
+    
+    # Store in database for persistence
+    await db.live_chat_rooms.insert_one({
+        **room,
+        "created_at": datetime.utcnow(),
+    })
+    
+    logging.info(f"Live chat room created: {room_id} with staff: {room_data.staff_name}")
+    
+    return {"room_id": room_id, "status": "active"}
+
+@api_router.get("/live-chat/rooms/{room_id}/messages")
+async def get_live_chat_messages(room_id: str):
+    """Get messages for a live chat room"""
+    # First check in-memory
+    if room_id in live_chat_rooms:
+        return {"messages": live_chat_rooms[room_id]["messages"]}
+    
+    # Fall back to database
+    room = await db.live_chat_rooms.find_one({"id": room_id}, {"_id": 0})
+    if not room:
+        raise HTTPException(status_code=404, detail="Chat room not found")
+    
+    return {"messages": room.get("messages", [])}
+
+@api_router.post("/live-chat/rooms/{room_id}/messages")
+async def send_live_chat_message(room_id: str, message: LiveChatMessage):
+    """Send a message in a live chat room"""
+    msg = {
+        "id": str(uuid.uuid4()),
+        "text": message.text,
+        "sender": message.sender,
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+    
+    # Update in-memory
+    if room_id in live_chat_rooms:
+        live_chat_rooms[room_id]["messages"].append(msg)
+    
+    # Update in database
+    await db.live_chat_rooms.update_one(
+        {"id": room_id},
+        {"$push": {"messages": msg}}
+    )
+    
+    return {"message_id": msg["id"], "status": "sent"}
+
+@api_router.post("/live-chat/rooms/{room_id}/end")
+async def end_live_chat_room(room_id: str):
+    """End a live chat session"""
+    # Update in-memory
+    if room_id in live_chat_rooms:
+        live_chat_rooms[room_id]["status"] = "ended"
+        live_chat_rooms[room_id]["ended_at"] = datetime.utcnow().isoformat()
+    
+    # Update in database
+    await db.live_chat_rooms.update_one(
+        {"id": room_id},
+        {"$set": {"status": "ended", "ended_at": datetime.utcnow()}}
+    )
+    
+    logging.info(f"Live chat room ended: {room_id}")
+    return {"status": "ended"}
+
+@api_router.get("/live-chat/rooms")
+async def get_active_chat_rooms(current_user: User = Depends(get_current_user)):
+    """Get all active chat rooms for staff (staff only)"""
+    if current_user.role not in ["admin", "counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Only staff can view chat rooms")
+    
+    rooms = await db.live_chat_rooms.find(
+        {"status": "active"},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return rooms
+
 # ============ IMAGE UPLOAD ENDPOINTS ============
 import base64
 import os
