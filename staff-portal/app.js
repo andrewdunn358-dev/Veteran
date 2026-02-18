@@ -464,14 +464,27 @@ function renderSafeguardingAlerts(alerts) {
         var characterIcon = alert.character === 'tommy' ? 'fa-user' : 'fa-user-circle';
         var characterName = alert.character === 'tommy' ? 'Tommy' : 'Doris';
         
-        return '<div class="card safeguarding-card ' + alert.status + '">' +
+        // Risk level styling
+        var riskLevel = alert.risk_level || 'AMBER';
+        var riskScore = alert.risk_score || 0;
+        var riskClass = riskLevel.toLowerCase();
+        var riskBadgeColor = riskLevel === 'RED' ? '#dc2626' : (riskLevel === 'AMBER' ? '#f59e0b' : '#eab308');
+        
+        // Format indicators
+        var indicatorsHtml = '';
+        if (alert.triggered_indicators && alert.triggered_indicators.length > 0) {
+            indicatorsHtml = '<div class="card-indicators"><i class="fas fa-exclamation-circle"></i> ' + alert.triggered_indicators.slice(0, 3).join(', ') + '</div>';
+        }
+        
+        return '<div class="card safeguarding-card ' + alert.status + ' risk-' + riskClass + '">' +
             '<div class="card-header">' +
                 '<span class="card-name"><i class="fas ' + characterIcon + '"></i> Chat with ' + characterName + '</span>' +
-                '<span class="card-status ' + alert.status + '">' + alert.status + '</span>' +
+                '<span class="risk-badge" style="background-color:' + riskBadgeColor + '">' + riskLevel + ' (' + riskScore + ')</span>' +
             '</div>' +
             '<div class="card-session"><i class="fas fa-fingerprint"></i> Session: ' + alert.session_id.substring(0, 12) + '...</div>' +
+            indicatorsHtml +
             '<div class="card-trigger">' +
-                '<label><i class="fas fa-exclamation-circle"></i> Triggering Message:</label>' +
+                '<label><i class="fas fa-quote-left"></i> Triggering Message:</label>' +
                 '<div class="trigger-message">"' + escapeHtml(alert.triggering_message) + '"</div>' +
             '</div>' +
             '<div class="card-time"><i class="fas fa-clock"></i> ' + new Date(alert.created_at).toLocaleString() + '</div>' +
