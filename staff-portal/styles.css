@@ -241,11 +241,16 @@ body {
     padding: 24px;
 }
 
-/* Dashboard Grid Layout */
+/* Top Row: Status + Panic */
+.top-row {
+    margin-bottom: 20px;
+}
+
+/* Dashboard Grid Layout - FORCE side by side */
 .dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 24px;
     align-items: start;
 }
 
@@ -253,6 +258,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    min-width: 0; /* Prevent overflow */
 }
 
 /* Urgent column styling - left side for critical items */
@@ -264,57 +270,14 @@ body {
     border-left-color: var(--primary);
 }
 
-/* Compact list for side-by-side view */
-.compact-list {
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.compact-list .card {
-    padding: 12px;
-    margin-bottom: 8px;
-}
-
-.compact-list .card-header {
-    margin-bottom: 6px;
-}
-
-.compact-list .card-message {
-    font-size: 13px;
-    -webkit-line-clamp: 2;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.compact-list .card-actions {
-    margin-top: 8px;
-    gap: 6px;
-}
-
-.compact-list .btn {
-    padding: 6px 10px;
-    font-size: 12px;
-}
-
-/* Responsive: Stack on smaller screens */
-@media (max-width: 900px) {
+/* Responsive: Stack on mobile only */
+@media (max-width: 768px) {
     .dashboard-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
     
-    .compact-list {
-        max-height: 400px;
-    }
-}
-
-@media (max-width: 600px) {
     .portal-content {
         padding: 16px;
-    }
-    
-    .dashboard-grid {
-        gap: 12px;
     }
 }
 
