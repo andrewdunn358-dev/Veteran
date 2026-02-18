@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,14 @@ interface Message {
   timestamp: Date;
 }
 
+interface ChatRoom {
+  id: string;
+  staff_id: string | null;
+  staff_name: string | null;
+  staff_type: string;
+  status: string;
+}
+
 export default function LiveChat() {
   const router = useRouter();
   const params = useLocalSearchParams<{
@@ -37,11 +45,13 @@ export default function LiveChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [chatRoomId, setChatRoomId] = useState<string | null>(null);
+  const [staffName, setStaffName] = useState<string | null>(null);
   const [waitingForStaff, setWaitingForStaff] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
+  const roomPollInterval = useRef<NodeJS.Timeout | null>(null);
 
-  const staffType = params.staffType || 'counsellor';
+  const staffType = params.staffType || 'any';
   const alertId = params.alertId || '';
   const sessionId = params.sessionId || '';
 
@@ -51,6 +61,9 @@ export default function LiveChat() {
     return () => {
       if (pollInterval.current) {
         clearInterval(pollInterval.current);
+      }
+      if (roomPollInterval.current) {
+        clearInterval(roomPollInterval.current);
       }
     };
   }, []);
@@ -74,17 +87,21 @@ export default function LiveChat() {
         const data = await response.json();
         setChatRoomId(data.room_id);
         setIsConnected(true);
+        setWaitingForStaff(true);
         
         // Add initial system message
         setMessages([{
           id: 'welcome',
-          text: `You're now connected. ${staffName} has been notified and will respond shortly. In the meantime, feel free to share what's on your mind.`,
+          text: "You're now in the queue. A support team member has been notified and will join you shortly. Feel free to share what's on your mind while you wait.",
           sender: 'staff',
           timestamp: new Date(),
         }]);
 
+        // Start polling for room updates (to see when staff joins)
+        startRoomPolling(data.room_id);
+        
         // Start polling for new messages
-        startPolling(data.room_id);
+        startMessagePolling(data.room_id);
       } else {
         throw new Error('Failed to create chat room');
       }
@@ -103,7 +120,35 @@ export default function LiveChat() {
     }
   };
 
-  const startPolling = (roomId: string) => {
+  // Poll for room updates to detect when staff joins
+  const startRoomPolling = (roomId: string) => {
+    roomPollInterval.current = setInterval(async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/live-chat/rooms/${roomId}`);
+        if (response.ok) {
+          const room: ChatRoom = await response.json();
+          
+          // Check if staff has joined
+          if (room.staff_name && !staffName) {
+            setStaffName(room.staff_name);
+            setWaitingForStaff(false);
+            
+            // Add a message that staff has joined
+            setMessages(prev => [...prev, {
+              id: `staff-joined-${Date.now()}`,
+              text: `${room.staff_name} has joined the chat. You can now talk with them directly.`,
+              sender: 'staff',
+              timestamp: new Date(),
+            }]);
+          }
+        }
+      } catch (error) {
+        console.log('Room polling error:', error);
+      }
+    }, 3000);
+  };
+
+  const startMessagePolling = (roomId: string) => {
     // Poll for new messages every 3 seconds
     pollInterval.current = setInterval(async () => {
       try {
@@ -127,7 +172,7 @@ export default function LiveChat() {
           }
         }
       } catch (error) {
-        console.log('Polling error:', error);
+        console.log('Message polling error:', error);
       }
     }, 3000);
   };
@@ -182,8 +227,12 @@ export default function LiveChat() {
                 console.log('Error ending chat:', e);
               }
             }
+            // Clear polling intervals
             if (pollInterval.current) {
               clearInterval(pollInterval.current);
+            }
+            if (roomPollInterval.current) {
+              clearInterval(roomPollInterval.current);
             }
             router.replace('/home');
           }
@@ -200,11 +249,15 @@ export default function LiveChat() {
     scrollToBottom();
   }, [messages]);
 
+  // Determine display name for header
+  const displayName = staffName || 'Support Team';
+  const statusText = waitingForStaff ? 'Connecting...' : 'Live Chat';
+
   if (isLoading && !isConnected) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2563eb" />
-        <Text style={styles.loadingText}>Connecting you with {staffName}...</Text>
+        <Text style={styles.loadingText}>Connecting you with the support team...</Text>
         <Text style={styles.loadingSubtext}>This may take a moment</Text>
       </View>
     );
@@ -218,7 +271,11 @@ export default function LiveChat() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleEndChat} style={styles.endButton}>
+        <TouchableOpacity 
+          onPress={handleEndChat} 
+          style={styles.endButton}
+          data-testid="live-chat-close-button"
+        >
           <FontAwesome5 name="times" size={18} color="#ef4444" />
         </TouchableOpacity>
         <View style={styles.headerContent}>
@@ -230,10 +287,10 @@ export default function LiveChat() {
             />
           </View>
           <View>
-            <Text style={styles.headerTitle}>{staffName}</Text>
+            <Text style={styles.headerTitle}>{displayName}</Text>
             <View style={styles.statusRow}>
-              <View style={styles.onlineDot} />
-              <Text style={styles.headerSubtitle}>Live Chat</Text>
+              <View style={[styles.onlineDot, waitingForStaff && styles.waitingDot]} />
+              <Text style={styles.headerSubtitle}>{statusText}</Text>
             </View>
           </View>
         </View>
@@ -244,6 +301,16 @@ export default function LiveChat() {
           <FontAwesome5 name="phone-alt" size={16} color="#16a34a" />
         </TouchableOpacity>
       </View>
+
+      {/* Waiting Banner */}
+      {waitingForStaff && (
+        <View style={styles.waitingBanner}>
+          <ActivityIndicator size="small" color="#f59e0b" />
+          <Text style={styles.waitingText}>
+            Waiting for a support team member to join...
+          </Text>
+        </View>
+      )}
 
       {/* Connection Banner */}
       <View style={styles.connectionBanner}>
@@ -275,7 +342,7 @@ export default function LiveChat() {
                   size={12} 
                   color="#16a34a" 
                 />
-                <Text style={styles.staffLabelText}>{staffName}</Text>
+                <Text style={styles.staffLabelText}>{staffName || 'System'}</Text>
               </View>
             )}
             <Text
@@ -327,6 +394,7 @@ export default function LiveChat() {
           style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
           onPress={sendMessage}
           disabled={!inputText.trim()}
+          data-testid="live-chat-send-button"
         >
           <FontAwesome5 name="paper-plane" size={16} color="#fff" />
         </TouchableOpacity>
@@ -404,6 +472,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#16a34a',
   },
+  waitingDot: {
+    backgroundColor: '#f59e0b',
+  },
   headerSubtitle: {
     fontSize: 13,
     color: '#94a3b8',
@@ -412,6 +483,20 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: '#2d3a4d',
     borderRadius: 8,
+  },
+  waitingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fef3c7',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    gap: 10,
+  },
+  waitingText: {
+    fontSize: 13,
+    color: '#92400e',
+    fontWeight: '500',
   },
   connectionBanner: {
     flexDirection: 'row',
