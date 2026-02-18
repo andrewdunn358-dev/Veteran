@@ -7,7 +7,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://peer-support-portal.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://vets-crisis-support.preview.emergentagent.com')
 
 # Admin credentials
 ADMIN_EMAIL = "admin@veteran.dbty.co.uk"
