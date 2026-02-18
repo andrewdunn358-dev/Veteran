@@ -646,13 +646,14 @@ def calculate_safeguarding_score(message: str, session_id: str) -> Dict[str, Any
     
     # Determine risk level
     # HARD RULE: Any RED indicator = RED regardless of score
+    # Raised thresholds so modal doesn't pop up too early
     if is_red_flag:
         risk_level = "RED"
-    elif score >= 90:
+    elif score >= 120:
         risk_level = "RED"
-    elif score >= 60:
+    elif score >= 80:
         risk_level = "AMBER"
-    elif score >= 30:
+    elif score >= 40:
         risk_level = "YELLOW"
     else:
         risk_level = "GREEN"
@@ -672,8 +673,9 @@ def check_safeguarding(message: str, session_id: str = "default") -> tuple:
     """
     risk_data = calculate_safeguarding_score(message, session_id)
     
-    # Escalate on RED or AMBER
-    should_escalate = risk_data["risk_level"] in ["RED", "AMBER"]
+    # Only escalate (show modal) on RED - AMBER is logged but doesn't interrupt
+    # This prevents the modal popping up too early
+    should_escalate = risk_data["risk_level"] == "RED"
     
     return should_escalate, risk_data
 
