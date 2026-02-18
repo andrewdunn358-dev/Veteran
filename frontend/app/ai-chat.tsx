@@ -186,19 +186,17 @@ export default function AIChat() {
     }
   };
 
-  // Handle connecting to live person
-  const handleLiveConnect = async (type: 'counsellor' | 'peer', staffMember: any) => {
+  // Handle connecting to live person - creates chat room for ANY available staff to pick up
+  const handleLiveConnect = async (type: 'counsellor' | 'peer') => {
     setSafeguardingView('connecting');
     
-    // Navigate to live chat with staff info after brief delay
+    // Navigate to live chat - room will be created and all staff will be alerted
     setTimeout(() => {
       setShowSafeguardingModal(false);
       setSafeguardingView('main');
       router.push({
         pathname: '/live-chat',
         params: { 
-          staffId: staffMember.id,
-          staffName: staffMember.name || staffMember.firstName,
           staffType: type,
           alertId: currentAlertId || '',
           sessionId: sessionId,
