@@ -697,6 +697,33 @@ def check_safeguarding(message: str, session_id: str = "default") -> tuple:
     
     return should_escalate, risk_data
 
+# IP Geolocation lookup using ip-api.com (free, no API key required)
+async def lookup_ip_geolocation(ip_address: str) -> Dict[str, Any]:
+    """
+    Lookup geolocation data for an IP address using ip-api.com
+    Returns city, region, country, ISP, timezone
+    """
+    if not ip_address or ip_address in ["unknown", "127.0.0.1", "localhost"]:
+        return {}
+    
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(f"http://ip-api.com/json/{ip_address}?fields=status,city,regionName,country,isp,timezone")
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("status") == "success":
+                    return {
+                        "geo_city": data.get("city"),
+                        "geo_region": data.get("regionName"),
+                        "geo_country": data.get("country"),
+                        "geo_isp": data.get("isp"),
+                        "geo_timezone": data.get("timezone")
+                    }
+    except Exception as e:
+        logging.warning(f"IP geolocation lookup failed for {ip_address}: {e}")
+    
+    return {}
+
 # In-memory rate limiting and conversation history for AI Buddies
 buddy_sessions: Dict[str, Dict[str, Any]] = {}
 BUDDY_MAX_MESSAGES = 30
