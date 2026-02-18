@@ -2422,9 +2422,19 @@ async def buddy_chat(request: BuddyChatRequest, req: Request):
                 user_agent=user_agent,
                 conversation_history=conversation_history
             )
+            
+            # Lookup geolocation for IP address
+            geo_data = await lookup_ip_geolocation(client_ip)
+            if geo_data:
+                alert.geo_city = geo_data.get("geo_city")
+                alert.geo_region = geo_data.get("geo_region")
+                alert.geo_country = geo_data.get("geo_country")
+                alert.geo_isp = geo_data.get("geo_isp")
+                alert.geo_timezone = geo_data.get("geo_timezone")
+            
             alert_id = alert.id
             await db.safeguarding_alerts.insert_one(alert.dict())
-            logging.warning(f"SAFEGUARDING ALERT [{risk_level}] Score: {risk_data['score']} - Alert: {alert_id} - Session: {request.sessionId} - IP: {client_ip}")
+            logging.warning(f"SAFEGUARDING ALERT [{risk_level}] Score: {risk_data['score']} - Alert: {alert_id} - Session: {request.sessionId} - IP: {client_ip} - Location: {geo_data.get('geo_city', 'Unknown')}, {geo_data.get('geo_country', 'Unknown')}")
             
             # Send email notification to admin (only for RED alerts or first AMBER)
             if risk_level == "RED" or risk_data["session_history_count"] <= 1:
