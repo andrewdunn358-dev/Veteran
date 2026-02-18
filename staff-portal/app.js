@@ -766,6 +766,236 @@ async function resolveSafeguardingAlert(id) {
     }
 }
 
+// ============ LIVE CHAT FUNCTIONALITY ============
+
+var activeLiveChats = [];
+var currentChatRoom = null;
+var chatPollingInterval = null;
+
+// Load Live Chats
+async function loadLiveChats() {
+    try {
+        var rooms = await apiCall('/live-chat/rooms');
+        activeLiveChats = rooms.filter(function(r) { return r.status === 'active'; });
+        renderLiveChats(activeLiveChats);
+        document.getElementById('livechat-count').textContent = activeLiveChats.length || '';
+    } catch (error) {
+        console.error('Error loading live chats:', error);
+    }
+}
+
+// Render Live Chats
+function renderLiveChats(rooms) {
+    var container = document.getElementById('livechat-list');
+    
+    if (rooms.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-comments"></i><p>No active live chats</p><span>When users request live support, they will appear here</span></div>';
+        return;
+    }
+    
+    container.innerHTML = rooms.map(function(room) {
+        var staffType = room.staff_type === 'counsellor' ? 'Counsellor' : 'Peer';
+        var messageCount = room.messages ? room.messages.length : 0;
+        var lastMessage = room.messages && room.messages.length > 0 ? 
+            room.messages[room.messages.length - 1] : null;
+        var waitingTime = getWaitingTime(room.created_at);
+        
+        return '<div class="card livechat-card" data-room-id="' + room.id + '">' +
+            '<div class="card-header">' +
+                '<span class="card-name"><i class="fas fa-comment-dots"></i> Live Chat Request</span>' +
+                '<span class="badge primary">' + staffType + ' Request</span>' +
+            '</div>' +
+            '<div class="livechat-meta">' +
+                '<span><i class="fas fa-clock"></i> Waiting: ' + waitingTime + '</span>' +
+                '<span><i class="fas fa-comments"></i> ' + messageCount + ' messages</span>' +
+            '</div>' +
+            (room.safeguarding_alert_id ? 
+                '<div class="livechat-safeguarding"><i class="fas fa-shield-alt"></i> Linked to Safeguarding Alert</div>' : '') +
+            (lastMessage ? 
+                '<div class="livechat-preview">' +
+                    '<label>Latest message:</label>' +
+                    '<div class="preview-text">"' + escapeHtml(lastMessage.text.substring(0, 100)) + (lastMessage.text.length > 100 ? '...' : '') + '"</div>' +
+                '</div>' : 
+                '<div class="livechat-preview"><label>No messages yet - user just connected</label></div>') +
+            '<div class="card-time"><i class="fas fa-calendar"></i> Started: ' + new Date(room.created_at).toLocaleString() + '</div>' +
+            '<div class="card-actions">' +
+                '<button class="btn btn-primary" onclick="joinLiveChat(\'' + room.id + '\')">' +
+                    '<i class="fas fa-headset"></i> Join Chat' +
+                '</button>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+// Get waiting time string
+function getWaitingTime(createdAt) {
+    var created = new Date(createdAt);
+    var now = new Date();
+    var diff = Math.floor((now - created) / 1000); // seconds
+    
+    if (diff < 60) return diff + ' seconds';
+    if (diff < 3600) return Math.floor(diff / 60) + ' minutes';
+    return Math.floor(diff / 3600) + ' hours';
+}
+
+// Join Live Chat
+async function joinLiveChat(roomId) {
+    currentChatRoom = roomId;
+    showLiveChatModal(roomId);
+}
+
+// Show Live Chat Modal
+async function showLiveChatModal(roomId) {
+    // Get room messages
+    try {
+        var response = await apiCall('/live-chat/rooms/' + roomId + '/messages');
+        var messages = response.messages || [];
+        
+        // Create modal HTML
+        var modalHtml = '<div class="livechat-modal" id="livechat-modal">' +
+            '<div class="livechat-modal-content">' +
+                '<div class="livechat-modal-header">' +
+                    '<h3><i class="fas fa-headset"></i> Live Chat Support</h3>' +
+                    '<button class="btn btn-icon" onclick="closeLiveChatModal()"><i class="fas fa-times"></i></button>' +
+                '</div>' +
+                '<div class="livechat-messages" id="livechat-messages">' +
+                    messages.map(function(msg) {
+                        var isStaff = msg.sender === 'staff';
+                        return '<div class="chat-message ' + (isStaff ? 'staff' : 'user') + '">' +
+                            '<span class="msg-sender">' + (isStaff ? 'You' : 'User') + '</span>' +
+                            '<span class="msg-text">' + escapeHtml(msg.text) + '</span>' +
+                            '<span class="msg-time">' + new Date(msg.timestamp).toLocaleTimeString() + '</span>' +
+                        '</div>';
+                    }).join('') +
+                '</div>' +
+                '<div class="livechat-input">' +
+                    '<input type="text" id="livechat-input" placeholder="Type your message..." onkeypress="handleChatKeypress(event)">' +
+                    '<button class="btn btn-primary" onclick="sendChatMessage()">' +
+                        '<i class="fas fa-paper-plane"></i>' +
+                    '</button>' +
+                '</div>' +
+                '<div class="livechat-actions">' +
+                    '<button class="btn btn-warning" onclick="endLiveChat(\'' + roomId + '\')">' +
+                        '<i class="fas fa-phone-slash"></i> End Chat' +
+                    '</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+        
+        // Add modal to page
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Start polling for new messages
+        startChatPolling(roomId);
+        
+        // Focus input
+        document.getElementById('livechat-input').focus();
+        
+        // Scroll to bottom
+        var messagesDiv = document.getElementById('livechat-messages');
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        
+    } catch (error) {
+        console.error('Error opening chat:', error);
+        showNotification('Failed to open chat', 'error');
+    }
+}
+
+// Handle Enter key in chat input
+function handleChatKeypress(event) {
+    if (event.key === 'Enter') {
+        sendChatMessage();
+    }
+}
+
+// Send Chat Message
+async function sendChatMessage() {
+    var input = document.getElementById('livechat-input');
+    var text = input.value.trim();
+    
+    if (!text || !currentChatRoom) return;
+    
+    try {
+        await apiCall('/live-chat/rooms/' + currentChatRoom + '/messages', {
+            method: 'POST',
+            body: JSON.stringify({ text: text, sender: 'staff' })
+        });
+        
+        input.value = '';
+        
+        // Add message to UI immediately
+        var messagesDiv = document.getElementById('livechat-messages');
+        messagesDiv.innerHTML += '<div class="chat-message staff">' +
+            '<span class="msg-sender">You</span>' +
+            '<span class="msg-text">' + escapeHtml(text) + '</span>' +
+            '<span class="msg-time">' + new Date().toLocaleTimeString() + '</span>' +
+        '</div>';
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        
+    } catch (error) {
+        console.error('Error sending message:', error);
+        showNotification('Failed to send message', 'error');
+    }
+}
+
+// Start polling for new messages
+function startChatPolling(roomId) {
+    chatPollingInterval = setInterval(async function() {
+        try {
+            var response = await apiCall('/live-chat/rooms/' + roomId + '/messages');
+            updateChatMessages(response.messages || []);
+        } catch (error) {
+            console.log('Chat polling error:', error);
+        }
+    }, 3000);
+}
+
+// Update chat messages in modal
+function updateChatMessages(messages) {
+    var messagesDiv = document.getElementById('livechat-messages');
+    if (!messagesDiv) return;
+    
+    messagesDiv.innerHTML = messages.map(function(msg) {
+        var isStaff = msg.sender === 'staff';
+        return '<div class="chat-message ' + (isStaff ? 'staff' : 'user') + '">' +
+            '<span class="msg-sender">' + (isStaff ? 'You' : 'User') + '</span>' +
+            '<span class="msg-text">' + escapeHtml(msg.text) + '</span>' +
+            '<span class="msg-time">' + new Date(msg.timestamp).toLocaleTimeString() + '</span>' +
+        '</div>';
+    }).join('');
+    
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+// Close Live Chat Modal
+function closeLiveChatModal() {
+    if (chatPollingInterval) {
+        clearInterval(chatPollingInterval);
+        chatPollingInterval = null;
+    }
+    currentChatRoom = null;
+    
+    var modal = document.getElementById('livechat-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// End Live Chat
+async function endLiveChat(roomId) {
+    if (!confirm('Are you sure you want to end this chat?')) return;
+    
+    try {
+        await apiCall('/live-chat/rooms/' + roomId + '/end', { method: 'POST' });
+        closeLiveChatModal();
+        loadLiveChats();
+        showNotification('Chat ended successfully', 'success');
+    } catch (error) {
+        console.error('Error ending chat:', error);
+        showNotification('Failed to end chat', 'error');
+    }
+}
+
 // ============ NOTES FUNCTIONALITY ============
 
 var staffUsers = [];
