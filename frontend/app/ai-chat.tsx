@@ -790,12 +790,12 @@ const styles = StyleSheet.create({
   safeguardingOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    justifyContent: 'center',
-    padding: 20,
+    justifyContent: 'flex-end',
   },
   safeguardingModal: {
     backgroundColor: '#fff',
-    borderRadius: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: 24,
     maxHeight: '90%',
   },
@@ -811,40 +811,69 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   safeguardingText: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#475569',
-    lineHeight: 24,
+    lineHeight: 22,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  safeguardingSubtext: {
-    fontSize: 14,
-    color: '#64748b',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  safeguardingOptions: {
-    gap: 12,
-    marginBottom: 20,
+  safeguardingScroll: {
+    maxHeight: 300,
   },
   safeguardingOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#f8fafc',
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#e2e8f0',
+    marginBottom: 12,
+    gap: 12,
+  },
+  safeguardingOptionContent: {
+    flex: 1,
   },
   safeguardingOptionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#1e293b',
-    marginTop: 8,
   },
   safeguardingOptionDesc: {
     fontSize: 13,
     color: '#64748b',
-    marginTop: 4,
+    marginTop: 2,
+  },
+  liveConnectSection: {
+    marginTop: 8,
+    marginBottom: 12,
+  },
+  liveConnectLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#16a34a',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  liveOption: {
+    borderColor: '#16a34a',
+    backgroundColor: '#f0fdf4',
+  },
+  availableDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#16a34a',
+    position: 'absolute',
+    top: 16,
+    left: 16,
+  },
+  noOneAvailable: {
+    fontSize: 13,
+    color: '#94a3b8',
+    textAlign: 'center',
+    paddingVertical: 16,
+    fontStyle: 'italic',
   },
   emergencyNote: {
     flexDirection: 'row',
@@ -854,6 +883,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     gap: 8,
+    marginTop: 8,
     marginBottom: 16,
   },
   emergencyNoteText: {
@@ -869,5 +899,63 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#64748b',
     textDecorationLine: 'underline',
+  },
+  // Callback Form Styles
+  backToMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  backToMainText: {
+    fontSize: 14,
+    color: '#64748b',
+  },
+  callbackForm: {
+    marginTop: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  callbackInput: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 10,
+    padding: 14,
+    fontSize: 16,
+    marginBottom: 16,
+    backgroundColor: '#f9fafb',
+  },
+  submitCallbackButton: {
+    backgroundColor: '#2563eb',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  submitCallbackText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  // Connecting View Styles
+  connectingView: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  connectingTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginTop: 20,
+  },
+  connectingText: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    marginTop: 8,
   },
 });
