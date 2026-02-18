@@ -439,6 +439,104 @@ export default function FamilyFriends() {
           </>
         )}
 
+        {/* Addiction & Substance Support */}
+        {view === 'addiction' && (
+          <>
+            <Text style={styles.sectionTitle}>Substance & Alcohol Support</Text>
+            <Text style={styles.sectionSubtitle}>
+              Specialist help for veterans dealing with addiction, alcoholism, or substance misuse.
+            </Text>
+
+            <View style={styles.infoCard}>
+              <FontAwesome5 name="info-circle" size={18} color="#d97706" />
+              <Text style={styles.infoText}>
+                Many veterans turn to alcohol or substances to cope with trauma, pain, or the transition to civilian life. 
+                Seeking help is a sign of strength, not weakness.
+              </Text>
+            </View>
+
+            {ADDICTION_RESOURCES.map((resource, index) => (
+              <TouchableOpacity 
+                key={index}
+                style={styles.resourceCard}
+                onPress={() => resource.url && Linking.openURL(resource.url)}
+              >
+                <View style={styles.resourceContent}>
+                  <Text style={styles.resourceName}>{resource.name}</Text>
+                  <Text style={styles.resourceDesc}>{resource.desc}</Text>
+                  {resource.phone && (
+                    <TouchableOpacity 
+                      style={styles.resourcePhone}
+                      onPress={() => Linking.openURL(`tel:${resource.phone.replace(/\s/g, '')}`)}
+                    >
+                      <FontAwesome5 name="phone-alt" size={14} color="#16a34a" />
+                      <Text style={styles.resourcePhoneText}>{resource.phone}</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <FontAwesome5 name="external-link-alt" size={14} color="#94a3b8" />
+              </TouchableOpacity>
+            ))}
+
+            <View style={styles.tipCard}>
+              <FontAwesome5 name="lightbulb" size={20} color="#f59e0b" />
+              <Text style={styles.tipText}>
+                <Text style={styles.tipBold}>Tip: </Text>
+                Tom Harrison House is the UK's only residential rehab specifically for veterans and emergency service workers.
+              </Text>
+            </View>
+          </>
+        )}
+
+        {/* Prison & Criminal Justice Support */}
+        {view === 'prison' && (
+          <>
+            <Text style={styles.sectionTitle}>Criminal Justice Support</Text>
+            <Text style={styles.sectionSubtitle}>
+              Help for veterans in the criminal justice system or recently released from prison.
+            </Text>
+
+            <View style={styles.infoCard}>
+              <FontAwesome5 name="info-circle" size={18} color="#4f46e5" />
+              <Text style={styles.infoText}>
+                Veterans can face unique challenges with the law, often linked to untreated PTSD, substance misuse, 
+                or difficulty adjusting to civilian life. Specialist support is available.
+              </Text>
+            </View>
+
+            {PRISON_RESOURCES.map((resource, index) => (
+              <TouchableOpacity 
+                key={index}
+                style={styles.resourceCard}
+                onPress={() => resource.url && Linking.openURL(resource.url)}
+              >
+                <View style={styles.resourceContent}>
+                  <Text style={styles.resourceName}>{resource.name}</Text>
+                  <Text style={styles.resourceDesc}>{resource.desc}</Text>
+                  {resource.phone && (
+                    <TouchableOpacity 
+                      style={styles.resourcePhone}
+                      onPress={() => Linking.openURL(`tel:${resource.phone.replace(/\s/g, '')}`)}
+                    >
+                      <FontAwesome5 name="phone-alt" size={14} color="#16a34a" />
+                      <Text style={styles.resourcePhoneText}>{resource.phone}</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <FontAwesome5 name="external-link-alt" size={14} color="#94a3b8" />
+              </TouchableOpacity>
+            ))}
+
+            <View style={styles.tipCard}>
+              <FontAwesome5 name="lightbulb" size={20} color="#f59e0b" />
+              <Text style={styles.tipText}>
+                <Text style={styles.tipBold}>Project Nova </Text>
+                works specifically with veterans at every stage of the criminal justice system - from arrest to release.
+              </Text>
+            </View>
+          </>
+        )}
+
         <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
