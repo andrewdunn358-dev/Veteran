@@ -432,18 +432,38 @@ class BuddyChatResponse(BaseModel):
 
 # Safeguarding keywords and phrases for veterans
 SAFEGUARDING_KEYWORDS = [
-    # Suicide/Self-harm related
+    # Suicide/Self-harm - direct
     "kill myself", "end my life", "want to die", "don't want to be here",
     "better off dead", "suicide", "suicidal", "end it all", "take my own life",
     "self harm", "self-harm", "hurt myself", "cut myself", "cutting",
     "no point living", "no reason to live", "can't go on", "not worth living",
+    "rather be dead", "wish i was dead", "wish i were dead",
+    
+    # Suicide/Self-harm - informal/angry
+    "gonna do it", "going to do it", "just do it", "fuck it",
+    "done with life", "done with everything", "done with this shit",
+    "ending it", "ending this", "top myself", "do myself in",
+    "off myself", "check out", "checking out",
+    
     # Crisis indicators
     "goodbye", "final goodbye", "last message", "can't take it anymore",
     "no way out", "no hope", "hopeless", "given up", "giving up",
-    "nobody cares", "no one would miss me", "burden to everyone",
+    "nobody cares", "no one cares", "no one would miss me", "burden to everyone",
+    "had enough", "can't do this anymore", "can't do this", "what's the point",
+    
+    # Desperation phrases
+    "i give up", "i'm done", "im done", "i quit", "finished",
+    "nothing matters", "nothing left", "got nothing", "lost everything",
+    "can't see a way", "no future", "no point", "pointless",
+    
     # PTSD/Trauma crisis
     "flashbacks won't stop", "can't escape", "nightmares every night",
-    "reliving it", "can't cope anymore",
+    "reliving it", "can't cope anymore", "can't cope", "losing it",
+    "going crazy", "losing my mind", "breaking down",
+    
+    # Isolation/Burden
+    "alone", "all alone", "completely alone", "no one understands",
+    "burden", "in the way", "better without me", "they'd be better off",
 ]
 
 def check_safeguarding(message: str) -> bool:
