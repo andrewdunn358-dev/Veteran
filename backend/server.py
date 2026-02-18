@@ -16,6 +16,7 @@ import secrets
 import resend
 import asyncio
 from openai import OpenAI
+import httpx  # For IP geolocation lookup
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
