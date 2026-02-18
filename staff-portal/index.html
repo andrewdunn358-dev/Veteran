@@ -81,6 +81,22 @@
                 <div id="panic-list" class="cards-list"></div>
             </div>
 
+            <!-- Safeguarding Alerts Section (Counsellors/Admins Only) -->
+            <div id="safeguarding-section" class="section safeguarding-section" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-shield-alt"></i> Safeguarding Alerts</h2>
+                    <span id="safeguarding-count" class="badge danger"></span>
+                    <button class="btn btn-small btn-secondary" onclick="loadSafeguardingAlerts()">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+                <div class="safeguarding-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>These alerts are triggered when AI chat detects potential crisis indicators</span>
+                </div>
+                <div id="safeguarding-list" class="cards-list"></div>
+            </div>
+
             <!-- Panic Button (Peers Only) -->
             <div id="panic-button-section" class="section" style="display: none;">
                 <button class="panic-button" onclick="triggerPanic()">
