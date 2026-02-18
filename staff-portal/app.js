@@ -208,14 +208,19 @@ async function initPortal() {
     if (role === 'counsellor' || role === 'admin') {
         loadPanicAlerts();
         loadSafeguardingAlerts(false); // Initial load, no sound
+        loadLiveChats(); // Load live chat rooms
         startAlertPolling(); // Start real-time polling
         updateSoundButton(); // Update sound toggle button
+        
+        // Show live chat section
+        document.getElementById('livechat-section').style.display = 'block';
     }
     
     // Auto-refresh every 30 seconds for callbacks/notes
     setInterval(function() {
         loadCallbacks();
         loadNotes();
+        loadLiveChats(); // Also refresh live chats
         if (role === 'counsellor' || role === 'admin') {
             loadPanicAlerts();
             // Note: Safeguarding alerts are polled separately with sound support
