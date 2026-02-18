@@ -613,7 +613,7 @@ function renderSafeguardingAlerts(alerts) {
             '<div class="contact-captured"><i class="fas fa-check-circle" style="color:#22c55e"></i> Contact details captured</div>' :
             '<div class="contact-not-captured"><i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i> NO CONTACT DETAILS - Anonymous user</div>';
         
-        // Geolocation info
+        // Geolocation info with map
         var locationHtml = '';
         if (alert.geo_city || alert.geo_country) {
             var locationParts = [];
@@ -626,6 +626,10 @@ function renderSafeguardingAlerts(alerts) {
             }
             if (alert.geo_timezone) {
                 locationHtml += '<div class="location-info"><i class="fas fa-clock"></i> <strong>Timezone:</strong> ' + alert.geo_timezone + '</div>';
+            }
+            // Add map if we have coordinates
+            if (alert.geo_lat && alert.geo_lon) {
+                locationHtml += '<div class="location-map" id="map-' + alert.id + '" data-lat="' + alert.geo_lat + '" data-lon="' + alert.geo_lon + '" data-city="' + escapeHtml(alert.geo_city || 'Unknown') + '"></div>';
             }
         }
         
