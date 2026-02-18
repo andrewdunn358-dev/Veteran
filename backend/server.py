@@ -1183,7 +1183,9 @@ async def create_counsellor(
 ):
     """Create a new counsellor (admin only)"""
     counsellor_obj = Counsellor(**counsellor_input.dict())
-    await db.counsellors.insert_one(counsellor_obj.dict())
+    # Encrypt sensitive fields before storing
+    encrypted_data = encrypt_document('counsellors', counsellor_obj.dict())
+    await db.counsellors.insert_one(encrypted_data)
     return counsellor_obj
 
 @api_router.get("/counsellors", response_model=List[Counsellor])
@@ -1192,7 +1194,8 @@ async def get_counsellors(current_user: User = Depends(get_current_user)):
     if current_user.role not in ["admin", "counsellor"]:
         raise HTTPException(status_code=403, detail="Access denied. Only admins and counsellors can view this.")
     counsellors = await db.counsellors.find().to_list(1000)
-    return [Counsellor(**c) for c in counsellors]
+    # Decrypt sensitive fields when retrieving
+    return [Counsellor(**decrypt_document('counsellors', c)) for c in counsellors]
 
 @api_router.get("/counsellors/available", response_model=List[CounsellorPublic])
 async def get_available_counsellors():
