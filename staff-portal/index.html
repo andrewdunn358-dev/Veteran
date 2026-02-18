@@ -76,93 +76,97 @@
                     </button>
                 </div>
                 <span id="current-status" class="current-status"></span>
-            </div>
-
-            <!-- Panic Alerts Section (Counsellors Only) -->
-            <div id="panic-section" class="section panic-section" style="display: none;">
-                <div class="section-header">
-                    <h2><i class="fas fa-exclamation-triangle"></i> Panic Alerts</h2>
-                    <span id="panic-count" class="badge danger"></span>
-                </div>
-                <div id="panic-list" class="cards-list"></div>
-            </div>
-
-            <!-- Safeguarding Alerts Section (Counsellors/Admins Only) -->
-            <div id="safeguarding-section" class="section safeguarding-section" style="display: none;">
-                <div class="section-header">
-                    <h2><i class="fas fa-shield-alt"></i> Safeguarding Alerts</h2>
-                    <span id="safeguarding-count" class="badge danger"></span>
-                    <button class="btn btn-small btn-secondary" onclick="loadSafeguardingAlerts()">
-                        <i class="fas fa-sync"></i> Refresh
-                    </button>
-                </div>
-                <div class="safeguarding-info">
-                    <i class="fas fa-info-circle"></i>
-                    <span>These alerts are triggered when AI chat detects potential crisis indicators</span>
-                </div>
-                <div id="safeguarding-list" class="cards-list"></div>
-            </div>
-
-            <!-- Live Chats Section (Staff Only) -->
-            <div id="livechat-section" class="section livechat-section" style="display: none;">
-                <div class="section-header">
-                    <h2><i class="fas fa-comments"></i> Live Chats</h2>
-                    <span id="livechat-count" class="badge primary"></span>
-                    <button class="btn btn-small btn-secondary" onclick="loadLiveChats()">
-                        <i class="fas fa-sync"></i> Refresh
-                    </button>
-                </div>
-                <div class="safeguarding-info">
-                    <i class="fas fa-info-circle"></i>
-                    <span>Active crisis chats from users who selected "Talk to someone now"</span>
-                </div>
-                <div id="livechat-list" class="cards-list"></div>
-            </div>
-
-            <!-- Panic Button (Peers Only) -->
-            <div id="panic-button-section" class="section" style="display: none;">
-                <button class="panic-button" onclick="triggerPanic()">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span class="panic-text">NEED COUNSELLOR HELP</span>
-                    <span class="panic-subtext">Click to alert a counsellor for assistance</span>
+                <button id="sound-toggle" class="btn btn-icon btn-secondary" onclick="toggleAlertSound()" title="Toggle alert sound">
+                    <i class="fas fa-volume-up"></i>
                 </button>
             </div>
 
-            <!-- My Active Callbacks -->
-            <div class="section">
-                <div class="section-header">
-                    <h2><i class="fas fa-phone-volume"></i> My Active Callbacks</h2>
-                    <span id="active-count" class="badge"></span>
-                </div>
-                <div id="active-callbacks" class="cards-list"></div>
-            </div>
+            <!-- Dashboard Grid Layout -->
+            <div class="dashboard-grid">
+                <!-- Left Column: Urgent/Real-time Items -->
+                <div class="dashboard-column urgent-column">
+                    <!-- Panic Alerts Section (Counsellors Only) -->
+                    <div id="panic-section" class="section panic-section" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-exclamation-triangle"></i> Panic Alerts</h2>
+                            <span id="panic-count" class="badge danger"></span>
+                        </div>
+                        <div id="panic-list" class="cards-list"></div>
+                    </div>
 
-            <!-- Pending Callbacks -->
-            <div class="section">
-                <div class="section-header">
-                    <h2><i class="fas fa-phone"></i> Pending Callbacks</h2>
-                    <span id="pending-count" class="badge"></span>
-                    <button class="btn btn-small btn-secondary" onclick="loadCallbacks()">
-                        <i class="fas fa-sync"></i> Refresh
-                    </button>
-                </div>
-                <div id="pending-callbacks" class="cards-list"></div>
-            </div>
+                    <!-- Safeguarding Alerts Section -->
+                    <div id="safeguarding-section" class="section safeguarding-section" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-shield-alt"></i> Safeguarding</h2>
+                            <span id="safeguarding-count" class="badge danger"></span>
+                            <button class="btn btn-icon btn-secondary" onclick="loadSafeguardingAlerts()">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                        <div id="safeguarding-list" class="cards-list compact-list"></div>
+                    </div>
 
-            <!-- Notes Section -->
-            <div class="section notes-section">
-                <div class="section-header">
-                    <h2><i class="fas fa-sticky-note"></i> My Notes</h2>
-                    <span id="notes-count" class="badge"></span>
-                    <button class="btn btn-small btn-primary" onclick="openNoteModal()">
-                        <i class="fas fa-plus"></i> New Note
-                    </button>
+                    <!-- Live Chats Section -->
+                    <div id="livechat-section" class="section livechat-section" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-comments"></i> Live Chats</h2>
+                            <span id="livechat-count" class="badge primary"></span>
+                            <button class="btn btn-icon btn-secondary" onclick="loadLiveChats()">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                        <div id="livechat-list" class="cards-list compact-list"></div>
+                    </div>
                 </div>
-                <div class="notes-tabs">
-                    <button class="notes-tab active" onclick="switchNotesTab('my')" data-tab="my">My Notes</button>
-                    <button class="notes-tab" onclick="switchNotesTab('shared')" data-tab="shared">Shared With Me</button>
+
+                <!-- Right Column: Callbacks & Notes -->
+                <div class="dashboard-column">
+                    <!-- Panic Button (Peers Only) -->
+                    <div id="panic-button-section" class="section" style="display: none;">
+                        <button class="panic-button" onclick="triggerPanic()">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span class="panic-text">NEED COUNSELLOR HELP</span>
+                            <span class="panic-subtext">Click to alert a counsellor</span>
+                        </button>
+                    </div>
+
+                    <!-- My Active Callbacks -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-phone-volume"></i> Active Callbacks</h2>
+                            <span id="active-count" class="badge"></span>
+                        </div>
+                        <div id="active-callbacks" class="cards-list compact-list"></div>
+                    </div>
+
+                    <!-- Pending Callbacks -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-phone"></i> Pending Callbacks</h2>
+                            <span id="pending-count" class="badge"></span>
+                            <button class="btn btn-icon btn-secondary" onclick="loadCallbacks()">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                        <div id="pending-callbacks" class="cards-list compact-list"></div>
+                    </div>
+
+                    <!-- Notes Section -->
+                    <div class="section notes-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-sticky-note"></i> Notes</h2>
+                            <span id="notes-count" class="badge"></span>
+                            <button class="btn btn-small btn-primary" onclick="openNoteModal()">
+                                <i class="fas fa-plus"></i> New
+                            </button>
+                        </div>
+                        <div class="notes-tabs">
+                            <button class="notes-tab active" onclick="switchNotesTab('my')" data-tab="my">My Notes</button>
+                            <button class="notes-tab" onclick="switchNotesTab('shared')" data-tab="shared">Shared</button>
+                        </div>
+                        <div id="notes-list" class="cards-list compact-list"></div>
+                    </div>
                 </div>
-                <div id="notes-list" class="cards-list"></div>
             </div>
         </main>
     </div>
