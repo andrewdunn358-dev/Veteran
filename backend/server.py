@@ -317,6 +317,8 @@ class CallbackRequestCreate(BaseModel):
     email: Optional[str] = None
     message: str
     request_type: str = Field(..., pattern="^(counsellor|peer)$")  # counsellor or peer
+    is_urgent: bool = False
+    safeguarding_alert_id: Optional[str] = None
 
 class CallbackRequest(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -328,6 +330,8 @@ class CallbackRequest(BaseModel):
     status: str = "pending"  # pending, in_progress, completed, released
     assigned_to: Optional[str] = None  # ID of counsellor/peer who took control
     assigned_name: Optional[str] = None
+    is_urgent: bool = False
+    safeguarding_alert_id: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
