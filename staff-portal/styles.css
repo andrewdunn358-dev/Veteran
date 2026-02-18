@@ -1064,3 +1064,22 @@ body {
     0% { background: rgba(220, 38, 38, 0.3); transform: scale(1.02); }
     100% { background: transparent; transform: scale(1); }
 }
+
+/* Location Map */
+.location-map {
+    height: 200px;
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.location-map .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+}
+
+.location-map .leaflet-popup-content {
+    font-size: 13px;
+    font-family: inherit;
+}
