@@ -380,6 +380,12 @@ class SafeguardingAlert(BaseModel):
     callback_requested: bool = False
     callback_id: Optional[str] = None
     contact_captured: bool = False
+    # Geolocation fields (from ip-api.com)
+    geo_city: Optional[str] = None
+    geo_region: Optional[str] = None
+    geo_country: Optional[str] = None
+    geo_isp: Optional[str] = None
+    geo_timezone: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class Resource(BaseModel):
