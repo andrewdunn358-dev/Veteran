@@ -419,6 +419,103 @@ async function triggerPanic() {
     }
 }
 
+// ============ SAFEGUARDING ALERTS ============
+
+// Load Safeguarding Alerts (Counsellors/Admins)
+async function loadSafeguardingAlerts() {
+    try {
+        var alerts = await apiCall('/safeguarding-alerts');
+        var active = alerts.filter(function(a) { 
+            return a.status === 'active' || a.status === 'acknowledged'; 
+        });
+        
+        renderSafeguardingAlerts(active);
+        document.getElementById('safeguarding-count').textContent = active.length || '';
+        
+        // Add pulsing effect if there are active alerts
+        var section = document.getElementById('safeguarding-section');
+        if (active.filter(function(a) { return a.status === 'active'; }).length > 0) {
+            section.classList.add('has-active');
+        } else {
+            section.classList.remove('has-active');
+        }
+        
+    } catch (error) {
+        console.error('Error loading safeguarding alerts:', error);
+    }
+}
+
+// Render Safeguarding Alerts
+function renderSafeguardingAlerts(alerts) {
+    var container = document.getElementById('safeguarding-list');
+    
+    if (alerts.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-shield-alt"></i><p>No active safeguarding alerts</p></div>';
+        return;
+    }
+    
+    container.innerHTML = alerts.map(function(alert) {
+        var actions = '';
+        if (alert.status === 'active') {
+            actions = '<button class="btn btn-warning" onclick="acknowledgeSafeguardingAlert(\'' + alert.id + '\')"><i class="fas fa-hand-paper"></i> Acknowledge</button>';
+        }
+        actions += '<button class="btn btn-success" onclick="resolveSafeguardingAlert(\'' + alert.id + '\')"><i class="fas fa-check"></i> Resolve</button>';
+        
+        var characterIcon = alert.character === 'tommy' ? 'fa-user' : 'fa-user-circle';
+        var characterName = alert.character === 'tommy' ? 'Tommy' : 'Doris';
+        
+        return '<div class="card safeguarding-card ' + alert.status + '">' +
+            '<div class="card-header">' +
+                '<span class="card-name"><i class="fas ' + characterIcon + '"></i> Chat with ' + characterName + '</span>' +
+                '<span class="card-status ' + alert.status + '">' + alert.status + '</span>' +
+            '</div>' +
+            '<div class="card-session"><i class="fas fa-fingerprint"></i> Session: ' + alert.session_id.substring(0, 12) + '...</div>' +
+            '<div class="card-trigger">' +
+                '<label><i class="fas fa-exclamation-circle"></i> Triggering Message:</label>' +
+                '<div class="trigger-message">"' + escapeHtml(alert.triggering_message) + '"</div>' +
+            '</div>' +
+            '<div class="card-time"><i class="fas fa-clock"></i> ' + new Date(alert.created_at).toLocaleString() + '</div>' +
+            (alert.acknowledged_by ? '<div class="card-ack"><i class="fas fa-user-check"></i> Acknowledged by ' + alert.acknowledged_by + '</div>' : '') +
+            '<div class="card-actions">' + actions + '</div>' +
+        '</div>';
+    }).join('');
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Acknowledge Safeguarding Alert
+async function acknowledgeSafeguardingAlert(id) {
+    try {
+        await apiCall('/safeguarding-alerts/' + id + '/acknowledge', { method: 'PATCH' });
+        showNotification('Safeguarding alert acknowledged');
+        loadSafeguardingAlerts();
+    } catch (error) {
+        showNotification('Failed: ' + error.message, 'error');
+    }
+}
+
+// Resolve Safeguarding Alert
+async function resolveSafeguardingAlert(id) {
+    var notes = prompt('Resolution notes (optional - what action was taken?):');
+    
+    try {
+        var url = '/safeguarding-alerts/' + id + '/resolve';
+        if (notes) {
+            url += '?notes=' + encodeURIComponent(notes);
+        }
+        await apiCall(url, { method: 'PATCH' });
+        showNotification('Safeguarding alert resolved');
+        loadSafeguardingAlerts();
+    } catch (error) {
+        showNotification('Failed: ' + error.message, 'error');
+    }
+}
+
 // ============ NOTES FUNCTIONALITY ============
 
 var staffUsers = [];
