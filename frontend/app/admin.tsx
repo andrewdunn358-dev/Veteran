@@ -2185,6 +2185,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#f59e0b',
   },
+  safeguardingCard: {
+    borderWidth: 2,
+    borderColor: '#dc2626',
+    backgroundColor: 'rgba(220, 38, 38, 0.1)',
+  },
   panicCard: {
     borderWidth: 2,
     borderColor: '#ef4444',
