@@ -209,36 +209,49 @@ export default function LiveChat() {
   };
 
   const handleEndChat = () => {
-    Alert.alert(
-      'End Chat',
-      'Are you sure you want to end this chat? You can always request another callback or call directly.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'End Chat', 
-          style: 'destructive',
-          onPress: async () => {
-            if (chatRoomId) {
-              try {
-                await fetch(`${API_URL}/api/live-chat/rooms/${chatRoomId}/end`, {
-                  method: 'POST',
-                });
-              } catch (e) {
-                console.log('Error ending chat:', e);
-              }
-            }
-            // Clear polling intervals
-            if (pollInterval.current) {
-              clearInterval(pollInterval.current);
-            }
-            if (roomPollInterval.current) {
-              clearInterval(roomPollInterval.current);
-            }
-            router.replace('/home');
-          }
-        },
-      ]
-    );
+    // Use window.confirm for web compatibility (Alert.alert is stubbed in react-native-web)
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm(
+        'Are you sure you want to end this chat? You can always request another callback or call directly.'
+      );
+      if (confirmed) {
+        endChatAndNavigate();
+      }
+    } else {
+      // Native mobile uses Alert.alert
+      Alert.alert(
+        'End Chat',
+        'Are you sure you want to end this chat? You can always request another callback or call directly.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'End Chat', 
+            style: 'destructive',
+            onPress: () => endChatAndNavigate()
+          },
+        ]
+      );
+    }
+  };
+
+  const endChatAndNavigate = async () => {
+    if (chatRoomId) {
+      try {
+        await fetch(`${API_URL}/api/live-chat/rooms/${chatRoomId}/end`, {
+          method: 'POST',
+        });
+      } catch (e) {
+        console.log('Error ending chat:', e);
+      }
+    }
+    // Clear polling intervals
+    if (pollInterval.current) {
+      clearInterval(pollInterval.current);
+    }
+    if (roomPollInterval.current) {
+      clearInterval(roomPollInterval.current);
+    }
+    router.replace('/home');
   };
 
   const scrollToBottom = () => {
