@@ -433,10 +433,10 @@ class BuddyChatResponse(BaseModel):
 # Safeguarding keywords and phrases for veterans
 SAFEGUARDING_KEYWORDS = [
     # Suicide/Self-harm - direct
-    "kill myself", "end my life", "want to die", "don't want to be here",
+    "kill myself", "end my life", "want to die", "don't want to be here", "dont want to be here",
     "better off dead", "suicide", "suicidal", "end it all", "take my own life",
     "self harm", "self-harm", "hurt myself", "cut myself", "cutting",
-    "no point living", "no reason to live", "can't go on", "not worth living",
+    "no point living", "no reason to live", "can't go on", "cant go on", "not worth living",
     "rather be dead", "wish i was dead", "wish i were dead",
     
     # Suicide/Self-harm - informal/angry
@@ -446,24 +446,24 @@ SAFEGUARDING_KEYWORDS = [
     "off myself", "check out", "checking out",
     
     # Crisis indicators
-    "goodbye", "final goodbye", "last message", "can't take it anymore",
+    "goodbye", "final goodbye", "last message", "can't take it anymore", "cant take it anymore",
     "no way out", "no hope", "hopeless", "given up", "giving up",
     "nobody cares", "no one cares", "no one would miss me", "burden to everyone",
-    "had enough", "can't do this anymore", "can't do this", "what's the point",
+    "had enough", "can't do this anymore", "cant do this anymore", "can't do this", "cant do this", "what's the point", "whats the point",
     
     # Desperation phrases
     "i give up", "i'm done", "im done", "i quit", "finished",
     "nothing matters", "nothing left", "got nothing", "lost everything",
-    "can't see a way", "no future", "no point", "pointless",
+    "can't see a way", "cant see a way", "no future", "no point", "pointless",
     
     # PTSD/Trauma crisis
-    "flashbacks won't stop", "can't escape", "nightmares every night",
-    "reliving it", "can't cope anymore", "can't cope", "losing it",
+    "flashbacks won't stop", "flashbacks wont stop", "can't escape", "cant escape", "nightmares every night",
+    "reliving it", "can't cope anymore", "cant cope anymore", "can't cope", "cant cope", "losing it",
     "going crazy", "losing my mind", "breaking down",
     
     # Isolation/Burden
-    "alone", "all alone", "completely alone", "no one understands",
-    "burden", "in the way", "better without me", "they'd be better off",
+    "all alone", "completely alone", "no one understands",
+    "burden", "in the way", "better without me", "they'd be better off", "theyd be better off",
 ]
 
 def check_safeguarding(message: str) -> bool:
