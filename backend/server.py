@@ -2533,6 +2533,141 @@ async def get_peer_support_registrations(current_user: User = Depends(require_ro
         logging.error(f"Error retrieving registrations: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to retrieve registrations.")
 
+# ============ FAMILY & FRIENDS CONCERN ENDPOINTS ============
+
+@api_router.post("/concerns", response_model=Concern)
+async def raise_concern(input: ConcernCreate):
+    """Raise a concern about a veteran (public - for family/friends)"""
+    try:
+        concern = Concern(**input.dict())
+        await db.concerns.insert_one(concern.dict())
+        logging.info(f"Concern raised by {input.your_name} ({input.relationship}) - Urgency: {input.urgency}")
+        
+        # Send notification email to admins
+        try:
+            await send_concern_notification(concern)
+        except Exception as email_err:
+            logging.error(f"Failed to send concern notification email: {email_err}")
+        
+        return concern
+    except Exception as e:
+        logging.error(f"Error raising concern: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to submit concern. Please try again.")
+
+@api_router.get("/concerns")
+async def get_concerns(
+    status: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Get all concerns (staff only)"""
+    if current_user.role not in ["admin", "counsellor"]:
+        raise HTTPException(status_code=403, detail="Only admins and counsellors can view concerns")
+    
+    try:
+        query = {}
+        if status:
+            query["status"] = status
+        
+        concerns = await db.concerns.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+        return concerns
+    except Exception as e:
+        logging.error(f"Error retrieving concerns: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve concerns.")
+
+@api_router.patch("/concerns/{concern_id}/status")
+async def update_concern_status(
+    concern_id: str,
+    status: str,
+    notes: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Update concern status (staff only)"""
+    if current_user.role not in ["admin", "counsellor"]:
+        raise HTTPException(status_code=403, detail="Only admins and counsellors can update concerns")
+    
+    try:
+        update_data = {
+            "status": status,
+            "updated_at": datetime.utcnow()
+        }
+        if notes:
+            update_data["notes"] = notes
+        if status == "in_progress":
+            update_data["assigned_to"] = current_user.name
+        
+        await db.concerns.update_one(
+            {"id": concern_id},
+            {"$set": update_data}
+        )
+        return {"message": f"Concern status updated to {status}"}
+    except Exception as e:
+        logging.error(f"Error updating concern: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update concern.")
+
+async def send_concern_notification(concern: Concern):
+    """Send notification to admin when a concern is raised"""
+    if not RESEND_API_KEY:
+        logging.warning("Resend API key not configured, skipping concern notification")
+        return False
+    
+    try:
+        settings = await db.settings.find_one({})
+        admin_email = settings.get("admin_notification_email", "") if settings else ""
+        
+        if not admin_email:
+            return False
+        
+        urgency_colors = {"urgent": "#dc2626", "high": "#f59e0b", "medium": "#3b82f6", "low": "#22c55e"}
+        urgency_color = urgency_colors.get(concern.urgency, "#3b82f6")
+        
+        signs_html = ""
+        if concern.signs_noticed:
+            signs_html = "<p><strong>Signs noticed:</strong> " + ", ".join(concern.signs_noticed) + "</p>"
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: {urgency_color}; color: white; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <h2 style="margin: 0;">Family/Friend Concern Raised</h2>
+                <p style="margin: 8px 0 0 0;">Urgency: {concern.urgency.upper()}</p>
+            </div>
+            
+            <div style="background-color: #f5f5f5; padding: 16px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>From:</strong> {concern.your_name} ({concern.relationship})</p>
+                <p><strong>Contact:</strong> {concern.your_email or 'N/A'} / {concern.your_phone or 'N/A'}</p>
+                <p><strong>About:</strong> {concern.veteran_name or 'Not specified'}</p>
+                <p><strong>How long:</strong> {concern.how_long or 'Not specified'}</p>
+                {signs_html}
+            </div>
+            
+            <div style="background-color: #fff3cd; padding: 16px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Concerns:</strong></p>
+                <p>{concern.concerns}</p>
+            </div>
+            
+            <p><strong>Consent to contact veteran:</strong> {'Yes' if concern.consent_to_contact else 'No'}</p>
+            
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="{FRONTEND_URL}/login" style="background-color: {urgency_color}; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block;">View in Staff Portal</a>
+            </p>
+        </body>
+        </html>
+        """
+        
+        params = {
+            "from": SENDER_EMAIL,
+            "to": [admin_email],
+            "subject": f"[{concern.urgency.upper()}] Family/Friend Concern - Radio Check",
+            "html": html_content
+        }
+        
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        logging.info(f"Concern notification sent, ID: {result.get('id')}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to send concern notification: {str(e)}")
+        return False
+
 # ============ CALL INTENT LOGGING ENDPOINTS ============
 
 @api_router.post("/call-logs", response_model=CallIntent)
