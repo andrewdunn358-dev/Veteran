@@ -13,12 +13,21 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Get encryption key from environment
-ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY')
+# Cache for Fernet instance
+_fernet_cache = None
 
 def _get_fernet():
-    """Get Fernet instance with derived key"""
-    if not ENCRYPTION_KEY:
+    """Get Fernet instance with derived key - loads key dynamically"""
+    global _fernet_cache
+    
+    # Return cached instance if available
+    if _fernet_cache is not None:
+        return _fernet_cache
+    
+    # Get encryption key from environment at runtime
+    encryption_key = os.environ.get('ENCRYPTION_KEY')
+    
+    if not encryption_key:
         logger.warning("ENCRYPTION_KEY not set - encryption disabled")
         return None
     
@@ -29,8 +38,10 @@ def _get_fernet():
         salt=b'veterans_support_salt_v1',  # Static salt - key should be unique per deployment
         iterations=100000,
     )
-    key = base64.urlsafe_b64encode(kdf.derive(ENCRYPTION_KEY.encode()))
-    return Fernet(key)
+    key = base64.urlsafe_b64encode(kdf.derive(encryption_key.encode()))
+    _fernet_cache = Fernet(key)
+    logger.info("Encryption initialized successfully")
+    return _fernet_cache
 
 
 def encrypt_field(value: str) -> str:
