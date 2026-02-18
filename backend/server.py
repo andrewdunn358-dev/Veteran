@@ -387,6 +387,8 @@ class SafeguardingAlert(BaseModel):
     geo_country: Optional[str] = None
     geo_isp: Optional[str] = None
     geo_timezone: Optional[str] = None
+    geo_lat: Optional[float] = None
+    geo_lon: Optional[float] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class Resource(BaseModel):
