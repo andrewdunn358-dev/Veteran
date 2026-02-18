@@ -582,6 +582,39 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: '#3b82f6',
     fontWeight: '500',
   },
+  // Friends & Family Card
+  familyFriendsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#faf5ff',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#e9d5ff',
+  },
+  familyFriendsIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#ede9fe',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  familyFriendsContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  familyFriendsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  familyFriendsDesc: {
+    fontSize: 13,
+    color: '#64748b',
+    marginTop: 2,
+  },
   // Modal Styles
   modalOverlay: {
     flex: 1,
