@@ -2435,6 +2435,8 @@ async def buddy_chat(request: BuddyChatRequest, req: Request):
                 alert.geo_country = geo_data.get("geo_country")
                 alert.geo_isp = geo_data.get("geo_isp")
                 alert.geo_timezone = geo_data.get("geo_timezone")
+                alert.geo_lat = geo_data.get("geo_lat")
+                alert.geo_lon = geo_data.get("geo_lon")
             
             alert_id = alert.id
             await db.safeguarding_alerts.insert_one(alert.dict())
