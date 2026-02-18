@@ -74,8 +74,10 @@ export default function CounsellorPortal() {
 
   const fetchData = useCallback(async () => {
     try {
-      // Fetch counsellor profile
-      const counsellorsResponse = await fetch(`${API_URL}/api/counsellors`);
+      // Fetch counsellor profile - requires auth now
+      const counsellorsResponse = await fetch(`${API_URL}/api/counsellors`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (counsellorsResponse.ok) {
         const counsellors = await counsellorsResponse.json();
         const myCounsellor = counsellors.find((c: any) => c.user_id === user?.id);
