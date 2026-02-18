@@ -2248,9 +2248,12 @@ async def buddy_chat(request: BuddyChatRequest):
                 characterAvatar=char_config["avatar"]
             )
         
-        # Check for safeguarding concerns BEFORE calling AI
-        safeguarding_triggered = check_safeguarding(request.message)
+        # Check for safeguarding concerns using weighted scoring system
+        should_escalate, risk_data = check_safeguarding(request.message, request.sessionId)
         alert_id = None
+        risk_level = risk_data["risk_level"]
+        
+        logging.info(f"Safeguarding check - Session: {request.sessionId[:12]}, Score: {risk_data['score']}, Level: {risk_level}")
         
         # Build messages with character-specific system prompt
         messages = [{"role": "system", "content": char_config["prompt"]}]
@@ -2276,23 +2279,27 @@ async def buddy_chat(request: BuddyChatRequest):
         session["history"].append({"role": "user", "content": request.message})
         session["history"].append({"role": "assistant", "content": reply})
         
-        # If safeguarding triggered, create alert and send notification
-        if safeguarding_triggered:
+        # If safeguarding triggered (RED or AMBER), create alert and send notification
+        if should_escalate:
             alert = SafeguardingAlert(
                 session_id=request.sessionId,
                 character=character,
                 triggering_message=request.message,
-                ai_response=reply
+                ai_response=reply,
+                risk_level=risk_level,
+                risk_score=risk_data["score"],
+                triggered_indicators=[t["indicator"] for t in risk_data["triggered_indicators"]]
             )
             alert_id = alert.id
             await db.safeguarding_alerts.insert_one(alert.dict())
-            logging.warning(f"SAFEGUARDING ALERT CREATED: {alert_id} - Session: {request.sessionId}")
+            logging.warning(f"SAFEGUARDING ALERT [{risk_level}] Score: {risk_data['score']} - Alert: {alert_id} - Session: {request.sessionId}")
             
-            # Send email notification to admin
-            try:
-                await send_safeguarding_email_notification(alert)
-            except Exception as email_err:
-                logging.error(f"Failed to send safeguarding email: {email_err}")
+            # Send email notification to admin (only for RED alerts or first AMBER)
+            if risk_level == "RED" or risk_data["session_history_count"] <= 1:
+                try:
+                    await send_safeguarding_email_notification(alert, risk_data)
+                except Exception as email_err:
+                    logging.error(f"Failed to send safeguarding email: {email_err}")
         
         return BuddyChatResponse(
             reply=reply,
@@ -2300,8 +2307,10 @@ async def buddy_chat(request: BuddyChatRequest):
             character=character,
             characterName=char_config["name"],
             characterAvatar=char_config["avatar"],
-            safeguardingTriggered=safeguarding_triggered,
-            safeguardingAlertId=alert_id
+            safeguardingTriggered=should_escalate,
+            safeguardingAlertId=alert_id,
+            riskLevel=risk_level,
+            riskScore=risk_data["score"]
         )
         
     except Exception as e:
