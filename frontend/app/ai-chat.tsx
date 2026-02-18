@@ -562,14 +562,71 @@ export default function AIChat() {
                     keyboardType="phone-pad"
                   />
                   
+                  <Text style={styles.inputLabel}>Email (optional)</Text>
+                  <TextInput
+                    style={styles.callbackInput}
+                    placeholder="your.email@example.com"
+                    placeholderTextColor="#94a3b8"
+                    value={callbackEmail}
+                    onChangeText={setCallbackEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                  
+                  <Text style={styles.inputLabel}>Anything you'd like us to know? (optional)</Text>
+                  <TextInput
+                    style={[styles.callbackInput, styles.callbackMessageInput]}
+                    placeholder="Is there anything you'd like to share?"
+                    placeholderTextColor="#94a3b8"
+                    value={callbackMessage}
+                    onChangeText={setCallbackMessage}
+                    multiline
+                    numberOfLines={3}
+                    textAlignVertical="top"
+                  />
+                  
                   <TouchableOpacity
-                    style={styles.submitCallbackButton}
+                    style={[styles.submitCallbackButton, isSubmittingCallback && styles.buttonDisabled]}
                     onPress={submitCallbackRequest}
+                    disabled={isSubmittingCallback}
                   >
-                    <Text style={styles.submitCallbackText}>Request Callback</Text>
+                    {isSubmittingCallback ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <Text style={styles.submitCallbackText}>Request Callback</Text>
+                    )}
                   </TouchableOpacity>
                 </View>
               </>
+            )}
+            
+            {/* Callback Success View */}
+            {safeguardingView === 'callback_success' && (
+              <View style={styles.successView}>
+                <View style={styles.successIcon}>
+                  <FontAwesome5 name="check-circle" size={48} color="#16a34a" />
+                </View>
+                <Text style={styles.successTitle}>Callback Requested</Text>
+                <Text style={styles.successText}>
+                  Someone will call you back as soon as possible. Please keep your phone nearby.
+                </Text>
+                <Text style={styles.successSubtext}>
+                  If you need immediate help, call 999 or Samaritans on 116 123.
+                </Text>
+                <TouchableOpacity
+                  style={styles.successCloseButton}
+                  onPress={() => {
+                    setShowSafeguardingModal(false);
+                    setSafeguardingView('main');
+                    setCallbackPhone('');
+                    setCallbackName('');
+                    setCallbackEmail('');
+                    setCallbackMessage('');
+                  }}
+                >
+                  <Text style={styles.successCloseText}>Close</Text>
+                </TouchableOpacity>
+              </View>
             )}
             
             {/* Connecting View */}
