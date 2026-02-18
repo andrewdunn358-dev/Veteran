@@ -56,7 +56,7 @@ const PRISON_RESOURCES = [
 
 export default function FamilyFriends() {
   const router = useRouter();
-  const [view, setView] = useState<'main' | 'concern' | 'resources' | 'signs'>('main');
+  const [view, setView] = useState<'main' | 'concern' | 'resources' | 'signs' | 'addiction' | 'prison'>('main');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Form state
