@@ -1184,8 +1184,10 @@ async def create_counsellor(
     return counsellor_obj
 
 @api_router.get("/counsellors", response_model=List[Counsellor])
-async def get_counsellors(current_user: User = Depends(require_role("admin"))):
-    """Get all counsellors - ADMIN ONLY (contains sensitive contact info)"""
+async def get_counsellors(current_user: User = Depends(get_current_user)):
+    """Get all counsellors - Requires authentication (admin or counsellor)"""
+    if current_user.role not in ["admin", "counsellor"]:
+        raise HTTPException(status_code=403, detail="Access denied. Only admins and counsellors can view this.")
     counsellors = await db.counsellors.find().to_list(1000)
     return [Counsellor(**c) for c in counsellors]
 
