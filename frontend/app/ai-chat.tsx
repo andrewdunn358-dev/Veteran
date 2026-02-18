@@ -46,7 +46,7 @@ export default function AIChat() {
   const [characterInfo, setCharacterInfo] = useState<CharacterInfo>({ name: 'Tommy', avatar: '' });
   const [sessionId] = useState(() => `${character}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   const [showSafeguardingModal, setShowSafeguardingModal] = useState(false);
-  const [safeguardingView, setSafeguardingView] = useState<'main' | 'callback' | 'connecting'>('main');
+  const [safeguardingView, setSafeguardingView] = useState<'main' | 'callback' | 'connecting' | 'callback_success'>('main');
   const [callbackPhone, setCallbackPhone] = useState('');
   const [callbackName, setCallbackName] = useState('');
   const [callbackEmail, setCallbackEmail] = useState('');
