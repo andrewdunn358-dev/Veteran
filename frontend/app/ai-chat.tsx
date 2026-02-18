@@ -49,6 +49,9 @@ export default function AIChat() {
   const [safeguardingView, setSafeguardingView] = useState<'main' | 'callback' | 'connecting'>('main');
   const [callbackPhone, setCallbackPhone] = useState('');
   const [callbackName, setCallbackName] = useState('');
+  const [callbackEmail, setCallbackEmail] = useState('');
+  const [callbackMessage, setCallbackMessage] = useState('');
+  const [isSubmittingCallback, setIsSubmittingCallback] = useState(false);
   const [availableStaff, setAvailableStaff] = useState<AvailableStaff>({ counsellors: [], peers: [] });
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [currentAlertId, setCurrentAlertId] = useState<string | null>(null);
