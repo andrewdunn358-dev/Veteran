@@ -236,9 +236,97 @@ body {
 
 /* Portal Content */
 .portal-content {
-    max-width: 900px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 24px;
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.dashboard-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Urgent column styling - left side for critical items */
+.urgent-column .section {
+    border-left: 4px solid var(--danger);
+}
+
+.urgent-column .livechat-section {
+    border-left-color: var(--primary);
+}
+
+/* Compact list for side-by-side view */
+.compact-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.compact-list .card {
+    padding: 12px;
+    margin-bottom: 8px;
+}
+
+.compact-list .card-header {
+    margin-bottom: 6px;
+}
+
+.compact-list .card-message {
+    font-size: 13px;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.compact-list .card-actions {
+    margin-top: 8px;
+    gap: 6px;
+}
+
+.compact-list .btn {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* Responsive: Stack on smaller screens */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .compact-list {
+        max-height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .portal-content {
+        padding: 16px;
+    }
+    
+    .dashboard-grid {
+        gap: 12px;
+    }
+}
+
+/* Icon button for refresh */
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
 }
 
 /* Status Section */
