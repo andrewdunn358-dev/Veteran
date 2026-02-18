@@ -103,6 +103,22 @@
                 <div id="safeguarding-list" class="cards-list"></div>
             </div>
 
+            <!-- Live Chats Section (Staff Only) -->
+            <div id="livechat-section" class="section livechat-section" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-comments"></i> Live Chats</h2>
+                    <span id="livechat-count" class="badge primary"></span>
+                    <button class="btn btn-small btn-secondary" onclick="loadLiveChats()">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+                <div class="safeguarding-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Active crisis chats from users who selected "Talk to someone now"</span>
+                </div>
+                <div id="livechat-list" class="cards-list"></div>
+            </div>
+
             <!-- Panic Button (Peers Only) -->
             <div id="panic-button-section" class="section" style="display: none;">
                 <button class="panic-button" onclick="triggerPanic()">
