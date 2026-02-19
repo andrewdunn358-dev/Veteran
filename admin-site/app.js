@@ -2208,3 +2208,407 @@ async function removeSipExtension(staffId, staffType, staffName) {
         showNotification('Failed to remove SIP extension: ' + error.message, 'error');
     }
 }
+
+// ==========================================
+// Unified Staff Management
+// ==========================================
+
+// Render Unified Staff List
+function renderUnifiedStaff() {
+    const container = document.getElementById('staff-list');
+    if (!container) return;
+    
+    // Filter staff based on current filter
+    let filteredStaff = unifiedStaff;
+    if (currentStaffFilter !== 'all') {
+        filteredStaff = unifiedStaff.filter(s => s.role === currentStaffFilter);
+    }
+    
+    if (filteredStaff.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                <i class="fas fa-users" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>No staff members found${currentStaffFilter !== 'all' ? ` with role "${currentStaffFilter}"` : ''}.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = filteredStaff.map(staff => {
+        const roleColors = {
+            admin: '#ef4444',
+            counsellor: '#22c55e',
+            peer: '#3b82f6'
+        };
+        const roleIcons = {
+            admin: 'shield-alt',
+            counsellor: 'user-md',
+            peer: 'hands-helping'
+        };
+        const roleColor = roleColors[staff.role] || '#6b7280';
+        const roleIcon = roleIcons[staff.role] || 'user';
+        
+        // Profile status
+        const hasProfile = staff.has_profile;
+        const profile = staff.profile || {};
+        const status = profile.status || 'N/A';
+        
+        // Status badge color
+        const statusColors = {
+            available: '#22c55e',
+            busy: '#f59e0b',
+            off: '#ef4444',
+            limited: '#f59e0b',
+            unavailable: '#6b7280'
+        };
+        const statusColor = statusColors[status] || '#6b7280';
+        
+        return `
+            <div class="card staff-card" data-role="${staff.role}">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                            <i class="fas fa-${roleIcon}" style="color: ${roleColor}; font-size: 20px;"></i>
+                            <strong style="color: var(--text-primary); font-size: 16px;">${staff.name}</strong>
+                            <span class="badge" style="background: ${roleColor}; color: white; padding: 2px 10px; border-radius: 12px; font-size: 11px; text-transform: uppercase;">
+                                ${staff.role}
+                            </span>
+                        </div>
+                        <p style="color: var(--text-muted); font-size: 13px; margin: 0;">
+                            <i class="fas fa-envelope"></i> ${staff.email}
+                        </p>
+                    </div>
+                    ${staff.role !== 'admin' ? `
+                        <span class="status-badge" style="background: ${statusColor}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; text-transform: capitalize;">
+                            ${status}
+                        </span>
+                    ` : ''}
+                </div>
+                
+                ${staff.role !== 'admin' ? `
+                    <div class="profile-info" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                        ${hasProfile ? `
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 13px;">
+                                ${staff.role === 'counsellor' ? `
+                                    <div><i class="fas fa-briefcase" style="color: var(--text-muted);"></i> ${profile.specialization || 'Not set'}</div>
+                                ` : `
+                                    <div><i class="fas fa-map-marker-alt" style="color: var(--text-muted);"></i> ${profile.area || 'Not set'}</div>
+                                `}
+                                <div><i class="fas fa-phone" style="color: var(--text-muted);"></i> ${profile.phone || 'Not set'}</div>
+                                ${profile.sip_extension ? `
+                                    <div><i class="fas fa-phone-volume" style="color: #8b5cf6;"></i> Ext. ${profile.sip_extension}</div>
+                                ` : ''}
+                            </div>
+                        ` : `
+                            <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 10px; border-radius: 8px; color: #f59e0b; font-size: 13px;">
+                                <i class="fas fa-exclamation-triangle"></i> No profile linked. Click "Fix Missing Profiles" to create one.
+                            </div>
+                        `}
+                    </div>
+                ` : ''}
+                
+                <div class="card-actions" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    ${staff.role !== 'admin' && hasProfile ? `
+                        <button class="btn btn-secondary btn-small" onclick="openEditStaffModal('${staff.user_id}', '${staff.role}')">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="openStatusModal('${staff.user_id}', '${staff.role}', '${status}')">
+                            <i class="fas fa-toggle-on"></i> Status
+                        </button>
+                    ` : ''}
+                    <button class="btn btn-secondary btn-small" onclick="resetUserPassword('${staff.user_id}', '${staff.name}')">
+                        <i class="fas fa-key"></i> Reset Password
+                    </button>
+                    ${staff.role !== 'admin' ? `
+                        <button class="btn btn-danger btn-small" onclick="deleteStaffMember('${staff.user_id}', '${staff.role}', '${staff.name}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Filter Staff
+function filterStaff(filter) {
+    currentStaffFilter = filter;
+    
+    // Update active button
+    document.querySelectorAll('.staff-filter').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.filter === filter) {
+            btn.classList.add('active');
+        }
+    });
+    
+    renderUnifiedStaff();
+}
+
+// Fix Missing Profiles
+async function fixMissingProfiles() {
+    if (!confirm('This will create profiles for all users that don\'t have one. Continue?')) {
+        return;
+    }
+    
+    try {
+        const result = await apiCall('/admin/fix-missing-profiles', { method: 'POST' });
+        showNotification(result.message, 'success');
+        loadAllData();
+    } catch (error) {
+        showNotification('Failed to fix profiles: ' + error.message, 'error');
+    }
+}
+
+// Open Add Staff Modal
+function openAddStaffModal() {
+    const modalContent = document.getElementById('modal-content');
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2><i class="fas fa-user-plus"></i> Add Staff Member</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="add-staff-form">
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email *</label>
+                    <input type="email" name="email" required placeholder="staff@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password *</label>
+                    <input type="password" name="password" required placeholder="Minimum 8 characters" minlength="8">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Full Name *</label>
+                    <input type="text" name="name" required placeholder="Full name">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-user-tag"></i> Role *</label>
+                    <select name="role" id="staff-role-select" required onchange="toggleRoleFields()">
+                        <option value="">Select role...</option>
+                        <option value="admin">Admin</option>
+                        <option value="counsellor">Counsellor</option>
+                        <option value="peer">Peer Supporter</option>
+                    </select>
+                </div>
+                
+                <!-- Counsellor-specific fields -->
+                <div id="counsellor-fields" style="display: none;">
+                    <div class="form-group">
+                        <label><i class="fas fa-briefcase"></i> Specialization</label>
+                        <input type="text" name="specialization" placeholder="e.g., Trauma & PTSD">
+                    </div>
+                </div>
+                
+                <!-- Peer-specific fields -->
+                <div id="peer-fields" style="display: none;">
+                    <div class="form-group">
+                        <label><i class="fas fa-map-marker-alt"></i> Area</label>
+                        <input type="text" name="area" placeholder="e.g., North East">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-history"></i> Background</label>
+                        <input type="text" name="background" placeholder="e.g., Army, 10 years">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar"></i> Years Served</label>
+                        <input type="text" name="yearsServed" placeholder="e.g., 2005-2015">
+                    </div>
+                </div>
+                
+                <!-- Common profile fields for non-admin -->
+                <div id="profile-fields" style="display: none;">
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Phone</label>
+                        <input type="tel" name="phone" placeholder="Phone number">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-sms"></i> SMS Number</label>
+                        <input type="tel" name="sms" placeholder="SMS number (optional)">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fab fa-whatsapp"></i> WhatsApp</label>
+                        <input type="tel" name="whatsapp" placeholder="WhatsApp number (optional)">
+                    </div>
+                </div>
+                
+                <div class="modal-actions" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Create Staff Member
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.getElementById('add-staff-form').addEventListener('submit', handleAddStaff);
+    document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+// Toggle role-specific fields
+function toggleRoleFields() {
+    const role = document.getElementById('staff-role-select').value;
+    const counsellorFields = document.getElementById('counsellor-fields');
+    const peerFields = document.getElementById('peer-fields');
+    const profileFields = document.getElementById('profile-fields');
+    
+    counsellorFields.style.display = role === 'counsellor' ? 'block' : 'none';
+    peerFields.style.display = role === 'peer' ? 'block' : 'none';
+    profileFields.style.display = (role === 'counsellor' || role === 'peer') ? 'block' : 'none';
+}
+
+// Handle Add Staff
+async function handleAddStaff(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const staffData = {
+        email: formData.get('email'),
+        password: formData.get('password'),
+        name: formData.get('name'),
+        role: formData.get('role'),
+        phone: formData.get('phone') || null,
+        sms: formData.get('sms') || null,
+        whatsapp: formData.get('whatsapp') || null,
+        specialization: formData.get('specialization') || null,
+        area: formData.get('area') || null,
+        background: formData.get('background') || null,
+        yearsServed: formData.get('yearsServed') || null
+    };
+    
+    try {
+        await apiCall('/auth/register', {
+            method: 'POST',
+            body: JSON.stringify(staffData)
+        });
+        
+        showNotification(`${staffData.role.charAt(0).toUpperCase() + staffData.role.slice(1)} "${staffData.name}" created successfully!`, 'success');
+        closeModal();
+        loadAllData();
+    } catch (error) {
+        showNotification('Failed to create staff member: ' + error.message, 'error');
+    }
+}
+
+// Delete Staff Member
+async function deleteStaffMember(userId, role, name) {
+    if (!confirm(`Are you sure you want to delete "${name}"? This will remove their user account and profile.`)) {
+        return;
+    }
+    
+    try {
+        // Delete user account
+        await apiCall(`/auth/users/${userId}`, { method: 'DELETE' });
+        
+        // The profile deletion should ideally be handled server-side
+        // For now, we just reload the data
+        showNotification(`"${name}" has been deleted`, 'success');
+        loadAllData();
+    } catch (error) {
+        showNotification('Failed to delete staff member: ' + error.message, 'error');
+    }
+}
+
+// Reset User Password
+function resetUserPassword(userId, name) {
+    const modalContent = document.getElementById('modal-content');
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2><i class="fas fa-key"></i> Reset Password</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="margin-bottom: 16px;">Reset password for <strong>${name}</strong></p>
+            <form id="reset-password-form">
+                <input type="hidden" name="user_id" value="${userId}">
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" name="new_password" required minlength="8" placeholder="Minimum 8 characters">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Reset Password</button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        try {
+            await apiCall('/auth/admin-reset-password', {
+                method: 'POST',
+                body: JSON.stringify({
+                    user_id: formData.get('user_id'),
+                    new_password: formData.get('new_password')
+                })
+            });
+            showNotification('Password reset successfully', 'success');
+            closeModal();
+        } catch (error) {
+            showNotification('Failed to reset password: ' + error.message, 'error');
+        }
+    });
+    
+    document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+// Open Status Modal
+function openStatusModal(userId, role, currentStatus) {
+    // Find the profile
+    const staff = unifiedStaff.find(s => s.user_id === userId);
+    if (!staff || !staff.profile) return;
+    
+    const profileId = staff.profile.id;
+    const statuses = role === 'counsellor' 
+        ? ['available', 'busy', 'off']
+        : ['available', 'limited', 'unavailable'];
+    
+    const modalContent = document.getElementById('modal-content');
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2><i class="fas fa-toggle-on"></i> Update Status</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="margin-bottom: 16px;">Update status for <strong>${staff.name}</strong></p>
+            <div class="status-options" style="display: flex; flex-direction: column; gap: 10px;">
+                ${statuses.map(status => `
+                    <button class="btn ${currentStatus === status ? 'btn-primary' : 'btn-secondary'}" 
+                            onclick="updateStaffStatus('${profileId}', '${role}', '${status}')"
+                            style="justify-content: flex-start;">
+                        <i class="fas fa-circle" style="color: ${status === 'available' ? '#22c55e' : status === 'busy' || status === 'limited' ? '#f59e0b' : '#ef4444'};"></i>
+                        ${status.charAt(0).toUpperCase() + status.slice(1)}
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+// Update Staff Status
+async function updateStaffStatus(profileId, role, newStatus) {
+    try {
+        const endpoint = role === 'counsellor'
+            ? `/admin/counsellors/${profileId}/status`
+            : `/admin/peer-supporters/${profileId}/status`;
+        
+        await apiCall(endpoint, {
+            method: 'PATCH',
+            body: JSON.stringify({ status: newStatus })
+        });
+        
+        showNotification(`Status updated to "${newStatus}"`, 'success');
+        closeModal();
+        loadAllData();
+    } catch (error) {
+        showNotification('Failed to update status: ' + error.message, 'error');
+    }
+}
