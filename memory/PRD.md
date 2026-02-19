@@ -241,15 +241,15 @@ When triggered offers:
 - Optional TURN server for NAT traversal
 
 ## Upcoming Tasks
-- P0: **Run Data Migration Script** - Encrypt all existing unencrypted PII in production database
-- P1: Fully integrate SIP calling into Mobile App with dedicated calling UI
-- P2: Add Legal Disclaimers to Staff Portal
-- Set up FreeSWITCH server for VoIP calls
-- Add Concerns section to Staff Portal
-- LMS course setup in WordPress/Tutor
-- Push notifications for safeguarding alerts
-- Training Portal API endpoint for WordPress/Tutor LMS integration
-- Persistent AI Chat History for logged-in users
+- **P0: Test WebRTC E2E** - Log into staff portal, set status available, test call from app
+- P1: Execute Data Migration Script - Encrypt existing PII in production database
+- P2: Training Portal API Endpoint for WordPress/LearnDash integration
+- P3: Implement "Calls" Tab in admin portal - real-time view of online staff and active calls
+- P4: Add Legal Disclaimers to Staff Portal
+
+## Known Issues
+- Most existing staff profiles have `user_id: null` - WebRTC only works for newly created staff
+- Call logs API returns 422 when phone is undefined - frontend has been patched to skip logging
 
 ## Future Tasks
 - Grounding techniques page
