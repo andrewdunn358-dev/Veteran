@@ -1933,6 +1933,68 @@ export default function AdminDashboard() {
           </View>
         </View>
       </Modal>
+
+      {/* SIP Extension Assignment Modal */}
+      <Modal visible={showSipModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Assign SIP Extension</Text>
+              <TouchableOpacity onPress={() => setShowSipModal(false)}>
+                <Ionicons name="close" size={24} color="#ffffff" />
+              </TouchableOpacity>
+            </View>
+
+            {selectedSipTarget && (
+              <View style={styles.sipModalInfo}>
+                <Text style={styles.sipModalLabel}>Assigning extension to:</Text>
+                <Text style={styles.sipModalName}>{selectedSipTarget.name}</Text>
+                <Text style={styles.sipModalType}>({selectedSipTarget.type})</Text>
+              </View>
+            )}
+
+            <ScrollView style={styles.modalForm}>
+              <Text style={styles.sipInputLabel}>Extension Number</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="e.g., 1000"
+                placeholderTextColor="#8899a6"
+                value={sipFormData.extension}
+                onChangeText={(text) => setSipFormData({ ...sipFormData, extension: text })}
+                keyboardType="number-pad"
+                data-testid="sip-extension-input"
+              />
+
+              <Text style={styles.sipInputLabel}>SIP Password</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Enter the SIP password"
+                placeholderTextColor="#8899a6"
+                value={sipFormData.password}
+                onChangeText={(text) => setSipFormData({ ...sipFormData, password: text })}
+                secureTextEntry
+                data-testid="sip-password-input"
+              />
+
+              <View style={styles.sipHelpBox}>
+                <Ionicons name="information-circle" size={16} color="#f59e0b" />
+                <Text style={styles.sipHelpText}>
+                  Get the extension and password from your FusionPBX admin panel. 
+                  The password will be encrypted before storing.
+                </Text>
+              </View>
+            </ScrollView>
+
+            <TouchableOpacity 
+              style={styles.saveButton} 
+              onPress={handleAssignSip}
+              data-testid="sip-save-button"
+            >
+              <Text style={styles.saveButtonText}>Assign Extension</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
