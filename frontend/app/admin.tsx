@@ -865,21 +865,22 @@ export default function AdminDashboard() {
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
         <View style={styles.tabs}>
-          {(['counsellors', 'peers', 'callbacks', 'alerts', 'orgs', 'resources', 'users', 'content', 'metrics'] as const).map((tab) => (
+          {(['counsellors', 'peers', 'callbacks', 'alerts', 'sip', 'orgs', 'resources', 'users', 'content', 'metrics'] as const).map((tab) => (
             <TouchableOpacity
               key={tab}
-              style={[styles.tab, activeTab === tab && styles.activeTab, (tab === 'alerts' && panicAlerts.filter(a => a.status === 'active').length > 0) && styles.alertTab]}
+              data-testid={`admin-tab-${tab}`}
+              style={[styles.tab, activeTab === tab && styles.activeTab, (tab === 'alerts' && panicAlerts.filter(a => a.status === 'active').length > 0) && styles.alertTab, tab === 'sip' && styles.sipTab]}
               onPress={() => setActiveTab(tab)}
             >
               <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab === 'orgs' ? 'Orgs' : tab === 'resources' ? 'Resources' : tab === 'callbacks' ? 'Callbacks' : tab === 'alerts' ? `Alerts${panicAlerts.filter(a => a.status === 'active').length > 0 ? ` (${panicAlerts.filter(a => a.status === 'active').length})` : ''}` : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab === 'orgs' ? 'Orgs' : tab === 'resources' ? 'Resources' : tab === 'callbacks' ? 'Callbacks' : tab === 'alerts' ? `Alerts${panicAlerts.filter(a => a.status === 'active').length > 0 ? ` (${panicAlerts.filter(a => a.status === 'active').length})` : ''}` : tab === 'sip' ? 'VoIP' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
 
-      {activeTab !== 'content' && activeTab !== 'metrics' && activeTab !== 'resources' && activeTab !== 'callbacks' && activeTab !== 'alerts' && (
+      {activeTab !== 'content' && activeTab !== 'metrics' && activeTab !== 'resources' && activeTab !== 'callbacks' && activeTab !== 'alerts' && activeTab !== 'sip' && (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
             <Ionicons name="add" size={20} color="#ffffff" />
