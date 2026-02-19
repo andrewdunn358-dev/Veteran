@@ -106,10 +106,49 @@ export default function CrisisSupport() {
     }
   };
 
-  const handleCall = (number: string, contactName: string = 'Unknown', contactType: string = 'crisis_line', contactId: string | null = null) => {
+  const handleCall = (number: string, contactName: string = 'Unknown', contactType: string = 'crisis_line', contactId: string | null = null, userId: string | null = null) => {
     logCallIntent(contactType, contactId, contactName, number, 'phone');
-    Linking.openURL(`tel:${number}`);
+    
+    // Use WebRTC for in-app calling if on web platform AND user_id is available (for counsellors only)
+    if (Platform.OS === 'web' && userId && contactType === 'counsellor') {
+      console.log('WebRTC: Initiating call to counsellor', contactName, 'user_id:', userId);
+      setCallingCounsellorName(contactName);
+      setIsInitiatingCall(true);
+      
+      initiateCall(userId, contactName).catch((error) => {
+        console.error('WebRTC call failed:', error);
+        setIsInitiatingCall(false);
+        Alert.alert('Call Failed', 'Unable to connect. Please try again.');
+      });
+    } else if (Platform.OS === 'web' && !userId && contactType === 'counsellor') {
+      // Counsellor doesn't have WebRTC set up, show message
+      Alert.alert(
+        'In-App Calling Not Available',
+        'This counsellor hasn\'t set up in-app calling yet. Would you like to call their phone instead?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Call Phone', onPress: () => Linking.openURL(`tel:${number}`) }
+        ]
+      );
+    } else {
+      // Crisis lines or native app - use phone dialer directly
+      Linking.openURL(`tel:${number}`);
+    }
   };
+
+  // Handle call end
+  const handleEndCall = () => {
+    endCall();
+    setIsInitiatingCall(false);
+    setCallingCounsellorName('');
+  };
+
+  // Update initiating state when call state changes
+  useEffect(() => {
+    if (callState !== 'idle' && isInitiatingCall) {
+      setIsInitiatingCall(false);
+    }
+  }, [callState]);
 
   const handleSMS = (number: string, contactName: string = 'Unknown', contactType: string = 'crisis_line', contactId: string | null = null) => {
     logCallIntent(contactType, contactId, contactName, number, 'sms');
