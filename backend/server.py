@@ -2265,9 +2265,9 @@ async def get_panic_alerts(
     current_user: User = Depends(get_current_user),
     status: Optional[str] = None
 ):
-    """Get panic alerts (counsellors and admins only)"""
-    if current_user.role not in ["admin", "counsellor"]:
-        raise HTTPException(status_code=403, detail="Only counsellors and admins can view panic alerts")
+    """Get panic alerts (all staff can view)"""
+    if current_user.role not in ["admin", "counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Only staff can view panic alerts")
     
     try:
         query = {}
