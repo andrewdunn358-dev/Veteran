@@ -172,13 +172,14 @@ function handleLogout() {
 // Load All Data
 async function loadAllData() {
     try {
-        const [counsellorsData, peersData, orgsData, usersData, contentData, resourcesData] = await Promise.all([
+        const [counsellorsData, peersData, orgsData, usersData, contentData, resourcesData, unifiedStaffData] = await Promise.all([
             apiCall('/counsellors'),
             apiCall('/peer-supporters'),
             apiCall('/organizations'),
             apiCall('/auth/users'),
             apiCall('/content'),
-            apiCall('/resources').catch(() => [])  // Resources might not exist yet
+            apiCall('/resources').catch(() => []),  // Resources might not exist yet
+            apiCall('/admin/unified-staff').catch(() => [])  // Unified staff view
         ]);
         
         counsellors = counsellorsData;
@@ -187,7 +188,9 @@ async function loadAllData() {
         users = usersData;
         content = contentData;
         resources = resourcesData;
+        unifiedStaff = unifiedStaffData;
         
+        renderUnifiedStaff();
         renderCounsellors();
         renderPeers();
         renderOrganizations();
