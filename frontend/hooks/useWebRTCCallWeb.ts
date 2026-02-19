@@ -54,15 +54,29 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
 
   // Initialize socket connection
   const initializeSocket = useCallback(() => {
-    if (Platform.OS !== 'web' || socketRef.current?.connected) return;
+    if (Platform.OS !== 'web') return;
+    if (socketRef.current?.connected) {
+      console.log('WebRTC: Socket already connected');
+      return;
+    }
     
-    const backendUrl = API_URL.replace('/api', '');
-    console.log('WebRTC: Connecting to', backendUrl);
+    // Don't create duplicate sockets
+    if (socketRef.current) {
+      console.log('WebRTC: Socket exists but not connected, reconnecting...');
+      socketRef.current.connect();
+      return;
+    }
+    
+    // The backend URL already doesn't have /api suffix
+    const backendUrl = API_URL;
+    console.log('WebRTC: Connecting to signaling server at', backendUrl);
     
     socketRef.current = io(backendUrl, {
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      timeout: 10000,
     });
 
     socketRef.current.on('connect', () => {
