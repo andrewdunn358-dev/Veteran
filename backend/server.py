@@ -243,6 +243,8 @@ class PeerSupporterCreate(BaseModel):
     sms: Optional[str] = None
     whatsapp: Optional[str] = None
     user_id: Optional[str] = None
+    sip_extension: Optional[str] = None  # SIP extension number (e.g., "1002")
+    sip_password: Optional[str] = None   # SIP extension password
 
 class PeerSupporter(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -255,6 +257,8 @@ class PeerSupporter(BaseModel):
     sms: Optional[str] = None
     whatsapp: Optional[str] = None
     user_id: Optional[str] = None
+    sip_extension: Optional[str] = None  # SIP extension number
+    sip_password: Optional[str] = None   # SIP extension password (encrypted)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class PeerSupporterStatusUpdate(BaseModel):
