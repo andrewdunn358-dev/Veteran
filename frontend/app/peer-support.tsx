@@ -143,7 +143,10 @@ export default function PeerSupport() {
   };
 
   const handleCallVeteran = async (phone: string, name: string = 'Peer Supporter', id: string | null = null, userId: string | null = null) => {
-    logCallIntent('peer', id, name, phone, 'phone');
+    // Only log call intent if we have a phone number
+    if (phone) {
+      logCallIntent('peer', id, name, phone, 'phone');
+    }
     
     // Use WebRTC for in-app calling if on web platform AND user_id is available
     if (Platform.OS === 'web' && userId) {
@@ -157,18 +160,33 @@ export default function PeerSupport() {
       } catch (error) {
         console.error('WebRTC call failed:', error);
         setIsInitiatingCall(false);
-        Alert.alert('Call Failed', 'Unable to connect. Please try again.');
+        // Use window.alert for web since RN Alert.alert doesn't work on web
+        if (typeof window !== 'undefined') {
+          window.alert('Call Failed: Unable to connect. Please try again.');
+        } else {
+          Alert.alert('Call Failed', 'Unable to connect. Please try again.');
+        }
       }
     } else if (Platform.OS === 'web' && !userId) {
-      // Staff member doesn't have WebRTC set up, show message
-      Alert.alert(
-        'In-App Calling Not Available',
-        'This peer supporter hasn\'t set up in-app calling yet. Would you like to call their phone instead?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Call Phone', onPress: () => Linking.openURL(`tel:${phone}`) }
-        ]
-      );
+      // Staff member doesn't have WebRTC set up, show message using window.confirm for web
+      if (typeof window !== 'undefined') {
+        const userWantsToCall = window.confirm(
+          'In-App Calling Not Available\n\n' +
+          'This peer supporter hasn\'t set up in-app calling yet. Would you like to call their phone instead?'
+        );
+        if (userWantsToCall && phone) {
+          Linking.openURL(`tel:${phone}`);
+        }
+      } else {
+        Alert.alert(
+          'In-App Calling Not Available',
+          'This peer supporter hasn\'t set up in-app calling yet. Would you like to call their phone instead?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Call Phone', onPress: () => Linking.openURL(`tel:${phone}`) }
+          ]
+        );
+      }
     } else {
       // Native app - use phone dialer directly
       Linking.openURL(`tel:${phone}`);
