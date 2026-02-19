@@ -240,15 +240,20 @@ async function initPortal() {
 // Initialize SIP Phone with user's credentials
 async function initializeWebRTCPhone() {
     try {
+        console.log('=== WebRTC Phone Init Starting ===');
+        
         // Check if WebRTCPhone is available
         if (typeof WebRTCPhone === 'undefined') {
-            console.log('WebRTC Phone module not loaded');
+            console.error('WebRTC Phone module not loaded - check if webrtc-phone.js is included');
             updatePhoneStatusUI('unavailable');
+            alert('WebRTC Phone Error: Module not loaded. Check browser console.');
             return;
         }
         
         // Get the backend URL for WebSocket connection
-        var backendUrl = CONFIG.API_URL.replace('/api', '');
+        var backendUrl = CONFIG.API_URL;
+        console.log('Backend URL for WebRTC:', backendUrl);
+        console.log('Current User:', currentUser);
         
         // Initialize WebRTC phone
         var success = WebRTCPhone.init(
@@ -263,8 +268,9 @@ async function initializeWebRTCPhone() {
         }
         
     } catch (error) {
-        console.log('WebRTC Phone initialization skipped:', error.message);
+        console.error('WebRTC Phone initialization failed:', error);
         updatePhoneStatusUI('error');
+        alert('WebRTC Phone Error: ' + error.message);
     }
 }
 
