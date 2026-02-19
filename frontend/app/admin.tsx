@@ -158,7 +158,7 @@ export default function AdminDashboard() {
     setIsLoading(true);
     try {
       const authHeaders = { 'Authorization': `Bearer ${token}` };
-      const [counsellorsRes, peersRes, orgsRes, resourcesRes, usersRes, contentRes, metricsRes, callbacksRes, alertsRes] = await Promise.all([
+      const [counsellorsRes, peersRes, orgsRes, resourcesRes, usersRes, contentRes, metricsRes, callbacksRes, alertsRes, sipRes] = await Promise.all([
         fetch(`${API_URL}/api/counsellors`, { headers: authHeaders }),
         fetch(`${API_URL}/api/peer-supporters`, { headers: authHeaders }),
         fetch(`${API_URL}/api/organizations`),
@@ -168,6 +168,7 @@ export default function AdminDashboard() {
         fetch(`${API_URL}/api/call-logs`, { headers: authHeaders }),
         fetch(`${API_URL}/api/callbacks`, { headers: authHeaders }),
         fetch(`${API_URL}/api/panic-alerts`, { headers: authHeaders }),
+        fetch(`${API_URL}/api/admin/sip-extensions`, { headers: authHeaders }),
       ]);
       
       if (counsellorsRes.ok) setCounsellors(await counsellorsRes.json());
@@ -179,6 +180,10 @@ export default function AdminDashboard() {
       if (metricsRes.ok) setCallMetrics(await metricsRes.json());
       if (callbacksRes.ok) setCallbacks(await callbacksRes.json());
       if (alertsRes.ok) setPanicAlerts(await alertsRes.json());
+      if (sipRes.ok) {
+        const sipData = await sipRes.json();
+        setSipAssignments(sipData.assignments || []);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
