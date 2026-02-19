@@ -2146,170 +2146,130 @@ async function submitEditResource() {
 }
 
 // ==========================================
-// VoIP Extension Management
+// Calls Management (WebRTC)
 // ==========================================
 
-// Render VoIP Staff List
-function renderVoIPStaff() {
-    const container = document.getElementById('voip-staff-list');
+// Render Calls Tab
+async function renderCallsTab() {
+    await fetchOnlineStaff();
+    await fetchActiveCalls();
+}
+
+// Refresh calls data
+async function refreshCallsData() {
+    showNotification('Refreshing...', 'info');
+    await renderCallsTab();
+    showNotification('Data refreshed', 'success');
+}
+
+// Fetch online staff
+async function fetchOnlineStaff() {
+    const container = document.getElementById('online-staff-list');
+    const countBadge = document.getElementById('online-count');
     if (!container) return;
     
-    // Combine counsellors and peers
-    const allStaff = [
-        ...counsellors.map(c => ({ ...c, type: 'counsellor', displayName: c.name })),
-        ...peers.map(p => ({ ...p, type: 'peer', displayName: p.firstName || p.name }))
-    ];
-    
-    if (allStaff.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state" style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                <i class="fas fa-users" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                <p>No staff members found. Add counsellors or peer supporters first.</p>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = allStaff.map(staff => {
-        const hasSip = staff.sip_extension;
-        const typeColor = staff.type === 'counsellor' ? '#22c55e' : '#3b82f6';
-        const typeIcon = staff.type === 'counsellor' ? 'user-md' : 'users';
+    try {
+        const response = await apiCall('/webrtc/online-staff');
+        const staff = response.staff || [];
         
-        return `
-            <div class="card voip-card ${hasSip ? 'has-sip' : ''}" style="border: ${hasSip ? '2px solid #8b5cf6' : '1px solid var(--border-color)'}; background: ${hasSip ? 'rgba(139, 92, 246, 0.05)' : 'var(--card-bg)'};">
-                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-${typeIcon}" style="color: ${typeColor};"></i>
-                        <strong style="color: var(--text-primary);">${staff.displayName}</strong>
-                        <span class="badge" style="background: ${typeColor}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; text-transform: capitalize;">
-                            ${staff.type}
+        if (countBadge) countBadge.textContent = staff.length;
+        
+        if (staff.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                    <i class="fas fa-user-slash" style="font-size: 32px; opacity: 0.5; margin-bottom: 10px;"></i>
+                    <p>No staff members online</p>
+                    <small>Staff will appear here when they log into the Staff Portal</small>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = staff.map(s => {
+            const typeColor = s.user_type === 'counsellor' ? '#22c55e' : '#3b82f6';
+            const typeIcon = s.user_type === 'counsellor' ? 'user-md' : 'hands-helping';
+            const statusColor = s.status === 'available' ? '#22c55e' : s.status === 'in_call' ? '#f59e0b' : '#6b7280';
+            
+            return `
+                <div class="card" style="border-left: 3px solid ${typeColor};">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-${typeIcon}" style="color: ${typeColor};"></i>
+                            <strong style="color: var(--text-primary);">${s.name}</strong>
+                            <span class="badge" style="background: ${typeColor}; color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px;">
+                                ${s.user_type}
+                            </span>
+                        </div>
+                        <span style="background: ${statusColor}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; text-transform: capitalize;">
+                            ${s.status.replace('_', ' ')}
                         </span>
                     </div>
-                    ${hasSip ? `
-                        <span class="sip-badge" style="background: #8b5cf6; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
-                            <i class="fas fa-phone"></i> Ext. ${staff.sip_extension}
-                        </span>
-                    ` : `
-                        <span style="color: var(--text-muted); font-size: 12px;">No Extension</span>
-                    `}
                 </div>
-                <div class="card-actions" style="margin-top: 12px; display: flex; gap: 8px;">
-                    ${hasSip ? `
-                        <button class="btn btn-danger btn-small" onclick="removeSipExtension('${staff.id}', '${staff.type}', '${staff.displayName}')">
-                            <i class="fas fa-times-circle"></i> Remove SIP
-                        </button>
-                    ` : `
-                        <button class="btn btn-primary btn-small" onclick="openAssignSipModal('${staff.id}', '${staff.type}', '${staff.displayName}')" style="background: #8b5cf6;">
-                            <i class="fas fa-plus-circle"></i> Assign Extension
-                        </button>
-                    `}
-                </div>
-            </div>
-        `;
-    }).join('');
+            `;
+        }).join('');
+        
+    } catch (error) {
+        container.innerHTML = `<p style="color: var(--error);">Failed to load online staff</p>`;
+    }
 }
 
-// Open Assign SIP Modal
-function openAssignSipModal(staffId, staffType, staffName) {
-    const modalContent = document.getElementById('modal-content');
-    modalContent.innerHTML = `
-        <div class="modal-header">
-            <h2><i class="fas fa-phone-volume" style="color: #8b5cf6;"></i> Assign SIP Extension</h2>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-                <span style="color: var(--text-muted); font-size: 12px;">Assigning to:</span>
-                <p style="color: var(--text-primary); font-size: 18px; font-weight: 600; margin: 4px 0;">${staffName}</p>
-                <span style="color: #8b5cf6; font-size: 12px; text-transform: capitalize;">(${staffType})</span>
-            </div>
-            <form id="assign-sip-form">
-                <input type="hidden" name="staffId" value="${staffId}">
-                <input type="hidden" name="staffType" value="${staffType}">
-                
-                <div class="form-group">
-                    <label><i class="fas fa-hashtag"></i> Extension Number</label>
-                    <input type="text" name="extension" required placeholder="e.g., 1000" pattern="[0-9]+" title="Enter numbers only">
-                </div>
-                
-                <div class="form-group">
-                    <label><i class="fas fa-key"></i> SIP Password</label>
-                    <input type="password" name="password" required placeholder="Enter SIP password">
-                </div>
-                
-                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 12px; margin-top: 16px;">
-                    <p style="color: #f59e0b; font-size: 13px; margin: 0;">
-                        <i class="fas fa-info-circle"></i> 
-                        Get the extension and password from your FusionPBX admin panel. 
-                        The password will be encrypted before storing.
-                    </p>
-                </div>
-                
-                <div class="modal-actions" style="margin-top: 20px;">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" style="background: #8b5cf6;">
-                        <i class="fas fa-check"></i> Assign Extension
-                    </button>
-                </div>
-            </form>
-        </div>
-    `;
-    
-    document.getElementById('assign-sip-form').addEventListener('submit', handleAssignSip);
-    document.getElementById('modal-overlay').classList.remove('hidden');
-}
-
-// Handle Assign SIP
-async function handleAssignSip(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(e.target);
-    const staffId = formData.get('staffId');
-    const staffType = formData.get('staffType');
-    const extension = formData.get('extension');
-    const password = formData.get('password');
+// Fetch active calls
+async function fetchActiveCalls() {
+    const container = document.getElementById('active-calls-list');
+    const countBadge = document.getElementById('calls-count');
+    if (!container) return;
     
     try {
-        const endpoint = staffType === 'counsellor' 
-            ? `/admin/counsellors/${staffId}/sip`
-            : `/admin/peer-supporters/${staffId}/sip`;
+        const response = await apiCall('/webrtc/active-calls');
+        const calls = response.calls || [];
         
-        await apiCall(endpoint, {
-            method: 'PATCH',
-            body: JSON.stringify({
-                sip_extension: extension,
-                sip_password: password
-            })
-        });
+        if (countBadge) countBadge.textContent = calls.length;
         
-        showNotification(`SIP extension ${extension} assigned successfully`, 'success');
-        closeModal();
-        loadAllData();
+        if (calls.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                    <i class="fas fa-phone-slash" style="font-size: 32px; opacity: 0.5; margin-bottom: 10px;"></i>
+                    <p>No active calls</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = calls.map(call => {
+            const duration = call.started_at ? getCallDuration(call.started_at) : '00:00';
+            const statusColor = call.status === 'ringing' ? '#f59e0b' : '#22c55e';
+            
+            return `
+                <div class="card" style="border-left: 3px solid ${statusColor};">
+                    <div class="card-header">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                            <i class="fas fa-phone-volume" style="color: ${statusColor};"></i>
+                            <strong style="color: var(--text-primary);">${call.caller_name} → ${call.callee_name}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
+                            <span><i class="fas fa-clock"></i> ${duration}</span>
+                            <span style="background: ${statusColor}; color: white; padding: 2px 8px; border-radius: 10px; text-transform: capitalize;">
+                                ${call.status}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
     } catch (error) {
-        showNotification('Failed to assign SIP extension: ' + error.message, 'error');
+        container.innerHTML = `<p style="color: var(--error);">Failed to load active calls</p>`;
     }
 }
 
-// Remove SIP Extension
-async function removeSipExtension(staffId, staffType, staffName) {
-    if (!confirm(`Remove SIP extension from ${staffName}?`)) {
-        return;
-    }
-    
-    try {
-        const endpoint = staffType === 'counsellor' 
-            ? `/admin/counsellors/${staffId}/sip`
-            : `/admin/peer-supporters/${staffId}/sip`;
-        
-        await apiCall(endpoint, {
-            method: 'DELETE'
-        });
-        
-        showNotification(`SIP extension removed from ${staffName}`, 'success');
-        loadAllData();
-    } catch (error) {
-        showNotification('Failed to remove SIP extension: ' + error.message, 'error');
-    }
+// Calculate call duration
+function getCallDuration(startedAt) {
+    const start = new Date(startedAt);
+    const now = new Date();
+    const diffMs = now - start;
+    const mins = Math.floor(diffMs / 60000);
+    const secs = Math.floor((diffMs % 60000) / 1000);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
 // ==========================================
