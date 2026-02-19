@@ -1486,7 +1486,7 @@ async def update_counsellor(
     updated = await db.counsellors.find_one({"id": counsellor_id})
     return Counsellor(**updated)
 
-@api_router.patch("/counsellors/{counsellor_id}/status", response_model=Counsellor)
+@api_router.patch("/counsellors/{counsellor_id}/status")
 async def update_counsellor_status(
     counsellor_id: str,
     status_update: CounsellorStatusUpdate,
@@ -1503,11 +1503,10 @@ async def update_counsellor_status(
     
     result = await db.counsellors.update_one(
         {"id": counsellor_id},
-        {"$set": status_update.dict(exclude_unset=True)}
+        {"$set": {"status": status_update.status}}
     )
     
-    updated = await db.counsellors.find_one({"id": counsellor_id})
-    return Counsellor(**updated)
+    return {"success": True, "status": status_update.status}
 
 @api_router.delete("/counsellors/{counsellor_id}")
 async def delete_counsellor(
