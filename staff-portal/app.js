@@ -238,37 +238,32 @@ async function initPortal() {
 }
 
 // Initialize SIP Phone with user's credentials
-async function initializeSIPPhone() {
+async function initializeWebRTCPhone() {
     try {
-        // Check if SIPPhone is available
-        if (typeof SIPPhone === 'undefined') {
-            console.log('SIP Phone module not loaded');
+        // Check if WebRTCPhone is available
+        if (typeof WebRTCPhone === 'undefined') {
+            console.log('WebRTC Phone module not loaded');
             updatePhoneStatusUI('unavailable');
             return;
         }
         
-        // Fetch SIP credentials from server
-        var response = await apiCall('/staff/my-sip-credentials');
+        // Get the backend URL for WebSocket connection
+        var backendUrl = CONFIG.API_URL.replace('/api', '');
         
-        if (!response.has_sip) {
-            console.log('No SIP extension assigned to this user');
-            updatePhoneStatusUI('no-extension');
-            return;
-        }
-        
-        // Initialize SIP phone
-        var success = SIPPhone.init(
-            response.sip_extension,
-            response.display_name || currentUser.name,
-            response.sip_password
+        // Initialize WebRTC phone
+        var success = WebRTCPhone.init(
+            backendUrl,
+            currentUser.id,
+            currentUser.role === 'counsellor' ? 'counsellor' : 'peer',
+            currentUser.name
         );
         
         if (success) {
-            console.log('SIP Phone initialized with extension:', response.sip_extension);
+            console.log('WebRTC Phone initialized for:', currentUser.name);
         }
         
     } catch (error) {
-        console.log('SIP Phone initialization skipped:', error.message);
+        console.log('WebRTC Phone initialization skipped:', error.message);
         updatePhoneStatusUI('error');
     }
 }
