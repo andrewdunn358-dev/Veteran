@@ -468,11 +468,27 @@ function showActiveCall(peerName) {
 }
 
 function hideCallUI() {
+    // Hide floating widget elements
     if (phoneUI.callInfo) phoneUI.callInfo.classList.add('hidden');
     if (phoneUI.incomingActions) phoneUI.incomingActions.classList.add('hidden');
     if (phoneUI.activeActions) phoneUI.activeActions.classList.add('hidden');
     if (phoneUI.container) phoneUI.container.classList.remove('ringing', 'in-call');
     if (phoneUI.callTimer) phoneUI.callTimer.textContent = '00:00';
+    
+    // Hide top-of-page elements
+    var incomingBanner = document.getElementById('webrtc-incoming-call');
+    var phoneIcon = document.querySelector('.phone-icon');
+    var callControls = document.getElementById('webrtc-call-controls');
+    
+    if (incomingBanner) {
+        incomingBanner.classList.add('hidden');
+    }
+    if (phoneIcon) {
+        phoneIcon.classList.remove('ringing', 'in-call');
+    }
+    if (callControls) {
+        callControls.classList.add('hidden');
+    }
 }
 
 function startCallTimer() {
