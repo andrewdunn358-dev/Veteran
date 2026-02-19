@@ -1439,7 +1439,22 @@ async def get_available_counsellors():
         {"status": "available"},
         {"id": 1, "name": 1, "specialization": 1, "status": 1, "user_id": 1, "_id": 0}
     ).to_list(1000)
-    return counsellors
+    
+    # Decrypt names for display
+    result = []
+    for c in counsellors:
+        counsellor_data = dict(c)
+        # Decrypt name if it's encrypted
+        if counsellor_data.get("name") and str(counsellor_data["name"]).startswith("ENC:"):
+            try:
+                counsellor_data["name"] = decrypt_field(counsellor_data["name"])
+            except Exception as e:
+                # If decryption fails, use a fallback name
+                logger.error(f"Failed to decrypt counsellor name: {e}")
+                counsellor_data["name"] = "Counsellor"
+        result.append(counsellor_data)
+    
+    return result
 
 @api_router.get("/counsellors/{counsellor_id}", response_model=Counsellor)
 async def get_counsellor(counsellor_id: str, current_user: User = Depends(get_current_user)):
