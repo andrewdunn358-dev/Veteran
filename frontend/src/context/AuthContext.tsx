@@ -19,7 +19,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // PRODUCTION URL - hardcoded to ensure correct backend
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://vets-crisis-support.preview.emergentagent.com';
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://battle-buddies-28.preview.emergentagent.com';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
