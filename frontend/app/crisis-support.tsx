@@ -28,6 +28,12 @@ export default function CrisisSupport() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // WebRTC calling
+  const { callState, callInfo, callDuration, initiateCall, endCall } = useWebRTCCall();
+  const [isInitiatingCall, setIsInitiatingCall] = useState(false);
+  const [callingCounsellorName, setCallingCounsellorName] = useState('');
+  const showCallModal = callState !== 'idle' || isInitiatingCall;
+
   // Fetch counsellors from API
   const fetchCounsellors = async () => {
     setIsLoading(true);
