@@ -2614,6 +2614,157 @@ async def admin_update_peer_status(
     updated = await db.peer_supporters.find_one({"id": peer_id}, {"_id": 0})
     return updated
 
+
+# ============ SIP EXTENSION MANAGEMENT ============
+
+class SIPExtensionAssign(BaseModel):
+    sip_extension: str
+    sip_password: str
+
+@api_router.get("/admin/sip-extensions")
+async def get_all_sip_assignments(current_user: User = Depends(require_role("admin"))):
+    """Get all SIP extension assignments for counsellors and peers"""
+    counsellors = await db.counsellors.find(
+        {"sip_extension": {"$exists": True, "$ne": None}},
+        {"_id": 0, "id": 1, "name": 1, "sip_extension": 1, "user_id": 1}
+    ).to_list(100)
+    
+    peers = await db.peer_supporters.find(
+        {"sip_extension": {"$exists": True, "$ne": None}},
+        {"_id": 0, "id": 1, "firstName": 1, "sip_extension": 1, "user_id": 1}
+    ).to_list(100)
+    
+    # Decrypt names
+    for c in counsellors:
+        c['name'] = decrypt_field(c.get('name', ''))
+        c['type'] = 'counsellor'
+    
+    for p in peers:
+        p['firstName'] = decrypt_field(p.get('firstName', ''))
+        p['name'] = p['firstName']  # Normalize field name
+        p['type'] = 'peer'
+    
+    return {
+        "assignments": counsellors + peers,
+        "total": len(counsellors) + len(peers)
+    }
+
+@api_router.patch("/admin/counsellors/{counsellor_id}/sip")
+async def assign_sip_to_counsellor(
+    counsellor_id: str,
+    sip_data: SIPExtensionAssign,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Assign or update SIP extension for a counsellor"""
+    counsellor = await db.counsellors.find_one({"id": counsellor_id})
+    if not counsellor:
+        raise HTTPException(status_code=404, detail="Counsellor not found")
+    
+    # Encrypt the password before storing
+    encrypted_password = encrypt_field(sip_data.sip_password)
+    
+    await db.counsellors.update_one(
+        {"id": counsellor_id},
+        {"$set": {
+            "sip_extension": sip_data.sip_extension,
+            "sip_password": encrypted_password
+        }}
+    )
+    
+    logging.info(f"SIP extension {sip_data.sip_extension} assigned to counsellor {counsellor_id}")
+    
+    return {
+        "message": "SIP extension assigned successfully",
+        "counsellor_id": counsellor_id,
+        "sip_extension": sip_data.sip_extension
+    }
+
+@api_router.patch("/admin/peer-supporters/{peer_id}/sip")
+async def assign_sip_to_peer(
+    peer_id: str,
+    sip_data: SIPExtensionAssign,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Assign or update SIP extension for a peer supporter"""
+    peer = await db.peer_supporters.find_one({"id": peer_id})
+    if not peer:
+        raise HTTPException(status_code=404, detail="Peer supporter not found")
+    
+    # Encrypt the password before storing
+    encrypted_password = encrypt_field(sip_data.sip_password)
+    
+    await db.peer_supporters.update_one(
+        {"id": peer_id},
+        {"$set": {
+            "sip_extension": sip_data.sip_extension,
+            "sip_password": encrypted_password
+        }}
+    )
+    
+    logging.info(f"SIP extension {sip_data.sip_extension} assigned to peer supporter {peer_id}")
+    
+    return {
+        "message": "SIP extension assigned successfully",
+        "peer_id": peer_id,
+        "sip_extension": sip_data.sip_extension
+    }
+
+@api_router.delete("/admin/counsellors/{counsellor_id}/sip")
+async def remove_sip_from_counsellor(
+    counsellor_id: str,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Remove SIP extension from a counsellor"""
+    await db.counsellors.update_one(
+        {"id": counsellor_id},
+        {"$unset": {"sip_extension": "", "sip_password": ""}}
+    )
+    return {"message": "SIP extension removed successfully"}
+
+@api_router.delete("/admin/peer-supporters/{peer_id}/sip")
+async def remove_sip_from_peer(
+    peer_id: str,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Remove SIP extension from a peer supporter"""
+    await db.peer_supporters.update_one(
+        {"id": peer_id},
+        {"$unset": {"sip_extension": "", "sip_password": ""}}
+    )
+    return {"message": "SIP extension removed successfully"}
+
+@api_router.get("/staff/my-sip-credentials")
+async def get_my_sip_credentials(current_user: User = Depends(get_current_user)):
+    """Get the current user's SIP credentials for phone registration"""
+    if current_user.role == "counsellor":
+        staff = await db.counsellors.find_one(
+            {"user_id": current_user.id},
+            {"_id": 0, "sip_extension": 1, "sip_password": 1, "name": 1}
+        )
+    elif current_user.role == "peer":
+        staff = await db.peer_supporters.find_one(
+            {"user_id": current_user.id},
+            {"_id": 0, "sip_extension": 1, "sip_password": 1, "firstName": 1}
+        )
+    else:
+        raise HTTPException(status_code=403, detail="Only staff can access SIP credentials")
+    
+    if not staff or not staff.get("sip_extension"):
+        return {"has_sip": False, "message": "No SIP extension assigned"}
+    
+    # Decrypt the password
+    decrypted_password = decrypt_field(staff.get("sip_password", ""))
+    display_name = decrypt_field(staff.get("name") or staff.get("firstName", ""))
+    
+    return {
+        "has_sip": True,
+        "sip_extension": staff["sip_extension"],
+        "sip_password": decrypted_password,
+        "display_name": display_name,
+        "sip_domain": "radiocheck.voip.synthesis-it.co.uk"
+    }
+
+
 # ============ PEER SUPPORT REGISTRATION (from app) ============
 
 async def send_peer_registration_notification(email: str, registration_time: datetime):
