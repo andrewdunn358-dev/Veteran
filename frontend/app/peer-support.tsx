@@ -145,8 +145,9 @@ export default function PeerSupport() {
   const handleCallVeteran = async (phone: string, name: string = 'Peer Supporter', id: string | null = null, userId: string | null = null) => {
     logCallIntent('peer', id, name, phone, 'phone');
     
-    // Use WebRTC for in-app calling if user_id is available
+    // Use WebRTC for in-app calling if on web platform AND user_id is available
     if (Platform.OS === 'web' && userId) {
+      console.log('WebRTC: Initiating call to', name, 'user_id:', userId);
       // Show calling modal immediately
       setCallingPeerName(name);
       setIsInitiatingCall(true);
@@ -158,8 +159,18 @@ export default function PeerSupport() {
         setIsInitiatingCall(false);
         Alert.alert('Call Failed', 'Unable to connect. Please try again.');
       }
+    } else if (Platform.OS === 'web' && !userId) {
+      // Staff member doesn't have WebRTC set up, show message
+      Alert.alert(
+        'In-App Calling Not Available',
+        'This peer supporter hasn\'t set up in-app calling yet. Would you like to call their phone instead?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Call Phone', onPress: () => Linking.openURL(`tel:${phone}`) }
+        ]
+      );
     } else {
-      // Fallback to phone dialer for native apps or if no user_id
+      // Native app - use phone dialer directly
       Linking.openURL(`tel:${phone}`);
     }
   };
