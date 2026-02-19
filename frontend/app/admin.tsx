@@ -1357,6 +1357,95 @@ export default function AdminDashboard() {
               </View>
             )
           )}
+
+          {/* SIP Extension Management Tab */}
+          {activeTab === 'sip' && (
+            <>
+              <View style={styles.sipHeader}>
+                <View style={styles.sipHeaderInfo}>
+                  <Ionicons name="call" size={24} color="#8b5cf6" />
+                  <View>
+                    <Text style={styles.sipHeaderTitle}>VoIP Extension Management</Text>
+                    <Text style={styles.sipHeaderSubtitle}>Assign SIP extensions to staff for in-app calling</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Available Extensions Info */}
+              <View style={styles.sipInfoCard}>
+                <View style={styles.sipInfoHeader}>
+                  <Ionicons name="information-circle" size={20} color="#4a90d9" />
+                  <Text style={styles.sipInfoTitle}>Available Extensions</Text>
+                </View>
+                <Text style={styles.sipInfoText}>
+                  Extensions 1000-1003 are configured on your FusionPBX server at radiocheck.voip.synthesis-it.co.uk
+                </Text>
+              </View>
+
+              {/* Staff List */}
+              {getAllStaffForSip().length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Ionicons name="people" size={48} color="#7c9cbf" />
+                  <Text style={styles.emptyText}>No staff members found</Text>
+                  <Text style={styles.emptySubtext}>Add counsellors or peer supporters first</Text>
+                </View>
+              ) : (
+                getAllStaffForSip().map((staff) => (
+                  <View key={`${staff.type}-${staff.id}`} style={[styles.card, staff.sip_extension && styles.sipAssignedCard]}>
+                    <View style={styles.cardHeader}>
+                      <View style={styles.sipStaffInfo}>
+                        <Ionicons 
+                          name={staff.type === 'counsellor' ? 'medkit' : 'people'} 
+                          size={18} 
+                          color={staff.type === 'counsellor' ? '#22c55e' : '#3b82f6'} 
+                        />
+                        <Text style={styles.cardName}>{staff.name}</Text>
+                        <View style={[styles.sipTypeBadge, { backgroundColor: staff.type === 'counsellor' ? '#22c55e' : '#3b82f6' }]}>
+                          <Text style={styles.sipTypeBadgeText}>{staff.type}</Text>
+                        </View>
+                      </View>
+                      {staff.sip_extension ? (
+                        <View style={styles.sipExtBadge}>
+                          <Ionicons name="call" size={14} color="#ffffff" />
+                          <Text style={styles.sipExtBadgeText}>Ext. {staff.sip_extension}</Text>
+                        </View>
+                      ) : (
+                        <View style={styles.sipNoExtBadge}>
+                          <Text style={styles.sipNoExtText}>No Extension</Text>
+                        </View>
+                      )}
+                    </View>
+
+                    <View style={styles.callbackActions}>
+                      {staff.sip_extension ? (
+                        <TouchableOpacity 
+                          style={styles.sipRemoveButton}
+                          onPress={() => handleRemoveSip(staff.id, staff.type, staff.name)}
+                          data-testid={`sip-remove-${staff.id}`}
+                        >
+                          <Ionicons name="close-circle" size={16} color="#ffffff" />
+                          <Text style={styles.actionButtonText}>Remove SIP</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity 
+                          style={styles.sipAssignButton}
+                          onPress={() => {
+                            setSelectedSipTarget(staff);
+                            setSipFormData({ extension: '', password: '' });
+                            setShowSipModal(true);
+                          }}
+                          data-testid={`sip-assign-${staff.id}`}
+                        >
+                          <Ionicons name="add-circle" size={16} color="#ffffff" />
+                          <Text style={styles.actionButtonText}>Assign Extension</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </View>
+                ))
+              )}
+            </>
+          )}
         </ScrollView>
       )}
 
