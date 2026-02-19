@@ -1432,12 +1432,12 @@ async def get_counsellors(current_user: User = Depends(get_current_user)):
     # Decrypt sensitive fields when retrieving
     return [Counsellor(**decrypt_document('counsellors', c)) for c in counsellors]
 
-@api_router.get("/counsellors/available", response_model=List[CounsellorPublic])
+@api_router.get("/counsellors/available")
 async def get_available_counsellors():
-    """Get only available counsellors - PUBLIC SAFE VIEW (no contact details)"""
+    """Get only available counsellors - PUBLIC SAFE VIEW (no contact details, includes user_id for WebRTC)"""
     counsellors = await db.counsellors.find(
         {"status": "available"},
-        {"id": 1, "name": 1, "specialization": 1, "status": 1, "_id": 0}
+        {"id": 1, "name": 1, "specialization": 1, "status": 1, "user_id": 1, "_id": 0}
     ).to_list(1000)
     return counsellors
 
