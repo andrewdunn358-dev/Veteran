@@ -103,6 +103,45 @@ When triggered offers:
 - [x] Feature list documentation
 - [x] Deployment instructions
 
+## Completed (Feb 19, 2026)
+
+### P0: VoIP Extension Management (Admin UI)
+- [x] Added "VoIP" tab to Admin Dashboard
+- [x] View all Counsellors and Peer Supporters in one list
+- [x] "Assign Extension" button opens modal to input extension number and password
+- [x] "Remove SIP" button revokes extension from staff
+- [x] Extensions encrypted before storing in database
+- [x] Info card shows available extensions on FusionPBX server
+
+**API Endpoints:**
+- `GET /api/admin/sip-extensions` - List all staff with SIP assignments
+- `PATCH /api/admin/counsellors/{id}/sip` - Assign SIP extension to counsellor
+- `PATCH /api/admin/peer-supporters/{id}/sip` - Assign SIP extension to peer supporter
+- `DELETE /api/admin/counsellors/{id}/sip` - Remove SIP extension from counsellor
+- `DELETE /api/admin/peer-supporters/{id}/sip` - Remove SIP extension from peer supporter
+
+### P1: Data Migration Script (PII Encryption)
+- [x] Created `/app/backend/scripts/migrate_encrypt_pii.py`
+- [x] Encrypts all existing unencrypted PII in production database
+- [x] Skips already-encrypted fields (prefixed with `ENC:`)
+- [x] Shows migration progress and summary
+- [x] Includes verification step after migration
+
+**Collections Migrated:**
+- counsellors, peer_supporters, callbacks, notes, safeguarding_alerts, concerns
+
+### P2: Legal Disclaimer Modal (AI Chat)
+- [x] Shows "Before We Begin" modal before AI chat starts
+- [x] Sections: What This Chat Is, What This Chat Is NOT, Crisis Support, Privacy Notice
+- [x] Crisis numbers: 999, Samaritans 116 123, Combat Stress 0800 138 1619
+- [x] "Go Back" returns to previous page
+- [x] "I Understand, Start Chat" starts the AI conversation
+- [x] Chat only initiates AFTER user accepts disclaimer
+
+**Files Modified:**
+- `/app/frontend/app/admin.tsx` - Added VoIP tab and SIP management UI
+- `/app/frontend/app/ai-chat.tsx` - Added legal disclaimer modal
+
 ## Completed (Feb 18, 2026)
 - [x] **Safeguarding Sensitivity Adjustment**: Raised AMBER threshold to 80+ (was 60), RED threshold to 120+. Modal now only triggers on RED level.
 - [x] **Back Button in Safeguarding Modal**: Added "Go Back" button in the callback request view so users aren't stuck.
