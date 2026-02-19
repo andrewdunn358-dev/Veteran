@@ -1168,8 +1168,8 @@ async def get_unified_staff(current_user: User = Depends(require_role("admin")))
     peers = await db.peer_supporters.find().to_list(1000)
     
     # Decrypt profiles
-    counsellors = [decrypt_document(c, "counsellors") for c in counsellors]
-    peers = [decrypt_document(p, "peer_supporters") for p in peers]
+    counsellors = [decrypt_document("counsellors", c) for c in counsellors]
+    peers = [decrypt_document("peer_supporters", p) for p in peers]
     
     # Build lookup maps
     counsellor_by_user = {c.get("user_id"): c for c in counsellors if c.get("user_id")}
