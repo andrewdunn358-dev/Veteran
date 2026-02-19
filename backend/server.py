@@ -176,6 +176,14 @@ class UserCreate(BaseModel):
     password: str
     role: str = Field(..., pattern="^(admin|counsellor|peer)$")
     name: str
+    # Optional profile fields - for counsellors/peers
+    phone: Optional[str] = None
+    specialization: Optional[str] = None  # For counsellors
+    area: Optional[str] = None  # For peers
+    background: Optional[str] = None  # For peers
+    yearsServed: Optional[str] = None  # For peers
+    sms: Optional[str] = None
+    whatsapp: Optional[str] = None
 
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
