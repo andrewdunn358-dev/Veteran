@@ -66,6 +66,13 @@ interface Resource {
   image_url?: string;
 }
 
+interface SIPAssignment {
+  id: string;
+  name: string;
+  type: 'counsellor' | 'peer';
+  sip_extension?: string;
+}
+
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'orgs' | 'resources' | 'users' | 'content' | 'metrics' | 'callbacks' | 'alerts' | 'sip'>('counsellors');
   const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
