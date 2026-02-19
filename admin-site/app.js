@@ -18,6 +18,8 @@ let organizations = [];
 let users = [];
 let content = {};
 let resources = [];
+let unifiedStaff = [];
+let currentStaffFilter = 'all';
 
 // API Helper
 async function apiCall(endpoint, options = {}) {
