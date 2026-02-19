@@ -5,17 +5,16 @@
  * This integrates with FreeSWITCH or any SIP server supporting WebSocket
  */
 
-// SIP Configuration - Update these for your server
+// SIP Configuration - RadioCheck VoIP Server
 const SIP_CONFIG = {
-    // WebSocket URL to your FreeSWITCH/Asterisk server
-    wsServer: 'wss://sip.yourdomain.com:7443',
+    // WebSocket URL to FusionPBX server
+    wsServer: 'wss://radiocheck.voip.synthesis-it.co.uk:7443',
     // SIP domain
-    domain: 'sip.yourdomain.com',
+    domain: 'radiocheck.voip.synthesis-it.co.uk',
     // STUN/TURN servers for NAT traversal
     iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
-        // Add TURN server for reliable connectivity through firewalls
-        // { urls: 'turn:turn.yourdomain.com:3478', username: 'user', credential: 'pass' }
+        // Add TURN server if needed for firewalls
     ]
 };
 
