@@ -3468,6 +3468,7 @@ app.add_middleware(
         "http://localhost:8081",
         "https://radiocheck.me",
         "https://www.radiocheck.me",
+        "https://app.radiocheck.me",
         "https://app.veteran.dbty.co.uk",
         "https://veteran.dbty.co.uk",
         "https://www.veteran.dbty.co.uk",
