@@ -77,6 +77,7 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
       reconnectionAttempts: 10,
       reconnectionDelay: 1000,
       timeout: 10000,
+      path: '/api/socket.io',  // Use /api path for Kubernetes ingress routing
     });
 
     socketRef.current.on('connect', () => {
