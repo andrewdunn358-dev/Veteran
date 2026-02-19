@@ -1535,6 +1535,10 @@ async def get_available_peer_supporters():
         {"status": {"$in": ["available", "limited"]}},
         {"id": 1, "firstName": 1, "area": 1, "status": 1, "user_id": 1, "_id": 0}
     ).to_list(1000)
+    # Decrypt firstName for each peer
+    for peer in peers:
+        if peer.get('firstName') and peer['firstName'].startswith('ENC:'):
+            peer['firstName'] = decrypt_field(peer['firstName'])
     return peers
 
 @api_router.get("/peer-supporters/{peer_id}", response_model=PeerSupporter)
