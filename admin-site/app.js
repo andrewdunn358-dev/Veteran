@@ -192,6 +192,7 @@ async function loadAllData() {
         renderUsers();
         renderResources();
         renderCMS();
+        renderVoIPStaff();
         
     } catch (error) {
         showNotification('Failed to load data: ' + error.message, 'error');
