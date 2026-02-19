@@ -205,6 +205,9 @@ async function initPortal() {
     // Load staff users for sharing
     await loadStaffUsers();
     
+    // Initialize SIP phone if credentials available
+    await initializeSIPPhone();
+    
     // Load data
     loadCallbacks();
     loadNotes();
@@ -232,6 +235,61 @@ async function initPortal() {
             // Note: Safeguarding and live chats are polled separately with sound support
         }
     }, 30000);
+}
+
+// Initialize SIP Phone with user's credentials
+async function initializeSIPPhone() {
+    try {
+        // Check if SIPPhone is available
+        if (typeof SIPPhone === 'undefined') {
+            console.log('SIP Phone module not loaded');
+            updatePhoneStatusUI('unavailable');
+            return;
+        }
+        
+        // Fetch SIP credentials from server
+        var response = await apiCall('/staff/my-sip-credentials');
+        
+        if (!response.has_sip) {
+            console.log('No SIP extension assigned to this user');
+            updatePhoneStatusUI('no-extension');
+            return;
+        }
+        
+        // Initialize SIP phone
+        var success = SIPPhone.init(
+            response.sip_extension,
+            response.display_name || currentUser.name,
+            response.sip_password
+        );
+        
+        if (success) {
+            console.log('SIP Phone initialized with extension:', response.sip_extension);
+        }
+        
+    } catch (error) {
+        console.log('SIP Phone initialization skipped:', error.message);
+        updatePhoneStatusUI('error');
+    }
+}
+
+// Update phone status in UI
+function updatePhoneStatusUI(status) {
+    var statusEl = document.getElementById('phone-status');
+    if (!statusEl) return;
+    
+    var statusMap = {
+        'unavailable': { text: 'Phone N/A', class: 'status-offline' },
+        'no-extension': { text: 'No Ext', class: 'status-offline' },
+        'error': { text: 'Phone Error', class: 'status-error' },
+        'connecting': { text: 'Connecting...', class: 'status-connecting' },
+        'registered': { text: 'Online', class: 'status-online' },
+        'disconnected': { text: 'Offline', class: 'status-offline' }
+    };
+    
+    var info = statusMap[status] || { text: status, class: '' };
+    statusEl.textContent = info.text;
+    statusEl.className = 'phone-status ' + info.class;
 }
 
 // Load My Profile
