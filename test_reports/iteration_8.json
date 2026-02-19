@@ -1,0 +1,34 @@
+{
+  "summary": "Tested WebRTC calling feature. Fixed critical issues: (1) Socket.IO path routing to backend via /api/socket.io, (2) RN Alert.alert not working on web - replaced with window.confirm(), (3) 422 error on call-logs when phone is undefined - added null check. WebRTC signaling server is fully functional, call initiation works for staff with user_id, fallback dialogs work for staff without user_id.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/call-logs", "issue": "Returns 422 when contact_phone is undefined (fixed in frontend by checking if phone exists before calling)"}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_8.json"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "RN Alert.alert() doesn't work on Expo web - must use window.alert/window.confirm for web platform",
+    "Socket.IO on Kubernetes requires custom path (/api/socket.io) to route through ingress to backend"
+  ],
+  "updated_files": [
+    "/app/backend/server.py - Changed socket_app mounting with custom path /api/socket.io and reassigned app to socket_app",
+    "/app/backend/webrtc_signaling.py - Added comment about path",
+    "/app/frontend/hooks/useWebRTCCallWeb.ts - Added path: '/api/socket.io' to Socket.IO connection config",
+    "/app/frontend/app/peer-support.tsx - Fixed Alert.alert to use window.confirm on web, added phone null check before logCallIntent",
+    "/app/frontend/app/crisis-support.tsx - Same fixes as peer-support.tsx"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "No auth required - anonymous calling",
+  "seed_data_creation": "Test Peer User with user_id already exists in database",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "WebRTC calling is working. Key points: (1) Socket.IO connects at /api/socket.io path, (2) Only Test Peer User has user_id set - other staff have null, (3) When staff has user_id, WebRTC call initiates and registers successfully, (4) When staff has no user_id, fallback dialog appears using window.confirm(), (5) Call fails with 'user_offline' when target is not connected to signaling server (expected behavior)",
+  "rca_of_the_issue": "Root causes identified: (1) Socket.IO was mounted at /socket.io but K8s ingress only routes /api/* to backend - fixed by mounting at /api/socket.io and configuring frontend to use this path, (2) React Native Alert.alert() silently fails on Expo web - replaced with window.confirm() for web platform detection"
+}
