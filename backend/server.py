@@ -3463,7 +3463,15 @@ app.include_router(api_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:8081",
+        "https://radiocheck.me",
+        "https://www.radiocheck.me",
+        "https://veterans-support-api.onrender.com",
+        "https://battle-buddies-ai.preview.emergentagent.com",
+    ],
+    allow_origin_regex=r"https://.*\.emergentagent\.com",
     allow_methods=["*"],
     allow_headers=["*"],
 )
