@@ -122,8 +122,8 @@ def decrypt_dict_fields(data: dict, fields: list) -> dict:
 
 # Define which fields to encrypt for each collection
 ENCRYPTED_FIELDS = {
-    'counsellors': ['name', 'phone', 'sms', 'whatsapp'],
-    'peer_supporters': ['firstName', 'phone', 'sms', 'whatsapp'],
+    'counsellors': ['name', 'phone', 'sms', 'whatsapp', 'sip_password'],
+    'peer_supporters': ['firstName', 'phone', 'sms', 'whatsapp', 'sip_password'],
     'callbacks': ['name', 'phone', 'email', 'message'],
     'notes': ['content', 'subject'],
     'safeguarding_alerts': ['ip_address', 'conversation_history'],
