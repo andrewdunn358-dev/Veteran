@@ -2035,3 +2035,170 @@ async function submitEditResource() {
         showNotification('Failed to update resource: ' + error.message, 'error');
     }
 }
+
+// ==========================================
+// VoIP Extension Management
+// ==========================================
+
+// Render VoIP Staff List
+function renderVoIPStaff() {
+    const container = document.getElementById('voip-staff-list');
+    if (!container) return;
+    
+    // Combine counsellors and peers
+    const allStaff = [
+        ...counsellors.map(c => ({ ...c, type: 'counsellor', displayName: c.name })),
+        ...peers.map(p => ({ ...p, type: 'peer', displayName: p.firstName || p.name }))
+    ];
+    
+    if (allStaff.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                <i class="fas fa-users" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>No staff members found. Add counsellors or peer supporters first.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = allStaff.map(staff => {
+        const hasSip = staff.sip_extension;
+        const typeColor = staff.type === 'counsellor' ? '#22c55e' : '#3b82f6';
+        const typeIcon = staff.type === 'counsellor' ? 'user-md' : 'users';
+        
+        return `
+            <div class="card voip-card ${hasSip ? 'has-sip' : ''}" style="border: ${hasSip ? '2px solid #8b5cf6' : '1px solid var(--border-color)'}; background: ${hasSip ? 'rgba(139, 92, 246, 0.05)' : 'var(--card-bg)'};">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-${typeIcon}" style="color: ${typeColor};"></i>
+                        <strong style="color: var(--text-primary);">${staff.displayName}</strong>
+                        <span class="badge" style="background: ${typeColor}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; text-transform: capitalize;">
+                            ${staff.type}
+                        </span>
+                    </div>
+                    ${hasSip ? `
+                        <span class="sip-badge" style="background: #8b5cf6; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-phone"></i> Ext. ${staff.sip_extension}
+                        </span>
+                    ` : `
+                        <span style="color: var(--text-muted); font-size: 12px;">No Extension</span>
+                    `}
+                </div>
+                <div class="card-actions" style="margin-top: 12px; display: flex; gap: 8px;">
+                    ${hasSip ? `
+                        <button class="btn btn-danger btn-small" onclick="removeSipExtension('${staff.id}', '${staff.type}', '${staff.displayName}')">
+                            <i class="fas fa-times-circle"></i> Remove SIP
+                        </button>
+                    ` : `
+                        <button class="btn btn-primary btn-small" onclick="openAssignSipModal('${staff.id}', '${staff.type}', '${staff.displayName}')" style="background: #8b5cf6;">
+                            <i class="fas fa-plus-circle"></i> Assign Extension
+                        </button>
+                    `}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Open Assign SIP Modal
+function openAssignSipModal(staffId, staffType, staffName) {
+    const modalContent = document.getElementById('modal-content');
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2><i class="fas fa-phone-volume" style="color: #8b5cf6;"></i> Assign SIP Extension</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <span style="color: var(--text-muted); font-size: 12px;">Assigning to:</span>
+                <p style="color: var(--text-primary); font-size: 18px; font-weight: 600; margin: 4px 0;">${staffName}</p>
+                <span style="color: #8b5cf6; font-size: 12px; text-transform: capitalize;">(${staffType})</span>
+            </div>
+            <form id="assign-sip-form">
+                <input type="hidden" name="staffId" value="${staffId}">
+                <input type="hidden" name="staffType" value="${staffType}">
+                
+                <div class="form-group">
+                    <label><i class="fas fa-hashtag"></i> Extension Number</label>
+                    <input type="text" name="extension" required placeholder="e.g., 1000" pattern="[0-9]+" title="Enter numbers only">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-key"></i> SIP Password</label>
+                    <input type="password" name="password" required placeholder="Enter SIP password">
+                </div>
+                
+                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 12px; margin-top: 16px;">
+                    <p style="color: #f59e0b; font-size: 13px; margin: 0;">
+                        <i class="fas fa-info-circle"></i> 
+                        Get the extension and password from your FusionPBX admin panel. 
+                        The password will be encrypted before storing.
+                    </p>
+                </div>
+                
+                <div class="modal-actions" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="background: #8b5cf6;">
+                        <i class="fas fa-check"></i> Assign Extension
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.getElementById('assign-sip-form').addEventListener('submit', handleAssignSip);
+    document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+// Handle Assign SIP
+async function handleAssignSip(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const staffId = formData.get('staffId');
+    const staffType = formData.get('staffType');
+    const extension = formData.get('extension');
+    const password = formData.get('password');
+    
+    try {
+        const endpoint = staffType === 'counsellor' 
+            ? `/admin/counsellors/${staffId}/sip`
+            : `/admin/peer-supporters/${staffId}/sip`;
+        
+        await apiCall(endpoint, {
+            method: 'PATCH',
+            body: JSON.stringify({
+                sip_extension: extension,
+                sip_password: password
+            })
+        });
+        
+        showNotification(`SIP extension ${extension} assigned successfully`, 'success');
+        closeModal();
+        loadAllData();
+    } catch (error) {
+        showNotification('Failed to assign SIP extension: ' + error.message, 'error');
+    }
+}
+
+// Remove SIP Extension
+async function removeSipExtension(staffId, staffType, staffName) {
+    if (!confirm(`Remove SIP extension from ${staffName}?`)) {
+        return;
+    }
+    
+    try {
+        const endpoint = staffType === 'counsellor' 
+            ? `/admin/counsellors/${staffId}/sip`
+            : `/admin/peer-supporters/${staffId}/sip`;
+        
+        await apiCall(endpoint, {
+            method: 'DELETE'
+        });
+        
+        showNotification(`SIP extension removed from ${staffName}`, 'success');
+        loadAllData();
+    } catch (error) {
+        showNotification('Failed to remove SIP extension: ' + error.message, 'error');
+    }
+}
