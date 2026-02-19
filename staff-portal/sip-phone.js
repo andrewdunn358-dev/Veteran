@@ -28,7 +28,7 @@ let localStream = null;
  * Initialize SIP User Agent
  * Call this after staff member logs in
  */
-function initializeSIP(staffId, staffName, password) {
+function initializeSIP(extension, staffName, password) {
     // Check if JsSIP is loaded
     if (typeof JsSIP === 'undefined') {
         console.error('JsSIP library not loaded');
@@ -36,8 +36,9 @@ function initializeSIP(staffId, staffName, password) {
         return false;
     }
 
-    // Generate SIP URI from staff ID
-    const sipUri = `sip:${staffId}@${SIP_CONFIG.domain}`;
+    // Generate SIP URI - format: extension@domain
+    const sipUri = `sip:${extension}@${SIP_CONFIG.domain}`;
+    console.log('SIP URI:', sipUri);
     
     // Create WebSocket connection
     const socket = new JsSIP.WebSocketInterface(SIP_CONFIG.wsServer);
@@ -46,11 +47,13 @@ function initializeSIP(staffId, staffName, password) {
     const configuration = {
         sockets: [socket],
         uri: sipUri,
-        password: password || staffId, // Use staff ID as default password
+        password: password,
         display_name: staffName,
         register: true,
         register_expires: 300, // Re-register every 5 minutes
         session_timers: false,
+        // Use authorization_user to set the username explicitly
+        authorization_user: extension,
         // WebRTC configuration
         pcConfig: {
             iceServers: SIP_CONFIG.iceServers
