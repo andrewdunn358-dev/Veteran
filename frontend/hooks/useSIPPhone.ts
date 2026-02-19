@@ -9,15 +9,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Platform, Alert } from 'react-native';
 
-// SIP Configuration
+// SIP Configuration - RadioCheck VoIP Server
 const SIP_CONFIG = {
   // Update these with your FreeSWITCH server details
-  wsServer: 'wss://sip.yourdomain.com:7443',
-  domain: 'sip.yourdomain.com',
+  wsServer: 'wss://radiocheck.voip.synthesis-it.co.uk:7443',
+  domain: 'radiocheck.voip.synthesis-it.co.uk',
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
-    // Add TURN server for NAT traversal
-    // { urls: 'turn:turn.yourdomain.com:3478', username: 'user', credential: 'pass' }
+    // Add TURN server for NAT traversal if needed
   ],
 };
 
