@@ -881,4 +881,56 @@ const styles = StyleSheet.create({
     color: '#b0c4de',
     lineHeight: 18,
   },
+  // Call Modal Styles
+  callModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  callModalContent: {
+    backgroundColor: '#1a2332',
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    minWidth: 280,
+    borderWidth: 1,
+    borderColor: '#2d3748',
+  },
+  callModalHeader: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  callModalTitle: {
+    fontSize: 18,
+    color: '#94a3b8',
+    marginTop: 16,
+  },
+  callModalPeerName: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginTop: 8,
+  },
+  callModalDuration: {
+    fontSize: 32,
+    fontWeight: '300',
+    color: '#22c55e',
+    marginTop: 12,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  callEndButton: {
+    backgroundColor: '#ef4444',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 30,
+    gap: 10,
+  },
+  callEndButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
