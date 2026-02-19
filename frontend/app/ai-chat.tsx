@@ -55,14 +55,27 @@ export default function AIChat() {
   const [availableStaff, setAvailableStaff] = useState<AvailableStaff>({ counsellors: [], peers: [] });
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [currentAlertId, setCurrentAlertId] = useState<string | null>(null);
+  const [showDisclaimerModal, setShowDisclaimerModal] = useState(true);
+  const [hasAcceptedDisclaimer, setHasAcceptedDisclaimer] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
-    // Fetch character info
-    fetchCharacterInfo();
-    // Send initial greeting
-    sendInitialGreeting();
-  }, [character]);
+    // Only start chat if disclaimer has been accepted
+    if (hasAcceptedDisclaimer) {
+      fetchCharacterInfo();
+      sendInitialGreeting();
+    }
+  }, [character, hasAcceptedDisclaimer]);
+
+  const handleAcceptDisclaimer = () => {
+    setShowDisclaimerModal(false);
+    setHasAcceptedDisclaimer(true);
+  };
+
+  const handleDeclineDisclaimer = () => {
+    setShowDisclaimerModal(false);
+    router.back();
+  };
 
   const fetchCharacterInfo = async () => {
     try {
