@@ -1158,6 +1158,140 @@ async def get_all_users(current_user: User = Depends(require_role("admin"))):
     users = await db.users.find().to_list(1000)
     return [User(**u) for u in users]
 
+@api_router.get("/admin/unified-staff")
+async def get_unified_staff(current_user: User = Depends(require_role("admin"))):
+    """Get all staff (counsellors and peers) with their user accounts in unified view"""
+    # Get all users
+    users = await db.users.find().to_list(1000)
+    # Get all counsellors and peers
+    counsellors = await db.counsellors.find().to_list(1000)
+    peers = await db.peer_supporters.find().to_list(1000)
+    
+    # Decrypt profiles
+    counsellors = [decrypt_document(c, "counsellors") for c in counsellors]
+    peers = [decrypt_document(p, "peer_supporters") for p in peers]
+    
+    # Build lookup maps
+    counsellor_by_user = {c.get("user_id"): c for c in counsellors if c.get("user_id")}
+    peer_by_user = {p.get("user_id"): p for p in peers if p.get("user_id")}
+    
+    unified = []
+    for user in users:
+        user_id = user.get("id")
+        role = user.get("role")
+        
+        staff_entry = {
+            "user_id": user_id,
+            "email": user.get("email"),
+            "name": user.get("name"),
+            "role": role,
+            "created_at": user.get("created_at"),
+            "has_profile": False,
+            "profile": None
+        }
+        
+        if role == "counsellor" and user_id in counsellor_by_user:
+            profile = counsellor_by_user[user_id]
+            staff_entry["has_profile"] = True
+            staff_entry["profile"] = {
+                "id": profile.get("id"),
+                "specialization": profile.get("specialization"),
+                "status": profile.get("status"),
+                "phone": profile.get("phone"),
+                "sms": profile.get("sms"),
+                "whatsapp": profile.get("whatsapp"),
+                "sip_extension": profile.get("sip_extension")
+            }
+        elif role == "peer" and user_id in peer_by_user:
+            profile = peer_by_user[user_id]
+            staff_entry["has_profile"] = True
+            staff_entry["profile"] = {
+                "id": profile.get("id"),
+                "area": profile.get("area"),
+                "background": profile.get("background"),
+                "yearsServed": profile.get("yearsServed"),
+                "status": profile.get("status"),
+                "phone": profile.get("phone"),
+                "sms": profile.get("sms"),
+                "whatsapp": profile.get("whatsapp"),
+                "sip_extension": profile.get("sip_extension")
+            }
+        elif role == "admin":
+            staff_entry["has_profile"] = True  # Admins don't need profiles
+            
+        unified.append(staff_entry)
+    
+    return unified
+
+@api_router.post("/admin/fix-missing-profiles")
+async def fix_missing_profiles(current_user: User = Depends(require_role("admin"))):
+    """Create missing profiles for counsellor/peer users that don't have one"""
+    users = await db.users.find({"role": {"$in": ["counsellor", "peer"]}}).to_list(1000)
+    
+    fixed_count = 0
+    already_linked = 0
+    
+    for user in users:
+        user_id = user.get("id")
+        role = user.get("role")
+        name = user.get("name", "Unknown")
+        
+        if role == "counsellor":
+            # Check if profile exists
+            existing = await db.counsellors.find_one({"user_id": user_id})
+            if not existing:
+                counsellor_data = {
+                    "id": str(uuid.uuid4()),
+                    "name": name,
+                    "specialization": "General Support",
+                    "status": "off",
+                    "next_available": None,
+                    "phone": "",
+                    "sms": None,
+                    "whatsapp": None,
+                    "user_id": user_id,
+                    "sip_extension": None,
+                    "sip_password": None,
+                    "created_at": datetime.utcnow()
+                }
+                counsellor_data = encrypt_document(counsellor_data, "counsellors")
+                await db.counsellors.insert_one(counsellor_data)
+                fixed_count += 1
+                logging.info(f"Created missing counsellor profile for user {user_id}")
+            else:
+                already_linked += 1
+                
+        elif role == "peer":
+            existing = await db.peer_supporters.find_one({"user_id": user_id})
+            if not existing:
+                peer_data = {
+                    "id": str(uuid.uuid4()),
+                    "firstName": name,
+                    "area": "General",
+                    "background": "Veteran",
+                    "yearsServed": "N/A",
+                    "status": "unavailable",
+                    "phone": "",
+                    "sms": None,
+                    "whatsapp": None,
+                    "user_id": user_id,
+                    "sip_extension": None,
+                    "sip_password": None,
+                    "created_at": datetime.utcnow()
+                }
+                peer_data = encrypt_document(peer_data, "peer_supporters")
+                await db.peer_supporters.insert_one(peer_data)
+                fixed_count += 1
+                logging.info(f"Created missing peer supporter profile for user {user_id}")
+            else:
+                already_linked += 1
+    
+    return {
+        "message": f"Fixed {fixed_count} missing profiles. {already_linked} were already linked.",
+        "fixed": fixed_count,
+        "already_linked": already_linked
+    }
+
 @api_router.delete("/auth/users/{user_id}")
 async def delete_user(user_id: str, current_user: User = Depends(require_role("admin"))):
     """Delete a user (admin only)"""
