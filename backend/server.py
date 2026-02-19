@@ -1014,7 +1014,7 @@ async def register_user(user_input: UserCreate, current_user: User = Depends(req
             "created_at": datetime.utcnow()
         }
         # Encrypt PII fields
-        counsellor_data = encrypt_document(counsellor_data, "counsellors")
+        counsellor_data = encrypt_document("counsellors", counsellor_data)
         await db.counsellors.insert_one(counsellor_data)
         logging.info(f"Auto-created counsellor profile for user {user_obj.id}")
         
@@ -1035,7 +1035,7 @@ async def register_user(user_input: UserCreate, current_user: User = Depends(req
             "created_at": datetime.utcnow()
         }
         # Encrypt PII fields
-        peer_data = encrypt_document(peer_data, "peer_supporters")
+        peer_data = encrypt_document("peer_supporters", peer_data)
         await db.peer_supporters.insert_one(peer_data)
         logging.info(f"Auto-created peer supporter profile for user {user_obj.id}")
     
@@ -1254,7 +1254,7 @@ async def fix_missing_profiles(current_user: User = Depends(require_role("admin"
                     "sip_password": None,
                     "created_at": datetime.utcnow()
                 }
-                counsellor_data = encrypt_document(counsellor_data, "counsellors")
+                counsellor_data = encrypt_document("counsellors", counsellor_data)
                 await db.counsellors.insert_one(counsellor_data)
                 fixed_count += 1
                 logging.info(f"Created missing counsellor profile for user {user_id}")
@@ -1279,7 +1279,7 @@ async def fix_missing_profiles(current_user: User = Depends(require_role("admin"
                     "sip_password": None,
                     "created_at": datetime.utcnow()
                 }
-                peer_data = encrypt_document(peer_data, "peer_supporters")
+                peer_data = encrypt_document("peer_supporters", peer_data)
                 await db.peer_supporters.insert_one(peer_data)
                 fixed_count += 1
                 logging.info(f"Created missing peer supporter profile for user {user_id}")
