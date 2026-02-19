@@ -105,6 +105,21 @@ When triggered offers:
 
 ## Completed (Feb 19, 2026)
 
+### Staff Management System Overhaul
+- [x] **Unified Staff Management** - Replaced separate Counsellors/Peers/Users tabs with single "Staff" tab
+- [x] **Auto-Profile Creation** - When creating a user with role 'counsellor' or 'peer', profile is auto-created
+- [x] **Fix Missing Profiles** - One-click button to create profiles for existing users without one
+- [x] **Filter by Role** - Filter staff list by All/Admins/Counsellors/Peers
+- [x] **Unified View** - See email, name, role, status, and profile details in one card
+- [x] **In-Place Actions** - Edit profile, change status, reset password, delete - all from one place
+
+**New API Endpoints:**
+- `GET /api/admin/unified-staff` - Get all staff with linked profile data
+- `POST /api/admin/fix-missing-profiles` - Create missing profiles for unlinked users
+
+**Updated API:**
+- `POST /api/auth/register` - Now accepts optional profile fields (phone, specialization, area, etc.) and auto-creates profile
+
 ### P0: VoIP Extension Management (Admin UI)
 - [x] Added "VoIP" tab to Admin Dashboard
 - [x] View all Counsellors and Peer Supporters in one list
