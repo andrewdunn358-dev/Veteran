@@ -65,6 +65,41 @@
         </header>
 
         <main class="portal-content">
+            <!-- WebRTC PHONE SECTION - TOP OF PAGE -->
+            <div id="webrtc-phone-section" class="section phone-section">
+                <div class="phone-status-bar">
+                    <div class="phone-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <div class="phone-info">
+                        <h3>In-App Calling</h3>
+                        <div id="webrtc-status" class="phone-status-text">
+                            <span class="status-dot offline"></span>
+                            <span id="webrtc-status-text">Initializing...</span>
+                        </div>
+                    </div>
+                    <div id="webrtc-call-controls" class="phone-controls hidden">
+                        <button class="btn btn-danger btn-sm" onclick="WebRTCPhone.endCall()">
+                            <i class="fas fa-phone-slash"></i> End Call
+                        </button>
+                    </div>
+                </div>
+                <div id="webrtc-incoming-call" class="incoming-call-banner hidden">
+                    <div class="caller-info">
+                        <i class="fas fa-user"></i>
+                        <span id="incoming-caller-name">Incoming Call...</span>
+                    </div>
+                    <div class="call-actions">
+                        <button class="btn btn-success" onclick="WebRTCPhone.acceptCall()">
+                            <i class="fas fa-phone"></i> Answer
+                        </button>
+                        <button class="btn btn-danger" onclick="WebRTCPhone.rejectCall()">
+                            <i class="fas fa-phone-slash"></i> Decline
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- TOP ROW: Status + Panic -->
             <div class="top-row">
                 <!-- Status Section -->
