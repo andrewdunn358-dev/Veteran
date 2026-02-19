@@ -136,7 +136,7 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
 
     // Call rejected/ended/failed
     socketRef.current.on('call_rejected', () => {
-      Alert.alert('Call Declined', 'The call was declined.');
+      showAlert('Call Declined', 'The call was declined.');
       cleanupCall();
     });
 
@@ -145,7 +145,8 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     });
 
     socketRef.current.on('call_failed', (data: any) => {
-      Alert.alert('Call Failed', data.message || 'Unable to connect.');
+      console.log('WebRTC: Call failed', data);
+      showAlert('Call Failed', data.message || 'The person you are trying to call is not available. They may need to log into the staff portal first.');
       cleanupCall();
     });
 
