@@ -21,6 +21,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Create Socket.IO server
+# Use /api/socket.io path to work with Kubernetes ingress routing
 sio = socketio.AsyncServer(
     async_mode='asgi',
     cors_allowed_origins='*',  # Configure for production
