@@ -107,7 +107,10 @@ export default function CrisisSupport() {
   };
 
   const handleCall = (number: string, contactName: string = 'Unknown', contactType: string = 'crisis_line', contactId: string | null = null, userId: string | null = null) => {
-    logCallIntent(contactType, contactId, contactName, number, 'phone');
+    // Only log call intent if we have a phone number
+    if (number) {
+      logCallIntent(contactType, contactId, contactName, number, 'phone');
+    }
     
     // Use WebRTC for in-app calling if on web platform AND user_id is available (for counsellors only)
     if (Platform.OS === 'web' && userId && contactType === 'counsellor') {
@@ -118,18 +121,33 @@ export default function CrisisSupport() {
       initiateCall(userId, contactName).catch((error) => {
         console.error('WebRTC call failed:', error);
         setIsInitiatingCall(false);
-        Alert.alert('Call Failed', 'Unable to connect. Please try again.');
+        // Use window.alert for web since RN Alert.alert doesn't work on web
+        if (typeof window !== 'undefined') {
+          window.alert('Call Failed: Unable to connect. Please try again.');
+        } else {
+          Alert.alert('Call Failed', 'Unable to connect. Please try again.');
+        }
       });
     } else if (Platform.OS === 'web' && !userId && contactType === 'counsellor') {
-      // Counsellor doesn't have WebRTC set up, show message
-      Alert.alert(
-        'In-App Calling Not Available',
-        'This counsellor hasn\'t set up in-app calling yet. Would you like to call their phone instead?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Call Phone', onPress: () => Linking.openURL(`tel:${number}`) }
-        ]
-      );
+      // Counsellor doesn't have WebRTC set up, show message using window.confirm for web
+      if (typeof window !== 'undefined') {
+        const userWantsToCall = window.confirm(
+          'In-App Calling Not Available\n\n' +
+          'This counsellor hasn\'t set up in-app calling yet. Would you like to call their phone instead?'
+        );
+        if (userWantsToCall && number) {
+          Linking.openURL(`tel:${number}`);
+        }
+      } else {
+        Alert.alert(
+          'In-App Calling Not Available',
+          'This counsellor hasn\'t set up in-app calling yet. Would you like to call their phone instead?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Call Phone', onPress: () => Linking.openURL(`tel:${number}`) }
+          ]
+        );
+      }
     } else {
       // Crisis lines or native app - use phone dialer directly
       Linking.openURL(`tel:${number}`);
