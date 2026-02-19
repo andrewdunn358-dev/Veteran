@@ -39,13 +39,16 @@ let callTimerInterval = null;
  */
 function initWebRTCPhone(serverUrl, userId, userType, userName) {
     console.log('Initializing WebRTC Phone...');
+    console.log('Server URL:', serverUrl);
     
-    // Connect to signaling server
+    // Connect to signaling server with the correct path
     socket = io(serverUrl, {
+        path: '/api/socket.io',
         transports: ['websocket', 'polling'],
         reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+        timeout: 10000
     });
     
     // Setup socket event handlers
@@ -60,6 +63,11 @@ function initWebRTCPhone(serverUrl, userId, userType, userName) {
             name: userName,
             status: 'available'
         });
+    });
+    
+    socket.on('connect_error', (error) => {
+        console.error('Socket connection error:', error);
+        updatePhoneStatus('offline', 'Connection Failed');
     });
     
     // Setup UI
