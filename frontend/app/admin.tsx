@@ -673,6 +673,97 @@ export default function AdminDashboard() {
     }
   };
 
+  // SIP Extension Management
+  const handleAssignSip = async () => {
+    if (!selectedSipTarget || !sipFormData.extension || !sipFormData.password) {
+      showToast('Please fill in extension and password', 'error');
+      return;
+    }
+
+    try {
+      const endpoint = selectedSipTarget.type === 'counsellor'
+        ? `admin/counsellors/${selectedSipTarget.id}/sip`
+        : `admin/peer-supporters/${selectedSipTarget.id}/sip`;
+
+      const response = await fetch(`${API_URL}/api/${endpoint}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          sip_extension: sipFormData.extension,
+          sip_password: sipFormData.password,
+        }),
+      });
+
+      if (response.ok) {
+        showToast(`SIP extension ${sipFormData.extension} assigned to ${selectedSipTarget.name}`, 'success');
+        setShowSipModal(false);
+        setSipFormData({ extension: '', password: '' });
+        setSelectedSipTarget(null);
+        fetchData();
+      } else {
+        const error = await response.json();
+        showToast(error.detail || 'Failed to assign SIP extension', 'error');
+      }
+    } catch (error) {
+      showToast('Network error', 'error');
+    }
+  };
+
+  const handleRemoveSip = async (staffId: string, staffType: 'counsellor' | 'peer', staffName: string) => {
+    Alert.alert(
+      'Remove SIP Extension',
+      `Remove SIP extension from ${staffName}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const endpoint = staffType === 'counsellor'
+                ? `admin/counsellors/${staffId}/sip`
+                : `admin/peer-supporters/${staffId}/sip`;
+
+              const response = await fetch(`${API_URL}/api/${endpoint}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` },
+              });
+
+              if (response.ok) {
+                showToast(`SIP extension removed from ${staffName}`, 'success');
+                fetchData();
+              } else {
+                const error = await response.json();
+                showToast(error.detail || 'Failed to remove SIP extension', 'error');
+              }
+            } catch (error) {
+              showToast('Network error', 'error');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const getAllStaffForSip = (): SIPAssignment[] => {
+    const counsellorList = counsellors.map(c => ({
+      id: c.id,
+      name: c.name,
+      type: 'counsellor' as const,
+      sip_extension: (c as any).sip_extension,
+    }));
+    const peerList = peers.map(p => ({
+      id: p.id,
+      name: p.firstName,
+      type: 'peer' as const,
+      sip_extension: (p as any).sip_extension,
+    }));
+    return [...counsellorList, ...peerList];
+  };
+
   const handleDelete = async (type: 'counsellor' | 'peer' | 'org' | 'resource' | 'user', id: string) => {
     Alert.alert(
       'Confirm Delete',
