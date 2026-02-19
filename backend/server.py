@@ -1593,7 +1593,7 @@ async def update_peer_supporter(
     updated = await db.peer_supporters.find_one({"id": peer_id})
     return PeerSupporter(**decrypt_document('peer_supporters', updated))
 
-@api_router.patch("/peer-supporters/{peer_id}/status", response_model=PeerSupporter)
+@api_router.patch("/peer-supporters/{peer_id}/status")
 async def update_peer_supporter_status(
     peer_id: str,
     status_update: PeerSupporterStatusUpdate,
@@ -1609,11 +1609,10 @@ async def update_peer_supporter_status(
     
     result = await db.peer_supporters.update_one(
         {"id": peer_id},
-        {"$set": status_update.dict(exclude_unset=True)}
+        {"$set": {"status": status_update.status}}
     )
     
-    updated = await db.peer_supporters.find_one({"id": peer_id})
-    return PeerSupporter(**updated)
+    return {"success": True, "status": status_update.status}
 
 @api_router.delete("/peer-supporters/{peer_id}")
 async def delete_peer_supporter(
