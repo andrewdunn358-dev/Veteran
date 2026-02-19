@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, TextInput, Alert, KeyboardAvoidingView, Platform, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, TextInput, Alert, KeyboardAvoidingView, Platform, Linking, ActivityIndicator, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useWebRTCCall, formatCallDuration } from '../hooks/useWebRTCCallWeb';
 
 const API_URL = Platform.select({
   web: process.env.EXPO_PUBLIC_BACKEND_URL || '',
@@ -19,6 +20,7 @@ interface PeerVeteran {
   phone: string;
   sms?: string;
   whatsapp?: string;
+  user_id?: string;
 }
 
 export default function PeerSupport() {
@@ -30,6 +32,10 @@ export default function PeerSupport() {
   const [peerSupporters, setPeerSupporters] = useState<PeerVeteran[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // WebRTC calling
+  const { callState, callInfo, callDuration, initiateCall, endCall } = useWebRTCCall();
+  const showCallModal = callState !== 'idle';
 
   // Fetch peer supporters from API
   const fetchPeerSupporters = async () => {
