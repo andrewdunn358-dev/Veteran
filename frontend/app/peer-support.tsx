@@ -147,18 +147,36 @@ export default function PeerSupport() {
     
     // Use WebRTC for in-app calling if user_id is available
     if (Platform.OS === 'web' && userId) {
+      // Show calling modal immediately
+      setCallingPeerName(name);
+      setIsInitiatingCall(true);
+      
       try {
         await initiateCall(userId, name);
       } catch (error) {
         console.error('WebRTC call failed:', error);
-        // Fallback to phone dialer
-        Linking.openURL(`tel:${phone}`);
+        setIsInitiatingCall(false);
+        Alert.alert('Call Failed', 'Unable to connect. Please try again.');
       }
     } else {
       // Fallback to phone dialer for native apps or if no user_id
       Linking.openURL(`tel:${phone}`);
     }
   };
+  
+  // Handle call end
+  const handleEndCall = () => {
+    endCall();
+    setIsInitiatingCall(false);
+    setCallingPeerName('');
+  };
+  
+  // Update initiating state when call state changes
+  useEffect(() => {
+    if (callState !== 'idle' && isInitiatingCall) {
+      setIsInitiatingCall(false);
+    }
+  }, [callState]);
 
   const handleSMS = (number: string, name: string = 'Peer Supporter', id: string | null = null) => {
     logCallIntent('peer', id, name, number, 'sms');
