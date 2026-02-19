@@ -144,7 +144,26 @@ When triggered offers:
 |------|-----|-------------|
 | Live Chat | `/live-chat` | Real-time chat with staff member |
 
+## SIP/VoIP Integration (Proof of Concept - Feb 2026)
+
+**Files Created:**
+- `/app/staff-portal/sip-phone.js` - JsSIP integration for staff portal
+- `/app/frontend/hooks/useSIPPhone.ts` - React hook for mobile app
+- `/app/FREESWITCH_SETUP.md` - FreeSWITCH server setup guide
+
+**How it works:**
+1. Counsellor logs in → Auto-registers SIP extension
+2. Status shown as "Online" in app
+3. Veteran clicks "Call" → JsSIP initiates WebRTC call
+4. Call connects → Voice through browser, no phone needed
+
+**Requirements:**
+- FreeSWITCH or Asterisk server (~£10/month VPS)
+- SSL certificate for WSS
+- Optional TURN server for NAT traversal
+
 ## Upcoming Tasks
+- Set up FreeSWITCH server for VoIP calls
 - Add Concerns section to Staff Portal
 - LMS course setup in WordPress/Tutor
 - Push notifications for safeguarding alerts
@@ -157,6 +176,5 @@ When triggered offers:
 - In-App Human-to-Human Chat (non-crisis)
 - Favorites/Saved Contacts
 - Privacy Policy & Terms pages
-- VoIP/PBX Integration
 - Achievement Badges
 - Referral System
