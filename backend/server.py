@@ -980,17 +980,65 @@ def require_role(required_role: str):
 
 @api_router.post("/auth/register", response_model=User)
 async def register_user(user_input: UserCreate, current_user: User = Depends(require_role("admin"))):
-    """Register a new user (admin only)"""
+    """Register a new user (admin only) - automatically creates linked profile for counsellors/peers"""
     existing_user = await db.users.find_one({"email": user_input.email})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    user_dict = user_input.dict(exclude={"password"})
+    # Create user object with base fields only
+    user_dict = {
+        "email": user_input.email,
+        "role": user_input.role,
+        "name": user_input.name
+    }
     user_obj = User(**user_dict)
     user_data = user_obj.dict()
     user_data["password_hash"] = hash_password(user_input.password)
     
     await db.users.insert_one(user_data)
+    
+    # Auto-create profile for counsellors and peers
+    if user_input.role == "counsellor":
+        counsellor_data = {
+            "id": str(uuid.uuid4()),
+            "name": user_input.name,
+            "specialization": user_input.specialization or "General Support",
+            "status": "off",
+            "next_available": None,
+            "phone": user_input.phone or "",
+            "sms": user_input.sms,
+            "whatsapp": user_input.whatsapp,
+            "user_id": user_obj.id,
+            "sip_extension": None,
+            "sip_password": None,
+            "created_at": datetime.utcnow()
+        }
+        # Encrypt PII fields
+        counsellor_data = encrypt_document(counsellor_data, "counsellors")
+        await db.counsellors.insert_one(counsellor_data)
+        logging.info(f"Auto-created counsellor profile for user {user_obj.id}")
+        
+    elif user_input.role == "peer":
+        peer_data = {
+            "id": str(uuid.uuid4()),
+            "firstName": user_input.name,
+            "area": user_input.area or "General",
+            "background": user_input.background or "Veteran",
+            "yearsServed": user_input.yearsServed or "N/A",
+            "status": "unavailable",
+            "phone": user_input.phone or "",
+            "sms": user_input.sms,
+            "whatsapp": user_input.whatsapp,
+            "user_id": user_obj.id,
+            "sip_extension": None,
+            "sip_password": None,
+            "created_at": datetime.utcnow()
+        }
+        # Encrypt PII fields
+        peer_data = encrypt_document(peer_data, "peer_supporters")
+        await db.peer_supporters.insert_one(peer_data)
+        logging.info(f"Auto-created peer supporter profile for user {user_obj.id}")
+    
     return user_obj
 
 @api_router.post("/auth/login", response_model=TokenResponse)
