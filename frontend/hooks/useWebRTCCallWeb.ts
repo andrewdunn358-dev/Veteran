@@ -288,12 +288,12 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
 
   const initiateCall = async (targetUserId: string, targetName: string) => {
     if (Platform.OS !== 'web') {
-      Alert.alert('Not Supported', 'In-app calling is only available on web.');
+      showAlert('Not Supported', 'In-app calling is only available on web.');
       return;
     }
     
     if (callState !== 'idle') {
-      Alert.alert('Busy', 'You are already in a call');
+      showAlert('Busy', 'You are already in a call');
       return;
     }
 
@@ -316,7 +316,7 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     }
 
     if (!socketRef.current?.connected) {
-      Alert.alert('Connection Error', 'Could not connect to call server. Please try again.');
+      showAlert('Connection Error', 'Could not connect to call server. Please try again.');
       cleanupCall();
       return;
     }
