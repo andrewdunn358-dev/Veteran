@@ -3514,7 +3514,8 @@ import socketio
 _fastapi_app = app
 
 # Create combined ASGI app with Socket.IO
-socket_app = socketio.ASGIApp(sio, _fastapi_app)
+# Use socketio_path='/api/socket.io' to work with Kubernetes ingress routing (all /api/* goes to backend)
+socket_app = socketio.ASGIApp(sio, _fastapi_app, socketio_path='/api/socket.io')
 
 @api_router.get("/webrtc/online-staff")
 async def api_get_online_staff():
