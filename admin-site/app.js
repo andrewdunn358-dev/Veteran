@@ -1232,89 +1232,135 @@ function openEditUserModal(userId) {
     const user = users.find(u => u.id === userId);
     if (!user) return;
     
-    // Determine if user has linked profile
+    // Find existing profile
     const counsellorProfile = counsellors.find(c => c.user_id === userId);
     const peerProfile = peers.find(p => p.user_id === userId);
-    const hasProfile = counsellorProfile || peerProfile;
-    
-    // Build role warning message
-    let roleWarning = '';
-    if (user.role === 'admin') {
-        roleWarning = '<small style="color: var(--warning);">Note: Admin role cannot be changed for security.</small>';
-    } else if (hasProfile) {
-        roleWarning = '<small style="color: var(--text-muted);">Changing role will unlink any existing profile. You may need to create a new profile after changing roles.</small>';
-    }
+    const profile = counsellorProfile || peerProfile;
     
     openModal(`
         <div class="modal-header">
-            <h3>Edit User: ${user.name}</h3>
+            <h3><i class="fas fa-user-edit"></i> Edit User: ${user.name}</h3>
             <button class="modal-close" onclick="closeModal()">&times;</button>
         </div>
         <form id="edit-user-form" class="modal-body">
             <input type="hidden" name="id" value="${user.id}">
-            <div class="form-group">
-                <label>Name *</label>
-                <input type="text" name="name" required value="${user.name}">
-            </div>
-            <div class="form-group">
-                <label>Email *</label>
-                <input type="email" name="email" required value="${user.email}">
-            </div>
-            <div class="form-group">
-                <label>Role *</label>
-                <select name="role" ${user.role === 'admin' ? 'disabled' : ''}>
-                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-                    <option value="counsellor" ${user.role === 'counsellor' ? 'selected' : ''}>Counsellor</option>
-                    <option value="peer" ${user.role === 'peer' ? 'selected' : ''}>Peer Supporter</option>
-                </select>
-                ${roleWarning}
+            <input type="hidden" name="profileId" value="${profile ? (profile.id || '') : ''}">
+            
+            <!-- Basic Info Section -->
+            <div style="background: var(--card-bg); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                <h4 style="margin: 0 0 12px 0; color: var(--text-primary);"><i class="fas fa-user"></i> Account Details</h4>
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" name="name" required value="${user.name}">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" name="email" required value="${user.email}">
+                </div>
+                <div class="form-group">
+                    <label>Role *</label>
+                    <select name="role" id="edit-user-role" onchange="toggleEditProfileFields()" ${user.role === 'admin' ? 'disabled' : ''}>
+                        <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        <option value="counsellor" ${user.role === 'counsellor' ? 'selected' : ''}>Counsellor</option>
+                        <option value="peer" ${user.role === 'peer' ? 'selected' : ''}>Peer Supporter</option>
+                    </select>
+                    ${user.role === 'admin' ? '<small style="color: var(--warning);">Admin role cannot be changed.</small>' : ''}
+                </div>
             </div>
             
-            <!-- Password Change Section -->
-            <div class="form-group" style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px;">
-                <label><i class="fas fa-key"></i> Change Password (optional)</label>
-                <input type="password" name="newPassword" minlength="8" placeholder="Leave blank to keep current password">
-                <small style="color: var(--text-muted);">Minimum 8 characters. Only fill if you want to change the password.</small>
-            </div>
-            <div class="form-group">
-                <label>Confirm New Password</label>
-                <input type="password" name="confirmPassword" minlength="8" placeholder="Re-enter new password">
+            <!-- Profile Section - Counsellor -->
+            <div id="edit-counsellor-fields" style="display: ${user.role === 'counsellor' ? 'block' : 'none'}; background: rgba(34, 197, 94, 0.1); padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid rgba(34, 197, 94, 0.3);">
+                <h4 style="margin: 0 0 12px 0; color: #22c55e;"><i class="fas fa-user-md"></i> Counsellor Profile</h4>
+                <div class="form-group">
+                    <label><i class="fas fa-briefcase"></i> Specialization</label>
+                    <input type="text" name="specialization" value="${counsellorProfile?.specialization || ''}" placeholder="e.g., Trauma & PTSD">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> Phone</label>
+                    <input type="tel" name="counsellor_phone" value="${counsellorProfile?.phone || ''}" placeholder="Contact number">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-sms"></i> SMS</label>
+                    <input type="tel" name="counsellor_sms" value="${counsellorProfile?.sms || ''}" placeholder="SMS number (optional)">
+                </div>
+                <div class="form-group">
+                    <label><i class="fab fa-whatsapp"></i> WhatsApp</label>
+                    <input type="tel" name="counsellor_whatsapp" value="${counsellorProfile?.whatsapp || ''}" placeholder="WhatsApp (optional)">
+                </div>
             </div>
             
-            ${hasProfile ? `
+            <!-- Profile Section - Peer -->
+            <div id="edit-peer-fields" style="display: ${user.role === 'peer' ? 'block' : 'none'}; background: rgba(59, 130, 246, 0.1); padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                <h4 style="margin: 0 0 12px 0; color: #3b82f6;"><i class="fas fa-hands-helping"></i> Peer Supporter Profile</h4>
                 <div class="form-group">
-                    <label>Linked Profile</label>
-                    <p style="color: var(--success);"><i class="fas fa-check-circle"></i> ${counsellorProfile ? counsellorProfile.name : peerProfile.firstName}</p>
+                    <label><i class="fas fa-map-marker-alt"></i> Area</label>
+                    <input type="text" name="area" value="${peerProfile?.area || ''}" placeholder="e.g., North East">
                 </div>
-            ` : user.role !== 'admin' ? `
                 <div class="form-group">
-                    <label>Linked Profile</label>
-                    <p style="color: var(--warning);"><i class="fas fa-exclamation-triangle"></i> No profile linked. Go to ${user.role === 'counsellor' ? 'Counsellors' : 'Peers'} tab to link a profile.</p>
+                    <label><i class="fas fa-history"></i> Background</label>
+                    <input type="text" name="background" value="${peerProfile?.background || ''}" placeholder="e.g., Army, 10 years">
                 </div>
-            ` : ''}
+                <div class="form-group">
+                    <label><i class="fas fa-calendar"></i> Years Served</label>
+                    <input type="text" name="yearsServed" value="${peerProfile?.yearsServed || ''}" placeholder="e.g., 2005-2015">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> Phone</label>
+                    <input type="tel" name="peer_phone" value="${peerProfile?.phone || ''}" placeholder="Contact number">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-sms"></i> SMS</label>
+                    <input type="tel" name="peer_sms" value="${peerProfile?.sms || ''}" placeholder="SMS number (optional)">
+                </div>
+                <div class="form-group">
+                    <label><i class="fab fa-whatsapp"></i> WhatsApp</label>
+                    <input type="tel" name="peer_whatsapp" value="${peerProfile?.whatsapp || ''}" placeholder="WhatsApp (optional)">
+                </div>
+            </div>
+            
+            <!-- Password Section -->
+            <div style="background: var(--card-bg); padding: 16px; border-radius: 8px;">
+                <h4 style="margin: 0 0 12px 0; color: var(--text-primary);"><i class="fas fa-key"></i> Change Password (optional)</h4>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" name="newPassword" minlength="8" placeholder="Leave blank to keep current">
+                    <small style="color: var(--text-muted);">Minimum 8 characters</small>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" name="confirmPassword" minlength="8" placeholder="Re-enter new password">
+                </div>
+            </div>
         </form>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-            <button class="btn btn-primary" onclick="submitEditUser()">Save Changes</button>
+            <button class="btn btn-primary" onclick="submitEditUser()">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
         </div>
     `);
+}
+
+function toggleEditProfileFields() {
+    const role = document.getElementById('edit-user-role').value;
+    document.getElementById('edit-counsellor-fields').style.display = role === 'counsellor' ? 'block' : 'none';
+    document.getElementById('edit-peer-fields').style.display = role === 'peer' ? 'block' : 'none';
 }
 
 async function submitEditUser() {
     const form = document.getElementById('edit-user-form');
     const formData = new FormData(form);
     const userId = formData.get('id');
+    const profileId = formData.get('profileId');
     const user = users.find(u => u.id === userId);
     
-    // Get role - if disabled (admin), use original role
+    // Get role
     const roleSelect = form.querySelector('select[name="role"]');
     const newRole = roleSelect.disabled ? user.role : formData.get('role');
     
-    // Check password fields
+    // Validate password if provided
     const newPassword = formData.get('newPassword');
     const confirmPassword = formData.get('confirmPassword');
-    
-    // Validate password if provided
     if (newPassword) {
         if (newPassword.length < 8) {
             showNotification('Password must be at least 8 characters', 'error');
@@ -1337,6 +1383,63 @@ async function submitEditUser() {
             })
         });
         
+        // Update or create profile based on role
+        if (newRole === 'counsellor') {
+            const profileData = {
+                name: formData.get('name'),
+                specialization: formData.get('specialization') || 'General Support',
+                phone: formData.get('counsellor_phone') || '',
+                sms: formData.get('counsellor_sms') || null,
+                whatsapp: formData.get('counsellor_whatsapp') || null,
+                user_id: userId
+            };
+            
+            // Check if counsellor profile exists
+            const existingCounsellor = counsellors.find(c => c.user_id === userId);
+            if (existingCounsellor) {
+                await apiCall(`/admin/counsellors/${existingCounsellor.id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(profileData)
+                });
+            } else {
+                await apiCall('/counsellors', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        ...profileData,
+                        status: 'off'
+                    })
+                });
+            }
+        } else if (newRole === 'peer') {
+            const profileData = {
+                firstName: formData.get('name'),
+                area: formData.get('area') || 'General',
+                background: formData.get('background') || 'Veteran',
+                yearsServed: formData.get('yearsServed') || 'N/A',
+                phone: formData.get('peer_phone') || '',
+                sms: formData.get('peer_sms') || null,
+                whatsapp: formData.get('peer_whatsapp') || null,
+                user_id: userId
+            };
+            
+            // Check if peer profile exists
+            const existingPeer = peers.find(p => p.user_id === userId);
+            if (existingPeer) {
+                await apiCall(`/admin/peer-supporters/${existingPeer.id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(profileData)
+                });
+            } else {
+                await apiCall('/peer-supporters', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        ...profileData,
+                        status: 'unavailable'
+                    })
+                });
+            }
+        }
+        
         // Update password if provided
         if (newPassword) {
             await apiCall('/auth/admin-reset-password', {
@@ -1346,15 +1449,15 @@ async function submitEditUser() {
                     new_password: newPassword
                 })
             });
-            showNotification('User updated and password changed successfully');
+            showNotification('User and profile updated, password changed!', 'success');
         } else {
-            showNotification('User updated successfully');
+            showNotification('User and profile updated successfully!', 'success');
         }
         
         closeModal();
         loadAllData();
     } catch (error) {
-        showNotification('Failed to update user: ' + error.message, 'error');
+        showNotification('Failed to update: ' + error.message, 'error');
     }
 }
 
