@@ -410,11 +410,27 @@ function setupPhoneUI() {
 }
 
 function updatePhoneStatus(status, text) {
+    // Update the floating widget
     if (phoneUI.status) {
         phoneUI.status.textContent = text;
     }
     if (phoneUI.statusDot) {
         phoneUI.statusDot.className = 'status-dot ' + status;
+    }
+    
+    // Also update the top-of-page phone section
+    var topStatusText = document.getElementById('webrtc-status-text');
+    var topStatusDot = document.querySelector('#webrtc-status .status-dot');
+    var topPhoneIcon = document.querySelector('.phone-icon');
+    
+    if (topStatusText) {
+        topStatusText.textContent = text;
+    }
+    if (topStatusDot) {
+        topStatusDot.className = 'status-dot ' + status;
+    }
+    if (topPhoneIcon) {
+        topPhoneIcon.className = 'phone-icon ' + (status === 'online' ? '' : status);
     }
 }
 
