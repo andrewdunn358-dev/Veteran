@@ -5,10 +5,22 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Platform, Alert } from 'react-native';
+import { Platform } from 'react-native';
 import { io, Socket } from 'socket.io-client';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+
+// Web-compatible alert helper
+const showAlert = (title: string, message: string) => {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    window.alert(`${title}\n\n${message}`);
+  } else {
+    // Import Alert dynamically for native
+    import('react-native').then(({ Alert }) => {
+      Alert.alert(title, message);
+    });
+  }
+};
 
 // WebRTC configuration
 const RTC_CONFIG = {
