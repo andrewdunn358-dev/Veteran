@@ -319,15 +319,15 @@ class CallIntentCreate(BaseModel):
     contact_type: str  # counsellor, peer, organization, crisis_line
     contact_id: Optional[str] = None  # ID of the specific contact if applicable
     contact_name: str
-    contact_phone: str
-    call_method: str = "phone"  # phone, sms, whatsapp
+    contact_phone: Optional[str] = None  # Made optional for WebRTC calls (no phone needed)
+    call_method: str = "phone"  # phone, sms, whatsapp, webrtc
 
 class CallIntent(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     contact_type: str
     contact_id: Optional[str] = None
     contact_name: str
-    contact_phone: str
+    contact_phone: Optional[str] = None  # Made optional for WebRTC calls
     call_method: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     # Anonymous - no user tracking for privacy
