@@ -84,6 +84,10 @@ export default function AdminDashboard() {
   const [callMetrics, setCallMetrics] = useState<any>(null);
   const [callbacks, setCallbacks] = useState<any[]>([]);
   const [panicAlerts, setPanicAlerts] = useState<any[]>([]);
+  const [sipAssignments, setSipAssignments] = useState<SIPAssignment[]>([]);
+  const [showSipModal, setShowSipModal] = useState(false);
+  const [selectedSipTarget, setSelectedSipTarget] = useState<SIPAssignment | null>(null);
+  const [sipFormData, setSipFormData] = useState({ extension: '', password: '' });
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
