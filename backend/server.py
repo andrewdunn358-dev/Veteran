@@ -1551,10 +1551,17 @@ async def get_available_peer_supporters():
         {"id": 1, "firstName": 1, "area": 1, "status": 1, "user_id": 1, "_id": 0}
     ).to_list(1000)
     # Decrypt firstName for each peer
+    result = []
     for peer in peers:
-        if peer.get('firstName') and peer['firstName'].startswith('ENC:'):
-            peer['firstName'] = decrypt_field(peer['firstName'])
-    return peers
+        peer_data = dict(peer)
+        if peer_data.get('firstName') and str(peer_data['firstName']).startswith('ENC:'):
+            try:
+                peer_data['firstName'] = decrypt_field(peer_data['firstName'])
+            except Exception as e:
+                logger.error(f"Failed to decrypt peer firstName: {e}")
+                peer_data['firstName'] = "Peer Supporter"
+        result.append(peer_data)
+    return result
 
 @api_router.get("/peer-supporters/{peer_id}", response_model=PeerSupporter)
 async def get_peer_supporter(peer_id: str, current_user: User = Depends(get_current_user)):
