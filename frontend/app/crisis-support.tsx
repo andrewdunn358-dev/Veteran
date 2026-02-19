@@ -249,7 +249,7 @@ export default function CrisisSupport() {
                 <View style={styles.counsellorContactButtons}>
                   <TouchableOpacity
                     style={styles.counsellorCallButton}
-                    onPress={() => handleCall(counsellor.phone, counsellor.name, 'counsellor', counsellor.id)}
+                    onPress={() => handleCall(counsellor.phone, counsellor.name, 'counsellor', counsellor.id, counsellor.user_id || null)}
                     activeOpacity={0.8}
                   >
                     <Ionicons name="call" size={20} color="#ffffff" />
