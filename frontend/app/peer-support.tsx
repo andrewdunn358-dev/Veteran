@@ -300,6 +300,35 @@ export default function PeerSupport() {
             </Text>
           </View>
         </ScrollView>
+        
+        {/* WebRTC Call Modal */}
+        <Modal visible={showCallModal} transparent animationType="fade">
+          <View style={styles.callModalOverlay}>
+            <View style={styles.callModalContent}>
+              <View style={styles.callModalHeader}>
+                <Ionicons 
+                  name={callState === 'connected' ? 'call' : callState === 'ringing' ? 'call-outline' : 'wifi'} 
+                  size={48} 
+                  color={callState === 'connected' ? '#22c55e' : '#3b82f6'} 
+                />
+                <Text style={styles.callModalTitle}>
+                  {callState === 'connecting' ? 'Connecting...' : 
+                   callState === 'ringing' ? 'Ringing...' : 
+                   callState === 'connected' ? 'Connected' : 'Call'}
+                </Text>
+                <Text style={styles.callModalPeerName}>{callInfo?.peerName || 'Unknown'}</Text>
+                {callState === 'connected' && (
+                  <Text style={styles.callModalDuration}>{formatCallDuration(callDuration)}</Text>
+                )}
+              </View>
+              
+              <TouchableOpacity style={styles.callEndButton} onPress={endCall}>
+                <Ionicons name="call" size={28} color="#fff" style={{ transform: [{ rotate: '135deg' }] }} />
+                <Text style={styles.callEndButtonText}>End Call</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     );
   }
