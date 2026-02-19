@@ -202,6 +202,9 @@ When triggered offers:
 - Optional TURN server for NAT traversal
 
 ## Upcoming Tasks
+- P0: **Run Data Migration Script** - Encrypt all existing unencrypted PII in production database
+- P1: Fully integrate SIP calling into Mobile App with dedicated calling UI
+- P2: Add Legal Disclaimers to Staff Portal
 - Set up FreeSWITCH server for VoIP calls
 - Add Concerns section to Staff Portal
 - LMS course setup in WordPress/Tutor
