@@ -249,7 +249,7 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
       }
     } catch (error) {
       console.error('WebRTC error:', error);
-      Alert.alert('Error', 'Could not access microphone');
+      showAlert('Microphone Error', 'Could not access microphone. Please allow microphone access in your browser settings.');
       cleanupCall();
     }
   };
