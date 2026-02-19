@@ -3510,7 +3510,11 @@ from webrtc_signaling import sio, get_online_staff_list, get_active_calls_list
 import socketio
 
 # Create ASGI app that combines FastAPI and Socket.IO
-socket_app = socketio.ASGIApp(sio, app)
+# Store original FastAPI app
+_fastapi_app = app
+
+# Create combined ASGI app with Socket.IO
+socket_app = socketio.ASGIApp(sio, _fastapi_app)
 
 @api_router.get("/webrtc/online-staff")
 async def api_get_online_staff():
@@ -3522,5 +3526,6 @@ async def api_get_active_calls(current_user: User = Depends(require_role("admin"
     """Get list of active calls (admin only)"""
     return {"calls": get_active_calls_list()}
 
-# Note: When running in production, use socket_app instead of app
-# uvicorn server:socket_app --host 0.0.0.0 --port 8001
+# IMPORTANT: Override app to be the socket_app so supervisor can run it correctly
+# The supervisor config runs server:app, so we reassign app to include Socket.IO
+app = socket_app
