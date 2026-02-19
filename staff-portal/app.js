@@ -206,7 +206,7 @@ async function initPortal() {
     await loadStaffUsers();
     
     // Initialize SIP phone if credentials available
-    await initializeSIPPhone();
+    await initializeWebRTCPhone();
     
     // Load data
     loadCallbacks();
