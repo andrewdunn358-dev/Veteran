@@ -121,3 +121,6 @@ watchfiles==1.1.1
 websockets==15.0.1
 yarl==1.22.0
 zipp==3.23.0
+bidict==0.23.1
+python-engineio==4.13.1
+python-socketio==5.16.1
