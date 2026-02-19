@@ -222,34 +222,53 @@
                 <div id="cms-list" class="cms-grid"></div>
             </div>
 
-            <!-- VoIP Tab -->
-            <div id="voip-tab" class="tab-content">
+            <!-- Calls Management Tab -->
+            <div id="calls-tab" class="tab-content">
                 <div class="tab-header">
-                    <h2>VoIP Extension Management</h2>
-                </div>
-                <div class="voip-info-banner" style="background: linear-gradient(135deg, #1e3a5f 0%, #243447 100%); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid rgba(74, 144, 217, 0.3);">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                        <i class="fas fa-phone-volume" style="font-size: 24px; color: #8b5cf6;"></i>
-                        <h3 style="color: #fff; margin: 0;">Assign SIP Extensions to Staff</h3>
+                    <h2>Call Management</h2>
+                    <div class="tab-actions">
+                        <button class="btn btn-secondary" onclick="refreshCallsData()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
                     </div>
-                    <p style="color: #b0c4de; margin: 0; font-size: 14px;">
-                        Allocate VoIP extensions from your FusionPBX server to counsellors and peer supporters. 
-                        Extensions are encrypted before storing. Staff can use their extension to make/receive calls via the app.
-                    </p>
                 </div>
                 
-                <div class="voip-server-info" style="background: rgba(74, 144, 217, 0.1); padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(74, 144, 217, 0.2);">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                        <i class="fas fa-server" style="color: #4a90d9;"></i>
-                        <strong style="color: #4a90d9;">FusionPBX Server</strong>
+                <div class="calls-info-banner" style="background: linear-gradient(135deg, #1e3a5f 0%, #243447 100%); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid rgba(74, 144, 217, 0.3);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <i class="fas fa-phone-alt" style="font-size: 24px; color: #22c55e;"></i>
+                        <h3 style="color: #fff; margin: 0;">WebRTC Calling System</h3>
                     </div>
-                    <p style="color: #b0c4de; margin: 0; font-size: 13px;">
-                        <i class="fas fa-globe"></i> radiocheck.voip.synthesis-it.co.uk<br>
-                        <i class="fas fa-phone"></i> Extensions: 1000 - 1003
+                    <p style="color: #b0c4de; margin: 0; font-size: 14px;">
+                        Free in-app calling using WebRTC. No phone lines or PBX needed. 
+                        Users can call available staff directly from the app.
                     </p>
                 </div>
 
-                <div id="voip-staff-list" class="cards-grid"></div>
+                <!-- Online Staff Section -->
+                <div class="calls-section" style="margin-bottom: 24px;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 16px;">
+                        <i class="fas fa-user-check" style="color: #22c55e;"></i> Online Staff
+                        <span id="online-count" class="badge" style="background: #22c55e; margin-left: 8px;">0</span>
+                    </h3>
+                    <div id="online-staff-list" class="cards-grid">
+                        <p style="color: var(--text-muted); padding: 20px; text-align: center;">
+                            <i class="fas fa-spinner fa-spin"></i> Loading...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Active Calls Section -->
+                <div class="calls-section">
+                    <h3 style="color: var(--text-primary); margin-bottom: 16px;">
+                        <i class="fas fa-phone-volume" style="color: #f59e0b;"></i> Active Calls
+                        <span id="calls-count" class="badge" style="background: #f59e0b; margin-left: 8px;">0</span>
+                    </h3>
+                    <div id="active-calls-list" class="cards-grid">
+                        <p style="color: var(--text-muted); padding: 20px; text-align: center;">
+                            No active calls
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <!-- Settings Tab -->
