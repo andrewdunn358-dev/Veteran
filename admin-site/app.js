@@ -2423,6 +2423,98 @@ async function fixMissingProfiles() {
     }
 }
 
+// Open Edit Staff Modal - routes to appropriate edit modal based on role
+function openEditStaffModal(userId, role) {
+    // Find the profile ID for this user
+    if (role === 'counsellor') {
+        const counsellor = allCounsellors.find(c => c.user_id === userId);
+        if (counsellor) {
+            openEditCounsellorModal(counsellor.id);
+        } else {
+            showNotification('Counsellor profile not found', 'error');
+        }
+    } else if (role === 'peer') {
+        const peer = allPeers.find(p => p.user_id === userId);
+        if (peer) {
+            openEditPeerModal(peer.id);
+        } else {
+            showNotification('Peer supporter profile not found', 'error');
+        }
+    }
+}
+
+// Open Status Modal for changing staff status
+function openStatusModal(userId, role, currentStatus) {
+    const modalContent = document.getElementById('modal-content');
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2><i class="fas fa-toggle-on"></i> Change Status</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="status-form">
+                <div class="form-group">
+                    <label><i class="fas fa-user-clock"></i> Status</label>
+                    <select name="status" required>
+                        <option value="available" ${currentStatus === 'available' ? 'selected' : ''}>Available</option>
+                        <option value="limited" ${currentStatus === 'limited' ? 'selected' : ''}>Limited</option>
+                        <option value="unavailable" ${currentStatus === 'unavailable' ? 'selected' : ''}>Unavailable</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Status
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    `;
+    document.getElementById('modal').classList.add('open');
+    
+    document.getElementById('status-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const newStatus = formData.get('status');
+        
+        try {
+            // Find the profile ID
+            let profileId;
+            let endpoint;
+            
+            if (role === 'counsellor') {
+                const counsellor = allCounsellors.find(c => c.user_id === userId);
+                if (counsellor) {
+                    profileId = counsellor.id;
+                    endpoint = `/admin/counsellors/${profileId}/status`;
+                }
+            } else if (role === 'peer') {
+                const peer = allPeers.find(p => p.user_id === userId);
+                if (peer) {
+                    profileId = peer.id;
+                    endpoint = `/admin/peer-supporters/${profileId}/status`;
+                }
+            }
+            
+            if (!endpoint) {
+                throw new Error('Profile not found');
+            }
+            
+            await apiCall(endpoint, {
+                method: 'PATCH',
+                body: JSON.stringify({ status: newStatus })
+            });
+            
+            showNotification('Status updated successfully', 'success');
+            closeModal();
+            loadAllData();
+        } catch (error) {
+            showNotification('Failed to update status: ' + error.message, 'error');
+        }
+    });
+}
+
 // Open Add Staff Modal
 function openAddStaffModal() {
     const modalContent = document.getElementById('modal-content');
