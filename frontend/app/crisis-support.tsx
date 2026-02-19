@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking, Platform, ActivityIndicator, Modal, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useWebRTCCall, formatCallDuration } from '../hooks/useWebRTCCallWeb';
 
 const API_URL = Platform.select({
   web: process.env.EXPO_PUBLIC_BACKEND_URL || '',
@@ -18,6 +19,7 @@ interface Counsellor {
   phone: string;
   sms?: string;
   whatsapp?: string;
+  user_id?: string;
 }
 
 export default function CrisisSupport() {
