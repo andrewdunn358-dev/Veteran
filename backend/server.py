@@ -2341,9 +2341,9 @@ async def get_safeguarding_alerts(
     status: Optional[str] = None,
     current_user: User = Depends(get_current_user)
 ):
-    """Get safeguarding alerts - counsellors and admins only"""
-    if current_user.role not in ["admin", "counsellor"]:
-        raise HTTPException(status_code=403, detail="Only counsellors and admins can view safeguarding alerts")
+    """Get safeguarding alerts - all staff can view"""
+    if current_user.role not in ["admin", "counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Only staff can view safeguarding alerts")
     
     try:
         query = {}
