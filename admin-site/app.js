@@ -2427,14 +2427,14 @@ async function fixMissingProfiles() {
 function openEditStaffModal(userId, role) {
     // Find the profile ID for this user
     if (role === 'counsellor') {
-        const counsellor = allCounsellors.find(c => c.user_id === userId);
+        const counsellor = counsellors.find(c => c.user_id === userId);
         if (counsellor) {
             openEditCounsellorModal(counsellor.id);
         } else {
             showNotification('Counsellor profile not found', 'error');
         }
     } else if (role === 'peer') {
-        const peer = allPeers.find(p => p.user_id === userId);
+        const peer = peers.find(p => p.user_id === userId);
         if (peer) {
             openEditPeerModal(peer.id);
         } else {
