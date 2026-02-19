@@ -357,6 +357,50 @@ export default function CrisisSupport() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* WebRTC Call Modal */}
+      <Modal visible={showCallModal} transparent animationType="fade">
+        <View style={styles.callModalOverlay}>
+          <View style={styles.callModalContent}>
+            <View style={styles.callModalHeader}>
+              {/* Animated icon based on call state */}
+              <View style={styles.callIconContainer}>
+                <Ionicons 
+                  name={callState === 'connected' ? 'call' : 'call-outline'} 
+                  size={48} 
+                  color={callState === 'connected' ? '#22c55e' : '#3b82f6'} 
+                />
+              </View>
+              
+              <Text style={styles.callModalTitle}>
+                {isInitiatingCall ? 'Connecting...' :
+                 callState === 'connecting' ? 'Connecting...' : 
+                 callState === 'ringing' ? 'Ringing...' : 
+                 callState === 'connected' ? 'Connected' : 'Calling...'}
+              </Text>
+              
+              <Text style={styles.callModalPeerName}>
+                {callInfo?.peerName || callingCounsellorName || 'Counsellor'}
+              </Text>
+              
+              {callState === 'connected' && (
+                <Text style={styles.callModalDuration}>{formatCallDuration(callDuration)}</Text>
+              )}
+              
+              {(isInitiatingCall || callState === 'connecting' || callState === 'ringing') && (
+                <ActivityIndicator size="small" color="#3b82f6" style={{ marginTop: 16 }} />
+              )}
+            </View>
+            
+            <TouchableOpacity style={styles.callEndButton} onPress={handleEndCall}>
+              <Ionicons name="call" size={28} color="#fff" style={{ transform: [{ rotate: '135deg' }] }} />
+              <Text style={styles.callEndButtonText}>
+                {callState === 'connected' ? 'End Call' : 'Cancel'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
