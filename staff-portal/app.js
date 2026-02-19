@@ -79,13 +79,23 @@ function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(function(s) {
         s.classList.remove('active');
     });
-    document.getElementById(screenId).classList.add('active');
+    var screen = document.getElementById(screenId);
+    if (screen) {
+        screen.classList.add('active');
+    } else {
+        console.error('Screen not found:', screenId);
+    }
 }
 
 // Show Notification
 function showNotification(message, type) {
     type = type || 'success';
     var notif = document.getElementById('notification');
+    if (!notif) {
+        console.error('Notification element not found');
+        alert(message);
+        return;
+    }
     notif.textContent = message;
     notif.className = 'notification ' + type;
     setTimeout(function() {
