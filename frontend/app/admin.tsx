@@ -145,14 +145,24 @@ export default function AdminDashboard() {
   });
 
   const [resetPassword, setResetPassword] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    
     if (!user || user.role !== 'admin') {
-      router.replace('/login');
-      return;
+      // Use setTimeout to ensure navigation happens after Root Layout mounts
+      const timeout = setTimeout(() => {
+        router.replace('/login');
+      }, 100);
+      return () => clearTimeout(timeout);
     }
     fetchData();
-  }, [user]);
+  }, [user, isMounted]);
 
   const fetchData = async () => {
     setIsLoading(true);
