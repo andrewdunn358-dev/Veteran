@@ -189,10 +189,13 @@ async function initPortal() {
     badge.className = 'role-badge role-' + role;
     
     // Show/hide sections based on role
+    // Panic ALERTS section - counsellors and admins see alerts FROM peers
     document.getElementById('panic-section').style.display = 
         (role === 'counsellor' || role === 'admin') ? 'block' : 'none';
+    // Safeguarding section - ALL staff should see safeguarding alerts
     document.getElementById('safeguarding-section').style.display = 
-        (role === 'counsellor' || role === 'admin') ? 'block' : 'none';
+        (role === 'counsellor' || role === 'admin' || role === 'peer') ? 'block' : 'none';
+    // Panic BUTTON - only peers can trigger panic to counsellors
     document.getElementById('panic-button-section').style.display = 
         role === 'peer' ? 'block' : 'none';
     
