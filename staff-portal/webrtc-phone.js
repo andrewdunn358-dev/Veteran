@@ -435,11 +435,27 @@ function updatePhoneStatus(status, text) {
 }
 
 function showIncomingCall(callerName, callType) {
+    // Update floating widget
     if (phoneUI.callInfo) phoneUI.callInfo.classList.remove('hidden');
     if (phoneUI.callerName) phoneUI.callerName.textContent = `Incoming: ${callerName}`;
     if (phoneUI.incomingActions) phoneUI.incomingActions.classList.remove('hidden');
     if (phoneUI.activeActions) phoneUI.activeActions.classList.add('hidden');
     if (phoneUI.container) phoneUI.container.classList.add('ringing');
+    
+    // Update top-of-page incoming call banner
+    var incomingBanner = document.getElementById('webrtc-incoming-call');
+    var incomingCallerName = document.getElementById('incoming-caller-name');
+    var phoneIcon = document.querySelector('.phone-icon');
+    
+    if (incomingBanner) {
+        incomingBanner.classList.remove('hidden');
+    }
+    if (incomingCallerName) {
+        incomingCallerName.textContent = 'Incoming Call: ' + callerName;
+    }
+    if (phoneIcon) {
+        phoneIcon.classList.add('ringing');
+    }
 }
 
 function showActiveCall(peerName) {
