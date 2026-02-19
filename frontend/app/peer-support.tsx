@@ -326,25 +326,40 @@ export default function PeerSupport() {
           <View style={styles.callModalOverlay}>
             <View style={styles.callModalContent}>
               <View style={styles.callModalHeader}>
-                <Ionicons 
-                  name={callState === 'connected' ? 'call' : callState === 'ringing' ? 'call-outline' : 'wifi'} 
-                  size={48} 
-                  color={callState === 'connected' ? '#22c55e' : '#3b82f6'} 
-                />
+                {/* Animated icon based on call state */}
+                <View style={styles.callIconContainer}>
+                  <Ionicons 
+                    name={callState === 'connected' ? 'call' : 'call-outline'} 
+                    size={48} 
+                    color={callState === 'connected' ? '#22c55e' : '#3b82f6'} 
+                  />
+                </View>
+                
                 <Text style={styles.callModalTitle}>
-                  {callState === 'connecting' ? 'Connecting...' : 
+                  {isInitiatingCall ? 'Connecting...' :
+                   callState === 'connecting' ? 'Connecting...' : 
                    callState === 'ringing' ? 'Ringing...' : 
-                   callState === 'connected' ? 'Connected' : 'Call'}
+                   callState === 'connected' ? 'Connected' : 'Calling...'}
                 </Text>
-                <Text style={styles.callModalPeerName}>{callInfo?.peerName || 'Unknown'}</Text>
+                
+                <Text style={styles.callModalPeerName}>
+                  {callInfo?.peerName || callingPeerName || 'Peer Supporter'}
+                </Text>
+                
                 {callState === 'connected' && (
                   <Text style={styles.callModalDuration}>{formatCallDuration(callDuration)}</Text>
                 )}
+                
+                {(isInitiatingCall || callState === 'connecting' || callState === 'ringing') && (
+                  <ActivityIndicator size="small" color="#3b82f6" style={{ marginTop: 16 }} />
+                )}
               </View>
               
-              <TouchableOpacity style={styles.callEndButton} onPress={endCall}>
+              <TouchableOpacity style={styles.callEndButton} onPress={handleEndCall}>
                 <Ionicons name="call" size={28} color="#fff" style={{ transform: [{ rotate: '135deg' }] }} />
-                <Text style={styles.callEndButtonText}>End Call</Text>
+                <Text style={styles.callEndButtonText}>
+                  {callState === 'connected' ? 'End Call' : 'Cancel'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
