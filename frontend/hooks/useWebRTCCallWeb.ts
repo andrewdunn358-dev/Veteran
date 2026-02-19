@@ -269,6 +269,7 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
       return;
     }
 
+    // Initialize socket connection
     initializeSocket();
     
     setCallInfo({
@@ -279,8 +280,34 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     });
     setCallState('connecting');
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Wait for socket to connect
+    let attempts = 0;
+    while (!socketRef.current?.connected && attempts < 10) {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      attempts++;
+    }
 
+    if (!socketRef.current?.connected) {
+      Alert.alert('Connection Error', 'Could not connect to call server. Please try again.');
+      cleanupCall();
+      return;
+    }
+
+    // Generate a temporary caller ID for anonymous users
+    const callerId = `app_user_${Date.now()}`;
+    
+    // Register the caller with the signaling server first
+    socketRef.current?.emit('register', {
+      user_id: callerId,
+      user_type: 'user',
+      name: 'App User',
+      status: 'available',
+    });
+
+    // Give time for registration to complete
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Now initiate the call
     socketRef.current?.emit('call_initiate', {
       target_user_id: targetUserId,
       caller_name: 'App User',
