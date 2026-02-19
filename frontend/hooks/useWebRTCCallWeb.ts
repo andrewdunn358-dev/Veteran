@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Platform, Alert } from 'react-native';
+import { io, Socket } from 'socket.io-client';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
@@ -38,32 +39,25 @@ interface UseWebRTCCallReturn {
   register: (userId: string, userType: string, userName: string) => void;
 }
 
-// Dynamic import for socket.io-client (only on web)
-let io: any = null;
-if (Platform.OS === 'web') {
-  import('socket.io-client').then((module) => {
-    io = module.io;
-  });
-}
-
 export function useWebRTCCall(): UseWebRTCCallReturn {
   const [callState, setCallState] = useState<CallState>('idle');
   const [callInfo, setCallInfo] = useState<CallInfo | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   
-  const socketRef = useRef<any>(null);
+  const socketRef = useRef<Socket | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
-  const callTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const callTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentCallIdRef = useRef<string | null>(null);
 
   // Initialize socket connection
   const initializeSocket = useCallback(() => {
-    if (Platform.OS !== 'web' || !io || socketRef.current?.connected) return;
+    if (Platform.OS !== 'web' || socketRef.current?.connected) return;
     
     const backendUrl = API_URL.replace('/api', '');
+    console.log('WebRTC: Connecting to', backendUrl);
     
     socketRef.current = io(backendUrl, {
       transports: ['websocket', 'polling'],
