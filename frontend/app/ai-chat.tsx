@@ -296,6 +296,83 @@ export default function AIChat() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
+      {/* Legal Disclaimer Modal */}
+      <Modal
+        visible={showDisclaimerModal}
+        transparent
+        animationType="fade"
+        onRequestClose={handleDeclineDisclaimer}
+      >
+        <View style={styles.disclaimerModalOverlay}>
+          <View style={styles.disclaimerModalContent}>
+            <View style={styles.disclaimerModalHeader}>
+              <FontAwesome5 name="shield-alt" size={32} color="#4a90d9" />
+              <Text style={styles.disclaimerModalTitle}>Before We Begin</Text>
+            </View>
+
+            <ScrollView style={styles.disclaimerModalScroll}>
+              <Text style={styles.disclaimerModalSection}>What This Chat Is</Text>
+              <Text style={styles.disclaimerModalText}>
+                You're about to chat with {characterInfo.name}, an AI companion designed to offer a 
+                supportive, non-judgmental space for conversation. This is a safe place to chat, 
+                have a laugh, or just have someone listen.
+              </Text>
+
+              <Text style={styles.disclaimerModalSection}>What This Chat Is NOT</Text>
+              <View style={styles.disclaimerModalList}>
+                <Text style={styles.disclaimerModalListItem}>
+                  <FontAwesome5 name="times-circle" size={12} color="#ef4444" /> Not a mental health service or diagnosis tool
+                </Text>
+                <Text style={styles.disclaimerModalListItem}>
+                  <FontAwesome5 name="times-circle" size={12} color="#ef4444" /> Not a replacement for professional care
+                </Text>
+                <Text style={styles.disclaimerModalListItem}>
+                  <FontAwesome5 name="times-circle" size={12} color="#ef4444" /> Not an emergency service
+                </Text>
+              </View>
+
+              <Text style={styles.disclaimerModalSection}>Crisis Support</Text>
+              <Text style={styles.disclaimerModalText}>
+                If you're in immediate danger or having thoughts of harming yourself:
+              </Text>
+              <View style={styles.disclaimerCrisisBox}>
+                <Text style={styles.disclaimerCrisisText}>
+                  <FontAwesome5 name="phone-alt" size={14} color="#fff" /> Call 999 for emergencies
+                </Text>
+                <Text style={styles.disclaimerCrisisText}>
+                  <FontAwesome5 name="phone-alt" size={14} color="#fff" /> Samaritans: 116 123 (24/7)
+                </Text>
+                <Text style={styles.disclaimerCrisisText}>
+                  <FontAwesome5 name="phone-alt" size={14} color="#fff" /> Combat Stress: 0800 138 1619
+                </Text>
+              </View>
+
+              <Text style={styles.disclaimerModalSection}>Privacy Notice</Text>
+              <Text style={styles.disclaimerModalText}>
+                Conversations may be reviewed if safeguarding concerns are detected. 
+                We take your safety seriously and may contact you if we're worried.
+              </Text>
+            </ScrollView>
+
+            <View style={styles.disclaimerModalButtons}>
+              <TouchableOpacity 
+                style={styles.disclaimerDeclineButton}
+                onPress={handleDeclineDisclaimer}
+              >
+                <Text style={styles.disclaimerDeclineText}>Go Back</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.disclaimerAcceptButton}
+                onPress={handleAcceptDisclaimer}
+                data-testid="accept-disclaimer-btn"
+              >
+                <Text style={styles.disclaimerAcceptText}>I Understand, Start Chat</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
