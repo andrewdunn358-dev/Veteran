@@ -1528,12 +1528,12 @@ async def get_peer_supporters(current_user: User = Depends(get_current_user)):
     # Decrypt sensitive fields when retrieving
     return [PeerSupporter(**decrypt_document('peer_supporters', p)) for p in peers]
 
-@api_router.get("/peer-supporters/available", response_model=List[PeerSupporterPublic])
+@api_router.get("/peer-supporters/available")
 async def get_available_peer_supporters():
-    """Get only available peer supporters - PUBLIC SAFE VIEW (no contact details)"""
+    """Get only available peer supporters - PUBLIC SAFE VIEW (no contact details, includes user_id for WebRTC)"""
     peers = await db.peer_supporters.find(
         {"status": {"$in": ["available", "limited"]}},
-        {"id": 1, "firstName": 1, "area": 1, "status": 1, "_id": 0}
+        {"id": 1, "firstName": 1, "area": 1, "status": 1, "user_id": 1, "_id": 0}
     ).to_list(1000)
     return peers
 
