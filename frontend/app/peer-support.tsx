@@ -140,9 +140,22 @@ export default function PeerSupport() {
     }
   };
 
-  const handleCallVeteran = (phone: string, name: string = 'Peer Supporter', id: string | null = null) => {
+  const handleCallVeteran = async (phone: string, name: string = 'Peer Supporter', id: string | null = null, userId: string | null = null) => {
     logCallIntent('peer', id, name, phone, 'phone');
-    Linking.openURL(`tel:${phone}`);
+    
+    // Use WebRTC for in-app calling if user_id is available
+    if (Platform.OS === 'web' && userId) {
+      try {
+        await initiateCall(userId, name);
+      } catch (error) {
+        console.error('WebRTC call failed:', error);
+        // Fallback to phone dialer
+        Linking.openURL(`tel:${phone}`);
+      }
+    } else {
+      // Fallback to phone dialer for native apps or if no user_id
+      Linking.openURL(`tel:${phone}`);
+    }
   };
 
   const handleSMS = (number: string, name: string = 'Peer Supporter', id: string | null = null) => {
