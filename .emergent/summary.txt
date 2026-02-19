@@ -1,86 +1,79 @@
-<analysis>**original_problem_statement**: The user's goal is to build and enhance a mobile-first web application for UK military veterans. The application includes role-based portals, a staff notes system, a callback/panic system, and an AI chatbot. Recent requests focused on implementing a full-featured live chat system, a side-by-side staff dashboard, significant security hardening including field-level encryption, integrating a professional-grade AI safety layer, and adding a proof-of-concept for in-app SIP/VoIP calling.
+<analysis>**original_problem_statement**: The user's goal is to build and enhance a mobile-first web application for UK military veterans. The application includes role-based portals, a staff notes system, a callback/panic system, and an AI chatbot. Recent requests focused on implementing a full-featured live chat system, a side-by-side staff dashboard, significant security hardening including field-level encryption, integrating a professional-grade AI safety layer, and adding in-app voice calling. The in-app calling was initially a SIP/VoIP proof-of-concept but has now pivoted to a pure WebRTC solution to simplify the architecture and remove costs. A major pain point was also addressed by unifying the user and profile management systems into a single, automated workflow.
 
 **PRODUCT REQUIREMENTS:**
 1.  **Callback/Panic System**: A system for users to request callbacks and for peer supporters to signal a crisis to counsellors.
-2.  **Role-Based Portals**: Dedicated portals for Counsellors and Peer Supporters.
+2.  **Role-Based Portals**: Dedicated portals for Counsellors and Peer Supporters, plus a separate portal for Admins.
 3.  **Staff Notes System**: A GDPR-compliant system for counsellors and peers to create and share notes.
 4.  **AI Chatbot (Battle Buddies)**: An anonymous AI chatbot with advanced, professional-grade safeguarding.
-5.  **Advanced AI Safeguarding**: A sophisticated, multi-level triage system (from Zentrafuge) that detects risk, handles negation, uses context multipliers, and provides UK-specific veteran crisis resources.
+5.  **Advanced AI Safeguarding**: A sophisticated, multi-level triage system (from Zentrafuge) that detects risk, handles negation, and provides UK-specific veteran crisis resources.
 6.  **Training Portal**: A learning management system (LMS) for training volunteers.
-7.  **Friends & Family Support**: A dedicated section for resources.
-8.  **Live Chat Handover**: A system for users to be handed over from the AI to a live chat with any available human supporter (Counsellor or Peer Supporter).
-9.  **Field-Level Encryption**: All Personally Identifiable Information (PII) must be encrypted at rest in the database.
-10. **In-App Calling (SIP/VoIP)**: A system to allow staff and users to make voice calls within the app without using phone numbers.
+7.  **Live Chat Handover**: A system for users to be handed over from the AI to a live chat with any available human supporter.
+8.  **Field-Level Encryption**: All Personally Identifiable Information (PII) must be encrypted at rest in the database.
+9.  **In-App Calling (WebRTC)**: A free, serverless (P2P) system for users and staff to make voice calls within the app without using phone numbers, using WebRTC for the media and the backend for signaling.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack solution with a FastAPI backend, a React Native (Expo) frontend, and a vanilla JS staff portal.
-- **Backend ()**: Major changes have been implemented.
-    - **Security**: Key endpoints (, ) are now protected and require appropriate authentication.
-    - **Field-Level Encryption**: A new AES-256 encryption utility () automatically encrypts and decrypts PII (names, contact info, messages, SIP passwords) for all new data written to MongoDB. An  has been added to .
-    - **AI Safety**: Integrated the open-source Zentrafuge AI Safety Layer (). This replaces the previous basic keyword search with a more robust system that understands negation and context.
-    - **Live Chat**: The API now supports creating a chat room without pre-assigning staff and has a  endpoint for staff to claim a chat.
-    - **SIP**: New models and API endpoints () have been created to manage and allocate SIP extensions to staff users.
-- **Frontend App ()**:
-    - The  page is now functional, handles waiting for a staff member, and the Close button bug is fixed.
-    - Public-facing pages like  have been updated to call the secure, public-safe  endpoints.
-    - A proof-of-concept SIP hook () and the  library have been added.
-- **Staff Portal ()**:
-    - **Dashboard Redesign**: The layout has been completely overhauled into a multi-column grid, showing urgent alerts (Safeguarding, Live Chats) and other items (Callbacks, Notes) side-by-side to eliminate scrolling.
-    - **Live Chat**: Staff can now see pending live chats and click to join them.
-    - **SIP PoC**: A proof-of-concept softphone UI (, ) has been added and configured to connect to the user's FusionPBX server. It auto-registers upon login if the user has a SIP extension allocated.
+The application consists of a FastAPI backend, a React Native (Expo) frontend for users, a vanilla JS staff portal, and a separate vanilla JS admin portal.
+- **Backend ()**: The backend now includes a **Socket.IO signaling server** () to facilitate the new WebRTC calling feature. The user management system has been overhauled; the  endpoint now automatically creates a 'counsellor' or 'peer' profile, and a new unified endpoint () serves all staff data. An endpoint for admins to update staff status has also been added. The  endpoints now correctly return  to enable WebRTC calling.
+- **Admin Portal ()**: This portal was heavily refactored. The separate Users, Counsellors, and Peers tabs have been replaced by a single, unified Staff tab. This new tab allows for creating, editing, and managing all staff members in one place. The Edit User modal now dynamically displays profile-specific fields based on the user's role. The previous VoIP tab has been removed and replaced with a placeholder Calls tab.
+- **Staff Portal ()**: The SIP-based softphone has been completely replaced with a new WebRTC phone (), which connects to the backend signaling server upon login.
+- **Frontend App ()**: The legal disclaimer modal () is implemented and functional. The  page has been modified to initiate WebRTC calls, although this feature is not yet fully functional. A data migration script to encrypt existing PII has been created at .
 
 **Last working item**:
-    - Last item agent was working: Implementing the user's request to manage and allocate SIP (VoIP) extensions to staff members from an admin panel. The agent had just updated the backend models, added encryption for the SIP password, created the admin APIs for managing extensions, and was starting to integrate the SIP credentials into the staff portal login flow.
+    - Last item agent was working: The agent was debugging the WebRTC call initiation from the mobile app. When a user clicks the Call button in , the WebRTC calling modal was not appearing, and the app was attempting to fall back to the native phone dialer. The agent identified a potential issue with the dynamic import of  in the  hook and changed it to a synchronous import.
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? both. Backend API endpoints for SIP allocation need to be tested via . The frontend staff portal needs UI testing to ensure SIP credentials are fetched on login and the softphone registers correctly.
+    - Which testing method agent to use? both. The mobile app frontend () needs to be tested to verify that the calling modal now appears and initiates a WebRTC call. This requires the backend signaling server to be running and a staff member to be logged into the  to receive the call signal, making it an end-to-end test.
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: Finalize SIP Extension Allocation Management (P0 - HIGHEST)
+  - Issue 1: WebRTC call initiation from the mobile app is not working (P0)
   - Issue 2: Bug - Peer Supporters not seeing Safeguarding Alerts (P1)
 
   **Issues Detail**:
-  - **Issue 1: Finalize SIP Extension Allocation Management**
-     - **Attempted fixes**: Backend models (, ) were updated with  and . Admin APIs () were created to manage a pool of available extensions. The  was modified to fetch and use these credentials upon login.
+  - **Issue 1: WebRTC call initiation from the mobile app is not working**
+     - **Attempted fixes**:
+        1. Added  to the  and  API endpoint responses.
+        2. Fixed a bug preventing decryption of  in the same endpoints.
+        3. Changed the dynamic  to a standard synchronous  in .
      - **Next debug checklist**:
-        1. Create the UI in the admin panel () to list available SIP extensions and assign them to counsellors or peer supporters.
-        2. Test the full flow: Admin assigns extension -> Staff member logs into staff portal -> Portal fetches SIP credentials ->  is called with the correct credentials -> Phone registers successfully.
-        3. Verify that making a call from the staff portal works.
-     - **Why fix this issue and what will be achieved with the fix?**: This will complete the SIP integration PoC, allowing the user to dynamically assign VoIP capabilities to staff, a core part of the in-app calling feature.
+        1. In , verify that the  object is successfully connecting to the backend signaling server. Check the browser/device console logs for any Socket.IO connection errors.
+        2. In , add  statements within the  function to trace the execution flow. Confirm that  is present and that  from the  hook is being called.
+        3. Verify the logic that controls the visibility of the  component in . Ensure the  and  states are being updated correctly to show the modal.
+        4. Perform an end-to-end test: log in to the  as a peer, then try to call that peer from the mobile app.
+     - **Why fix this issue and what will be achieved with the fix?**: This is the final step to make the free, in-app WebRTC calling feature functional for users.
      - **Status**: IN PROGRESS
      - **Is recurring issue?** N
      - **Should Test frontend/backend/both after fix?** both
      - **Blocked on other issue**: None
   - **Issue 2: Bug - Peer Supporters not seeing Safeguarding Alerts**
-     - **Attempted fixes**: The agent identified a faulty conditional check in  that hid the safeguarding section from users with the  role. The check was updated to .
+     - **Attempted fixes**: A fix was previously implemented in , but given the numerous subsequent changes to this file and the separate deployment environments, it's unclear if the fix is active in production.
      - **Next debug checklist**:
-        1. User needs to deploy the updated  to their 20i hosting.
-        2. Log in to the staff portal as a user with the  role.
-        3. Confirm that the Safeguarding Alerts section is now visible.
-     - **Why fix this issue and what will be achieved with the fix?**: This is a critical operational bug fix. Peer supporters are frontline responders and must see safeguarding alerts to act on them.
+        1. Ask the user to deploy the latest version of the  to their 20i hosting.
+        2. Have the user log in to the staff portal with a  account.
+        3. Confirm that the Safeguarding Alerts section is visible.
+     - **Why fix this issue and what will be achieved with the fix?**: This is a critical operational bug. Peer supporters are first-line responders and must have visibility of safeguarding alerts.
      - **Status**: USER VERIFICATION PENDING
      - **Is recurring issue?** N
      - **Should Test frontend/backend/both after fix?** frontend
      - **Blocked on other issue**: None
 
 **In progress Task List**:
-  - Task 1: Complete SIP Proof-of-Concept Integration
-     - Where to resume: The backend is mostly ready. The frontend work needs to be completed, specifically the admin UI for assigning extensions and end-to-end testing of the call flow.
-     - What will be achieved with this?: A working demonstration of in-app calling from the staff portal, which can be extended to the mobile app.
-     - Status: IN PROGRESS
-     - Should Test frontend/backend/both after fix?: both
-     - Blocked on something: Issue 1 (Finalize SIP Extension Allocation Management)
+  - Task 1: Complete WebRTC Calling Implementation
+     - **Where to resume**: Resume debugging the call initiation in . Once fixed, the same WebRTC calling logic and UI must be implemented in  to enable calling counsellors.
+     - **What will be achieved with this?**: A fully functional, free, in-app calling system between users and all staff members (peers and counsellors).
+     - **Status**: IN PROGRESS
+     - **Should Test frontend/backend/both after fix?**: both
+     - **Blocked on something**: Issue 1 (WebRTC call initiation from the mobile app is not working)
 
 **Upcoming and Future Tasks**
 
 **Upcoming Tasks:**
-- **P0: Create Data Migration Script**: Write a one-off script to encrypt all existing unencrypted PII in the production database.
-- **P1: Fully Integrate SIP into Mobile App**: Move beyond the PoC hook () and build a full calling UI within the React Native app for users to call available staff.
-- **P2: Add Legal Disclaimers**: Integrate the  content from the Zentrafuge safety layer into the app's UI, likely before starting an AI chat.
-- **P3: Implement Training Portal API Endpoint**: Create a webhook endpoint in  () to receive and store trainee progress from the user's WordPress/LearnDash LMS.
+- **P0: Implement WebRTC calling on Crisis Support page**: Apply the now-debugged WebRTC calling logic from  to  so users can call counsellors.
+- **P1: Execute Data Migration Script**: The script to encrypt existing PII () has been created. The user needs to be guided on how to run this one-off script against their production database.
+- **P2: Implement Training Portal API Endpoint**: Create a webhook endpoint in  () to receive and store trainee progress from the user's WordPress/LearnDash LMS.
+- **P3: Implement Calls Tab Functionality**: The Calls tab in the  is currently a UI placeholder. It needs to be connected to the Socket.IO server to provide a real-time view of online staff and active calls.
 
 **Future Tasks:**
 - In-App Human-to-Human Chat (for non-crisis situations).
@@ -90,22 +83,19 @@ The application is a full-stack solution with a FastAPI backend, a React Native 
 - Referral System.
 
 **Completed work in this session**
-- **Live Chat Flow**: Completed the live chat handover system, allowing any staff member (peer or counsellor) to accept a chat request.
-- **Staff Portal Dashboard Redesign**: Re-architected the staff portal into a responsive, side-by-side grid layout for at-a-glance visibility of all alerts and tasks.
-- **Critical Security Hardening**:
-  - Locked down public API endpoints (, ) to require authentication and appropriate roles.
-  - Fixed all frontend components to use the correct (either secure or public-safe) endpoints.
-- **Field-Level Encryption**: Implemented AES-256 encryption for all PII (names, contact info, notes, SIP passwords) stored in the database.
-- **AI Safety Layer Integration**: Replaced the basic safeguarding system with the professional-grade Zentrafuge Veteran AI Safety Layer, adding superior crisis detection, negation handling, and veteran-specific resources.
-- **SIP/VoIP Proof-of-Concept**: Researched and built a working PoC for in-app calling, including a softphone in the staff portal connected to the user's FusionPBX server.
+- **SIP to WebRTC Migration**: Successfully pivoted the entire in-app calling feature from a complex, paid SIP/PBX system to a free, pure WebRTC solution using Socket.IO for signaling.
+- **Unified Staff Management System**: Completely refactored the backend () and  to unify the previously separate 'User' and 'Profile' systems into a single, automated workflow, resolving a major user pain point.
+- **Dynamic Admin UI**: The  Edit User modal now dynamically renders profile-specific fields based on the selected role (Counsellor or Peer Supporter).
+- **Legal Disclaimer for AI Chat**: Implemented a mandatory disclaimer modal that users must accept before starting a conversation with the AI chatbot.
+- **Data Migration Script Creation**: A Python script was created to encrypt all existing unencrypted PII in the database.
+- **Admin Status Control**: Implemented the functionality for admins to change the availability status of any staff member directly from the .
 - **Bug Fixes**:
-  - Fixed Close button on the live chat screen.
-  - Fixed View button on staff portal alert banners.
-  - Fixed bug preventing peer supporters from viewing the staff portal.
-- **Documentation**: Created  and  to document all recent changes for both non-technical and technical audiences.
+    - Resolved multiple critical bugs in  related to incorrect parameter order in encryption/decryption function calls.
+    - Fixed API endpoints () to correctly return  and decrypted data, unblocking the WebRTC implementation.
+    - Addressed a git conflict issue by guiding the user on how to Force Push from the platform.
 
 **Earlier issues found/mentioned but not fixed**
-- None. The minor avatar issue was investigated and found to be already resolved.
+- None.
 
 **Known issue recurrence from previous fork**
   - None.
@@ -118,86 +108,72 @@ The application is a full-stack solution with a FastAPI backend, a React Native 
 - **Frontend (Web Portals)**: Vanilla JavaScript (ES6), HTML, CSS
 - **Backend**: Python, FastAPI
 - **Database**: MongoDB
-- **Security**: Field-Level Encryption (AES-256), Role-Based Access Control (RBAC) on API endpoints.
-- **AI Integration**: OpenAI API, Zentrafuge Safety Layer (Regex, Negation Handling).
-- **VoIP**: SIP, WebRTC, JsSIP (client), FreeSWITCH/FusionPBX (server).
+- **Security**: Field-Level Encryption (AES-256), Role-Based Access Control (RBAC).
+- **Real-time Communication**: WebRTC (for peer-to-peer media) and WebSockets (via Socket.IO for signaling).
+- **AI Integration**: OpenAI API, Zentrafuge Safety Layer.
 
 **key DB schema**
-- : 
-- : 
-- : 
-- : 
+- :  (Core auth record).
+- :  (Profile record).
+- :  (Profile record).
+- The  in profile collections links back to the  of the  collection. Creating a user now auto-creates the corresponding profile.
 
 **changes in tech stack**
-- **JsSIP**: Added for WebRTC/SIP client functionality.
-- **Zentrafuge AI Safety Layer**: Integrated as a core backend module.
-- Custom **AES-256 Encryption**: Implemented for field-level database encryption.
+- **Added**:  and  (backend),  (frontend) to enable WebRTC signaling.
+- **Removed**: . The entire SIP/FusionPBX stack is now deprecated and has been replaced by the WebRTC implementation.
 
 **All files of reference**
-- : Core backend logic with new security, encryption, and SIP APIs.
-- : The custom encryption utility.
-- : The directory containing the new AI safety layer.
-- : Contains logic for the new dashboard, live chat joining, and SIP registration.
-- : Defines the new grid structure for the dashboard.
-- : Contains all styling for the new dashboard layout.
-- : The SIP softphone client logic.
-- : The user-facing live chat component.
-- : The React hook for the mobile app's SIP PoC.
-- : The comprehensive technical documentation created in this session.
+- : Core backend logic, now with Socket.IO integration and unified staff management APIs.
+- : New module containing all Socket.IO event handlers for call signaling.
+-  & : Heavily refactored to provide the new unified Staff management interface.
+- : The new WebRTC client for the staff portal, replacing the old SIP phone.
+- : The new React hook that encapsulates WebRTC logic for the mobile app.
+- : The mobile app screen where the WebRTC calling feature is being implemented.
+- : The new script for encrypting existing data.
 
 **Critical Info for New Agent**
-- **Encryption is LIVE**: Field-level encryption is active for all new PII. Existing data in the database is unencrypted. A migration script is a high-priority upcoming task. The  () is critical and MUST be present in the environment for the app to function. Do not lose this key.
-- **API Security Model**: Public-facing app screens MUST use the  endpoints, which return a limited, safe subset of data. Authenticated staff portals can access the full data endpoints (, ) which now require a valid token and the correct role.
-- **Deployment Workflow**: The user has three separate deployment targets: the backend on Render, the staff portal on 20i (static files), and the frontend on Vercel. Remind the user which parts need redeploying after specific changes. The user has reported issues with the platform's Save to Github feature; be prepared to provide file contents for manual updates if necessary.
-- **SIP Integration**: The current work is a proof-of-concept. The user has a working FusionPBX server at . Your current task is to finish the admin UI to allow the user to allocate the extensions they provided to staff members.
+- **WebRTC is the new standard**: The project has fully pivoted from SIP/VoIP to a pure WebRTC solution for in-app calling. All SIP-related code is deprecated. The new system uses the backend for signaling only, and a free Google STUN server for NAT traversal.
+- **Unified User Management is LIVE**: The  and backend now use a unified system for staff management. Creating a user with a 'peer' or 'counsellor' role automatically creates their associated profile. There is no longer a need to link profiles manually.
+- **Complex Deployment Environment**: The user manages four distinct deployments (Render backend, two 20i frontends, Vercel app). This has been a major source of confusion, as features implemented in the preview environment don't work in production until the correct component is redeployed. Be explicit about which part(s) (, , ) need to be deployed for a change to take effect.
+- **Git Push Workflow**: The user has previously encountered git conflicts by modifying files directly on GitHub. Remind the user to use the platform's Save to Github feature. Be prepared to guide them on resolving merge conflicts if they arise.
 
 **documents and test reports created in this job**
 - 
-- 
-- 
-- 
-- 
-- 
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: We should encrypt names as well. **Status**: Completed.
-2.  **User**: I need summary documents (technical and non-technical) of what's been accomplished. **Status**: Completed.
-3.  **User**: Found an open-source AI safety layer, can we integrate it? **Status**: Completed.
-4.  **User**: Yes, integrate all three components (safety monitor, crisis resources, disclaimer). **Status**: Completed.
-5.  **User**: Suggested adding a SIP client for in-app calls. **Status**: PoC Implemented.
-6.  **User**: Create a PoC for staff portal & app, and document the server setup. **Status**: Completed.
-7.  **User**: Confirmed they have a FusionPBX server ready. **Status**: Info noted.
-8.  **User**: **(Bug)** Peer supporters are not seeing safeguarding alerts. **Status**: Fix implemented, pending user verification.
-9.  **User**: Provided FusionPBX domain and 4 test extensions. **Status**: Info noted.
-10. **User**: **(Current Task)** Requested a way to allocate the new SIP extensions to users from the admin panel. **Status**: IN PROGRESS.
+1. **User**: Admin can't change staff status, and SIP username format is wrong. **Status**: Completed (Status change added, SIP format fixed then replaced by WebRTC).
+2. **User**: SIP is not working, IP might be banned. Open to using a new, easier PBX. **Status**: Addressed (Agent proposed a simpler, free WebRTC solution).
+3. **User**: The solution needs to be free for this pilot phase. **Status**: Addressed (WebRTC is free).
+4. **User**: Agreed to implement the pure WebRTC solution. **Status**: In Progress (Implementation started).
+5. **User**: Can we admin the new WebRTC system from the admin portal, and have you removed the old VoIP stuff? **Status**: Completed (VoIP tab replaced with placeholder Calls tab).
+6. **User**: Clicking Call in the mobile app dials the phone, it doesn't use WebRTC. **Status**: In Progress (Agent started updating the mobile app).
+7. **User**: After deploying, clicking Call does nothing, no connecting indicator. **Status**: In Progress (Agent is debugging the call initiation UI/UX).
+8. **User**: The backend on Render is auto-deployed. **Status**: Info Noted.
+9. **User**: Pointed out a git push error with a screenshot. **Status**: Resolved (Agent explained the conflict and advised on force pushing).
+10. **User**: Confirmed the git push is now working. **Status**: Resolved.
 
 **Project Health Check:**
-- **Broken**: None.
-- **Mocked**: The SIP/VoIP integration is a proof-of-concept. While functional in the staff portal, it lacks a full UI in the mobile app and requires completion of the admin allocation feature.
+- **Broken**: The primary WebRTC calling feature is broken. The mobile app cannot successfully initiate a call to the staff portal.
+- **Mocked**: The Calls tab in the  is a UI placeholder. It does not yet connect to the signaling server to monitor online staff or active calls.
 
 **3rd Party Integrations**
 - **OpenAI**: Powers the AI Battle Buddies feature. Requires a User API Key.
 - **Zentrafuge AI Safety Layer**: Open-source (MIT license) framework integrated into the backend.
+- **Socket.IO**: Used for WebSocket-based signaling for the WebRTC calling feature.
+- **WebRTC**: Browser-native P2P communication for audio calls. Uses Google's free STUN server ().
 - **Resend**: Used for email notifications.
 - **ip-api.com**: Used for free IP-based geolocation lookup.
 - **OpenStreetMap/Leaflet.js**: Used for rendering maps in the staff portal.
-- **FusionPBX/FreeSWITCH**: User-provided, self-hosted SIP server for VoIP functionality.
-- **JsSIP**: Open-source client library for SIP/WebRTC.
 
 **Testing status**
-  - Testing agent used after significant changes: YES
+  - Testing agent used after significant changes: YES (Once, early in the session for P0/P1/P2 tasks)
   - Troubleshoot agent used after agent stuck in loop: NO
   - Test files created: []
   - Known regressions: None.
 
 **Credentials to test flow:**
 - **Admin**:  / 
-- **Counsellor**:  / (password is unknown to the agent)
-- **SIP Extensions (for testing allocation)**:
-    - 1000 / 
-    - 1001 / 
-    - 1002 / 
-    - 1003 / 
 
 **What agent forgot to execute**
-- The agent started the work for SIP extension allocation (backend models, APIs) but has not yet created the necessary UI in the admin panel () for the user to actually perform the allocation. This is the immediate next step for the .</analysis>
+- The WebRTC calling logic was only added to . It still needs to be implemented in  to allow users to call counsellors.
+- The Calls tab in the  was created as a UI placeholder, but the JavaScript logic to connect to the Socket.IO server and display real-time data (online users, active calls) was not implemented.</analysis>
