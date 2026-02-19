@@ -105,6 +105,30 @@ When triggered offers:
 
 ## Completed (Feb 19, 2026)
 
+### WebRTC In-App Calling (P0)
+- [x] **SIP to WebRTC Migration** - Replaced complex SIP/PBX stack with free, serverless WebRTC solution
+- [x] **Socket.IO Signaling Server** - Backend signaling at `/api/socket.io` for WebRTC handshakes
+- [x] **Mobile App Calling UI** - WebRTC call modal with connecting, ringing, connected states, call timer
+- [x] **Staff Portal WebRTC Phone** - Real-time phone widget for receiving calls
+- [x] **Fallback Handling** - If staff has no `user_id`, shows dialog offering to call phone instead
+- [x] **Caller Registration** - App users auto-register with signaling server before calling
+
+**Technical Details:**
+- Uses Google STUN servers for NAT traversal (free)
+- Socket.IO path: `/api/socket.io` (routed through K8s ingress)
+- React Native Web Alert.alert fix: Uses `window.confirm()` on web platform
+- Staff must have `user_id` linked to receive WebRTC calls
+
+**Files Created/Modified:**
+- `/app/backend/webrtc_signaling.py` - Socket.IO signaling events
+- `/app/frontend/hooks/useWebRTCCallWeb.ts` - React hook for WebRTC
+- `/app/frontend/app/peer-support.tsx` - Added WebRTC call initiation
+- `/app/frontend/app/crisis-support.tsx` - Added WebRTC call initiation
+- `/app/staff-portal/webrtc-phone.js` - Staff portal phone widget
+- `/app/staff-portal/webrtc-phone.css` - Phone styles
+
+**Important Note:** Most existing staff profiles have `user_id: null`. WebRTC only works for staff with linked user accounts. Use Admin Portal → Staff tab to manage profiles.
+
 ### Staff Management System Overhaul
 - [x] **Unified Staff Management** - Replaced separate Counsellors/Peers/Users tabs with single "Staff" tab
 - [x] **Auto-Profile Creation** - When creating a user with role 'counsellor' or 'peer', profile is auto-created
