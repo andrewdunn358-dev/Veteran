@@ -3499,3 +3499,24 @@ async def get_uploaded_image(filename: str):
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="Image not found")
     return FileResponse(filepath)
+
+# ============ WebRTC Signaling Integration ============
+# Import Socket.IO signaling server
+from webrtc_signaling import sio, get_online_staff_list, get_active_calls_list
+import socketio
+
+# Create ASGI app that combines FastAPI and Socket.IO
+socket_app = socketio.ASGIApp(sio, app)
+
+@api_router.get("/webrtc/online-staff")
+async def api_get_online_staff():
+    """Get list of staff currently online for calls"""
+    return {"staff": get_online_staff_list()}
+
+@api_router.get("/webrtc/active-calls")
+async def api_get_active_calls(current_user: User = Depends(require_role("admin"))):
+    """Get list of active calls (admin only)"""
+    return {"calls": get_active_calls_list()}
+
+# Note: When running in production, use socket_app instead of app
+# uvicorn server:socket_app --host 0.0.0.0 --port 8001
