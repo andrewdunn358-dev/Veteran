@@ -386,31 +386,6 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     startWebRTCConnection(false);
   }, []);
 
-  const startCallTimer = () => {
-    setCallDuration(0);
-    callTimerRef.current = setInterval(() => {
-      setCallDuration((prev) => prev + 1);
-    }, 1000);
-  };
-
-  const cleanupCall = useCallback(() => {
-    localStreamRef.current?.getTracks().forEach((track) => track.stop());
-    localStreamRef.current = null;
-    
-    peerConnectionRef.current?.close();
-    peerConnectionRef.current = null;
-    
-    if (callTimerRef.current) {
-      clearInterval(callTimerRef.current);
-      callTimerRef.current = null;
-    }
-
-    currentCallIdRef.current = null;
-    setCallState('idle');
-    setCallInfo(null);
-    setCallDuration(0);
-  }, []);
-
   const rejectCall = useCallback(() => {
     if (currentCallIdRef.current) {
       socketRef.current?.emit('call_reject', {
