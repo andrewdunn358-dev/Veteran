@@ -415,7 +415,7 @@ export default function LiveChat() {
                   size={12} 
                   color="#16a34a" 
                 />
-                <Text style={styles.staffLabelText}>{staffName || 'System'}</Text>
+                <Text style={styles.staffLabelText}>{message.senderName || staffName || 'System'}</Text>
               </View>
             )}
             <Text
