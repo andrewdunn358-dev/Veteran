@@ -51,7 +51,7 @@ A section with a specialized AI ("Sentry") to provide informational support for 
 
 ### 12. AI Chat Persistence
 A system using email and a 4-digit PIN to save and restore AI chat conversations on the user's device.
-**Status**: ✅ Completed
+**Status**: ✅ Completed - Now requires identity verification (email + PIN) when returning
 
 ### 13. Regimental Associations Directory
 A searchable page listing UK military associations with contact details.
