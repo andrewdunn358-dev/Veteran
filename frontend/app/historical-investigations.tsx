@@ -52,21 +52,21 @@ export default function HistoricalInvestigations() {
           </View>
         </View>
 
-        {/* Sentry AI Chat Card - Featured at top */}
+        {/* Finch AI Chat Card - Featured at top */}
         <TouchableOpacity 
-          style={styles.sentryCard}
+          style={styles.finchCard}
           onPress={() => router.push('/sentry-chat')}
           activeOpacity={0.9}
         >
-          <View style={styles.sentryHeader}>
-            <Image source={{ uri: SENTRY_AVATAR }} style={styles.sentryAvatar} />
-            <View style={styles.sentryTextContainer}>
-              <Text style={styles.sentryTitle}>Talk to Sentry</Text>
-              <Text style={styles.sentrySubtitle}>AI Legal Support Companion</Text>
+          <View style={styles.finchHeader}>
+            <Image source={{ uri: FINCH_AVATAR }} style={styles.finchAvatar} />
+            <View style={styles.finchTextContainer}>
+              <Text style={styles.finchTitle}>Talk to Finch</Text>
+              <Text style={styles.finchSubtitle}>AI Legal Support Companion</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color="#64748b" />
           </View>
-          <Text style={styles.sentryDescription}>
+          <Text style={styles.finchDescription}>
             Confidential AI support for veterans facing historical investigations. 
             Get information, emotional support, and guidance 24/7.
           </Text>
