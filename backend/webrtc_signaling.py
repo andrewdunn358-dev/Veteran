@@ -231,16 +231,18 @@ async def call_accept(sid, data):
     
     logger.info(f"Call accepted: {call_id}")
     
-    # Notify caller to start WebRTC negotiation
+    # Notify caller to start WebRTC negotiation (they will create the offer)
     await sio.emit('call_accepted', {
         'call_id': call_id,
         'callee_name': call['callee_name']
     }, to=call['caller_sid'])
     
-    # Notify callee
-    await sio.emit('call_connected', {
+    # Also notify callee with call_accepted so they prepare to receive the offer
+    # The callee should NOT create an offer (createOffer=false)
+    await sio.emit('call_accepted', {
         'call_id': call_id,
-        'peer_name': call['caller_name']
+        'caller_name': call['caller_name'],
+        'is_callee': True  # Flag to indicate they should wait for offer
     }, to=sid)
 
 
