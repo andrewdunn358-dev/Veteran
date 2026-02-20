@@ -39,18 +39,33 @@ export default function SentryChatScreen() {
   const [pin, setPin] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
+  
+  // Verification modal state for returning users
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [verifyEmail, setVerifyEmail] = useState('');
+  const [verifyPin, setVerifyPin] = useState('');
+  const [verifyError, setVerifyError] = useState('');
+  const [pendingMessages, setPendingMessages] = useState<Message[] | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [pendingPin, setPendingPin] = useState<string | null>(null);
+  const [hasLoadedSession, setHasLoadedSession] = useState(false);
 
   useEffect(() => {
     loadSavedSession();
-    // Add welcome message
-    const welcomeMessage: Message = {
-      id: 'welcome',
-      text: "Hello, I'm Sentry. I'm here to provide support and understanding for veterans facing historical investigations or legal challenges related to their service.\n\nI want you to know that whatever you're going through, you're not alone. I can offer a listening ear, general information, and point you towards helpful resources.\n\nPlease remember: I provide emotional support and general guidance, not legal advice. For your specific legal situation, always consult a qualified solicitor.\n\nHow are you feeling today? What's on your mind?",
-      sender: 'sentry',
-      timestamp: new Date(),
-    };
-    setMessages([welcomeMessage]);
   }, []);
+  
+  useEffect(() => {
+    // Only show welcome message if no saved session or after verification
+    if (hasLoadedSession && messages.length === 0) {
+      const welcomeMessage: Message = {
+        id: 'welcome',
+        text: "Hello, I'm Sentry. I'm here to provide support and understanding for veterans facing historical investigations or legal challenges related to their service.\n\nI want you to know that whatever you're going through, you're not alone. I can offer a listening ear, general information, and point you towards helpful resources.\n\nPlease remember: I provide emotional support and general guidance, not legal advice. For your specific legal situation, always consult a qualified solicitor.\n\nHow are you feeling today? What's on your mind?",
+        sender: 'sentry',
+        timestamp: new Date(),
+      };
+      setMessages([welcomeMessage]);
+    }
+  }, [hasLoadedSession]);
 
   const loadSavedSession = async () => {
     try {
@@ -58,22 +73,66 @@ export default function SentryChatScreen() {
       const storedPin = await AsyncStorage.getItem('sentry_pin');
       const storedMessages = await AsyncStorage.getItem('sentry_messages');
       
-      if (storedEmail && storedPin) {
-        setSavedEmail(storedEmail);
-        setIsAuthenticated(true);
-        if (storedMessages) {
-          const parsed = JSON.parse(storedMessages);
-          // Convert timestamp strings back to Date objects
-          const messagesWithDates = parsed.map((m: any) => ({
-            ...m,
-            timestamp: new Date(m.timestamp)
-          }));
-          setMessages(messagesWithDates);
-        }
+      if (storedEmail && storedPin && storedMessages) {
+        const parsed = JSON.parse(storedMessages);
+        const messagesWithDates = parsed.map((m: any) => ({
+          ...m,
+          timestamp: new Date(m.timestamp)
+        }));
+        
+        // Store pending data and show verification modal
+        setPendingMessages(messagesWithDates);
+        setPendingEmail(storedEmail);
+        setPendingPin(storedPin);
+        setShowVerifyModal(true);
+      } else {
+        setHasLoadedSession(true);
       }
     } catch (error) {
       console.error('Error loading session:', error);
+      setHasLoadedSession(true);
     }
+  };
+  
+  const handleVerifyIdentity = () => {
+    if (verifyEmail.toLowerCase() === pendingEmail?.toLowerCase() && verifyPin === pendingPin) {
+      // Verification successful - load the conversation
+      if (pendingMessages) {
+        setMessages(pendingMessages);
+      }
+      setSavedEmail(pendingEmail);
+      setIsAuthenticated(true);
+      setShowVerifyModal(false);
+      setHasLoadedSession(true);
+      setVerifyError('');
+      // Clear pending data
+      setPendingMessages(null);
+      setPendingEmail(null);
+      setPendingPin(null);
+    } else {
+      setVerifyError('Email or PIN does not match. Please try again.');
+    }
+  };
+  
+  const handleStartFresh = async () => {
+    // User wants to start a new conversation - clear saved data
+    try {
+      await AsyncStorage.removeItem('sentry_email');
+      await AsyncStorage.removeItem('sentry_pin');
+      await AsyncStorage.removeItem('sentry_messages');
+    } catch (error) {
+      console.error('Error clearing session:', error);
+    }
+    
+    // Clear state and start fresh
+    setPendingMessages(null);
+    setPendingEmail(null);
+    setPendingPin(null);
+    setShowVerifyModal(false);
+    setVerifyEmail('');
+    setVerifyPin('');
+    setVerifyError('');
+    setHasLoadedSession(true);
   };
 
   const saveMessages = async (newMessages: Message[]) => {
