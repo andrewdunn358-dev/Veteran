@@ -1637,4 +1637,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
+  verifyErrorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fef2f2',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 16,
+    gap: 8,
+    width: '100%',
+  },
+  verifyErrorText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#dc2626',
+  },
+  startFreshButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+  },
+  startFreshText: {
+    fontSize: 14,
+    color: '#64748b',
+    textDecorationLine: 'underline',
+  },
 });
