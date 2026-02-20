@@ -828,6 +828,74 @@ export default function AIChat() {
           </View>
         </View>
       </Modal>
+
+      {/* Email Setup Modal */}
+      <Modal
+        visible={showEmailModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowEmailModal(false)}
+      >
+        <View style={styles.emailModalOverlay}>
+          <View style={styles.emailModalContent}>
+            <TouchableOpacity 
+              style={styles.emailModalClose}
+              onPress={() => setShowEmailModal(false)}
+            >
+              <Ionicons name="close" size={24} color="#64748b" />
+            </TouchableOpacity>
+            
+            <Ionicons name="bookmark" size={48} color="#3b82f6" />
+            <Text style={styles.emailModalTitle}>Save Your Conversation</Text>
+            <Text style={styles.emailModalDescription}>
+              Enter your email and create a 4-digit PIN to save this conversation. 
+              You can continue where you left off next time.
+            </Text>
+
+            <View style={styles.privacyNotice}>
+              <Ionicons name="shield-checkmark" size={20} color="#22c55e" />
+              <Text style={styles.privacyText}>
+                Your conversation is stored only on your device, not in any database. 
+                Your privacy is protected.
+              </Text>
+            </View>
+
+            <Text style={styles.emailInputLabel}>Email</Text>
+            <TextInput
+              style={styles.emailModalInput}
+              value={saveEmail}
+              onChangeText={setSaveEmail}
+              placeholder="your@email.com"
+              placeholderTextColor="#94a3b8"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <Text style={styles.emailInputLabel}>4-Digit PIN</Text>
+            <TextInput
+              style={styles.emailModalInput}
+              value={savePin}
+              onChangeText={(text) => setSavePin(text.replace(/[^0-9]/g, '').slice(0, 4))}
+              placeholder="1234"
+              placeholderTextColor="#94a3b8"
+              keyboardType="number-pad"
+              maxLength={4}
+              secureTextEntry
+            />
+
+            <TouchableOpacity
+              style={[
+                styles.emailModalButton,
+                (!saveEmail || savePin.length !== 4) && styles.emailModalButtonDisabled
+              ]}
+              onPress={handleSetupEmail}
+              disabled={!saveEmail || savePin.length !== 4}
+            >
+              <Text style={styles.emailModalButtonText}>Save Conversation</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
