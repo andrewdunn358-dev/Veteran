@@ -257,10 +257,9 @@ When triggered offers:
 - Optional TURN server for NAT traversal
 
 ## Upcoming Tasks
-- **P0: Test WebRTC E2E** - Log into staff portal, set status available, test call from app
 - P1: Execute Data Migration Script - Encrypt existing PII in production database
-- P2: Training Portal API Endpoint for WordPress/LearnDash integration
-- P3: Implement "Calls" Tab in admin portal - real-time view of online staff and active calls
+- P2: Implement `/api/webrtc/online-staff` and `/api/webrtc/active-calls` endpoints for admin "Calls" tab
+- P3: Training Portal API Endpoint for WordPress/LearnDash integration
 - P4: Add Legal Disclaimers to Staff Portal
 
 ## Known Issues
@@ -268,10 +267,10 @@ When triggered offers:
 - Call logs API returns 422 when phone is undefined - frontend has been patched to skip logging
 
 ## Future Tasks
+- In-App Human-to-Human Chat (non-crisis)
+- Privacy Policy & Terms pages
 - Grounding techniques page
 - Local mental health team finder
-- In-App Human-to-Human Chat (non-crisis)
 - Favorites/Saved Contacts
-- Privacy Policy & Terms pages
 - Achievement Badges
 - Referral System
