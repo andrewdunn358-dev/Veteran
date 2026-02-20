@@ -534,11 +534,12 @@ function createAudioElement() {
 }
 
 function createRingtone() {
-    // Create a simple ringtone using Web Audio API
+    // Create a proper ringtone using Web Audio API
     ringtone = {
         context: null,
         oscillator: null,
-        isPlaying: false
+        isPlaying: false,
+        timeoutId: null
     };
 }
 
@@ -549,30 +550,60 @@ function playRingtone() {
         }
         
         if (ringtone.isPlaying) return;
+        ringtone.isPlaying = true;
         
-        const playTone = () => {
+        // UK-style ring pattern: two tones (400Hz + 450Hz) for 400ms, silence for 200ms, repeat twice, then 2s pause
+        const playRingCycle = () => {
             if (!ringtone.isPlaying) return;
             
-            const osc = ringtone.context.createOscillator();
-            const gain = ringtone.context.createGain();
+            const playDoubleRing = (callback) => {
+                // First ring burst
+                playToneBurst(400, 450, 400, () => {
+                    if (!ringtone.isPlaying) return;
+                    // Short gap
+                    ringtone.timeoutId = setTimeout(() => {
+                        if (!ringtone.isPlaying) return;
+                        // Second ring burst
+                        playToneBurst(400, 450, 400, callback);
+                    }, 200);
+                });
+            };
             
-            osc.connect(gain);
-            gain.connect(ringtone.context.destination);
-            
-            osc.frequency.value = 440;
-            osc.type = 'sine';
-            gain.gain.value = 0.3;
-            
-            osc.start();
-            osc.stop(ringtone.context.currentTime + 0.2);
-            
-            setTimeout(() => {
-                if (ringtone.isPlaying) playTone();
-            }, 500);
+            playDoubleRing(() => {
+                // Long pause before next cycle
+                ringtone.timeoutId = setTimeout(() => {
+                    if (ringtone.isPlaying) playRingCycle();
+                }, 2000);
+            });
         };
         
-        ringtone.isPlaying = true;
-        playTone();
+        const playToneBurst = (freq1, freq2, duration, callback) => {
+            if (!ringtone.isPlaying) return;
+            
+            const osc1 = ringtone.context.createOscillator();
+            const osc2 = ringtone.context.createOscillator();
+            const gain = ringtone.context.createGain();
+            
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(ringtone.context.destination);
+            
+            osc1.frequency.value = freq1;
+            osc2.frequency.value = freq2;
+            osc1.type = 'sine';
+            osc2.type = 'sine';
+            gain.gain.value = 0.15; // Lower volume for dual tone
+            
+            const now = ringtone.context.currentTime;
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + duration / 1000);
+            osc2.stop(now + duration / 1000);
+            
+            ringtone.timeoutId = setTimeout(callback, duration);
+        };
+        
+        playRingCycle();
     } catch (e) {
         console.log('Could not play ringtone:', e);
     }
