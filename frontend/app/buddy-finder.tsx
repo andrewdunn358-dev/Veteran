@@ -316,11 +316,13 @@ const SAMPLE_VETERANS = [
   { id: '1', name: 'Dave M.', service: 'army', region: 'North West', regiment: 'Royal Regiment of Fusiliers', years: '1995-2010' },
   { id: '2', name: 'Steve R.', service: 'army', region: 'Yorkshire & Humber', regiment: 'Yorkshire Regiment', years: '2001-2015' },
   { id: '3', name: 'Mike T.', service: 'navy', region: 'South West', regiment: 'HMS Ocean', years: '1998-2012' },
-  { id: '4', name: 'John B.', service: 'raf', region: 'East of England', regiment: 'RAF Regiment', years: '2005-2018' },
+  { id: '4', name: 'John B.', service: 'raf', region: 'East of England', regiment: 'No. 617 Squadron (Dambusters)', years: '2005-2018' },
   { id: '5', name: 'Chris P.', service: 'marines', region: 'Scotland', regiment: '45 Commando', years: '2000-2014' },
   { id: '6', name: 'Paul W.', service: 'army', region: 'London & South East', regiment: 'Parachute Regiment', years: '1992-2008' },
   { id: '7', name: 'Gary L.', service: 'army', region: 'West Midlands', regiment: 'Mercian Regiment', years: '2003-2016' },
   { id: '8', name: 'Ian K.', service: 'navy', region: 'Scotland', regiment: 'HMS Illustrious', years: '1997-2011' },
+  { id: '9', name: 'Rob H.', service: 'army', region: 'North East', regiment: 'Green Howards', years: '1985-2000' },
+  { id: '10', name: 'Kev D.', service: 'army', region: 'Overseas/Germany (BAOR)', regiment: 'Royal Tank Regiment', years: '1988-2004' },
 ];
 
 export default function BuddyFinderScreen() {
@@ -328,6 +330,8 @@ export default function BuddyFinderScreen() {
   const { isDark } = useTheme();
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedRegiment, setSelectedRegiment] = useState<string | null>(null);
+  const [showRegimentPicker, setShowRegimentPicker] = useState(false);
   const [searchResults, setSearchResults] = useState<typeof SAMPLE_VETERANS>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -346,6 +350,9 @@ export default function BuddyFinderScreen() {
       if (selectedRegion) {
         results = results.filter(v => v.region === selectedRegion);
       }
+      if (selectedRegiment) {
+        results = results.filter(v => v.regiment === selectedRegiment);
+      }
       
       setSearchResults(results);
       setIsSearching(false);
@@ -355,12 +362,18 @@ export default function BuddyFinderScreen() {
   const clearFilters = () => {
     setSelectedService(null);
     setSelectedRegion(null);
+    setSelectedRegiment(null);
     setSearchResults([]);
     setHasSearched(false);
   };
 
   const getServiceInfo = (serviceId: string) => {
     return SERVICE_BRANCHES.find(s => s.id === serviceId);
+  };
+
+  const getRegimentsForService = () => {
+    if (!selectedService) return [];
+    return REGIMENTS[selectedService] || [];
   };
 
   return (
