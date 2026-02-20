@@ -1637,6 +1637,132 @@ async def fix_missing_profiles(current_user: User = Depends(require_role("admin"
         "already_linked": already_linked
     }
 
+class CreateUsersForStaffRequest(BaseModel):
+    default_password: str = "TempPassword123!"
+
+@api_router.post("/admin/create-users-for-unlinked-staff")
+async def create_users_for_unlinked_staff(
+    request: CreateUsersForStaffRequest,
+    current_user: User = Depends(require_role("admin"))
+):
+    """
+    Create user accounts for staff profiles (counsellors/peers) that don't have linked users.
+    This is needed for WebRTC calling to work - staff need user_ids for signaling.
+    """
+    created_users = []
+    already_linked = 0
+    errors = []
+    
+    # Process counsellors without user_id
+    counsellors = await db.counsellors.find({"$or": [{"user_id": None}, {"user_id": {"$exists": False}}]}).to_list(1000)
+    for counsellor in counsellors:
+        counsellor = decrypt_document("counsellors", counsellor)
+        name = counsellor.get("name", "Unknown Counsellor")
+        counsellor_id = counsellor.get("id")
+        
+        # Generate email from name
+        safe_name = name.lower().replace(" ", ".").replace(".", "")[:20]
+        email = f"{safe_name}.counsellor@radiocheck.local"
+        
+        # Check if email already exists
+        existing_user = await db.users.find_one({"email": email})
+        if existing_user:
+            # Try with a suffix
+            email = f"{safe_name}.{counsellor_id[:8]}@radiocheck.local"
+            existing_user = await db.users.find_one({"email": email})
+            if existing_user:
+                errors.append(f"Could not create user for {name} - email conflict")
+                continue
+        
+        try:
+            # Create user account
+            user_id = str(uuid.uuid4())
+            user_data = {
+                "id": user_id,
+                "email": email,
+                "role": "counsellor",
+                "name": name,
+                "password_hash": hash_password(request.default_password),
+                "created_at": datetime.utcnow()
+            }
+            await db.users.insert_one(user_data)
+            
+            # Link to counsellor profile
+            await db.counsellors.update_one(
+                {"id": counsellor_id},
+                {"$set": {"user_id": user_id}}
+            )
+            
+            created_users.append({
+                "name": name,
+                "email": email,
+                "role": "counsellor",
+                "user_id": user_id,
+                "profile_id": counsellor_id
+            })
+            logging.info(f"Created user account for counsellor {name} ({email})")
+        except Exception as e:
+            errors.append(f"Failed to create user for {name}: {str(e)}")
+    
+    # Process peer supporters without user_id
+    peers = await db.peer_supporters.find({"$or": [{"user_id": None}, {"user_id": {"$exists": False}}]}).to_list(1000)
+    for peer in peers:
+        peer = decrypt_document("peer_supporters", peer)
+        name = peer.get("firstName", "Unknown Peer")
+        peer_id = peer.get("id")
+        
+        # Generate email from name
+        safe_name = name.lower().replace(" ", ".").replace(".", "")[:20]
+        email = f"{safe_name}.peer@radiocheck.local"
+        
+        # Check if email already exists
+        existing_user = await db.users.find_one({"email": email})
+        if existing_user:
+            # Try with a suffix
+            email = f"{safe_name}.{peer_id[:8]}@radiocheck.local"
+            existing_user = await db.users.find_one({"email": email})
+            if existing_user:
+                errors.append(f"Could not create user for {name} - email conflict")
+                continue
+        
+        try:
+            # Create user account
+            user_id = str(uuid.uuid4())
+            user_data = {
+                "id": user_id,
+                "email": email,
+                "role": "peer",
+                "name": name,
+                "password_hash": hash_password(request.default_password),
+                "created_at": datetime.utcnow()
+            }
+            await db.users.insert_one(user_data)
+            
+            # Link to peer profile
+            await db.peer_supporters.update_one(
+                {"id": peer_id},
+                {"$set": {"user_id": user_id}}
+            )
+            
+            created_users.append({
+                "name": name,
+                "email": email,
+                "role": "peer",
+                "user_id": user_id,
+                "profile_id": peer_id
+            })
+            logging.info(f"Created user account for peer supporter {name} ({email})")
+        except Exception as e:
+            errors.append(f"Failed to create user for {name}: {str(e)}")
+    
+    return {
+        "message": f"Created {len(created_users)} user accounts for unlinked staff profiles.",
+        "created_users": created_users,
+        "already_linked": already_linked,
+        "errors": errors,
+        "note": f"Default password for new accounts: {request.default_password} - Please change these!"
+    }
+
 @api_router.delete("/auth/users/{user_id}")
 async def delete_user(user_id: str, current_user: User = Depends(require_role("admin"))):
     """Delete a user (admin only)"""
