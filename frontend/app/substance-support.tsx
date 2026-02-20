@@ -5,12 +5,10 @@ import {
   ScrollView, 
   TouchableOpacity, 
   StyleSheet, 
-  Linking,
-  Platform,
-  Image
+  Linking
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 
