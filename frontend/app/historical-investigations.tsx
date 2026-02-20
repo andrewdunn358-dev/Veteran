@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const SENTRY_AVATAR = 'https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png';
 
 export default function HistoricalInvestigations() {
   const router = useRouter();
@@ -46,7 +48,7 @@ export default function HistoricalInvestigations() {
             <Ionicons name="arrow-back" size={24} color="#7c9cbf" />
           </TouchableOpacity>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerTitle}>Historical Investigation Support</Text>
+            <Text style={styles.headerTitle}>Warfare on Lawfare</Text>
           </View>
         </View>
 
@@ -66,6 +68,26 @@ export default function HistoricalInvestigations() {
           </TouchableOpacity>
         </View>
 
+        {/* Sentry AI Chat Card - Featured at top */}
+        <TouchableOpacity 
+          style={styles.sentryCard}
+          onPress={() => router.push('/sentry-chat')}
+          activeOpacity={0.9}
+        >
+          <View style={styles.sentryHeader}>
+            <Image source={{ uri: SENTRY_AVATAR }} style={styles.sentryAvatar} />
+            <View style={styles.sentryTextContainer}>
+              <Text style={styles.sentryTitle}>Talk to Sentry</Text>
+              <Text style={styles.sentrySubtitle}>AI Legal Support Companion</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#64748b" />
+          </View>
+          <Text style={styles.sentryDescription}>
+            Confidential AI support for veterans facing historical investigations. 
+            Get information, emotional support, and guidance 24/7.
+          </Text>
+        </TouchableOpacity>
+
         {/* Understanding Section */}
         <View style={styles.understandingSection}>
           <View style={styles.sectionHeader}>
@@ -73,10 +95,11 @@ export default function HistoricalInvestigations() {
             <Text style={styles.sectionTitle}>We understand</Text>
           </View>
           <Text style={styles.bodyText}>
-            Being part of a historical investigation - whether related to Iraq, Afghanistan, or other legacy cases - can bring intense stress, anxiety, and emotional strain.
+            Being part of a historical investigation - whether related to Northern Ireland, Iraq, Afghanistan, or other legacy cases - can bring intense stress, anxiety, and emotional strain.
           </Text>
           <Text style={styles.bodyText}>
             You may be experiencing difficult emotions years after your service. This is a normal response to an abnormal situation. You deserve support.
+          </Text>
           </Text>
         </View>
 
