@@ -306,19 +306,13 @@ export default function SentryChatScreen() {
     setIsLoading(true);
 
     try {
-      // Build conversation history for context
-      const conversationHistory = newMessages.slice(-10).map(m => ({
-        role: m.sender === 'user' ? 'user' : 'assistant',
-        content: m.text
-      }));
-
-      const response = await fetch(`${API_URL}/api/ai/chat`, {
+      // Use the same endpoint as Tommy & Doris - ai-buddies/chat
+      const response = await fetch(`${API_URL}/api/ai-buddies/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: inputText.trim(),
-          system_prompt: SENTRY_SYSTEM_PROMPT,
-          conversation_history: conversationHistory,
+          sessionId: `sentry-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           character: 'sentry',
         }),
       });
@@ -329,7 +323,7 @@ export default function SentryChatScreen() {
       
       const sentryMessage: Message = {
         id: `sentry-${Date.now()}`,
-        text: data.response || "I'm here to listen. Please tell me more about what you're going through.",
+        text: data.reply || "I'm here to listen. Please tell me more about what you're going through.",
         sender: 'sentry',
         timestamp: new Date(),
       };
