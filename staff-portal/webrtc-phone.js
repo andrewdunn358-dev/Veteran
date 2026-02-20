@@ -304,7 +304,8 @@ function acceptCall() {
     
     stopRingtone();
     socket.emit('call_accept', { call_id: currentCallId });
-    startWebRTCConnection(false); // We'll receive offer
+    // Don't start WebRTC here - wait for call_accepted event to avoid race condition
+    updatePhoneStatus('in-call', 'Connecting...');
 }
 
 /**
