@@ -1,345 +1,138 @@
-# UK Veterans Support App - Product Requirements Document
+# Radio Check - UK Veterans Support App
 
 ## Original Problem Statement
-Build and enhance a mobile-first web application for UK military veterans providing crisis support, counselling, peer support, callback request functionality, and AI-powered companionship with comprehensive BACP-aligned safeguarding.
+Build and enhance a mobile-first web application for UK military veterans. The application includes role-based portals (Admin, Counsellor, Peer Supporter), a staff notes system, a callback/panic system, and AI chatbots. Key features include a full-featured live chat system, a side-by-side staff dashboard, significant security hardening with field-level encryption, an AI safety layer, and in-app voice calling.
 
-## What's Been Implemented (Feb 2026)
+## Core Requirements
 
-### NEW: Substance Misuse Advice Section (Feb 20, 2026)
-**Purpose**: Dedicated home page section for alcohol and substance support for veterans
-- **Home Page Card** - "Alcohol & Substance Support" with amber styling, links to /substance-support
-- **Overview Section** - "You're Not Alone" hero, quick call buttons for Combat Stress & AA
-- **Why Veterans at Higher Risk** - 6 risk factors (PTSD, sleep, drinking culture, civilian adjustment, injuries, loss of identity)
-- **Featured Resource** - Tom Harrison House (UK's only veteran-specific residential rehab)
-- **Resources Section** - Veteran-specific (Tom Harrison, Combat Stress, Op Courage, Veterans' Gateway) + General UK (AA, Drinkline, FRANK, Change Grow Live)
-- **Self-Help Guide** - 6 practical tips (Track intake, Identify triggers, Talk to someone, Build routines, Set goals, Avoid temptation)
-- **Warning Signs** - 8 indicators with checklist format, Take Action card with Veterans' Gateway, Samaritans info
+### 1. Callback/Panic System
+A system for users to request callbacks and for peer supporters to signal a crisis to counsellors.
+**Status**: ✅ Completed
 
-**Files Added:**
-- `/app/frontend/app/substance-support.tsx` - Full substance support page with 4 sub-sections
+### 2. Role-Based Portals
+Dedicated portals for Counsellors and Peer Supporters, plus a separate portal for Admins.
+**Status**: ✅ Completed
 
-**Files Modified:**
-- `/app/frontend/app/home.tsx` - Added "Alcohol & Substance Support" navigation card
+### 3. Staff Notes System
+A GDPR-compliant system for counsellors and peers to create and share notes.
+**Status**: ✅ Completed
 
-### NEW: Grounding Techniques Page (Feb 20, 2026)
-**Purpose**: Self-help tools for anxiety, flashbacks, and panic
-- **5-4-3-2-1 Technique** - Sensory grounding with step-by-step guidance
-- **Box Breathing** - 4-second cycles used by Navy SEALs/special forces
-- **Cold Water Reset** - Vagus nerve activation technique
-- **Quick Body Scan** - Head-to-toe awareness exercise
-- **Grounding Statements** - Present-moment affirmations
+### 4. AI Chatbot ("Battle Buddies")
+An anonymous AI chatbot with advanced, professional-grade safeguarding.
+**Status**: ✅ Completed (Tommy & Doris with enhanced squaddie banter)
 
-**Files Added:**
-- `/app/frontend/app/grounding.tsx` - Interactive grounding tools page
+### 5. Live Chat Handover
+A system for users to be handed over from the AI to a live chat with any available human supporter.
+**Status**: ✅ Completed
 
-### NEW: Local Mental Health Services Finder (Feb 20, 2026)
-**Purpose**: Find veteran-specific NHS mental health services by postcode
-- **Postcode Search** - Maps UK postcodes to regional NHS services
-- **National Services** - Op COURAGE (England), Veterans NHS Wales, Combat Stress Scotland, Veterans Support NI
-- **Regional Services** - Local TILs (Transition, Intervention & Liaison) and veteran charities
-- **Veterans' Gateway** - First point of contact for unsure veterans
+### 6. Field-Level Encryption
+All Personally Identifiable Information (PII) must be encrypted at rest in the database.
+**Status**: ✅ Completed
 
-**Files Added:**
-- `/app/frontend/app/local-services.tsx` - Postcode-based service finder
+### 7. In-App Calling (WebRTC)
+A free, serverless (P2P) system for users and staff to make voice calls within the app.
+**Status**: ⚠️ Partially Complete - BLOCKED by missing user_id on staff profiles
 
-**Files Modified:**
-- `/app/frontend/app/home.tsx` - Added "Grounding Tools" and "Find Local Support" to Self-Care Tools section
+### 8. Substance Misuse Section
+A dedicated section on the home page for advice on alcohol and substance misuse.
+**Status**: ✅ Completed
 
-### NEW: WebRTC Admin Endpoints (Feb 20, 2026)
-**Purpose**: Enable admin portal to view online staff and active calls
-- `GET /api/webrtc/online-staff` - Returns list of currently online staff
-- `GET /api/webrtc/active-calls` - Returns list of active calls (admin only)
+### 9. Self-Help & Gamification
+Grounding Techniques, local support finder, Breathing Challenge, and Buddy Finder.
+**Status**: ✅ Completed
 
-**Files Modified:**
-- `/app/backend/server.py` - Added REST endpoints for WebRTC state
+### 10. Human-to-Human Chat
+A real-time messaging feature for users to chat with staff.
+**Status**: ✅ Completed
 
-### NEW: Human-to-Human Chat System (Feb 20, 2026)
-**Purpose**: Allow veterans to request live chat with human staff (handover from AI)
-- **Socket.IO Events**: `request_human_chat`, `accept_chat_request`, `chat_message`, `typing_start/stop`
-- **REST API Endpoints**:
-  - `POST /api/chat/messages` - Save message to database
-  - `GET /api/chat/messages/{room_id}` - Get messages (7-day retention)
-  - `GET /api/chat/rooms` - Get user's chat history
-  - `GET /api/chat/active-rooms` - Get active rooms (admin)
-  - `DELETE /api/chat/cleanup` - Clean up old messages (admin)
-- **Features**: Real-time messaging, typing indicators, 7-day message retention
+### 11. Warfare on Lawfare Section
+A section with a specialized AI ("Sentry") to provide informational support for veterans facing legal investigations.
+**Status**: ✅ Completed
 
-**Files Modified:**
-- `/app/backend/webrtc_signaling.py` - Added chat room events
-- `/app/backend/server.py` - Added chat REST endpoints
-- `/app/frontend/app/live-chat.tsx` - Updated to use Socket.IO with typing indicators
+### 12. AI Chat Persistence
+A system using email and a 4-digit PIN to save and restore AI chat conversations on the user's device.
+**Status**: ✅ Completed
 
-### NEW: Breathing Challenge Game (Feb 20, 2026)
-**Purpose**: Gamified breathing exercises with streak tracking and unlockable patterns
-- **6 Breathing Patterns**: Relaxing (4-4), Box Breathing (4-4-4-4), 4-7-8 Sleep, Energizing (2-2), Deep Calm, Master Breath
-- **Streak System**: Daily challenge, patterns unlock at 3/7/14/21/30 day streaks
-- **Achievements**: First Breath, Week Warrior, Fortnight Fighter, Month Master, etc.
-- **Visual Feedback**: Animated breathing circle, cycle progress dots
-- **Persistence**: Stats saved via AsyncStorage
+### 13. Regimental Associations Directory
+A searchable page listing UK military associations with contact details.
+**Status**: ✅ Completed (35 associations with search/filter)
 
-**Files Added:**
-- `/app/frontend/app/breathing-game.tsx` - Full breathing challenge game
+---
 
-**Files Modified:**
-- `/app/frontend/app/home.tsx` - Added "Breathing Challenge" to Self-Care Tools
+## What's Been Implemented (Session: Feb 2026)
 
-### NEW: Zentrafuge Veteran AI Safety Layer Integration
-**Source**: https://github.com/TheAIOldtimer/veteran-ai-safety-layer (MIT License)
+### Completed This Session:
+1. **Fixed Sentry AI Connection** - Changed API endpoint from non-existent `/api/ai/chat` to working `/api/ai-buddies/chat`
+2. **Added Sentry to Backend AI Characters** - Sentry now has proper system prompt in backend
+3. **Enhanced Tommy & Doris Squaddie Banter** - Updated prompts with more British military slang and banter expressions
+4. **Created Regimental Associations Page** - 35 associations searchable/filterable by service (Navy/Army/RAF)
+5. **Added Regimental Associations to Home Screen** - Medal icon button in Self-Care Tools section
 
-Enhanced AI safety features:
-- **Negation-aware detection** - Distinguishes "I want to kill myself" vs "I don't want to kill myself"
-- **Context multipliers** - Escalates risk when substances, isolation, or means mentioned
-- **Multi-level risk** - NONE → LOW → MEDIUM → HIGH → CRITICAL
-- **Fail-safe design** - On error, assumes HIGH risk (never silently passes)
-- **UK Veteran Crisis Resources** - Combat Stress, Veterans Gateway, Op COURAGE, Samaritans
+---
 
-Files added:
-- `/app/backend/safety/safety_monitor.py` - Enhanced crisis detection
-- `/app/backend/safety/crisis_resources.py` - Country-specific helplines
-- `/app/SAFEGUARDING_DISCLAIMER.md` - Legal/liability documentation
-- `/app/ATTRIBUTION.md` - Open source attribution
+## Known Issues (Prioritized)
 
-### NEW: Field-Level Data Encryption (AES-256)
-Sensitive data now encrypted at rest:
-- **Counsellors**: name, phone, sms, whatsapp
-- **Peer Supporters**: firstName, phone, sms, whatsapp
-- **Callbacks**: name, phone, email, message
-- **Notes**: content, subject
-- **Safeguarding Alerts**: ip_address, conversation_history
+### P0 - CRITICAL
+- **WebRTC Blocker**: Staff profiles missing `user_id` field. Cannot test or use in-app calling.
 
-⚠️ **CRITICAL**: Add `ENCRYPTION_KEY` to Render environment variables
+### P1 - HIGH  
+- **WebRTC call connection/hangup** - Needs verification after P0 fix
 
-### NEW: API Security Hardening
-- `/api/counsellors` and `/api/peer-supporters` now require authentication
-- Public `/available` endpoints return only safe data (no contact info)
-- Role-based access (admin, counsellor, peer)
+### P2 - MEDIUM
+- **Stale user data** ("Barry Gib") in production - User action pending
 
-### NEW: Friends & Family Section
-**Purpose**: Support for concerned loved ones
-- **Raise a Concern form** - Family/friends can report worries
-- **Signs to Look For** - Education on warning signs
-- **Support Services** - Op Courage, Combat Stress, Men's Sheds, SSAFA, RBL
-- **Armed Forces Covenant** info
-- **Substance & Alcohol Support** - Tom Harrison House, AA, FRANK
-- **Criminal Justice Support** - NACRO, Project Nova, Walking With The Wounded
-
-### Enhanced Safeguarding Indicators
-Now detects:
-- **Addiction**: gambling, drinking to cope, drug use, "can't stop drinking"
-- **Offending/Legal**: prison, court cases, anger issues, assault charges
-- **Self-care deterioration**: not eating, not showering, letting go
-- **Sleep changes**: insomnia, sleeping all day, "awake all night"
-- **Isolation**: pushing people away, not leaving house, avoiding everyone
-- **Pride/Stigma barriers**: "too proud to ask", "sign of weakness", "others had it worse", "real men don't"
-
-### Safeguarding Modal Enhanced
-When triggered offers:
-- **Request a Callback** - Captures phone number for staff to call back
-- **Connect Now** - Shows available counsellors/peers online
-- **Samaritans** - Direct dial 116 123
-- **999 notice**
-
-### Tommy & Doris - Squaddie Personalities
-- Proper military banter and slang
-- "Alright mucker", "brew", "scran", "threaders"
-- Drops banter immediately for serious topics
-
-## Files to Deploy
-
-| File | Location | Action |
-|------|----------|--------|
-| `staff-portal-livechat.zip` | `/app/staff-portal/` | Upload to 20i hosting - includes latest live chat flow |
-| `FEATURE_LIST.md` | `/app/` | Complete reference |
-| `DEPLOYMENT_INSTRUCTIONS.md` | `/app/` | Morning setup guide |
-
-## New API Endpoints
-
-### Family/Friends Concerns
-- `POST /api/concerns` - Submit concern (public)
-- `GET /api/concerns` - List concerns (staff only)
-- `PATCH /api/concerns/{id}/status` - Update status
-
-## New Pages
-
-| Page | URL |
-|------|-----|
-| Friends & Family | `/family-friends` |
-
-## Credentials
-- Admin: admin@veteran.dbty.co.uk / ChangeThisPassword123!
-
-## Completed This Session
-- [x] BACP-aligned weighted safeguarding scoring
-- [x] Addiction and offending behaviour detection
-- [x] Self-care and sleep change detection
-- [x] Pride/stigma barrier detection
-- [x] Friends & Family page with Raise a Concern
-- [x] Signs to Look For education
-- [x] Support services (Op Courage, Men's Sheds, etc.)
-- [x] Armed Forces Covenant info
-- [x] Concern API endpoints
-- [x] Feature list documentation
-- [x] Deployment instructions
-
-## Completed (Feb 19, 2026)
-
-### WebRTC In-App Calling (P0)
-- [x] **SIP to WebRTC Migration** - Replaced complex SIP/PBX stack with free, serverless WebRTC solution
-- [x] **Socket.IO Signaling Server** - Backend signaling at `/api/socket.io` for WebRTC handshakes
-- [x] **Mobile App Calling UI** - WebRTC call modal with connecting, ringing, connected states, call timer
-- [x] **Staff Portal WebRTC Phone** - Real-time phone widget for receiving calls
-- [x] **Fallback Handling** - If staff has no `user_id`, shows dialog offering to call phone instead
-- [x] **Caller Registration** - App users auto-register with signaling server before calling
-
-**Technical Details:**
-- Uses Google STUN servers for NAT traversal (free)
-- Socket.IO path: `/api/socket.io` (routed through K8s ingress)
-- React Native Web Alert.alert fix: Uses `window.confirm()` on web platform
-- Staff must have `user_id` linked to receive WebRTC calls
-
-**Files Created/Modified:**
-- `/app/backend/webrtc_signaling.py` - Socket.IO signaling events
-- `/app/frontend/hooks/useWebRTCCallWeb.ts` - React hook for WebRTC
-- `/app/frontend/app/peer-support.tsx` - Added WebRTC call initiation
-- `/app/frontend/app/crisis-support.tsx` - Added WebRTC call initiation
-- `/app/staff-portal/webrtc-phone.js` - Staff portal phone widget
-- `/app/staff-portal/webrtc-phone.css` - Phone styles
-
-**Important Note:** Most existing staff profiles have `user_id: null`. WebRTC only works for staff with linked user accounts. Use Admin Portal → Staff tab to manage profiles.
-
-### Staff Management System Overhaul
-- [x] **Unified Staff Management** - Replaced separate Counsellors/Peers/Users tabs with single "Staff" tab
-- [x] **Auto-Profile Creation** - When creating a user with role 'counsellor' or 'peer', profile is auto-created
-- [x] **Fix Missing Profiles** - One-click button to create profiles for existing users without one
-- [x] **Filter by Role** - Filter staff list by All/Admins/Counsellors/Peers
-- [x] **Unified View** - See email, name, role, status, and profile details in one card
-- [x] **In-Place Actions** - Edit profile, change status, reset password, delete - all from one place
-
-**New API Endpoints:**
-- `GET /api/admin/unified-staff` - Get all staff with linked profile data
-- `POST /api/admin/fix-missing-profiles` - Create missing profiles for unlinked users
-
-**Updated API:**
-- `POST /api/auth/register` - Now accepts optional profile fields (phone, specialization, area, etc.) and auto-creates profile
-
-### P0: VoIP Extension Management (Admin UI)
-- [x] Added "VoIP" tab to Admin Dashboard
-- [x] View all Counsellors and Peer Supporters in one list
-- [x] "Assign Extension" button opens modal to input extension number and password
-- [x] "Remove SIP" button revokes extension from staff
-- [x] Extensions encrypted before storing in database
-- [x] Info card shows available extensions on FusionPBX server
-
-**API Endpoints:**
-- `GET /api/admin/sip-extensions` - List all staff with SIP assignments
-- `PATCH /api/admin/counsellors/{id}/sip` - Assign SIP extension to counsellor
-- `PATCH /api/admin/peer-supporters/{id}/sip` - Assign SIP extension to peer supporter
-- `DELETE /api/admin/counsellors/{id}/sip` - Remove SIP extension from counsellor
-- `DELETE /api/admin/peer-supporters/{id}/sip` - Remove SIP extension from peer supporter
-
-### P1: Data Migration Script (PII Encryption)
-- [x] Created `/app/backend/scripts/migrate_encrypt_pii.py`
-- [x] Encrypts all existing unencrypted PII in production database
-- [x] Skips already-encrypted fields (prefixed with `ENC:`)
-- [x] Shows migration progress and summary
-- [x] Includes verification step after migration
-
-**Collections Migrated:**
-- counsellors, peer_supporters, callbacks, notes, safeguarding_alerts, concerns
-
-### P2: Legal Disclaimer Modal (AI Chat)
-- [x] Shows "Before We Begin" modal before AI chat starts
-- [x] Sections: What This Chat Is, What This Chat Is NOT, Crisis Support, Privacy Notice
-- [x] Crisis numbers: 999, Samaritans 116 123, Combat Stress 0800 138 1619
-- [x] "Go Back" returns to previous page
-- [x] "I Understand, Start Chat" starts the AI conversation
-- [x] Chat only initiates AFTER user accepts disclaimer
-
-**Files Modified:**
-- `/app/frontend/app/admin.tsx` - Added VoIP tab and SIP management UI
-- `/app/frontend/app/ai-chat.tsx` - Added legal disclaimer modal
-
-## Completed (Feb 18, 2026)
-- [x] **Safeguarding Sensitivity Adjustment**: Raised AMBER threshold to 80+ (was 60), RED threshold to 120+. Modal now only triggers on RED level.
-- [x] **Back Button in Safeguarding Modal**: Added "Go Back" button in the callback request view so users aren't stuck.
-- [x] **Live Chat Feature (P1)**: Complete real-time in-app chat between users and staff
-  - New `/live-chat` page with staff info, secure connection banner, message UI
-  - Backend API: `POST /api/live-chat/rooms`, `GET/POST /api/live-chat/rooms/{id}/messages`, `POST /api/live-chat/rooms/{id}/end`
-  - Integration with safeguarding flow - "Connect Now" navigates to live chat
-- [x] **Splash Screen Button Update**: Changed "No, I'll explore the app" to "I'm ok, take me to the app"
-- [x] **Substance & Alcohol Support Section**: New section in Friends & Family page with resources:
-  - Tom Harrison House (veteran-specific rehab)
-  - Change Grow Live, Alcoholics Anonymous, FRANK, Drinkline, We Are With You
-- [x] **Criminal Justice Support Section**: New section in Friends & Family page with resources:
-  - NACRO, Forces in Mind Trust, Walking With The Wounded
-  - Project Nova, Probation Services, Veterans' Gateway
-- [x] **Live Chat Handover Flow Enhancement**: 
-  - Staff are NO LONGER auto-assigned - all available staff (counsellors AND peer supporters) see live chat alerts
-  - New `/api/live-chat/rooms/{id}/join` endpoint for staff to claim chats
-  - Staff portal updated with "Join Chat" button that properly assigns staff member
-  - User sees "Waiting for support team member to join..." while waiting
-  - When staff joins, user's UI updates to show staff member name
-- [x] **Live Chat Close Button Fix**: Fixed bug where Close button (X) did nothing on web
-  - Root cause: React Native Web's Alert.alert() is stubbed (does nothing)
-  - Solution: Platform-specific handling - window.confirm() for web, Alert.alert() for mobile
-
-## New API Endpoints (Feb 2026)
-
-### Live Chat
-- `POST /api/live-chat/rooms` - Create chat room (staff_id/staff_name now optional)
-- `GET /api/live-chat/rooms/{id}` - Get room details (NEW - for polling staff assignment)
-- `POST /api/live-chat/rooms/{id}/join` - Staff joins chat (NEW - requires auth)
-- `GET /api/live-chat/rooms/{id}/messages` - Get messages (public)
-- `POST /api/live-chat/rooms/{id}/messages` - Send message (public)
-- `POST /api/live-chat/rooms/{id}/end` - End chat session (public)
-- `GET /api/live-chat/rooms` - List active rooms (staff only)
-
-## New Pages (Feb 2026)
-
-| Page | URL | Description |
-|------|-----|-------------|
-| Live Chat | `/live-chat` | Real-time chat with staff member |
-
-## SIP/VoIP Integration (Proof of Concept - Feb 2026)
-
-**Files Created:**
-- `/app/staff-portal/sip-phone.js` - JsSIP integration for staff portal
-- `/app/frontend/hooks/useSIPPhone.ts` - React hook for mobile app
-- `/app/FREESWITCH_SETUP.md` - FreeSWITCH server setup guide
-
-**How it works:**
-1. Counsellor logs in → Auto-registers SIP extension
-2. Status shown as "Online" in app
-3. Veteran clicks "Call" → JsSIP initiates WebRTC call
-4. Call connects → Voice through browser, no phone needed
-
-**Requirements:**
-- FreeSWITCH or Asterisk server (~£10/month VPS)
-- SSL certificate for WSS
-- Optional TURN server for NAT traversal
+---
 
 ## Upcoming Tasks
-- P1: Execute Data Migration Script - Encrypt existing PII in production database
-- P2: ~~Implement `/api/webrtc/online-staff` and `/api/webrtc/active-calls` endpoints for admin "Calls" tab~~ DONE
-- P3: ~~In-App Human-to-Human Chat~~ DONE
-- P4: Training Portal API Endpoint for WordPress/LearnDash integration
-- P5: Add Legal Disclaimers to Staff Portal
 
-## Known Issues
-- Most existing staff profiles have `user_id: null` - WebRTC only works for newly created staff
-- Call logs API returns 422 when phone is undefined - frontend has been patched to skip logging
+### P1
+- Training Portal API Endpoint for WordPress/LearnDash
 
-## Status Check (Feb 20, 2026 - Latest)
-- ✅ **P0 Blank Screen Bug**: RESOLVED - Pages using WebRTC hook (`/peer-support`, `/crisis-support`) now load correctly
-- ⚠️ **WebRTC Calling**: Requires staff to have `user_id` linked - most existing staff profiles have `user_id: null`
-- ✅ **Backend API**: All endpoints functioning (`/api/counsellors/available`, `/api/peer-supporters/available`, `/api/webrtc/online-staff`)
-- ✅ **Frontend**: Home page, peer-support, crisis-support, and self-care tools all loading correctly
+### P2
+- Legal disclaimers for staff portal
+- Privacy Policy & Terms of Service pages
 
-## Future Tasks
-- Privacy Policy & Terms pages
-- Favorites/Saved Contacts
-- Achievement Badges
+### Future/Backlog
+- Achievement Badges system
 - Referral System
 
-## Completed Features (Verified)
-- ✅ Live postcode search for "Find Local Support" page
+---
+
+## Code Architecture
+
+```
+/app
+├── backend/
+│   ├── server.py              # Main API with AI prompts (Tommy, Doris, Sentry)
+│   ├── encryption.py          # Field-level encryption
+│   └── safety.py              # Safeguarding/safety layer
+├── frontend/
+│   └── app/
+│       ├── home.tsx           # Home screen with tools
+│       ├── ai-chat.tsx        # Tommy & Doris chat
+│       ├── sentry-chat.tsx    # Sentry legal support chat
+│       ├── regimental-associations.tsx  # NEW: Associations directory
+│       ├── buddy-finder.tsx   # Regiment finder
+│       └── historical-investigations.tsx # Warfare on Lawfare
+├── staff-portal/              # Vanilla JS staff dashboard
+│   ├── app.js
+│   ├── index.html
+│   ├── webrtc-phone.js
+│   └── webrtc-phone.css
+└── admin-site/                # Admin portal
+```
+
+---
+
+## Tech Stack
+- **Frontend**: React Native, Expo, Expo Router, TypeScript
+- **Backend**: Python, FastAPI
+- **Database**: MongoDB
+- **Real-time**: WebRTC (calling), Socket.IO (signaling/chat)
+- **AI**: OpenAI GPT
+
+---
+
+## Credentials (Test Accounts)
+- **Admin**: `admin@veteran.dbty.co.uk` / `ChangeThisPassword123!`
+- **Peer Supporter**: `kev@radiocheck.me` / `AS90155mm`
