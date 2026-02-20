@@ -219,6 +219,9 @@ async function handleLogin(e) {
         localStorage.setItem('staff_token', token);
         localStorage.setItem('staff_user', JSON.stringify(currentUser));
         
+        // Start session timer
+        resetInactivityTimer();
+        
         initPortal();
         
     } catch (error) {
