@@ -244,6 +244,18 @@ export default function Index() {
 
           <TouchableOpacity 
             style={styles.toolButton}
+            onPress={() => router.push('/buddy-finder')}
+            activeOpacity={0.8}
+            data-testid="buddy-finder-btn"
+          >
+            <View style={[styles.toolIconBg, { backgroundColor: '#dbeafe' }]}>
+              <Ionicons name="people" size={24} color="#3b82f6" />
+            </View>
+            <Text style={styles.toolText}>Buddy{'\n'}Finder</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.toolButton}
             onPress={() => router.push('/local-services')}
             activeOpacity={0.8}
             data-testid="local-services-btn"
@@ -253,7 +265,10 @@ export default function Index() {
             </View>
             <Text style={styles.toolText}>Find Local{'\n'}Support</Text>
           </TouchableOpacity>
+        </View>
 
+        {/* Third row of tools */}
+        <View style={styles.toolsRow}>
           <TouchableOpacity 
             style={styles.toolButton}
             onPress={() => router.push('/resources')}
@@ -264,6 +279,9 @@ export default function Index() {
             </View>
             <Text style={styles.toolText}>Resources{'\n'}Library</Text>
           </TouchableOpacity>
+
+          <View style={styles.toolButton} />
+          <View style={styles.toolButton} />
         </View>
 
         {/* Disclaimer */}
