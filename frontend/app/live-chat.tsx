@@ -451,6 +451,18 @@ export default function LiveChat() {
         </TouchableOpacity>
       </View>
 
+      {/* Typing Indicator */}
+      {typingUser && (
+        <View style={styles.typingIndicator}>
+          <View style={styles.typingDots}>
+            <View style={[styles.typingDot, styles.typingDot1]} />
+            <View style={[styles.typingDot, styles.typingDot2]} />
+            <View style={[styles.typingDot, styles.typingDot3]} />
+          </View>
+          <Text style={styles.typingText}>{typingUser} is typing...</Text>
+        </View>
+      )}
+
       {/* Input Area */}
       <View style={styles.inputContainer}>
         <TextInput
@@ -458,7 +470,7 @@ export default function LiveChat() {
           placeholder="Type a message..."
           placeholderTextColor="#94a3b8"
           value={inputText}
-          onChangeText={setInputText}
+          onChangeText={handleTyping}
           onSubmitEditing={sendMessage}
           multiline
           maxLength={500}
