@@ -3537,7 +3537,7 @@ async def get_uploaded_image(filename: str):
 
 # ============ WebRTC Signaling Integration ============
 # Import Socket.IO signaling server
-from webrtc_signaling import sio, get_online_staff_list, get_active_calls_list
+from webrtc_signaling import sio, get_online_staff_list, get_active_calls_list, get_active_chat_rooms
 import socketio
 
 # WebRTC REST API Endpoints (must be defined BEFORE socket_app wrapping)
@@ -3550,6 +3550,107 @@ async def api_get_online_staff():
 async def api_get_active_calls(current_user: User = Depends(require_role("admin"))):
     """Get list of active calls (admin only)"""
     return {"calls": get_active_calls_list()}
+
+
+# ============ Human-to-Human Chat API ============
+
+class ChatMessage(BaseModel):
+    room_id: str
+    message: str
+    sender_id: str
+    sender_name: str
+    sender_type: str = "user"  # user, counsellor, peer
+
+
+@api_router.post("/chat/messages")
+async def save_chat_message(msg: ChatMessage):
+    """Save a chat message to the database for persistence"""
+    message_doc = {
+        "room_id": msg.room_id,
+        "message": msg.message,
+        "sender_id": msg.sender_id,
+        "sender_name": msg.sender_name,
+        "sender_type": msg.sender_type,
+        "created_at": datetime.utcnow(),
+        "message_id": str(uuid.uuid4())
+    }
+    
+    await db.chat_messages.insert_one(message_doc)
+    
+    return {"success": True, "message_id": message_doc["message_id"]}
+
+
+@api_router.get("/chat/messages/{room_id}")
+async def get_chat_messages(room_id: str, limit: int = 50):
+    """Get chat messages for a room (last 50 by default)"""
+    # Only return messages from last 7 days
+    seven_days_ago = datetime.utcnow() - timedelta(days=7)
+    
+    messages = await db.chat_messages.find(
+        {
+            "room_id": room_id,
+            "created_at": {"$gte": seven_days_ago}
+        },
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # Return in chronological order
+    messages.reverse()
+    
+    return {"messages": messages}
+
+
+@api_router.get("/chat/rooms")
+async def get_user_chat_rooms(current_user: User = Depends(get_current_user)):
+    """Get list of chat rooms the user has participated in"""
+    seven_days_ago = datetime.utcnow() - timedelta(days=7)
+    
+    # Find rooms where this user has sent messages
+    pipeline = [
+        {
+            "$match": {
+                "sender_id": current_user.id,
+                "created_at": {"$gte": seven_days_ago}
+            }
+        },
+        {
+            "$group": {
+                "_id": "$room_id",
+                "last_message": {"$last": "$message"},
+                "last_message_at": {"$max": "$created_at"},
+                "message_count": {"$sum": 1}
+            }
+        },
+        {"$sort": {"last_message_at": -1}},
+        {"$limit": 20}
+    ]
+    
+    rooms = await db.chat_messages.aggregate(pipeline).to_list(20)
+    
+    return {"rooms": rooms}
+
+
+@api_router.get("/chat/active-rooms")
+async def api_get_active_chat_rooms(current_user: User = Depends(require_role("admin"))):
+    """Get list of currently active chat rooms (admin only)"""
+    return {"rooms": get_active_chat_rooms()}
+
+
+@api_router.delete("/chat/cleanup")
+async def cleanup_old_messages(current_user: User = Depends(require_role("admin"))):
+    """Delete messages older than 7 days (admin maintenance task)"""
+    seven_days_ago = datetime.utcnow() - timedelta(days=7)
+    
+    result = await db.chat_messages.delete_many({
+        "created_at": {"$lt": seven_days_ago}
+    })
+    
+    return {
+        "success": True,
+        "deleted_count": result.deleted_count,
+        "cutoff_date": seven_days_ago.isoformat()
+    }
+
 
 # Include the router in the main app (MUST be after all routes are defined)
 app.include_router(api_router)
