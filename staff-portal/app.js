@@ -327,11 +327,15 @@ async function loadMyProfile() {
 
 // Update Status UI
 function updateStatusUI(status) {
-    // Update buttons
+    // Update buttons - map API values to button classes
     document.querySelectorAll('.status-btn').forEach(function(btn) {
         btn.classList.remove('active');
     });
-    var activeBtn = document.querySelector('.status-btn.' + status);
+    // Map API status values to button CSS classes
+    var btnClass = status === 'available' ? 'available' : 
+                   status === 'limited' ? 'busy' : 
+                   status === 'unavailable' ? 'off' : status;
+    var activeBtn = document.querySelector('.status-btn.' + btnClass);
     if (activeBtn) activeBtn.classList.add('active');
     
     // Update current status display
