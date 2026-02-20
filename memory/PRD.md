@@ -31,7 +31,7 @@ All Personally Identifiable Information (PII) must be encrypted at rest in the d
 
 ### 7. In-App Calling (WebRTC)
 A free, serverless (P2P) system for users and staff to make voice calls within the app.
-**Status**: ⚠️ Partially Complete - BLOCKED by missing user_id on staff profiles
+**Status**: ✅ Blocker Fixed - All staff now have user_id for WebRTC signaling
 
 ### 8. Substance Misuse Section
 A dedicated section on the home page for advice on alcohol and substance misuse.
