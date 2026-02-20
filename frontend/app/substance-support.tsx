@@ -357,8 +357,8 @@ export default function SubstanceSupport() {
       <View style={styles.motivationCard}>
         <Text style={styles.motivationTitle}>Remember</Text>
         <Text style={styles.motivationText}>
-          "Asking for help is not a sign of weakness. In the forces, we had each other's backs. 
-          Let someone have yours now."
+          &quot;Asking for help is not a sign of weakness. In the forces, we had each other&apos;s backs. 
+          Let someone have yours now.&quot;
         </Text>
         <Text style={styles.motivationAttrib}>- Former Royal Marine, 12 years sober</Text>
       </View>
@@ -366,7 +366,7 @@ export default function SubstanceSupport() {
       <View style={styles.infoCard}>
         <Ionicons name="information-circle" size={20} color="#2563eb" />
         <Text style={styles.infoCardText}>
-          SMART Recovery and AA both have online meetings if you're not ready for face-to-face. 
+          SMART Recovery and AA both have online meetings if you&apos;re not ready for face-to-face. 
           You can listen without speaking.
         </Text>
       </View>
