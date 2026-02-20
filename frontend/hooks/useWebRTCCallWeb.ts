@@ -64,6 +64,32 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
   const callTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentCallIdRef = useRef<string | null>(null);
 
+  // Define cleanupCall first since it's used by many other functions
+  const cleanupCall = useCallback(() => {
+    localStreamRef.current?.getTracks().forEach((track) => track.stop());
+    localStreamRef.current = null;
+    
+    peerConnectionRef.current?.close();
+    peerConnectionRef.current = null;
+    
+    if (callTimerRef.current) {
+      clearInterval(callTimerRef.current);
+      callTimerRef.current = null;
+    }
+
+    currentCallIdRef.current = null;
+    setCallState('idle');
+    setCallInfo(null);
+    setCallDuration(0);
+  }, []);
+
+  const startCallTimer = useCallback(() => {
+    setCallDuration(0);
+    callTimerRef.current = setInterval(() => {
+      setCallDuration((prev) => prev + 1);
+    }, 1000);
+  }, []);
+
   // Initialize socket connection
   const initializeSocket = useCallback(() => {
     if (Platform.OS !== 'web') return;
