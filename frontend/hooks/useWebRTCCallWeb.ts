@@ -65,7 +65,7 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
   const currentCallIdRef = useRef<string | null>(null);
 
   // Define cleanupCall first since it's used by many other functions
-  const cleanupCall = useCallback(() => {
+  const cleanupCallFn = () => {
     localStreamRef.current?.getTracks().forEach((track) => track.stop());
     localStreamRef.current = null;
     
@@ -81,6 +81,14 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     setCallState('idle');
     setCallInfo(null);
     setCallDuration(0);
+  };
+
+  // Use ref for cleanup to avoid closure issues
+  const cleanupCallRef = useRef(cleanupCallFn);
+  cleanupCallRef.current = cleanupCallFn;
+
+  const cleanupCall = useCallback(() => {
+    cleanupCallRef.current();
   }, []);
 
   const startCallTimer = useCallback(() => {
