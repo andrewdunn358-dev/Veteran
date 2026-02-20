@@ -293,8 +293,6 @@ When triggered offers:
 ## Future Tasks
 - In-App Human-to-Human Chat (non-crisis)
 - Privacy Policy & Terms pages
-- Grounding techniques page
-- Local mental health team finder
 - Favorites/Saved Contacts
 - Achievement Badges
 - Referral System
