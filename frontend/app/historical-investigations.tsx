@@ -52,22 +52,6 @@ export default function HistoricalInvestigations() {
           </View>
         </View>
 
-        {/* Emergency Banner - Display only, no call functionality */}
-        <View style={styles.emergencyBannerContainer}>
-          <View style={styles.emergencyBanner}>
-            <Ionicons name="warning" size={24} color="#ffffff" />
-            <Text style={styles.emergencyText}>At risk? Dial 999</Text>
-          </View>
-          
-          <TouchableOpacity 
-            style={styles.crisisButton}
-            onPress={() => router.push('/crisis-support')}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.crisisButtonText}>I NEED HELP NOW</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Sentry AI Chat Card - Featured at top */}
         <TouchableOpacity 
           style={styles.sentryCard}
