@@ -245,6 +245,43 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 24,
   },
+  sentryCard: {
+    backgroundColor: '#243447',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#3b5068',
+  },
+  sentryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sentryAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    marginRight: 12,
+  },
+  sentryTextContainer: {
+    flex: 1,
+  },
+  sentryTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  sentrySubtitle: {
+    fontSize: 14,
+    color: '#7c9cbf',
+    marginTop: 2,
+  },
+  sentryDescription: {
+    fontSize: 14,
+    color: '#94a3b8',
+    lineHeight: 20,
+  },
   emergencyBanner: {
     flex: 1,
     flexDirection: 'row',
