@@ -217,14 +217,43 @@ export default function Index() {
 
           <TouchableOpacity 
             style={styles.toolButton}
+            onPress={() => router.push('/grounding')}
+            activeOpacity={0.8}
+            data-testid="grounding-tools-btn"
+          >
+            <View style={[styles.toolIconBg, { backgroundColor: '#e0e7ff' }]}>
+              <Ionicons name="hand-left" size={24} color="#6366f1" />
+            </View>
+            <Text style={styles.toolText}>Grounding{'\n'}Tools</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Second row of tools */}
+        <View style={styles.toolsRow}>
+          <TouchableOpacity 
+            style={styles.toolButton}
+            onPress={() => router.push('/local-services')}
+            activeOpacity={0.8}
+            data-testid="local-services-btn"
+          >
+            <View style={[styles.toolIconBg, { backgroundColor: '#d1fae5' }]}>
+              <Ionicons name="location" size={24} color="#10b981" />
+            </View>
+            <Text style={styles.toolText}>Find Local{'\n'}Support</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.toolButton}
             onPress={() => router.push('/resources')}
             activeOpacity={0.8}
           >
             <View style={[styles.toolIconBg, { backgroundColor: '#dcfce7' }]}>
               <Ionicons name="library" size={24} color="#22c55e" />
             </View>
-            <Text style={styles.toolText}>Resources</Text>
+            <Text style={styles.toolText}>Resources{'\n'}Library</Text>
           </TouchableOpacity>
+
+          <View style={styles.toolButtonPlaceholder} />
         </View>
 
         {/* Disclaimer */}
