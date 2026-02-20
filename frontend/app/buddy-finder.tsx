@@ -458,6 +458,93 @@ export default function BuddyFinderScreen() {
           </ScrollView>
         </View>
 
+        {/* Regiment Filter - Only show if service is selected */}
+        {selectedService && (
+          <View style={styles.filterSection}>
+            <Text style={[styles.filterLabel, isDark && styles.textLight]}>Regiment / Unit</Text>
+            <TouchableOpacity
+              style={[styles.regimentSelector, isDark && styles.regimentSelectorDark]}
+              onPress={() => setShowRegimentPicker(true)}
+            >
+              <Ionicons name="list" size={20} color={isDark ? '#94a3b8' : '#64748b'} />
+              <Text style={[
+                styles.regimentSelectorText,
+                isDark && styles.textMuted,
+                selectedRegiment && styles.regimentSelectorTextSelected
+              ]}>
+                {selectedRegiment || 'Select Regiment / Unit (Optional)'}
+              </Text>
+              <Ionicons name="chevron-down" size={20} color={isDark ? '#94a3b8' : '#64748b'} />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Regiment Picker Modal */}
+        <Modal
+          visible={showRegimentPicker}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowRegimentPicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, isDark && styles.modalContentDark]}>
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, isDark && styles.textLight]}>Select Regiment / Unit</Text>
+                <TouchableOpacity onPress={() => setShowRegimentPicker(false)}>
+                  <Ionicons name="close" size={24} color={isDark ? '#ffffff' : '#1e293b'} />
+                </TouchableOpacity>
+              </View>
+              <ScrollView style={styles.modalScroll}>
+                {/* Clear selection option */}
+                <TouchableOpacity
+                  style={[styles.regimentItem, isDark && styles.regimentItemDark]}
+                  onPress={() => {
+                    setSelectedRegiment(null);
+                    setShowRegimentPicker(false);
+                  }}
+                >
+                  <Text style={[styles.regimentItemText, isDark && styles.textMuted]}>
+                    Any Regiment / Unit
+                  </Text>
+                </TouchableOpacity>
+                
+                {getRegimentsForService().map((category) => (
+                  <View key={category.category}>
+                    <Text style={[styles.categoryHeader, isDark && styles.textLight]}>
+                      {category.category}
+                    </Text>
+                    {category.units.map((unit) => (
+                      <TouchableOpacity
+                        key={unit}
+                        style={[
+                          styles.regimentItem,
+                          isDark && styles.regimentItemDark,
+                          selectedRegiment === unit && styles.regimentItemSelected
+                        ]}
+                        onPress={() => {
+                          setSelectedRegiment(unit);
+                          setShowRegimentPicker(false);
+                        }}
+                      >
+                        <Text style={[
+                          styles.regimentItemText,
+                          isDark && styles.textMuted,
+                          selectedRegiment === unit && styles.regimentItemTextSelected
+                        ]}>
+                          {unit}
+                        </Text>
+                        {selectedRegiment === unit && (
+                          <Ionicons name="checkmark" size={20} color="#3b82f6" />
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+
         {/* Search Button */}
         <View style={styles.searchActions}>
           <TouchableOpacity 
