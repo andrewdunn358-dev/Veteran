@@ -475,6 +475,25 @@ export default function AIChat() {
         </TouchableOpacity>
       </View>
 
+      {/* Save Conversation Banner */}
+      {!isAuthenticated && (
+        <TouchableOpacity 
+          style={styles.saveBanner}
+          onPress={() => setShowEmailModal(true)}
+        >
+          <Ionicons name="bookmark-outline" size={18} color="#3b82f6" />
+          <Text style={styles.saveBannerText}>Save conversation to continue later</Text>
+          <Ionicons name="chevron-forward" size={16} color="#3b82f6" />
+        </TouchableOpacity>
+      )}
+
+      {isAuthenticated && (
+        <View style={styles.authenticatedBanner}>
+          <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
+          <Text style={styles.authenticatedText}>Conversation saved locally</Text>
+        </View>
+      )}
+
       {/* Disclaimer */}
       <View style={styles.disclaimer}>
         <FontAwesome5 name="info-circle" size={14} color="#64748b" />
