@@ -96,24 +96,66 @@ export default function AIChat() {
       const storedPin = await AsyncStorage.getItem(`${storageKey}_pin`);
       const storedMessages = await AsyncStorage.getItem(`${storageKey}_messages`);
       
-      if (storedEmail && storedPin) {
-        setSavedEmail(storedEmail);
-        setIsAuthenticated(true);
-        if (storedMessages) {
-          const parsed = JSON.parse(storedMessages);
-          const messagesWithDates = parsed.map((m: any) => ({
-            ...m,
-            timestamp: new Date(m.timestamp)
-          }));
-          setMessages(messagesWithDates);
-          // Skip disclaimer if we have saved messages
-          setShowDisclaimerModal(false);
-          setHasAcceptedDisclaimer(true);
-        }
+      if (storedEmail && storedPin && storedMessages) {
+        // There's a saved session - require verification before loading
+        const parsed = JSON.parse(storedMessages);
+        const messagesWithDates = parsed.map((m: any) => ({
+          ...m,
+          timestamp: new Date(m.timestamp)
+        }));
+        
+        // Store pending data and show verification modal
+        setPendingMessages(messagesWithDates);
+        setPendingEmail(storedEmail);
+        setPendingPin(storedPin);
+        setShowVerifyModal(true);
+        setShowDisclaimerModal(false); // Hide disclaimer while verifying
       }
     } catch (error) {
       console.error('Error loading session:', error);
     }
+  };
+  
+  const handleVerifyIdentity = () => {
+    if (verifyEmail.toLowerCase() === pendingEmail?.toLowerCase() && verifyPin === pendingPin) {
+      // Verification successful - load the conversation
+      if (pendingMessages) {
+        setMessages(pendingMessages);
+      }
+      setSavedEmail(pendingEmail);
+      setIsAuthenticated(true);
+      setShowVerifyModal(false);
+      setHasAcceptedDisclaimer(true);
+      setVerifyError('');
+      // Clear pending data
+      setPendingMessages(null);
+      setPendingEmail(null);
+      setPendingPin(null);
+    } else {
+      setVerifyError('Email or PIN does not match. Please try again.');
+    }
+  };
+  
+  const handleStartFresh = async () => {
+    // User wants to start a new conversation - clear saved data
+    try {
+      const storageKey = `ai_chat_${character}`;
+      await AsyncStorage.removeItem(`${storageKey}_email`);
+      await AsyncStorage.removeItem(`${storageKey}_pin`);
+      await AsyncStorage.removeItem(`${storageKey}_messages`);
+    } catch (error) {
+      console.error('Error clearing session:', error);
+    }
+    
+    // Clear state and show disclaimer for new session
+    setPendingMessages(null);
+    setPendingEmail(null);
+    setPendingPin(null);
+    setShowVerifyModal(false);
+    setShowDisclaimerModal(true);
+    setVerifyEmail('');
+    setVerifyPin('');
+    setVerifyError('');
   };
 
   const saveMessages = async (newMessages: Message[]) => {
