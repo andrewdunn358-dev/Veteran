@@ -73,10 +73,10 @@ A searchable page listing UK military associations with contact details.
 ## Known Issues (Prioritized)
 
 ### P0 - CRITICAL
-- **WebRTC Blocker**: Staff profiles missing `user_id` field. Cannot test or use in-app calling.
+- ~~**WebRTC Blocker**: Staff profiles missing `user_id` field.~~ **FIXED** - Created endpoint and linked all staff
 
 ### P1 - HIGH  
-- **WebRTC call connection/hangup** - Needs verification after P0 fix
+- **WebRTC call connection/hangup** - Now unblocked and ready for end-to-end testing
 
 ### P2 - MEDIUM
 - **Stale user data** ("Barry Gib") in production - User action pending
