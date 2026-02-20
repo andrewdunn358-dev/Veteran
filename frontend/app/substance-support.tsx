@@ -215,7 +215,7 @@ export default function SubstanceSupport() {
         </View>
         <Text style={styles.featuredTitle}>Tom Harrison House</Text>
         <Text style={styles.featuredDesc}>
-          The UK's only residential rehabilitation centre exclusively for veterans and emergency services personnel. 
+          The UK&apos;s only residential rehabilitation centre exclusively for veterans and emergency services personnel. 
           They understand military culture and the unique challenges you face.
         </Text>
         <View style={styles.featuredPhone}>
