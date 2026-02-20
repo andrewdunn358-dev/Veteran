@@ -156,6 +156,23 @@ export default function Index() {
           </View>
         </View>
 
+        {/* Substance Misuse Advice Section */}
+        <TouchableOpacity 
+          style={styles.substanceSupportCard}
+          onPress={() => router.push('/substance-support')}
+          activeOpacity={0.8}
+          data-testid="substance-support-btn"
+        >
+          <View style={styles.substanceSupportIcon}>
+            <Ionicons name="medkit" size={28} color="#f59e0b" />
+          </View>
+          <View style={styles.substanceSupportContent}>
+            <Text style={styles.substanceSupportTitle}>Alcohol & Substance Support</Text>
+            <Text style={styles.substanceSupportDesc}>Advice, helplines & self-help resources for veterans</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+        </TouchableOpacity>
+
         {/* Friends & Family Section */}
         <TouchableOpacity 
           style={styles.familyFriendsCard}
