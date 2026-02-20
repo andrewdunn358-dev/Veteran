@@ -41,7 +41,7 @@ const UK_REGIONS = [
 ];
 
 // Regiments by service (since 1970)
-const REGIMENTS: { [key: string]: { category: string; units: string[] }[] } = {
+const REGIMENTS = {
   army: [
     {
       category: 'Household Cavalry',
