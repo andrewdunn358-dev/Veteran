@@ -947,6 +947,76 @@ export default function AIChat() {
           </View>
         </View>
       </Modal>
+
+      {/* Verification Modal for Returning Users */}
+      <Modal
+        visible={showVerifyModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={handleStartFresh}
+      >
+        <View style={styles.emailModalOverlay}>
+          <View style={styles.emailModalContent}>
+            <Ionicons name="person-circle" size={48} color="#3b82f6" />
+            <Text style={styles.emailModalTitle}>Welcome Back</Text>
+            <Text style={styles.emailModalDescription}>
+              We found a saved conversation. Please verify your identity to continue where you left off.
+            </Text>
+
+            {verifyError ? (
+              <View style={styles.verifyErrorContainer}>
+                <Ionicons name="alert-circle" size={20} color="#dc2626" />
+                <Text style={styles.verifyErrorText}>{verifyError}</Text>
+              </View>
+            ) : null}
+
+            <Text style={styles.emailInputLabel}>Email</Text>
+            <TextInput
+              style={styles.emailModalInput}
+              value={verifyEmail}
+              onChangeText={setVerifyEmail}
+              placeholder="your@email.com"
+              placeholderTextColor="#94a3b8"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              data-testid="verify-email-input"
+            />
+
+            <Text style={styles.emailInputLabel}>4-Digit PIN</Text>
+            <TextInput
+              style={styles.emailModalInput}
+              value={verifyPin}
+              onChangeText={(text) => setVerifyPin(text.replace(/[^0-9]/g, '').slice(0, 4))}
+              placeholder="1234"
+              placeholderTextColor="#94a3b8"
+              keyboardType="number-pad"
+              maxLength={4}
+              secureTextEntry
+              data-testid="verify-pin-input"
+            />
+
+            <TouchableOpacity
+              style={[
+                styles.emailModalButton,
+                (!verifyEmail || verifyPin.length !== 4) && styles.emailModalButtonDisabled
+              ]}
+              onPress={handleVerifyIdentity}
+              disabled={!verifyEmail || verifyPin.length !== 4}
+              data-testid="verify-continue-btn"
+            >
+              <Text style={styles.emailModalButtonText}>Continue Conversation</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.startFreshButton}
+              onPress={handleStartFresh}
+              data-testid="start-fresh-btn"
+            >
+              <Text style={styles.startFreshText}>Start a New Conversation</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
