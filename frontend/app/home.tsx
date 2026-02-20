@@ -50,7 +50,7 @@ export default function Index() {
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.headerTitle}>Veterans Support</Text>
+          <Text style={styles.headerTitle}>Radio Check</Text>
           <Text style={styles.taglineEnglish}>Once in service, forever united</Text>
           <Text style={styles.taglineLatin}>Semel Servientes, Semper Uniti</Text>
         </View>
