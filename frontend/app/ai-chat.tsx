@@ -319,7 +319,11 @@ export default function AIChat() {
           sender: 'buddy',
           timestamp: new Date(),
         };
-        setMessages(prev => [...prev, buddyMessage]);
+        setMessages(prev => {
+          const newMessages = [...prev, buddyMessage];
+          saveMessages(newMessages);
+          return newMessages;
+        });
         
         // Check if safeguarding was triggered
         if (data.safeguardingTriggered) {
@@ -334,7 +338,11 @@ export default function AIChat() {
           sender: 'buddy',
           timestamp: new Date(),
         };
-        setMessages(prev => [...prev, errorMessage]);
+        setMessages(prev => {
+          const newMessages = [...prev, errorMessage];
+          saveMessages(newMessages);
+          return newMessages;
+        });
       }
     } catch (error) {
       const errorMessage: Message = {
@@ -343,7 +351,11 @@ export default function AIChat() {
         sender: 'buddy',
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => {
+        const newMessages = [...prev, errorMessage];
+        saveMessages(newMessages);
+        return newMessages;
+      });
     } finally {
       setIsLoading(false);
     }
