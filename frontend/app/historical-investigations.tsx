@@ -100,7 +100,6 @@ export default function HistoricalInvestigations() {
           <Text style={styles.bodyText}>
             You may be experiencing difficult emotions years after your service. This is a normal response to an abnormal situation. You deserve support.
           </Text>
-          </Text>
         </View>
 
         {/* Important Notice */}
