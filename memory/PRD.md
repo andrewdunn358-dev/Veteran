@@ -21,6 +21,30 @@ Build and enhance a mobile-first web application for UK military veterans provid
 **Files Modified:**
 - `/app/frontend/app/home.tsx` - Added "Alcohol & Substance Support" navigation card
 
+### NEW: Grounding Techniques Page (Feb 20, 2026)
+**Purpose**: Self-help tools for anxiety, flashbacks, and panic
+- **5-4-3-2-1 Technique** - Sensory grounding with step-by-step guidance
+- **Box Breathing** - 4-second cycles used by Navy SEALs/special forces
+- **Cold Water Reset** - Vagus nerve activation technique
+- **Quick Body Scan** - Head-to-toe awareness exercise
+- **Grounding Statements** - Present-moment affirmations
+
+**Files Added:**
+- `/app/frontend/app/grounding.tsx` - Interactive grounding tools page
+
+### NEW: Local Mental Health Services Finder (Feb 20, 2026)
+**Purpose**: Find veteran-specific NHS mental health services by postcode
+- **Postcode Search** - Maps UK postcodes to regional NHS services
+- **National Services** - Op COURAGE (England), Veterans NHS Wales, Combat Stress Scotland, Veterans Support NI
+- **Regional Services** - Local TILs (Transition, Intervention & Liaison) and veteran charities
+- **Veterans' Gateway** - First point of contact for unsure veterans
+
+**Files Added:**
+- `/app/frontend/app/local-services.tsx` - Postcode-based service finder
+
+**Files Modified:**
+- `/app/frontend/app/home.tsx` - Added "Grounding Tools" and "Find Local Support" to Self-Care Tools section
+
 ### NEW: Zentrafuge Veteran AI Safety Layer Integration
 **Source**: https://github.com/TheAIOldtimer/veteran-ai-safety-layer (MIT License)
 
