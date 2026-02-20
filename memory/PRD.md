@@ -45,6 +45,30 @@ Build and enhance a mobile-first web application for UK military veterans provid
 **Files Modified:**
 - `/app/frontend/app/home.tsx` - Added "Grounding Tools" and "Find Local Support" to Self-Care Tools section
 
+### NEW: WebRTC Admin Endpoints (Feb 20, 2026)
+**Purpose**: Enable admin portal to view online staff and active calls
+- `GET /api/webrtc/online-staff` - Returns list of currently online staff
+- `GET /api/webrtc/active-calls` - Returns list of active calls (admin only)
+
+**Files Modified:**
+- `/app/backend/server.py` - Added REST endpoints for WebRTC state
+
+### NEW: Human-to-Human Chat System (Feb 20, 2026)
+**Purpose**: Allow veterans to request live chat with human staff (handover from AI)
+- **Socket.IO Events**: `request_human_chat`, `accept_chat_request`, `chat_message`, `typing_start/stop`
+- **REST API Endpoints**:
+  - `POST /api/chat/messages` - Save message to database
+  - `GET /api/chat/messages/{room_id}` - Get messages (7-day retention)
+  - `GET /api/chat/rooms` - Get user's chat history
+  - `GET /api/chat/active-rooms` - Get active rooms (admin)
+  - `DELETE /api/chat/cleanup` - Clean up old messages (admin)
+- **Features**: Real-time messaging, typing indicators, 7-day message retention
+
+**Files Modified:**
+- `/app/backend/webrtc_signaling.py` - Added chat room events
+- `/app/backend/server.py` - Added chat REST endpoints
+- `/app/frontend/app/live-chat.tsx` - Updated to use Socket.IO with typing indicators
+
 ### NEW: Zentrafuge Veteran AI Safety Layer Integration
 **Source**: https://github.com/TheAIOldtimer/veteran-ai-safety-layer (MIT License)
 
