@@ -232,6 +232,18 @@ export default function Index() {
         <View style={styles.toolsRow}>
           <TouchableOpacity 
             style={styles.toolButton}
+            onPress={() => router.push('/breathing-game')}
+            activeOpacity={0.8}
+            data-testid="breathing-game-btn"
+          >
+            <View style={[styles.toolIconBg, { backgroundColor: '#fce7f3' }]}>
+              <Ionicons name="fitness" size={24} color="#ec4899" />
+            </View>
+            <Text style={styles.toolText}>Breathing{'\n'}Challenge</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.toolButton}
             onPress={() => router.push('/local-services')}
             activeOpacity={0.8}
             data-testid="local-services-btn"
@@ -252,8 +264,6 @@ export default function Index() {
             </View>
             <Text style={styles.toolText}>Resources{'\n'}Library</Text>
           </TouchableOpacity>
-
-          <View style={styles.toolButtonPlaceholder} />
         </View>
 
         {/* Disclaimer */}
