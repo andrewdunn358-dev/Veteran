@@ -406,6 +406,72 @@ export default function SentryChatScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Verification Modal for Returning Users */}
+      <Modal
+        visible={showVerifyModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={handleStartFresh}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Ionicons name="person-circle" size={48} color="#3b82f6" />
+            <Text style={styles.modalTitle}>Welcome Back</Text>
+            <Text style={styles.modalDescription}>
+              We found a saved conversation. Please verify your identity to continue where you left off.
+            </Text>
+
+            {verifyError ? (
+              <View style={styles.verifyErrorContainer}>
+                <Ionicons name="alert-circle" size={20} color="#dc2626" />
+                <Text style={styles.verifyErrorText}>{verifyError}</Text>
+              </View>
+            ) : null}
+
+            <Text style={styles.inputLabel}>Email</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={verifyEmail}
+              onChangeText={setVerifyEmail}
+              placeholder="your@email.com"
+              placeholderTextColor="#94a3b8"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <Text style={styles.inputLabel}>4-Digit PIN</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={verifyPin}
+              onChangeText={(text) => setVerifyPin(text.replace(/[^0-9]/g, '').slice(0, 4))}
+              placeholder="1234"
+              placeholderTextColor="#94a3b8"
+              keyboardType="number-pad"
+              maxLength={4}
+              secureTextEntry
+            />
+
+            <TouchableOpacity
+              style={[
+                styles.modalButton,
+                (!verifyEmail || verifyPin.length !== 4) && styles.modalButtonDisabled
+              ]}
+              onPress={handleVerifyIdentity}
+              disabled={!verifyEmail || verifyPin.length !== 4}
+            >
+              <Text style={styles.modalButtonText}>Continue Conversation</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.startFreshButton}
+              onPress={handleStartFresh}
+            >
+              <Text style={styles.startFreshText}>Start a New Conversation</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
