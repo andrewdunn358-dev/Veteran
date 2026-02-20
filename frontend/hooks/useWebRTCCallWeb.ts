@@ -360,25 +360,6 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     startWebRTCConnection(false);
   }, []);
 
-  const rejectCall = useCallback(() => {
-    if (currentCallIdRef.current) {
-      socketRef.current?.emit('call_reject', {
-        call_id: currentCallIdRef.current,
-        reason: 'rejected',
-      });
-    }
-    cleanupCall();
-  }, [cleanupCall]);
-
-  const endCall = useCallback(() => {
-    console.log('WebRTC: Ending call, callId:', currentCallIdRef.current);
-    if (currentCallIdRef.current) {
-      socketRef.current?.emit('call_end', { call_id: currentCallIdRef.current });
-    }
-    // Always cleanup even if no call ID (allows cancel during connecting)
-    cleanupCall();
-  }, [cleanupCall]);
-
   const startCallTimer = () => {
     setCallDuration(0);
     callTimerRef.current = setInterval(() => {
@@ -403,6 +384,25 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     setCallInfo(null);
     setCallDuration(0);
   }, []);
+
+  const rejectCall = useCallback(() => {
+    if (currentCallIdRef.current) {
+      socketRef.current?.emit('call_reject', {
+        call_id: currentCallIdRef.current,
+        reason: 'rejected',
+      });
+    }
+    cleanupCall();
+  }, [cleanupCall]);
+
+  const endCall = useCallback(() => {
+    console.log('WebRTC: Ending call, callId:', currentCallIdRef.current);
+    if (currentCallIdRef.current) {
+      socketRef.current?.emit('call_end', { call_id: currentCallIdRef.current });
+    }
+    // Always cleanup even if no call ID (allows cancel during connecting)
+    cleanupCall();
+  }, [cleanupCall]);
 
   useEffect(() => {
     return () => {
