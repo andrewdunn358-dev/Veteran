@@ -1,73 +1,104 @@
-<analysis>**original_problem_statement**: The user's goal is to build and enhance a mobile-first web application for UK military veterans. The application includes role-based portals (Admin, Counsellor, Peer Supporter), a staff notes system, a callback/panic system, and an AI chatbot. Key features include a full-featured live chat system, a side-by-side staff dashboard, significant security hardening with field-level encryption, an AI safety layer, and in-app voice calling. A major pain point was also addressed by unifying the user and profile management systems into a single, automated workflow.
+<analysis>**original_problem_statement**: The user's goal is to build and enhance a mobile-first web application for UK military veterans. The application includes role-based portals (Admin, Counsellor, Peer Supporter), a staff notes system, a callback/panic system, and AI chatbots. Key features include a full-featured live chat system, a side-by-side staff dashboard, significant security hardening with field-level encryption, an AI safety layer, and in-app voice calling.
 
 **PRODUCT REQUIREMENTS:**
 1.  **Callback/Panic System**: A system for users to request callbacks and for peer supporters to signal a crisis to counsellors.
 2.  **Role-Based Portals**: Dedicated portals for Counsellors and Peer Supporters, plus a separate portal for Admins.
 3.  **Staff Notes System**: A GDPR-compliant system for counsellors and peers to create and share notes.
-4.  **AI Chatbot (Battle Buddies)**: An anonymous AI chatbot with advanced, professional-grade safeguarding.
+4.  **AI Chatbot (Battle Buddies)**: An anonymous AI chatbot with advanced, professional-grade safeguarding. (Enhanced with persistence & new prompts).
 5.  **Live Chat Handover**: A system for users to be handed over from the AI to a live chat with any available human supporter.
 6.  **Field-Level Encryption**: All Personally Identifiable Information (PII) must be encrypted at rest in the database.
-7.  **In-App Calling (WebRTC)**: A free, serverless (P2P) system for users and staff to make voice calls within the app.
-8.  **Substance Misuse Section**: A dedicated section on the home page for advice on alcohol and substance misuse. (Completed)
-9.  **Self-Help & Gamification**: New tools including Grounding Techniques, a local support finder, and a gamified Breathing Challenge. (Completed)
-10. **Human-to-Human Chat**: A real-time messaging feature for users to chat with staff. (Completed)
+7.  **In-App Calling (WebRTC)**: A free, serverless (P2P) system for users and staff to make voice calls within the app. (Partially fixed).
+8.  **Substance Misuse Section**: A dedicated section on the home page for advice on alcohol and substance misuse. (Completed).
+9.  **Self-Help & Gamification**: New tools including Grounding Techniques, a local support finder, a Breathing Challenge, and a Buddy Finder. (Completed).
+10. **Human-to-Human Chat**: A real-time messaging feature for users to chat with staff. (Completed).
+11. **Warfare on Lawfare Section**: A section with a specialized AI (Sentry) to provide informational support for veterans facing legal investigations. (Completed).
+12. **AI Chat Persistence**: A system using email and a 4-digit PIN to save and restore AI chat conversations on the user's device. (Completed).
+13. **Regimental Associations Directory**: A new page listing UK military associations with contact details. (In Progress).
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack project with a FastAPI backend, a React Native (Expo) frontend for the mobile app, and separate vanilla JS portals for Staff and Admins. In this session, the agent implemented several new frontend features requested by the user: a Substance Misuse section, a Grounding Techniques page, a Local Mental Health Team Finder page, and a gamified Breathing Challenge. The agent also implemented the backend and frontend for a real-time, human-to-human chat system using Socket.IO. A major backend issue with API routing was also resolved by moving the  call to the correct position in , which fixed the WebRTC admin endpoints. However, an attempt to fix a bug in the WebRTC calling feature introduced a critical regression.
+The agent addressed numerous issues and implemented several new features. Initially, it investigated the critical blank screen bug from the previous session and found it was no longer reproducible. It then successfully debugged and fixed a no audio issue in WebRTC calls by resolving a race condition. A series of bugs in the vanilla JS staff portal were also fixed, including status updates, UI highlighting, a duplicate widget, and an incorrect ringtone. A 30-minute inactivity timeout was added to the staff portal for security.
+
+In response to user requests, the agent created a Buddy Finder feature from scratch, complete with a comprehensive, searchable list of UK military regiments since 1970. A major new feature, the Warfare on Lawfare section, was implemented with a specialized AI companion named Sentry. The system prompts for all AI chatbots (Tommy, Doris, and Sentry) were significantly enhanced based on detailed user specifications to ensure they are safe, supportive, and operate within strict boundaries. To support long-running conversations, a local persistence feature using email and a 4-digit PIN was added to both AI chat interfaces. Finally, a detailed guide for the AI features () was created. The agent was last gathering information to create a new page for Regimental Associations.
 
 **Last working item**:
-    - Last item agent was working: Fixing a critical regression that causes a blank screen on pages using the WebRTC hook (e.g., Counsellors, Talk to a Veteran). The user reported this after the agent attempted to fix an issue where calls would not connect and the hangup button was broken. The agent identified the new bug as a JavaScript hoisting/closure issue in , where the  function is referenced before it is initialized within other  hooks.
+    - Last item agent was working: The agent was gathering information to create a new page listing Naval/Regimental/RAF associations with contact details. It successfully completed the web search for this information.
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? Frontend testing agent. First, reproduce the blank screen issue. After applying a fix, take a screenshot of the Counsellors page to confirm it loads. Finally, conduct a full regression test of the WebRTC call flow.
+    - Which testing method agent to use? Frontend testing agent. Create the new page, add it to the app navigation, and use the screenshot tool to verify it renders correctly with the gathered information.
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: Blank screen on pages using WebRTC hook (P0 - CRITICAL REGRESSION)
-  - Issue 2: WebRTC call does not connect, and hangup button is broken (P1 - BLOCKED)
-  - Issue 3: Stale user data (Barry Gib) in production database (P2)
+  - Issue 1: WebRTC calling is blocked because staff profiles lack a  (P0 - CRITICAL)
+  - Issue 2: Original WebRTC call connection/hangup bug remains unverified (P1 - BLOCKED)
+  - Issue 3: Stale user data (Barry Gib) in production database (P2 - USER ACTION PENDING)
 
   **Issues Detail**:
-  - **Issue 1: Blank screen on pages using WebRTC hook**
-     - **Attempted fixes**: The agent tried moving the  function definition within , which did not solve the problem. The agent then correctly identified the need to use a  to hold the  function to resolve the closure problem but failed to implement it correctly.
+  - **Issue 1: WebRTC calling is blocked because staff profiles lack a **
+     - **Attempted fixes**: None. The agent observed this issue while testing API endpoints (, ) but did not act on it. The API responses showed staff records without the  field, which is essential for the WebRTC signaling server to route calls.
      - **Next debug checklist**:
-        1. Open .
-        2. Define  as a standalone function *inside* the hook but not wrapped in .
-        3. Create a  to hold the function: . Update the ref's  value in a  whenever  changes.
-        4. In all places where  is called from within a  (like the socket event handlers), use .
-        5. Verify the fix by navigating to the Peer Support or Crisis Support pages and confirming they load without a blank screen.
-     - **Why fix this issue and what will be achieved with the fix?**: This is a critical regression that blocks users from accessing all calling features. Fixing it will restore core app functionality.
-     - **Status**: IN PROGRESS
+        1. Investigate the staff/user creation process. Is there a step missing where the main  table ID is linked to the  or  profile?
+        2. Create or update a backend endpoint to link an existing user account to a staff profile.
+        3. Alternatively, modify the staff creation process in the Admin Portal to ensure the  is correctly assigned.
+        4. Create a test staff user (e.g., a peer supporter) with a linked  to enable end-to-end testing.
+     - **Why fix this issue and what will be achieved with the fix?**: This is a critical blocker. Without it, no WebRTC calls can be made or received by staff, rendering the entire in-app calling feature useless. Fixing this will unblock testing for all WebRTC-related bugs.
+     - **Status**: NOT STARTED
      - **Is recurring issue?** N
-     - **Should Test frontend/backend/both after fix?** frontend
-     - **Blocked on other issue**: None. This blocks Issue 2.
+     - **Should Test frontend/backend/both after fix?** both
+     - **Blocked on other issue**: None. This issue blocks Issue 2.
 
-  - **Issue 2: WebRTC call does not connect, and hangup button is broken**
-     - **Attempted fixes**: The agent modified  and  to adjust the signaling flow. These changes introduced Issue 1.
-     - **Next debug checklist**: Once Issue 1 is resolved, perform an end-to-end test of the WebRTC call flow to confirm if the original fix was effective.
-        1. Log in as a staff member and set status to Available.
-        2. From the mobile app, initiate a call to the staff member.
-        3. Verify the call connects and two-way audio is established.
-        4. Verify the Hang Up button works for both the caller and the receiver.
-     - **Why fix this issue and what will be achieved with the fix?**: The in-app calling feature is a key requirement and is currently unusable.
+  - **Issue 2: Original WebRTC call connection/hangup bug remains unverified**
+     - **Attempted fixes**: The agent fixed a no audio bug by resolving a race condition in , which might be related. However, a full end-to-end test could not be completed.
+     - **Next debug checklist**:
+        1. Once Issue 1 is resolved and a testable staff account exists, perform a full end-to-end call.
+        2. Log in as a staff member in the staff portal and set status to Available.
+        3. From the mobile app, initiate a call to that staff member.
+        4. Verify the call connects, two-way audio works, and the hang-up button functions correctly for both parties.
+     - **Why fix this issue and what will be achieved with the fix?**: This is a core feature of the application that has been historically buggy. Verifying the fix is essential.
      - **Status**: BLOCKED
      - **Is recurring issue?** Y
      - **Should Test frontend/backend/both after fix?** both
-     - **Blocked on other issue**: Issue 1: Blank screen on pages using WebRTC hook
+     - **Blocked on other issue**: Issue 1: WebRTC calling is blocked because staff profiles lack a 
 
   - **Issue 3: Stale user data (Barry Gib) in production database**
-     - **Attempted fixes**: Agent confirmed the user is not in the preview database.
-     - **Next debug checklist**: The user has confirmed they will delete old accounts. Provide the user with clear, simple instructions on how to delete this user from their **production database** using the Admin Portal's staff management section.
-     - **Why fix this issue and what will be achieved with the fix?**: Cleans up unwanted data from the production environment.
-     - **Status**: BLOCKED (on user action)
+     - **Attempted fixes**: The agent provided the user with Current Mongosh Log ID:	6998e31e068b68b6b9591666
+Connecting to:		mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.7.0
+Using MongoDB:		7.0.30
+Using Mongosh:		2.7.0
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+
+To help improve our products, anonymous usage data is collected and sent to MongoDB periodically (https://www.mongodb.com/legal/privacy-policy).
+You can opt-out by running the disableTelemetry() command.
+
+------
+   The server generated these startup warnings when booting
+   2026-02-20T22:41:26.629+00:00: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem
+   2026-02-20T22:41:27.853+00:00: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+   2026-02-20T22:41:27.853+00:00: You are running this process as the root user, which is not recommended
+   2026-02-20T22:41:27.853+00:00: Soft rlimits for open file descriptors too low
+------
+
+test>  commands to find and delete the user from their production database on Render.
+     - **Next debug checklist**: Awaiting user action to confirm if the instructions worked. No further action is required from the agent unless the user reports a problem.
+     - **Why fix this issue and what will be achieved with the fix?**: Cleans up unwanted data from the production environment as requested by the user.
+     - **Status**: USER VERIFICATION PENDING
      - **Is recurring issue?** N
-     - **Should Test frontend/backend/both after fix?** backend
+     - **Should Test frontend/backend/both after fix?** N/A
      - **Blocked on other issue**: None
 
 **In progress Task List**:
-- None.
+  - Task 1: Create the Naval/Regimental/RAF associations page (P1)
+
+ Task Detail:
+  - **Task 1: Create the Naval/Regimental/RAF associations page**
+     - **Where to resume**: The agent has already performed a web search and has the data. The next step is to create a new React component file (e.g., ), populate it with the gathered information, and add a link to it from a relevant part of the app (likely the  self-care section).
+     - **What will be achieved with this?**: Fulfills a direct user request to provide a directory of veteran support associations.
+     - **Status**: IN PROGRESS
+     - **Should Test frontend/backend/both after fix?** frontend
+     - **Blocked on something**: None
 
 **Upcoming and Future Tasks**
 
@@ -79,21 +110,33 @@ The application is a full-stack project with a FastAPI backend, a React Native (
 **Future Tasks:**
 - Achievement Badges system.
 - Referral System.
-- Implement live postcode search for the Find Local Support page.
 
 **Completed work in this session**
-- **New Feature**: Implemented a comprehensive Substance Misuse Advice section, accessible from the home page ().
-- **New Feature**: Added a Grounding Techniques page to the self-help tools ().
-- **New Feature**: Created a Find Local Support page with a static list of national veteran services ().
-- **New Feature**: Developed a gamified Breathing Challenge with streak tracking and animated exercises ().
-- **Feature Implemented**: Built a real-time, human-to-human chat system using Socket.IO, with backend endpoints for message persistence and a refactored frontend UI ().
-- **Backend Fix**: Resolved a critical routing issue in  that was causing 404 errors on several API endpoints, including the WebRTC admin dashboard endpoints.
-- **Task Resolved**: Confirmed with the user that the PII migration script is no longer necessary, as they will be deleting old, unencrypted user accounts.
+- **Bug Fix**: Fixed no audio on WebRTC calls by resolving a race condition in .
+- **UI/UX Fix**: Changed staff portal ringtone from a busy signal to a proper UK ringtone in .
+- **Bug Fix**: Corrected a bug preventing staff from changing their status by aligning API values in  and .
+- **UI/UX Fix**: Fixed status button highlighting and removed a duplicate/floating phone widget in the staff portal (, ).
+- **New Feature**: Implemented a 30-minute inactivity timeout for the staff portal in .
+- **New Feature**: Re-created and enhanced the Buddy Finder page () with a comprehensive list of UK military regiments since 1970.
+- **New Feature**: Renamed a section to Warfare on Lawfare and created a specialized AI chatbot named Sentry with a unique UI and avatar (, ).
+- **New Feature**: Implemented an Email + 4-digit PIN system for local AI chat persistence on both the main chat () and Sentry chat.
+- **AI Enhancement**: Updated system prompts for all AI companions (Tommy, Doris, Sentry) in  with detailed, user-provided guidelines for safety and persona.
+- **Documentation**: Created a user-facing guide for the AI features in .
+
+**Earlier issues found/mentioned but not fixed**
+   - **Issue 1: Staff profiles are missing **
+     - **Debug checklist**:
+        1. Investigate the user/staff creation flow to find why the link is not being made.
+        2. Create a backend utility or endpoint to link existing  to / records by email.
+        3. Ensure the Admin portal correctly associates the user ID upon staff creation.
+     - **Why to solve this issue and what will be achieved with this?**: This is a critical blocker for the entire WebRTC in-app calling feature. Fixing it will allow for proper end-to-end testing and deployment of the feature.
+     - **Should Test frontend/backend/both after fix**: both
+     - **Is recurring issue?** N
 
 **Known issue recurrence from previous fork**
   - **Issue recurrence in previous fork**: Production Deployment & Caching Failures.
   - **Recurrence count**: High.
-  - **Status**: RESOLVED (for now). The user confirmed P0 is all working I think, suggesting the deployment issues are resolved. However, the new agent should be mindful that this could resurface.
+  - **Status**: RESOLVED (for now). The agent should remain aware that deployment or caching issues, especially with the vanilla JS staff portal on 20i, are a recurring theme.
 
 **Code Architecture**
 
@@ -103,78 +146,66 @@ The application is a full-stack project with a FastAPI backend, a React Native (
 - **Backend**: Python, FastAPI
 - **Database**: MongoDB
 - **Real-time**: WebRTC (for calling), Socket.IO (for signaling and chat)
-- **Security**: Field-Level Encryption (AES-256), RBAC
+- **Security**: RBAC, Inactivity Timeout.
+- **Local Persistence**: Using device storage (implicitly AsyncStorage) to save and retrieve chat history based on email/PIN credentials.
 
 **key DB schema**
-  - : 
-  - : 
-  - : 
-  - :  (New)
+  - No changes were made to the database schema in this session.
 
 **changes in tech stack**
-- None.
+  - None.
 
 **All files of reference**
-- : The source of the current critical bug.
-- : A page that is currently broken by the bug.
-- : Another page broken by the bug.
-- : Contains fixes for API routing and new chat endpoints.
-- : Contains updated logic for call signaling and chat events.
-- : Home page, updated with new self-care tools.
-- : The new real-time chat interface.
-- : Contains the latest product requirements and completed tasks.
+- **New Files**: , , 
+- **Modified Frontend**: , , , 
+- **Modified Backend**: 
+- **Modified Staff Portal**: , , , 
 
-**Areas that need refactoring**
-- : This hook is complex and fragile. After fixing the current bug, it should be reviewed for simplification to prevent future regressions. Using refs for functions called within callbacks is a sign that the hook's structure could be improved.
-- : This is a monolithic file containing almost all application logic. It should be broken down into separate routers for different domains (auth, users, webrtc, chat, etc.) to improve maintainability.
+**Areas that need refactoring**:
+- ****: This monolithic file continues to grow. It now contains large, multi-line string prompts for three different AI personas. It should be broken down into separate routers and a dedicated module for AI configuration.
+- ****: The entire staff portal is built with vanilla JS and is becoming increasingly complex and difficult to maintain. The interconnectedness of , , and  has led to several bugs. It should be considered for a rewrite into a modern component-based framework like React.
 
 **key api endpoints**
-- : Sends a new chat message.
-- : Retrieves chat history for a user.
-- : (Fixed) Lists online staff for the admin dashboard.
-- : (Fixed) Lists active calls for the admin dashboard.
+- : The endpoint that was failing due to a validation error and was fixed by correcting the values sent from the frontend.
 
 **Critical Info for New Agent**
-- Your absolute first priority is to fix the blank screen regression in . The app's core calling functionality is completely blocked until this is resolved.
-- The bug is a JavaScript closure/hoisting issue. The previous agent's idea to use a  to hold the  function is the correct path, but it needs to be implemented properly.
-- Once the blank screen is fixed, you must immediately perform a full regression test of the WebRTC calling feature to see if the original call not connecting bug is also solved.
-- Do not work on any new features until the calling functionality is restored and verified.
+- **Priority 1: Finish the Regimental Associations page.** The user is waiting for this, and the research is already done.
+- **Priority 2: Fix the WebRTC Blocker.** You MUST address the missing  on staff profiles. This is a critical blocker preventing the entire in-app calling feature from being tested or used. All other WebRTC bug fixes are meaningless until this is resolved.
+- **Staff Portal Deployment**: Remember that the  is a separate set of static files. The user deploys these manually to their 20i hosting. The agent has made numerous fixes to these files (, , , ). The user must be reminded to deploy all of them to see the fixes for the ringtone, audio, status buttons, highlighting, and inactivity timeout.
 
 **documents and test reports created in this job**
-- 
-- 
--  (updated)
+  - 
 
-**Last 10 User Messages and any pending HUMAN messages**
-10. **User**: Requests a gamified self-help tool, like a daily challenge or word game. **Status**: Completed (Breathing Challenge was implemented).
-9. **User**: Selects option 4 (Breathing Challenge). **Status**: Completed.
-8. **User**: Asks for the purpose of the  script. **Status**: Addressed (Agent explained its purpose).
-7. **User**: Confirms old accounts can be deleted and the PII migration is not needed. **Status**: Completed (Task removed from backlog).
-6. **User**: Reports a new bug: when using the call feature the call goes through but does not connect and the client end cant click to hangup. **Status**: Work started.
-5. **User**: Confirms the WebRTC fixes are done and asks to test. **Status**: Awaiting user test.
-4. **User**: Reports a critical regression: you broke something now when I try to open councellors or talk to a veteran its just a black page. Also asks to hide user Barry Gib. **Status**: This is the current active bug.
-3. **User**: Says I did not provide an image (in response to agent mistakenly calling image tool). **Status**: Noted.
-2. **User**: Repeats I did not provide an image. **Status**: Noted.
-1. **User**: Says fix it. **Status**: This is the current directive.
+**Last 10 User Messages and any pending HUMAN messages** 
+10. **User**: Requests a way to save AI chat history with an email and some identifier, but not a full password. **Status**: Completed (Email + 4-digit PIN implemented).
+9. **User**: Asks to change Historical Investigations to Warfare on Lawfare and add a specialized AI chat within it. **Status**: Completed (Sentry AI chat created).
+8. **User**: Specifies Email + 4-digit PIN and wants a separate page for the new AI chat. Suggests a disclaimer about local storage. Asks agent to name the AI and find an avatar. **Status**: Completed.
+7. **User**: Asks where to enter the email and PIN for the main AI chat (Tommy & Doris). **Status**: Completed (Feature was added to the main AI chat).
+6. **User**: Asks to remove the red emergency buttons from the Warfare on Lawfare page. **Status**: Completed.
+5. **User**: Provides detailed requirements for Sentry's system prompt to ensure it gives legal information, not advice. **Status**: Completed (Prompt updated).
+4. **User**: Provides an addendum for Sentry's prompt specifically regarding the Ministry of Defence (MOD). **Status**: Completed (Prompt updated).
+3. **User**: Provides further detailed modules, refusal templates, and a prompt router logic for Sentry. **Status**: Completed (Prompt updated).
+2. **User**: Provides 8 detailed persona and safety prompts for the Tommy & Doris AI chat. **Status**: Completed (Prompts updated).
+1. **User**: Requests a written explanation of all AI features to be created as a document for GitHub. Also requests a new section for Naval/Regimental/RAF associations. **Status**: In Progress (Document created, associations page started).
 
 **Project Health Check:**
-- **Broken**: The WebRTC calling feature is critically broken. A regression introduced in the  hook causes any page using it to render as a blank screen, blocking all user-to-staff contact features.
-- **Mocked**: The Find Local Support page includes a postcode search input, but it is not yet functional. It only displays a static list of national services.
+- **Broken**: The core WebRTC calling feature is untestable and non-functional due to a backend data issue where staff profiles are not linked with a . This is a critical failure point.
+- **Mocked**: The new Buddy Finder feature is UI-only. The search functionality is not connected to any backend logic to find or display veteran data.
 
 **3rd Party Integrations**
-- **OpenAI**: Used for the AI chatbot. Requires a user-provided API key.
-- **Socket.IO**: Used for real-time WebRTC signaling and the new human-to-human chat.
+- **OpenAI**: Used for the AI chatbots (Tommy, Doris, Sentry). Requires a user-provided API key.
+- **Socket.IO**: Used for real-time WebRTC signaling and human-to-human chat.
 - **WebRTC**: Used for peer-to-peer in-app voice calls.
 
 **Testing status**
-  - Testing agent used after significant changes: YES, for the new self-help features and chat implementation.
+  - Testing agent used after significant changes: NO
   - Troubleshoot agent used after agent stuck in loop: NO
   - Test files created: []
-  - Known regressions: A critical regression in  causes pages that use the hook to show a blank screen, breaking the app's core calling functionality.
+  - Known regressions: None from this session, but the core calling feature remains in a broken/unverified state.
 
 **Credentials to test flow:**
 - **Admin**:  / 
 - **Peer Supporter (Kevin)**:  / 
 
 **What agent forgot to execute**
-The agent failed to properly test the implications of their changes to the complex  hook. While attempting to fix one bug (call connection failure), they introduced a more severe regression (blank pages) and did not catch it before asking the user to test. The agent then got stuck in a debugging loop on the new issue.</analysis>
+- The agent critically failed to address the missing  on staff profiles. Despite identifying this as the reason API calls were failing and WebRTC would not work, the agent did not create a task to fix it. This oversight has left the entire in-app calling feature, a major component of the app, in an unverified and broken state. All subsequent bug fixes for WebRTC are unprovable until this data linkage issue is resolved.</analysis>
