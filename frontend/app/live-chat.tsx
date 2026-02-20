@@ -704,4 +704,37 @@ const styles = StyleSheet.create({
   sendButtonDisabled: {
     backgroundColor: '#94a3b8',
   },
+  // Typing Indicator
+  typingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#f8fafc',
+    gap: 8,
+  },
+  typingDots: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  typingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#94a3b8',
+  },
+  typingDot1: {
+    // Animation could be added here
+  },
+  typingDot2: {
+    // Animation could be added here
+  },
+  typingDot3: {
+    // Animation could be added here
+  },
+  typingText: {
+    fontSize: 12,
+    color: '#64748b',
+    fontStyle: 'italic',
+  },
 });
