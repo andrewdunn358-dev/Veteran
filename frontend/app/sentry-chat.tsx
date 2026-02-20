@@ -59,8 +59,8 @@ export default function FinchChatScreen() {
     if (hasLoadedSession && messages.length === 0) {
       const welcomeMessage: Message = {
         id: 'welcome',
-        text: "Hello, I'm Sentry. I'm here to provide support and understanding for veterans facing historical investigations or legal challenges related to their service.\n\nI want you to know that whatever you're going through, you're not alone. I can offer a listening ear, general information, and point you towards helpful resources.\n\nPlease remember: I provide emotional support and general guidance, not legal advice. For your specific legal situation, always consult a qualified solicitor.\n\nHow are you feeling today? What's on your mind?",
-        sender: 'sentry',
+        text: "Hello, I'm Finch. I'm here to provide support and understanding for veterans facing historical investigations or legal challenges related to their service.\n\nI want you to know that whatever you're going through, you're not alone. I can offer a listening ear, general information, and point you towards helpful resources.\n\nPlease remember: I provide emotional support and general guidance, not legal advice. For your specific legal situation, always consult a qualified solicitor.\n\nHow are you feeling today? What's on your mind?",
+        sender: 'finch',
         timestamp: new Date(),
       };
       setMessages([welcomeMessage]);
@@ -69,9 +69,9 @@ export default function FinchChatScreen() {
 
   const loadSavedSession = async () => {
     try {
-      const storedEmail = await AsyncStorage.getItem('sentry_email');
-      const storedPin = await AsyncStorage.getItem('sentry_pin');
-      const storedMessages = await AsyncStorage.getItem('sentry_messages');
+      const storedEmail = await AsyncStorage.getItem('finch_email');
+      const storedPin = await AsyncStorage.getItem('finch_pin');
+      const storedMessages = await AsyncStorage.getItem('finch_messages');
       
       if (storedEmail && storedPin && storedMessages) {
         const parsed = JSON.parse(storedMessages);
@@ -117,9 +117,9 @@ export default function FinchChatScreen() {
   const handleStartFresh = async () => {
     // User wants to start a new conversation - clear saved data
     try {
-      await AsyncStorage.removeItem('sentry_email');
-      await AsyncStorage.removeItem('sentry_pin');
-      await AsyncStorage.removeItem('sentry_messages');
+      await AsyncStorage.removeItem('finch_email');
+      await AsyncStorage.removeItem('finch_pin');
+      await AsyncStorage.removeItem('finch_messages');
     } catch (error) {
       console.error('Error clearing session:', error);
     }
@@ -138,7 +138,7 @@ export default function FinchChatScreen() {
   const saveMessages = async (newMessages: Message[]) => {
     if (isAuthenticated) {
       try {
-        await AsyncStorage.setItem('sentry_messages', JSON.stringify(newMessages));
+        await AsyncStorage.setItem('finch_messages', JSON.stringify(newMessages));
       } catch (error) {
         console.error('Error saving messages:', error);
       }
@@ -148,8 +148,8 @@ export default function FinchChatScreen() {
   const handleSetupEmail = async () => {
     if (email && pin.length === 4) {
       try {
-        await AsyncStorage.setItem('sentry_email', email);
-        await AsyncStorage.setItem('sentry_pin', pin);
+        await AsyncStorage.setItem('finch_email', email);
+        await AsyncStorage.setItem('finch_pin', pin);
         setSavedEmail(email);
         setIsAuthenticated(true);
         setShowEmailModal(false);
