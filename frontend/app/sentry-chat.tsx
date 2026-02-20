@@ -239,7 +239,7 @@ export default function FinchChatScreen() {
         </TouchableOpacity>
         <Image source={{ uri: SENTRY_AVATAR }} style={styles.headerAvatar} />
         <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>Sentry</Text>
+          <Text style={styles.headerTitle}>Finch</Text>
           <Text style={styles.headerSubtitle}>Legal Support Companion</Text>
         </View>
         <TouchableOpacity onPress={clearConversation} style={styles.menuButton}>
@@ -278,18 +278,18 @@ export default function FinchChatScreen() {
             key={message.id}
             style={[
               styles.messageBubble,
-              message.sender === 'user' ? styles.userBubble : styles.sentryBubble,
+              message.sender === 'user' ? styles.userBubble : styles.finchBubble,
             ]}
           >
-            {message.sender === 'sentry' && (
-              <View style={styles.sentryLabel}>
-                <Image source={{ uri: SENTRY_AVATAR }} style={styles.sentryLabelAvatar} />
-                <Text style={styles.sentryLabelText}>Sentry</Text>
+            {message.sender === 'finch' && (
+              <View style={styles.finchLabel}>
+                <Image source={{ uri: FINCH_AVATAR }} style={styles.finchLabelAvatar} />
+                <Text style={styles.finchLabelText}>Finch</Text>
               </View>
             )}
             <Text style={[
               styles.messageText,
-              message.sender === 'user' ? styles.userText : styles.sentryText,
+              message.sender === 'user' ? styles.userText : styles.finchText,
             ]}>
               {message.text}
             </Text>
