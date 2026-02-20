@@ -381,7 +381,7 @@ export default function SubstanceSupport() {
       <View style={styles.warningIntro}>
         <Ionicons name="help-circle" size={24} color="#f59e0b" />
         <Text style={styles.warningIntroText}>
-          Do any of these sound familiar? Ticking even one or two might mean it's time to talk to someone.
+          Do any of these sound familiar? Ticking even one or two might mean it&apos;s time to talk to someone.
         </Text>
       </View>
 
