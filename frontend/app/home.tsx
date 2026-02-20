@@ -599,6 +599,39 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: '#3b82f6',
     fontWeight: '500',
   },
+  // Substance Support Card
+  substanceSupportCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fffbeb',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#fde68a',
+  },
+  substanceSupportIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#fef3c7',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  substanceSupportContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  substanceSupportTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  substanceSupportDesc: {
+    fontSize: 13,
+    color: '#64748b',
+    marginTop: 2,
+  },
   // Friends & Family Card
   familyFriendsCard: {
     flexDirection: 'row',
