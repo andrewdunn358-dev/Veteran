@@ -397,7 +397,7 @@ export default function SubstanceSupport() {
       <View style={styles.takeActionCard}>
         <Text style={styles.takeActionTitle}>Ready to Take Action?</Text>
         <Text style={styles.takeActionText}>
-          You don't have to hit rock bottom to get help. The earlier you reach out, the easier the path back.
+          You don&apos;t have to hit rock bottom to get help. The earlier you reach out, the easier the path back.
         </Text>
         <TouchableOpacity 
           style={styles.takeActionBtn}
@@ -405,7 +405,7 @@ export default function SubstanceSupport() {
           data-testid="take-action-btn"
         >
           <Ionicons name="call" size={20} color="#fff" />
-          <Text style={styles.takeActionBtnText}>Call Veterans' Gateway: 0808 802 1212</Text>
+          <Text style={styles.takeActionBtnText}>Call Veterans&apos; Gateway: 0808 802 1212</Text>
         </TouchableOpacity>
       </View>
 
