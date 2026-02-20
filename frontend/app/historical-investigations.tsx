@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 24,
   },
-  sentryCard: {
+  finchCard: {
     backgroundColor: '#243447',
     borderRadius: 16,
     padding: 16,
@@ -236,31 +236,31 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#3b5068',
   },
-  sentryHeader: {
+  finchHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
   },
-  sentryAvatar: {
+  finchAvatar: {
     width: 56,
     height: 56,
     borderRadius: 28,
     marginRight: 12,
   },
-  sentryTextContainer: {
+  finchTextContainer: {
     flex: 1,
   },
-  sentryTitle: {
+  finchTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#ffffff',
   },
-  sentrySubtitle: {
+  finchSubtitle: {
     fontSize: 14,
     color: '#7c9cbf',
     marginTop: 2,
   },
-  sentryDescription: {
+  finchDescription: {
     fontSize: 14,
     color: '#94a3b8',
     lineHeight: 20,
