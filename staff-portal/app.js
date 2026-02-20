@@ -116,7 +116,16 @@ function updateSoundButton() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
+    // Setup activity tracking for session timeout
+    setupActivityListeners();
+    
     if (token && currentUser) {
+        // Check if session has expired while away
+        if (checkSessionExpiry()) {
+            return; // Will show login screen after logout
+        }
+        // Session still valid - initialize portal
+        resetInactivityTimer();
         initPortal();
     } else {
         showScreen('login-screen');
