@@ -611,6 +611,10 @@ function playRingtone() {
 
 function stopRingtone() {
     ringtone.isPlaying = false;
+    if (ringtone.timeoutId) {
+        clearTimeout(ringtone.timeoutId);
+        ringtone.timeoutId = null;
+    }
 }
 
 // Export for use
