@@ -282,16 +282,16 @@ When triggered offers:
 
 ## Upcoming Tasks
 - P1: Execute Data Migration Script - Encrypt existing PII in production database
-- P2: Implement `/api/webrtc/online-staff` and `/api/webrtc/active-calls` endpoints for admin "Calls" tab
-- P3: Training Portal API Endpoint for WordPress/LearnDash integration
-- P4: Add Legal Disclaimers to Staff Portal
+- P2: ~~Implement `/api/webrtc/online-staff` and `/api/webrtc/active-calls` endpoints for admin "Calls" tab~~ DONE
+- P3: ~~In-App Human-to-Human Chat~~ DONE
+- P4: Training Portal API Endpoint for WordPress/LearnDash integration
+- P5: Add Legal Disclaimers to Staff Portal
 
 ## Known Issues
 - Most existing staff profiles have `user_id: null` - WebRTC only works for newly created staff
 - Call logs API returns 422 when phone is undefined - frontend has been patched to skip logging
 
 ## Future Tasks
-- In-App Human-to-Human Chat (non-crisis)
 - Privacy Policy & Terms pages
 - Favorites/Saved Contacts
 - Achievement Badges
