@@ -296,10 +296,10 @@ export default function FinchChatScreen() {
           </View>
         ))}
         {isLoading && (
-          <View style={[styles.messageBubble, styles.sentryBubble]}>
-            <View style={styles.sentryLabel}>
-              <Image source={{ uri: SENTRY_AVATAR }} style={styles.sentryLabelAvatar} />
-              <Text style={styles.sentryLabelText}>Sentry</Text>
+          <View style={[styles.messageBubble, styles.finchBubble]}>
+            <View style={styles.finchLabel}>
+              <Image source={{ uri: FINCH_AVATAR }} style={styles.finchLabelAvatar} />
+              <Text style={styles.finchLabelText}>Finch</Text>
             </View>
             <ActivityIndicator size="small" color="#7c9cbf" />
           </View>
