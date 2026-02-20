@@ -237,7 +237,7 @@ export default function FinchChatScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#ffffff" />
         </TouchableOpacity>
-        <Image source={{ uri: SENTRY_AVATAR }} style={styles.headerAvatar} />
+        <Image source={{ uri: FINCH_AVATAR }} style={styles.headerAvatar} />
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle}>Finch</Text>
           <Text style={styles.headerSubtitle}>Legal Support Companion</Text>
