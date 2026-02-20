@@ -121,36 +121,22 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     });
 
     // Call accepted
-    socketRef.current.on('call_accepted', async () => {
-      console.log('WebRTC: Call accepted');
+    socketRef.current.on('call_accepted', async (data: any) => {
+      console.log('WebRTC: Call accepted', data);
+      if (data.call_id) {
+        currentCallIdRef.current = data.call_id;
+      }
       setCallState('connecting');
       await startWebRTCConnection(true);
     });
 
-    // Call connected
-    socketRef.current.on('call_connected', () => {
-      console.log('WebRTC: Call connected');
-      setCallState('connected');
-      startCallTimer();
-    });
-
-    // Call rejected/ended/failed
-    socketRef.current.on('call_rejected', () => {
-      showAlert('Call Declined', 'The call was declined.');
-      cleanupCall();
-    });
-
-    socketRef.current.on('call_ended', () => {
-      cleanupCall();
-    });
-
-    socketRef.current.on('call_failed', (data: any) => {
-      console.log('WebRTC: Call failed', data);
-      showAlert('Call Failed', data.message || 'The person you are trying to call is not available. They may need to log into the staff portal first.');
-      cleanupCall();
-    });
-
-    socketRef.current.on('call_ringing', () => {
+    // Call ringing - store the call ID
+    socketRef.current.on('call_ringing', (data: any) => {
+      console.log('WebRTC: Call ringing', data);
+      if (data.call_id) {
+        currentCallIdRef.current = data.call_id;
+        setCallInfo(prev => prev ? { ...prev, callId: data.call_id } : null);
+      }
       setCallState('ringing');
     });
 
