@@ -129,8 +129,8 @@ export default function Index() {
               activeOpacity={0.8}
             >
               <Ionicons name="document-text" size={32} color={colors.textSecondary} />
-              <Text style={styles.secondaryButtonText}>Issues Related to Historical Investigations</Text>
-              <Text style={styles.secondaryButtonSubtext}>Support for investigation-related stress</Text>
+              <Text style={styles.secondaryButtonText}>Warfare on Lawfare</Text>
+              <Text style={styles.secondaryButtonSubtext}>Support for veterans facing investigations</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
