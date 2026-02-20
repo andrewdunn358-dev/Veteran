@@ -5,6 +5,22 @@ Build and enhance a mobile-first web application for UK military veterans provid
 
 ## What's Been Implemented (Feb 2026)
 
+### NEW: Substance Misuse Advice Section (Feb 20, 2026)
+**Purpose**: Dedicated home page section for alcohol and substance support for veterans
+- **Home Page Card** - "Alcohol & Substance Support" with amber styling, links to /substance-support
+- **Overview Section** - "You're Not Alone" hero, quick call buttons for Combat Stress & AA
+- **Why Veterans at Higher Risk** - 6 risk factors (PTSD, sleep, drinking culture, civilian adjustment, injuries, loss of identity)
+- **Featured Resource** - Tom Harrison House (UK's only veteran-specific residential rehab)
+- **Resources Section** - Veteran-specific (Tom Harrison, Combat Stress, Op Courage, Veterans' Gateway) + General UK (AA, Drinkline, FRANK, Change Grow Live)
+- **Self-Help Guide** - 6 practical tips (Track intake, Identify triggers, Talk to someone, Build routines, Set goals, Avoid temptation)
+- **Warning Signs** - 8 indicators with checklist format, Take Action card with Veterans' Gateway, Samaritans info
+
+**Files Added:**
+- `/app/frontend/app/substance-support.tsx` - Full substance support page with 4 sub-sections
+
+**Files Modified:**
+- `/app/frontend/app/home.tsx` - Added "Alcohol & Substance Support" navigation card
+
 ### NEW: Zentrafuge Veteran AI Safety Layer Integration
 **Source**: https://github.com/TheAIOldtimer/veteran-ai-safety-layer (MIT License)
 
