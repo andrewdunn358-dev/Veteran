@@ -329,6 +329,12 @@ When triggered offers:
 - Most existing staff profiles have `user_id: null` - WebRTC only works for newly created staff
 - Call logs API returns 422 when phone is undefined - frontend has been patched to skip logging
 
+## Status Check (Feb 20, 2026 - Latest)
+- ✅ **P0 Blank Screen Bug**: RESOLVED - Pages using WebRTC hook (`/peer-support`, `/crisis-support`) now load correctly
+- ⚠️ **WebRTC Calling**: Requires staff to have `user_id` linked - most existing staff profiles have `user_id: null`
+- ✅ **Backend API**: All endpoints functioning (`/api/counsellors/available`, `/api/peer-supporters/available`, `/api/webrtc/online-staff`)
+- ✅ **Frontend**: Home page, peer-support, crisis-support, and self-care tools all loading correctly
+
 ## Future Tasks
 - Privacy Policy & Terms pages
 - Favorites/Saved Contacts
