@@ -130,6 +130,30 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
       await startWebRTCConnection(true);
     });
 
+    // Call connected
+    socketRef.current.on('call_connected', () => {
+      console.log('WebRTC: Call connected');
+      setCallState('connected');
+      startCallTimer();
+    });
+
+    // Call rejected/ended/failed
+    socketRef.current.on('call_rejected', () => {
+      showAlert('Call Declined', 'The call was declined.');
+      cleanupCall();
+    });
+
+    socketRef.current.on('call_ended', () => {
+      console.log('WebRTC: Call ended by other party');
+      cleanupCall();
+    });
+
+    socketRef.current.on('call_failed', (data: any) => {
+      console.log('WebRTC: Call failed', data);
+      showAlert('Call Failed', data.message || 'The person you are trying to call is not available. They may need to log into the staff portal first.');
+      cleanupCall();
+    });
+
     // Call ringing - store the call ID
     socketRef.current.on('call_ringing', (data: any) => {
       console.log('WebRTC: Call ringing', data);
