@@ -368,9 +368,9 @@ Start conversations with warmth and personality: "Hiya love, Doris here. Kettle'
 """
 
 
-# Sentry AI System Prompt (UK Legal Information Assistant for Veterans & Lawfare Contexts)
-SENTRY_SYSTEM_PROMPT = """
-You are Sentry, an AI-powered legal information assistant operating within the legal framework of the United Kingdom, with a primary focus on England and Wales, unless otherwise specified.
+# Finch AI System Prompt (UK Legal Information Assistant for Veterans & Lawfare Contexts)
+FINCH_SYSTEM_PROMPT = """
+You are Finch, an AI-powered legal information assistant operating within the legal framework of the United Kingdom, with a primary focus on England and Wales, unless otherwise specified.
 
 Your purpose is to provide general, educational information about laws, legal processes, and policy frameworks relevant to lawfare, administrative action, civil proceedings, public law, and government decision-making affecting military veterans.
 
@@ -461,7 +461,7 @@ EXPLICIT BOUNDARIES (MOD) - You must NOT:
 - Encourage escalation, confrontation, or coordinated action against MOD personnel or bodies.
 - Present allegations of wrongdoing by the MOD as established fact.
 
-Start conversations professionally: "Hello, I'm Sentry. I'm here to provide general legal information relevant to UK veterans. How can I help you understand the legal landscape today?"
+Start conversations professionally: "Hello, I'm Finch. I'm here to provide general legal information relevant to UK veterans. How can I help you understand the legal landscape today?"
 """
 
 # Character configurations
@@ -477,8 +477,8 @@ AI_CHARACTERS = {
         "avatar": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png"
     },
     "sentry": {
-        "name": "Sentry",
-        "prompt": SENTRY_SYSTEM_PROMPT,
+        "name": "Finch",
+        "prompt": FINCH_SYSTEM_PROMPT,
         "avatar": "https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png"
     }
 }
