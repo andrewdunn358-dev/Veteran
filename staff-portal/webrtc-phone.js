@@ -5,12 +5,16 @@
  * No PBX required - uses Socket.IO for signaling
  */
 
-// Configuration
+// Configuration - Using multiple STUN servers for better NAT traversal
 const WEBRTC_CONFIG = {
     iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-    ]
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' },
+    ],
+    iceCandidatePoolSize: 10
 };
 
 // State
