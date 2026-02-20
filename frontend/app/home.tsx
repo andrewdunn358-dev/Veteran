@@ -507,7 +507,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   toolsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 32,
+    marginBottom: 16,
     gap: 12,
   },
   toolButton: {
@@ -518,6 +518,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
+  },
+  toolButtonPlaceholder: {
+    flex: 1,
   },
   toolIconBg: {
     width: 48,
