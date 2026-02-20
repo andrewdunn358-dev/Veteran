@@ -174,7 +174,7 @@ export default function SubstanceSupport() {
       <View style={styles.infoSection}>
         <Text style={styles.sectionTitle}>Why Veterans Are at Higher Risk</Text>
         <Text style={styles.infoText}>
-          Veterans are significantly more likely to develop problems with alcohol and substances than civilians. This isn't weakness - it's often the result of:
+          Veterans are significantly more likely to develop problems with alcohol and substances than civilians. This isn&apos;t weakness - it&apos;s often the result of:
         </Text>
         <View style={styles.reasonsList}>
           <View style={styles.reasonItem}>
