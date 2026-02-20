@@ -230,13 +230,29 @@ async function handleLogin(e) {
 }
 
 // Logout
-function handleLogout() {
+function logout(silent) {
+    // Clear inactivity timer
+    if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = null;
+    }
+    
     token = null;
     currentUser = null;
     myProfile = null;
     localStorage.removeItem('staff_token');
     localStorage.removeItem('staff_user');
+    localStorage.removeItem('staff_last_activity');
+    
+    if (!silent) {
+        showNotification('Logged out successfully', 'success');
+    }
     showScreen('login-screen');
+}
+
+// Keep old function name for backwards compatibility
+function handleLogout() {
+    logout();
 }
 
 // Initialize Portal
