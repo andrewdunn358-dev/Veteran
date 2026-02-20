@@ -529,9 +529,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  toolButtonPlaceholder: {
-    flex: 1,
-  },
   toolIconBg: {
     width: 48,
     height: 48,
