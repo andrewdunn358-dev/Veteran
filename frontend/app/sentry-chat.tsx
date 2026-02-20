@@ -716,4 +716,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#ffffff',
   },
+  verifyErrorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#450a0a',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 16,
+    gap: 8,
+    width: '100%',
+  },
+  verifyErrorText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#fca5a5',
+  },
+  startFreshButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+  },
+  startFreshText: {
+    fontSize: 14,
+    color: '#94a3b8',
+    textDecorationLine: 'underline',
+  },
 });
