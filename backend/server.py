@@ -3551,6 +3551,9 @@ async def api_get_active_calls(current_user: User = Depends(require_role("admin"
     """Get list of active calls (admin only)"""
     return {"calls": get_active_calls_list()}
 
+# Include the router in the main app (MUST be after all routes are defined)
+app.include_router(api_router)
+
 # Create ASGI app that combines FastAPI and Socket.IO
 # Store original FastAPI app
 _fastapi_app = app
