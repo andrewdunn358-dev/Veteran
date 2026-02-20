@@ -66,6 +66,15 @@ export default function AIChat() {
   const [savePin, setSavePin] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
+  
+  // Verification modal state for returning users
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [verifyEmail, setVerifyEmail] = useState('');
+  const [verifyPin, setVerifyPin] = useState('');
+  const [verifyError, setVerifyError] = useState('');
+  const [pendingMessages, setPendingMessages] = useState<Message[] | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [pendingPin, setPendingPin] = useState<string | null>(null);
 
   useEffect(() => {
     // Check for saved session on mount
