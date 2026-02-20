@@ -3541,14 +3541,7 @@ async def get_uploaded_image(filename: str):
 from webrtc_signaling import sio, get_online_staff_list, get_active_calls_list
 import socketio
 
-# Create ASGI app that combines FastAPI and Socket.IO
-# Store original FastAPI app
-_fastapi_app = app
-
-# Create combined ASGI app with Socket.IO
-# Use socketio_path='/api/socket.io' to work with Kubernetes ingress routing (all /api/* goes to backend)
-socket_app = socketio.ASGIApp(sio, _fastapi_app, socketio_path='/api/socket.io')
-
+# WebRTC REST API Endpoints (must be defined BEFORE socket_app wrapping)
 @api_router.get("/webrtc/online-staff")
 async def api_get_online_staff():
     """Get list of staff currently online for calls"""
@@ -3558,6 +3551,14 @@ async def api_get_online_staff():
 async def api_get_active_calls(current_user: User = Depends(require_role("admin"))):
     """Get list of active calls (admin only)"""
     return {"calls": get_active_calls_list()}
+
+# Create ASGI app that combines FastAPI and Socket.IO
+# Store original FastAPI app
+_fastapi_app = app
+
+# Create combined ASGI app with Socket.IO
+# Use socketio_path='/api/socket.io' to work with Kubernetes ingress routing (all /api/* goes to backend)
+socket_app = socketio.ASGIApp(sio, _fastapi_app, socketio_path='/api/socket.io')
 
 # IMPORTANT: Override app to be the socket_app so supervisor can run it correctly
 # The supervisor config runs server:app, so we reassign app to include Socket.IO
