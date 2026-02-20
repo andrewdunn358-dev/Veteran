@@ -377,3 +377,271 @@ def get_online_staff_list():
 def get_active_calls_list():
     """Get list of active calls (for admin)"""
     return list(active_calls.values())
+
+
+# ============ Chat Messaging ============
+
+# Track active chat rooms
+# Format: {room_id: {participants: [user_ids], created_at}}
+active_chat_rooms: Dict[str, dict] = {}
+
+
+@sio.event
+async def join_chat_room(sid, data):
+    """
+    User joins a chat room
+    Data: {room_id, user_id, user_type, name}
+    """
+    room_id = data.get('room_id')
+    user_id = data.get('user_id')
+    user_type = data.get('user_type')
+    name = data.get('name', 'Unknown')
+    
+    if not room_id:
+        await sio.emit('chat_error', {'error': 'room_id required'}, to=sid)
+        return
+    
+    # Join the Socket.IO room
+    await sio.enter_room(sid, room_id)
+    
+    # Track user in room
+    if room_id not in active_chat_rooms:
+        active_chat_rooms[room_id] = {
+            'participants': [],
+            'created_at': datetime.utcnow().isoformat()
+        }
+    
+    if user_id not in active_chat_rooms[room_id]['participants']:
+        active_chat_rooms[room_id]['participants'].append(user_id)
+    
+    # Update connected users with room info
+    if sid in connected_users:
+        connected_users[sid]['current_room'] = room_id
+    
+    logger.info(f"User {name} ({user_id}) joined chat room {room_id}")
+    
+    # Notify room members
+    await sio.emit('user_joined_chat', {
+        'room_id': room_id,
+        'user_id': user_id,
+        'user_type': user_type,
+        'name': name
+    }, room=room_id, skip_sid=sid)
+    
+    # Confirm join to user
+    await sio.emit('chat_room_joined', {
+        'room_id': room_id,
+        'participants': active_chat_rooms[room_id]['participants']
+    }, to=sid)
+
+
+@sio.event
+async def leave_chat_room(sid, data):
+    """User leaves a chat room"""
+    room_id = data.get('room_id')
+    user_id = data.get('user_id')
+    
+    if room_id:
+        await sio.leave_room(sid, room_id)
+        
+        # Remove from tracking
+        if room_id in active_chat_rooms and user_id in active_chat_rooms[room_id]['participants']:
+            active_chat_rooms[room_id]['participants'].remove(user_id)
+            
+            # Clean up empty rooms
+            if not active_chat_rooms[room_id]['participants']:
+                del active_chat_rooms[room_id]
+        
+        # Clear room from user
+        if sid in connected_users:
+            connected_users[sid].pop('current_room', None)
+        
+        logger.info(f"User {user_id} left chat room {room_id}")
+        
+        # Notify room members
+        await sio.emit('user_left_chat', {
+            'room_id': room_id,
+            'user_id': user_id
+        }, room=room_id)
+
+
+@sio.event
+async def chat_message(sid, data):
+    """
+    Send a chat message
+    Data: {room_id, message, sender_id, sender_name, sender_type}
+    """
+    room_id = data.get('room_id')
+    message = data.get('message')
+    sender_id = data.get('sender_id')
+    sender_name = data.get('sender_name', 'Unknown')
+    sender_type = data.get('sender_type', 'user')
+    
+    if not room_id or not message:
+        return
+    
+    message_data = {
+        'room_id': room_id,
+        'message': message,
+        'sender_id': sender_id,
+        'sender_name': sender_name,
+        'sender_type': sender_type,
+        'timestamp': datetime.utcnow().isoformat(),
+        'message_id': f"msg_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{sid[:8]}"
+    }
+    
+    logger.info(f"Chat message in room {room_id} from {sender_name}")
+    
+    # Broadcast to room (including sender for confirmation)
+    await sio.emit('new_chat_message', message_data, room=room_id)
+
+
+@sio.event
+async def typing_start(sid, data):
+    """User started typing"""
+    room_id = data.get('room_id')
+    user_id = data.get('user_id')
+    user_name = data.get('user_name', 'Someone')
+    
+    if room_id:
+        await sio.emit('user_typing', {
+            'room_id': room_id,
+            'user_id': user_id,
+            'user_name': user_name,
+            'is_typing': True
+        }, room=room_id, skip_sid=sid)
+
+
+@sio.event
+async def typing_stop(sid, data):
+    """User stopped typing"""
+    room_id = data.get('room_id')
+    user_id = data.get('user_id')
+    
+    if room_id:
+        await sio.emit('user_typing', {
+            'room_id': room_id,
+            'user_id': user_id,
+            'is_typing': False
+        }, room=room_id, skip_sid=sid)
+
+
+@sio.event
+async def request_human_chat(sid, data):
+    """
+    User requests to chat with a human (handover from AI)
+    Data: {user_id, user_name, reason?, preferred_type: 'counsellor'|'peer'|'any'}
+    """
+    user_id = data.get('user_id')
+    user_name = data.get('user_name', 'A veteran')
+    reason = data.get('reason', 'Requested human support')
+    preferred_type = data.get('preferred_type', 'any')
+    
+    # Find available staff
+    available_staff = []
+    for socket_id, user in connected_users.items():
+        if user['user_type'] in ['counsellor', 'peer'] and user['status'] == 'available':
+            if preferred_type == 'any' or user['user_type'] == preferred_type:
+                available_staff.append({
+                    'socket_id': socket_id,
+                    'user_id': user['user_id'],
+                    'user_type': user['user_type'],
+                    'name': user['name']
+                })
+    
+    if not available_staff:
+        # No staff available
+        await sio.emit('human_chat_unavailable', {
+            'message': 'No staff members are currently available. Please try again later or request a callback.',
+            'suggestion': 'callback'
+        }, to=sid)
+        return
+    
+    # Create a chat request that goes to available staff
+    request_id = f"req_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{sid[:8]}"
+    
+    logger.info(f"Human chat request from {user_name} ({user_id}), {len(available_staff)} staff available")
+    
+    # Notify all available staff about the request
+    for staff in available_staff:
+        await sio.emit('incoming_chat_request', {
+            'request_id': request_id,
+            'user_id': user_id,
+            'user_name': user_name,
+            'reason': reason,
+            'preferred_type': preferred_type,
+            'timestamp': datetime.utcnow().isoformat()
+        }, to=staff['socket_id'])
+    
+    # Notify user that request is pending
+    await sio.emit('human_chat_pending', {
+        'request_id': request_id,
+        'message': 'Finding an available supporter...',
+        'available_count': len(available_staff)
+    }, to=sid)
+    
+    # Store request for tracking
+    if sid in connected_users:
+        connected_users[sid]['pending_chat_request'] = request_id
+
+
+@sio.event
+async def accept_chat_request(sid, data):
+    """
+    Staff accepts a chat request
+    Data: {request_id, user_id (of the requester)}
+    """
+    request_id = data.get('request_id')
+    requester_user_id = data.get('user_id')
+    
+    staff_info = connected_users.get(sid, {})
+    
+    if staff_info.get('user_type') not in ['counsellor', 'peer']:
+        return
+    
+    # Find the requester's socket
+    requester_sid = user_to_socket.get(requester_user_id)
+    
+    if not requester_sid:
+        await sio.emit('chat_request_expired', {
+            'request_id': request_id,
+            'reason': 'User no longer connected'
+        }, to=sid)
+        return
+    
+    # Create a chat room
+    room_id = f"chat_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{staff_info.get('user_id', '')[:8]}"
+    
+    # Update staff status
+    connected_users[sid]['status'] = 'in_chat'
+    
+    logger.info(f"Staff {staff_info.get('name')} accepted chat request {request_id}, room: {room_id}")
+    
+    # Notify the requester
+    await sio.emit('human_chat_accepted', {
+        'request_id': request_id,
+        'room_id': room_id,
+        'staff_id': staff_info.get('user_id'),
+        'staff_name': staff_info.get('name'),
+        'staff_type': staff_info.get('user_type')
+    }, to=requester_sid)
+    
+    # Confirm to staff
+    await sio.emit('chat_request_confirmed', {
+        'request_id': request_id,
+        'room_id': room_id,
+        'user_id': requester_user_id
+    }, to=sid)
+    
+    # Notify other staff that request is taken
+    for socket_id, user in connected_users.items():
+        if socket_id != sid and user.get('user_type') in ['counsellor', 'peer']:
+            await sio.emit('chat_request_taken', {
+                'request_id': request_id,
+                'accepted_by': staff_info.get('name')
+            }, to=socket_id)
+
+
+def get_active_chat_rooms():
+    """Get list of active chat rooms (for admin)"""
+    return active_chat_rooms
