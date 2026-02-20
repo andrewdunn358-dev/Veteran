@@ -192,22 +192,22 @@ export default function FinchChatScreen() {
 
       const data = await response.json();
       
-      const sentryMessage: Message = {
-        id: `sentry-${Date.now()}`,
+      const finchMessage: Message = {
+        id: `finch-${Date.now()}`,
         text: data.reply || "I'm here to listen. Please tell me more about what you're going through.",
-        sender: 'sentry',
+        sender: 'finch',
         timestamp: new Date(),
       };
 
-      const updatedMessages = [...newMessages, sentryMessage];
+      const updatedMessages = [...newMessages, finchMessage];
       setMessages(updatedMessages);
       await saveMessages(updatedMessages);
     } catch (error) {
       console.error('Error:', error);
       const errorMessage: Message = {
-        id: `sentry-${Date.now()}`,
+        id: `finch-${Date.now()}`,
         text: "I'm having trouble connecting right now. Please know that support is available. If you need immediate help, please contact Combat Stress on 0800 138 1619 or Samaritans on 116 123.",
-        sender: 'sentry',
+        sender: 'finch',
         timestamp: new Date(),
       };
       const updatedMessages = [...newMessages, errorMessage];
@@ -221,7 +221,7 @@ export default function FinchChatScreen() {
     const welcomeMessage: Message = {
       id: 'welcome-new',
       text: "I've started a fresh conversation. How can I support you today?",
-      sender: 'sentry',
+      sender: 'finch',
       timestamp: new Date(),
     };
     setMessages([welcomeMessage]);
