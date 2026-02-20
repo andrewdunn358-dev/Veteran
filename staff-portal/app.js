@@ -336,13 +336,17 @@ function updateStatusUI(status) {
     
     // Update current status display
     var statusEl = document.getElementById('current-status');
-    statusEl.textContent = status ? status.charAt(0).toUpperCase() + status.slice(1) : '';
+    // Map API values to display names
+    var displayName = status === 'available' ? 'Available' : 
+                      status === 'limited' ? 'Busy' : 
+                      status === 'unavailable' ? 'Off Duty' : status;
+    statusEl.textContent = displayName;
     statusEl.style.background = 
         status === 'available' ? 'var(--success-light)' :
-        status === 'busy' ? 'var(--warning-light)' : 'var(--danger-light)';
+        status === 'limited' ? 'var(--warning-light)' : 'var(--danger-light)';
     statusEl.style.color = 
         status === 'available' ? 'var(--success)' :
-        status === 'busy' ? 'var(--warning)' : 'var(--danger)';
+        status === 'limited' ? 'var(--warning)' : 'var(--danger)';
 }
 
 // Update My Status
