@@ -69,6 +69,20 @@ Build and enhance a mobile-first web application for UK military veterans provid
 - `/app/backend/server.py` - Added chat REST endpoints
 - `/app/frontend/app/live-chat.tsx` - Updated to use Socket.IO with typing indicators
 
+### NEW: Breathing Challenge Game (Feb 20, 2026)
+**Purpose**: Gamified breathing exercises with streak tracking and unlockable patterns
+- **6 Breathing Patterns**: Relaxing (4-4), Box Breathing (4-4-4-4), 4-7-8 Sleep, Energizing (2-2), Deep Calm, Master Breath
+- **Streak System**: Daily challenge, patterns unlock at 3/7/14/21/30 day streaks
+- **Achievements**: First Breath, Week Warrior, Fortnight Fighter, Month Master, etc.
+- **Visual Feedback**: Animated breathing circle, cycle progress dots
+- **Persistence**: Stats saved via AsyncStorage
+
+**Files Added:**
+- `/app/frontend/app/breathing-game.tsx` - Full breathing challenge game
+
+**Files Modified:**
+- `/app/frontend/app/home.tsx` - Added "Breathing Challenge" to Self-Care Tools
+
 ### NEW: Zentrafuge Veteran AI Safety Layer Integration
 **Source**: https://github.com/TheAIOldtimer/veteran-ai-safety-layer (MIT License)
 
