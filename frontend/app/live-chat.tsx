@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { io, Socket } from 'socket.io-client';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
@@ -21,15 +22,8 @@ interface Message {
   id: string;
   text: string;
   sender: 'user' | 'staff';
+  senderName?: string;
   timestamp: Date;
-}
-
-interface ChatRoom {
-  id: string;
-  staff_id: string | null;
-  staff_name: string | null;
-  staff_type: string;
-  status: string;
 }
 
 export default function LiveChat() {
@@ -42,174 +36,251 @@ export default function LiveChat() {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
-  const [chatRoomId, setChatRoomId] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState<string | null>(null);
   const [staffName, setStaffName] = useState<string | null>(null);
+  const [staffType, setStaffType] = useState<string>('any');
   const [waitingForStaff, setWaitingForStaff] = useState(true);
+  const [typingUser, setTypingUser] = useState<string | null>(null);
+  const [userId] = useState(() => `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const [userName] = useState('You');
+  
   const scrollViewRef = useRef<ScrollView>(null);
-  const pollInterval = useRef<NodeJS.Timeout | null>(null);
-  const roomPollInterval = useRef<NodeJS.Timeout | null>(null);
+  const socketRef = useRef<Socket | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastTypingEmit = useRef<number>(0);
 
-  const staffType = params.staffType || 'any';
+  const preferredStaffType = params.staffType || 'any';
   const alertId = params.alertId || '';
   const sessionId = params.sessionId || '';
 
-  // Initialize chat room
+  // Initialize Socket.IO connection
   useEffect(() => {
-    initializeChat();
+    initializeSocket();
+    
     return () => {
-      if (pollInterval.current) {
-        clearInterval(pollInterval.current);
-      }
-      if (roomPollInterval.current) {
-        clearInterval(roomPollInterval.current);
+      if (socketRef.current) {
+        // Leave room before disconnecting
+        if (roomId) {
+          socketRef.current.emit('leave_chat_room', { room_id: roomId, user_id: userId });
+        }
+        socketRef.current.disconnect();
       }
     };
   }, []);
 
-  const initializeChat = async () => {
-    setIsLoading(true);
-    try {
-      // Create a live chat room - no specific staff assigned
-      // All staff will see this and can pick it up
-      const response = await fetch(`${API_URL}/api/live-chat/rooms`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          staff_type: staffType,
-          safeguarding_alert_id: alertId || null,
-          ai_session_id: sessionId,
-        }),
-      });
+  const initializeSocket = () => {
+    // Connect to Socket.IO server
+    const socketUrl = API_URL.replace('/api', '').replace('https://', 'wss://').replace('http://', 'ws://');
+    
+    socketRef.current = io(socketUrl, {
+      path: '/api/socket.io',
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+    });
 
-      if (response.ok) {
-        const data = await response.json();
-        setChatRoomId(data.room_id);
-        setIsConnected(true);
-        setWaitingForStaff(true);
-        
-        // Add initial system message
-        setMessages([{
-          id: 'welcome',
-          text: "You're now in the queue. A support team member has been notified and will join you shortly. Feel free to share what's on your mind while you wait.",
+    const socket = socketRef.current;
+
+    socket.on('connect', () => {
+      console.log('Socket connected:', socket.id);
+      setIsConnected(true);
+      
+      // Register as a user
+      socket.emit('register', {
+        user_id: userId,
+        user_type: 'user',
+        name: userName,
+        status: 'available'
+      });
+    });
+
+    socket.on('registered', (data) => {
+      console.log('Registered:', data);
+      // Request human chat after registration
+      requestHumanChat();
+    });
+
+    socket.on('human_chat_pending', (data) => {
+      console.log('Chat request pending:', data);
+      setMessages([{
+        id: 'pending',
+        text: `Finding an available supporter... ${data.available_count} staff member(s) notified.`,
+        sender: 'staff',
+        senderName: 'System',
+        timestamp: new Date(),
+      }]);
+    });
+
+    socket.on('human_chat_unavailable', (data) => {
+      console.log('No staff available:', data);
+      setIsLoading(false);
+      setMessages([{
+        id: 'unavailable',
+        text: data.message,
+        sender: 'staff',
+        senderName: 'System',
+        timestamp: new Date(),
+      }]);
+    });
+
+    socket.on('human_chat_accepted', (data) => {
+      console.log('Chat accepted:', data);
+      setRoomId(data.room_id);
+      setStaffName(data.staff_name);
+      setStaffType(data.staff_type);
+      setWaitingForStaff(false);
+      setIsLoading(false);
+      
+      // Join the chat room
+      socket.emit('join_chat_room', {
+        room_id: data.room_id,
+        user_id: userId,
+        user_type: 'user',
+        name: userName
+      });
+      
+      setMessages(prev => [...prev, {
+        id: `accepted-${Date.now()}`,
+        text: `${data.staff_name} (${data.staff_type === 'counsellor' ? 'Counsellor' : 'Peer Supporter'}) has joined the chat. You can now talk with them directly.`,
+        sender: 'staff',
+        senderName: 'System',
+        timestamp: new Date(),
+      }]);
+    });
+
+    socket.on('new_chat_message', (data) => {
+      console.log('New message:', data);
+      // Only add messages from others (not our own)
+      if (data.sender_id !== userId) {
+        setMessages(prev => [...prev, {
+          id: data.message_id,
+          text: data.message,
           sender: 'staff',
+          senderName: data.sender_name,
+          timestamp: new Date(data.timestamp),
+        }]);
+        
+        // Clear typing indicator when message received
+        setTypingUser(null);
+      }
+    });
+
+    socket.on('user_typing', (data) => {
+      if (data.user_id !== userId && data.is_typing) {
+        setTypingUser(data.user_name);
+        // Clear typing after 3 seconds
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+        typingTimeoutRef.current = setTimeout(() => {
+          setTypingUser(null);
+        }, 3000);
+      } else if (!data.is_typing) {
+        setTypingUser(null);
+      }
+    });
+
+    socket.on('user_left_chat', (data) => {
+      if (data.user_id !== userId) {
+        setMessages(prev => [...prev, {
+          id: `left-${Date.now()}`,
+          text: 'The support team member has left the chat.',
+          sender: 'staff',
+          senderName: 'System',
           timestamp: new Date(),
         }]);
-
-        // Start polling for room updates (to see when staff joins)
-        startRoomPolling(data.room_id);
-        
-        // Start polling for new messages
-        startMessagePolling(data.room_id);
-      } else {
-        throw new Error('Failed to create chat room');
       }
-    } catch (error) {
-      console.error('Error initializing chat:', error);
-      Alert.alert(
-        'Connection Issue',
-        'Unable to start live chat. Would you like to try calling instead?',
-        [
-          { text: 'Go Back', onPress: () => router.back() },
-          { text: 'Call Support', onPress: () => Linking.openURL('tel:116123') },
-        ]
-      );
-    } finally {
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Socket disconnected');
+      setIsConnected(false);
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
       setIsLoading(false);
+    });
+  };
+
+  const requestHumanChat = () => {
+    if (socketRef.current) {
+      socketRef.current.emit('request_human_chat', {
+        user_id: userId,
+        user_name: userName,
+        reason: alertId ? 'Safeguarding alert triggered' : 'Requested human support',
+        preferred_type: preferredStaffType
+      });
     }
   };
 
-  // Poll for room updates to detect when staff joins
-  const startRoomPolling = (roomId: string) => {
-    roomPollInterval.current = setInterval(async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/live-chat/rooms/${roomId}`);
-        if (response.ok) {
-          const room: ChatRoom = await response.json();
-          
-          // Check if staff has joined
-          if (room.staff_name && !staffName) {
-            setStaffName(room.staff_name);
-            setWaitingForStaff(false);
-            
-            // Add a message that staff has joined
-            setMessages(prev => [...prev, {
-              id: `staff-joined-${Date.now()}`,
-              text: `${room.staff_name} has joined the chat. You can now talk with them directly.`,
-              sender: 'staff',
-              timestamp: new Date(),
-            }]);
-          }
-        }
-      } catch (error) {
-        console.log('Room polling error:', error);
-      }
-    }, 3000);
-  };
-
-  const startMessagePolling = (roomId: string) => {
-    // Poll for new messages every 3 seconds
-    pollInterval.current = setInterval(async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/live-chat/rooms/${roomId}/messages`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.messages && data.messages.length > 0) {
-            setMessages(prev => {
-              const existingIds = new Set(prev.map(m => m.id));
-              const newMessages = data.messages.filter((m: any) => !existingIds.has(m.id));
-              if (newMessages.length > 0) {
-                return [...prev, ...newMessages.map((m: any) => ({
-                  id: m.id,
-                  text: m.text,
-                  sender: m.sender as 'user' | 'staff',
-                  timestamp: new Date(m.timestamp),
-                }))];
-              }
-              return prev;
-            });
-          }
-        }
-      } catch (error) {
-        console.log('Message polling error:', error);
-      }
-    }, 3000);
-  };
-
   const sendMessage = async () => {
-    if (!inputText.trim() || isLoading || !chatRoomId) return;
+    if (!inputText.trim() || !roomId || !socketRef.current) return;
 
     const messageText = inputText.trim();
-    const tempId = `user-${Date.now()}`;
+    const messageId = `msg_${Date.now()}`;
     
     // Optimistically add message
     const userMessage: Message = {
-      id: tempId,
+      id: messageId,
       text: messageText,
       sender: 'user',
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
+    
+    // Stop typing indicator
+    socketRef.current.emit('typing_stop', {
+      room_id: roomId,
+      user_id: userId
+    });
 
+    // Send via Socket.IO for real-time
+    socketRef.current.emit('chat_message', {
+      room_id: roomId,
+      message: messageText,
+      sender_id: userId,
+      sender_name: userName,
+      sender_type: 'user'
+    });
+
+    // Also save to database for persistence
     try {
-      await fetch(`${API_URL}/api/live-chat/rooms/${chatRoomId}/messages`, {
+      await fetch(`${API_URL}/api/chat/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: messageText,
-          sender: 'user',
+          room_id: roomId,
+          message: messageText,
+          sender_id: userId,
+          sender_name: userName,
+          sender_type: 'user'
         }),
       });
     } catch (error) {
-      console.error('Error sending message:', error);
-      Alert.alert('Error', 'Message failed to send. Please try again.');
+      console.error('Error saving message:', error);
+    }
+  };
+
+  const handleTyping = (text: string) => {
+    setInputText(text);
+    
+    // Emit typing indicator (throttled to once per second)
+    const now = Date.now();
+    if (roomId && socketRef.current && now - lastTypingEmit.current > 1000) {
+      lastTypingEmit.current = now;
+      socketRef.current.emit('typing_start', {
+        room_id: roomId,
+        user_id: userId,
+        user_name: userName
+      });
     }
   };
 
   const handleEndChat = () => {
-    // Use window.confirm for web compatibility (Alert.alert is stubbed in react-native-web)
     if (Platform.OS === 'web') {
       const confirmed = window.confirm(
         'Are you sure you want to end this chat? You can always request another callback or call directly.'
@@ -218,7 +289,6 @@ export default function LiveChat() {
         endChatAndNavigate();
       }
     } else {
-      // Native mobile uses Alert.alert
       Alert.alert(
         'End Chat',
         'Are you sure you want to end this chat? You can always request another callback or call directly.',
@@ -234,22 +304,12 @@ export default function LiveChat() {
     }
   };
 
-  const endChatAndNavigate = async () => {
-    if (chatRoomId) {
-      try {
-        await fetch(`${API_URL}/api/live-chat/rooms/${chatRoomId}/end`, {
-          method: 'POST',
-        });
-      } catch (e) {
-        console.log('Error ending chat:', e);
-      }
-    }
-    // Clear polling intervals
-    if (pollInterval.current) {
-      clearInterval(pollInterval.current);
-    }
-    if (roomPollInterval.current) {
-      clearInterval(roomPollInterval.current);
+  const endChatAndNavigate = () => {
+    if (socketRef.current && roomId) {
+      socketRef.current.emit('leave_chat_room', {
+        room_id: roomId,
+        user_id: userId
+      });
     }
     router.replace('/home');
   };
@@ -266,7 +326,7 @@ export default function LiveChat() {
   const displayName = staffName || 'Support Team';
   const statusText = waitingForStaff ? 'Connecting...' : 'Live Chat';
 
-  if (isLoading && !isConnected) {
+  if (isLoading && messages.length === 0) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2563eb" />
