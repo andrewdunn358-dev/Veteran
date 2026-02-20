@@ -59,6 +59,18 @@ export default function AIChat() {
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(true);
   const [hasAcceptedDisclaimer, setHasAcceptedDisclaimer] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
+  
+  // Email + PIN state for saving conversations
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [saveEmail, setSaveEmail] = useState('');
+  const [savePin, setSavePin] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [savedEmail, setSavedEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check for saved session on mount
+    loadSavedSession();
+  }, [character]);
 
   useEffect(() => {
     // Only start chat if disclaimer has been accepted
@@ -67,6 +79,60 @@ export default function AIChat() {
       sendInitialGreeting();
     }
   }, [character, hasAcceptedDisclaimer]);
+
+  const loadSavedSession = async () => {
+    try {
+      const storageKey = `ai_chat_${character}`;
+      const storedEmail = await AsyncStorage.getItem(`${storageKey}_email`);
+      const storedPin = await AsyncStorage.getItem(`${storageKey}_pin`);
+      const storedMessages = await AsyncStorage.getItem(`${storageKey}_messages`);
+      
+      if (storedEmail && storedPin) {
+        setSavedEmail(storedEmail);
+        setIsAuthenticated(true);
+        if (storedMessages) {
+          const parsed = JSON.parse(storedMessages);
+          const messagesWithDates = parsed.map((m: any) => ({
+            ...m,
+            timestamp: new Date(m.timestamp)
+          }));
+          setMessages(messagesWithDates);
+          // Skip disclaimer if we have saved messages
+          setShowDisclaimerModal(false);
+          setHasAcceptedDisclaimer(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading session:', error);
+    }
+  };
+
+  const saveMessages = async (newMessages: Message[]) => {
+    if (isAuthenticated) {
+      try {
+        const storageKey = `ai_chat_${character}`;
+        await AsyncStorage.setItem(`${storageKey}_messages`, JSON.stringify(newMessages));
+      } catch (error) {
+        console.error('Error saving messages:', error);
+      }
+    }
+  };
+
+  const handleSetupEmail = async () => {
+    if (saveEmail && savePin.length === 4) {
+      try {
+        const storageKey = `ai_chat_${character}`;
+        await AsyncStorage.setItem(`${storageKey}_email`, saveEmail);
+        await AsyncStorage.setItem(`${storageKey}_pin`, savePin);
+        setSavedEmail(saveEmail);
+        setIsAuthenticated(true);
+        setShowEmailModal(false);
+        await saveMessages(messages);
+      } catch (error) {
+        console.error('Error saving credentials:', error);
+      }
+    }
+  };
 
   const handleAcceptDisclaimer = () => {
     setShowDisclaimerModal(false);
