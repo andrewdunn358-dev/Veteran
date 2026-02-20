@@ -280,7 +280,18 @@ export default function Index() {
             <Text style={styles.toolText}>Resources{'\n'}Library</Text>
           </TouchableOpacity>
 
-          <View style={styles.toolButton} />
+          <TouchableOpacity 
+            style={styles.toolButton}
+            onPress={() => router.push('/regimental-associations')}
+            activeOpacity={0.8}
+            data-testid="regimental-associations-btn"
+          >
+            <View style={[styles.toolIconBg, { backgroundColor: '#fef3c7' }]}>
+              <Ionicons name="medal" size={24} color="#d97706" />
+            </View>
+            <Text style={styles.toolText}>Regimental{'\n'}Associations</Text>
+          </TouchableOpacity>
+
           <View style={styles.toolButton} />
         </View>
 
