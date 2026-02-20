@@ -1,0 +1,99 @@
+{
+  "summary": "Tested self-help tools for UK military veterans: Home page Self-Care Tools section (5 tools), Grounding page (5 techniques with interactive flows), Local Services page (postcode search + 4 national services). All features working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "data-testid selectors",
+        "issue": "data-testid attributes on React Native TouchableOpacity components not rendering in web DOM for Playwright - need text-based selectors",
+        "affected_selectors": ["[data-testid=\"grounding-tools-btn\"]", "[data-testid=\"local-services-btn\"]"],
+        "priority": "LOW",
+        "workaround": "Use text-based selectors - functionality works, only test automation affected"
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_10.json"],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A - frontend only test", "frontend": "100%"},
+  "test_credentials": "None required",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Self-help tools fully tested. Home page has 5 Self-Care Tools (Daily Check-in, Journal, Grounding Tools, Find Local Support, Resources Library). Grounding page has 5 techniques with interactive flows (5-4-3-2-1 with sense navigation, Box Breathing with timer). Local Services page has postcode search that returns region-specific results plus 4 National Veteran Services (Op COURAGE, Veterans NHS Wales, Combat Stress Scotland, Veterans Support NI).",
+  "features_tested": {
+    "home_page_selfcare_tools": {
+      "section_title": "PASS - 'Self-Care Tools' section visible",
+      "daily_checkin": "PASS - Daily Check-in tool visible with emoji icon",
+      "journal": "PASS - My Journal tool visible with book icon",
+      "grounding_tools": "PASS - Grounding Tools visible with hand icon, navigates to /grounding",
+      "find_local_support": "PASS - Find Local Support visible with location icon, navigates to /local-services",
+      "resources_library": "PASS - Resources Library visible with library icon"
+    },
+    "grounding_page": {
+      "page_loads": "PASS - Header shows 'Grounding Techniques'",
+      "intro_card": "PASS - 'Ground Yourself' intro with shield icon and military reference",
+      "5_techniques_visible": "PASS - All 5 grounding techniques listed",
+      "techniques": {
+        "5-4-3-2-1_technique": {
+          "visible": "PASS",
+          "icon": "hand-left",
+          "desc": "Use your senses to ground yourself in the present moment",
+          "interactive_flow": "PASS - Shows 5 senses (SEE 5, TOUCH 4, HEAR 3, SMELL 2, TASTE 1) with Next Sense button and progress dots"
+        },
+        "box_breathing": {
+          "visible": "PASS",
+          "icon": "square-outline",
+          "desc": "Used by Navy SEALs and special forces to stay calm under pressure",
+          "interactive_flow": "PASS - Timer box shows phase (Breathe In/Hold/Breathe Out/Hold) with countdown from 4, Start/Stop button works"
+        },
+        "cold_water_reset": {
+          "visible": "PASS",
+          "icon": "water",
+          "desc": "Splash cold water on your face to activate your dive reflex"
+        },
+        "quick_body_scan": {
+          "visible": "PASS",
+          "icon": "body",
+          "desc": "Check in with your body from head to toe"
+        },
+        "grounding_statements": {
+          "visible": "PASS",
+          "icon": "chatbubble",
+          "desc": "Remind yourself where you are and that you are safe"
+        }
+      },
+      "emergency_note": "PASS - 'If you're in crisis, call Samaritans on 116 123 or Combat Stress on 0800 138 1619'"
+    },
+    "local_services_page": {
+      "page_loads": "PASS - Header shows 'Find Local Support'",
+      "intro_card": "PASS - 'Veteran Mental Health Services' with location icon",
+      "postcode_search": {
+        "input_visible": "PASS - Input with placeholder 'E.G. SW1A 1AA'",
+        "find_button": "PASS - Green Find button with search icon",
+        "search_works": "PASS - Entering 'SW1A 1AA' returns 'Services in London' with Op COURAGE featured card and Local Services section"
+      },
+      "national_veteran_services": {
+        "section_visible": "PASS - 'National Veteran Services - Available to all UK veterans'",
+        "op_courage": "PASS - England badge, phone 0300 323 0137",
+        "veterans_nhs_wales": "PASS - Wales badge, phone 0800 132 737",
+        "combat_stress_scotland": "PASS - Scotland badge, phone 0800 138 1619",
+        "veterans_support_ni": "PASS - Northern Ireland badge, phone 0800 138 1619"
+      },
+      "veterans_gateway": "PASS - 'Not sure where to start?' card with phone 0808 802 1212",
+      "emergency_note": "PASS - 'In a mental health crisis? Call Samaritans 116 123'"
+    },
+    "navigation": {
+      "home_to_grounding": "PASS - Clicking Grounding Tools navigates to /grounding",
+      "home_to_local_services": "PASS - Clicking Find Local Support navigates to /local-services",
+      "grounding_back_to_home": "PASS - Back arrow in header navigates back",
+      "local_services_back_to_home": "PASS - Back arrow in header navigates back"
+    }
+  }
+}
