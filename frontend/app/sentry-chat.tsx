@@ -557,23 +557,23 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     borderBottomRightRadius: 4,
   },
-  sentryBubble: {
+  finchBubble: {
     backgroundColor: '#243447',
     alignSelf: 'flex-start',
     borderBottomLeftRadius: 4,
   },
-  sentryLabel: {
+  finchLabel: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
   },
-  sentryLabelAvatar: {
+  finchLabelAvatar: {
     width: 20,
     height: 20,
     borderRadius: 10,
     marginRight: 6,
   },
-  sentryLabelText: {
+  finchLabelText: {
     fontSize: 12,
     fontWeight: '600',
     color: '#7c9cbf',
@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
   userText: {
     color: '#ffffff',
   },
-  sentryText: {
+  finchText: {
     color: '#e2e8f0',
   },
   disclaimer: {
