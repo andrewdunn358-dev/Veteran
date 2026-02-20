@@ -268,7 +268,7 @@ export default function SubstanceSupport() {
   const renderResources = () => (
     <>
       <Text style={styles.pageTitle}>Helplines & Resources</Text>
-      <Text style={styles.pageSubtitle}>All calls are confidential. You don't need to give your name.</Text>
+      <Text style={styles.pageSubtitle}>All calls are confidential. You don&apos;t need to give your name.</Text>
 
       <Text style={styles.resourceGroupTitle}>Veteran-Specific Services</Text>
       {VETERAN_RESOURCES.map((resource, index) => (
