@@ -1713,7 +1713,7 @@ async def create_users_for_unlinked_staff(
         
         # Generate email from name
         safe_name = name.lower().replace(" ", ".").replace(".", "")[:20]
-        email = f"{safe_name}.peer@radiocheck.local"
+        email = f"{safe_name}.peer@radiocheck.me"
         
         # Check if email already exists
         existing_user = await db.users.find_one({"email": email})
