@@ -6,6 +6,55 @@ let token = localStorage.getItem('staff_token');
 let currentUser = JSON.parse(localStorage.getItem('staff_user') || 'null');
 let myProfile = null;
 
+// Session timeout - 30 minutes of inactivity
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+let inactivityTimer = null;
+let lastActivityTime = Date.now();
+
+// Check if session has expired on page load
+function checkSessionExpiry() {
+    const lastActivity = localStorage.getItem('staff_last_activity');
+    if (lastActivity) {
+        const timeSinceActivity = Date.now() - parseInt(lastActivity);
+        if (timeSinceActivity > SESSION_TIMEOUT_MS) {
+            // Session expired - force logout
+            console.log('Session expired due to inactivity');
+            logout(true); // silent logout
+            return true;
+        }
+    }
+    return false;
+}
+
+// Reset inactivity timer on user activity
+function resetInactivityTimer() {
+    lastActivityTime = Date.now();
+    localStorage.setItem('staff_last_activity', lastActivityTime.toString());
+    
+    if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+    }
+    
+    // Only set timer if user is logged in
+    if (token && currentUser) {
+        inactivityTimer = setTimeout(function() {
+            console.log('Session timeout - logging out due to inactivity');
+            showNotification('Session expired due to inactivity', 'warning');
+            setTimeout(function() {
+                logout();
+            }, 2000);
+        }, SESSION_TIMEOUT_MS);
+    }
+}
+
+// Setup activity listeners
+function setupActivityListeners() {
+    const activityEvents = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
+    activityEvents.forEach(function(event) {
+        document.addEventListener(event, resetInactivityTimer, { passive: true });
+    });
+}
+
 // Real-time alert tracking
 let knownAlertIds = new Set();
 let alertPollingInterval = null;
