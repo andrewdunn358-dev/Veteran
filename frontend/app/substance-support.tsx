@@ -139,11 +139,11 @@ export default function SubstanceSupport() {
       {/* Hero Section */}
       <View style={styles.heroCard}>
         <Ionicons name="heart" size={48} color="#f59e0b" />
-        <Text style={styles.heroTitle}>You're Not Alone</Text>
+        <Text style={styles.heroTitle}>You&apos;re Not Alone</Text>
         <Text style={styles.heroText}>
           Many veterans struggle with alcohol or substances after service. 
           It often starts as a way to cope - to sleep, to forget, to fit in. 
-          Recognising the problem is the hardest part. You've already shown courage.
+          Recognising the problem is the hardest part. You&apos;ve already shown courage.
         </Text>
       </View>
 
