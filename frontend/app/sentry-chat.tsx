@@ -59,7 +59,7 @@ export default function FinchChatScreen() {
     if (hasLoadedSession && messages.length === 0) {
       const welcomeMessage: Message = {
         id: 'welcome',
-        text: "Hello, I'm Finch. I'm here to provide support and understanding for veterans facing historical investigations or legal challenges related to their service.\n\nI want you to know that whatever you're going through, you're not alone. I can offer a listening ear, general information, and point you towards helpful resources.\n\nPlease remember: I provide emotional support and general guidance, not legal advice. For your specific legal situation, always consult a qualified solicitor.\n\nHow are you feeling today? What's on your mind?",
+        text: "Hello, what can I help you with today?",
         sender: 'finch',
         timestamp: new Date(),
       };
