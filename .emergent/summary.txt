@@ -1,179 +1,180 @@
-<analysis>**original_problem_statement**: The user's goal is to build and enhance a mobile-first web application for UK military veterans. The application includes role-based portals, a staff notes system, a callback/panic system, and an AI chatbot. Recent requests focused on implementing a full-featured live chat system, a side-by-side staff dashboard, significant security hardening including field-level encryption, integrating a professional-grade AI safety layer, and adding in-app voice calling. The in-app calling was initially a SIP/VoIP proof-of-concept but has now pivoted to a pure WebRTC solution to simplify the architecture and remove costs. A major pain point was also addressed by unifying the user and profile management systems into a single, automated workflow.
+<analysis>**original_problem_statement**: The user's goal is to build and enhance a mobile-first web application for UK military veterans. The application includes role-based portals (Admin, Counsellor, Peer Supporter), a staff notes system, a callback/panic system, and an AI chatbot. Key features include a full-featured live chat system, a side-by-side staff dashboard, significant security hardening with field-level encryption, an AI safety layer, and in-app voice calling. A major pain point was also addressed by unifying the user and profile management systems into a single, automated workflow.
 
 **PRODUCT REQUIREMENTS:**
 1.  **Callback/Panic System**: A system for users to request callbacks and for peer supporters to signal a crisis to counsellors.
 2.  **Role-Based Portals**: Dedicated portals for Counsellors and Peer Supporters, plus a separate portal for Admins.
 3.  **Staff Notes System**: A GDPR-compliant system for counsellors and peers to create and share notes.
 4.  **AI Chatbot (Battle Buddies)**: An anonymous AI chatbot with advanced, professional-grade safeguarding.
-5.  **Advanced AI Safeguarding**: A sophisticated, multi-level triage system (from Zentrafuge) that detects risk, handles negation, and provides UK-specific veteran crisis resources.
-6.  **Training Portal**: A learning management system (LMS) for training volunteers.
-7.  **Live Chat Handover**: A system for users to be handed over from the AI to a live chat with any available human supporter.
-8.  **Field-Level Encryption**: All Personally Identifiable Information (PII) must be encrypted at rest in the database.
-9.  **In-App Calling (WebRTC)**: A free, serverless (P2P) system for users and staff to make voice calls within the app without using phone numbers, using WebRTC for the media and the backend for signaling.
+5.  **Live Chat Handover**: A system for users to be handed over from the AI to a live chat with any available human supporter.
+6.  **Field-Level Encryption**: All Personally Identifiable Information (PII) must be encrypted at rest in the database.
+7.  **In-App Calling (WebRTC)**: A free, serverless (P2P) system for users and staff to make voice calls within the app.
+8.  **Substance Misuse Section**: A dedicated section on the home page for advice on alcohol and substance misuse. (Completed)
+9.  **Self-Help & Gamification**: New tools including Grounding Techniques, a local support finder, and a gamified Breathing Challenge. (Completed)
+10. **Human-to-Human Chat**: A real-time messaging feature for users to chat with staff. (Completed)
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application consists of a FastAPI backend, a React Native (Expo) frontend for users, a vanilla JS staff portal, and a separate vanilla JS admin portal.
-- **Backend ()**: The backend now includes a **Socket.IO signaling server** () to facilitate the new WebRTC calling feature. The user management system has been overhauled; the  endpoint now automatically creates a 'counsellor' or 'peer' profile, and a new unified endpoint () serves all staff data. An endpoint for admins to update staff status has also been added. The  endpoints now correctly return  to enable WebRTC calling.
-- **Admin Portal ()**: This portal was heavily refactored. The separate Users, Counsellors, and Peers tabs have been replaced by a single, unified Staff tab. This new tab allows for creating, editing, and managing all staff members in one place. The Edit User modal now dynamically displays profile-specific fields based on the user's role. The previous VoIP tab has been removed and replaced with a placeholder Calls tab.
-- **Staff Portal ()**: The SIP-based softphone has been completely replaced with a new WebRTC phone (), which connects to the backend signaling server upon login.
-- **Frontend App ()**: The legal disclaimer modal () is implemented and functional. The  page has been modified to initiate WebRTC calls, although this feature is not yet fully functional. A data migration script to encrypt existing PII has been created at .
+The application is a full-stack project with a FastAPI backend, a React Native (Expo) frontend for the mobile app, and separate vanilla JS portals for Staff and Admins. In this session, the agent implemented several new frontend features requested by the user: a Substance Misuse section, a Grounding Techniques page, a Local Mental Health Team Finder page, and a gamified Breathing Challenge. The agent also implemented the backend and frontend for a real-time, human-to-human chat system using Socket.IO. A major backend issue with API routing was also resolved by moving the  call to the correct position in , which fixed the WebRTC admin endpoints. However, an attempt to fix a bug in the WebRTC calling feature introduced a critical regression.
 
 **Last working item**:
-    - Last item agent was working: The agent was debugging the WebRTC call initiation from the mobile app. When a user clicks the Call button in , the WebRTC calling modal was not appearing, and the app was attempting to fall back to the native phone dialer. The agent identified a potential issue with the dynamic import of  in the  hook and changed it to a synchronous import.
+    - Last item agent was working: Fixing a critical regression that causes a blank screen on pages using the WebRTC hook (e.g., Counsellors, Talk to a Veteran). The user reported this after the agent attempted to fix an issue where calls would not connect and the hangup button was broken. The agent identified the new bug as a JavaScript hoisting/closure issue in , where the  function is referenced before it is initialized within other  hooks.
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? both. The mobile app frontend () needs to be tested to verify that the calling modal now appears and initiates a WebRTC call. This requires the backend signaling server to be running and a staff member to be logged into the  to receive the call signal, making it an end-to-end test.
+    - Which testing method agent to use? Frontend testing agent. First, reproduce the blank screen issue. After applying a fix, take a screenshot of the Counsellors page to confirm it loads. Finally, conduct a full regression test of the WebRTC call flow.
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: WebRTC call initiation from the mobile app is not working (P0)
-  - Issue 2: Bug - Peer Supporters not seeing Safeguarding Alerts (P1)
+  - Issue 1: Blank screen on pages using WebRTC hook (P0 - CRITICAL REGRESSION)
+  - Issue 2: WebRTC call does not connect, and hangup button is broken (P1 - BLOCKED)
+  - Issue 3: Stale user data (Barry Gib) in production database (P2)
 
   **Issues Detail**:
-  - **Issue 1: WebRTC call initiation from the mobile app is not working**
-     - **Attempted fixes**:
-        1. Added  to the  and  API endpoint responses.
-        2. Fixed a bug preventing decryption of  in the same endpoints.
-        3. Changed the dynamic  to a standard synchronous  in .
+  - **Issue 1: Blank screen on pages using WebRTC hook**
+     - **Attempted fixes**: The agent tried moving the  function definition within , which did not solve the problem. The agent then correctly identified the need to use a  to hold the  function to resolve the closure problem but failed to implement it correctly.
      - **Next debug checklist**:
-        1. In , verify that the  object is successfully connecting to the backend signaling server. Check the browser/device console logs for any Socket.IO connection errors.
-        2. In , add  statements within the  function to trace the execution flow. Confirm that  is present and that  from the  hook is being called.
-        3. Verify the logic that controls the visibility of the  component in . Ensure the  and  states are being updated correctly to show the modal.
-        4. Perform an end-to-end test: log in to the  as a peer, then try to call that peer from the mobile app.
-     - **Why fix this issue and what will be achieved with the fix?**: This is the final step to make the free, in-app WebRTC calling feature functional for users.
+        1. Open .
+        2. Define  as a standalone function *inside* the hook but not wrapped in .
+        3. Create a  to hold the function: . Update the ref's  value in a  whenever  changes.
+        4. In all places where  is called from within a  (like the socket event handlers), use .
+        5. Verify the fix by navigating to the Peer Support or Crisis Support pages and confirming they load without a blank screen.
+     - **Why fix this issue and what will be achieved with the fix?**: This is a critical regression that blocks users from accessing all calling features. Fixing it will restore core app functionality.
      - **Status**: IN PROGRESS
      - **Is recurring issue?** N
-     - **Should Test frontend/backend/both after fix?** both
-     - **Blocked on other issue**: None
-  - **Issue 2: Bug - Peer Supporters not seeing Safeguarding Alerts**
-     - **Attempted fixes**: A fix was previously implemented in , but given the numerous subsequent changes to this file and the separate deployment environments, it's unclear if the fix is active in production.
-     - **Next debug checklist**:
-        1. Ask the user to deploy the latest version of the  to their 20i hosting.
-        2. Have the user log in to the staff portal with a  account.
-        3. Confirm that the Safeguarding Alerts section is visible.
-     - **Why fix this issue and what will be achieved with the fix?**: This is a critical operational bug. Peer supporters are first-line responders and must have visibility of safeguarding alerts.
-     - **Status**: USER VERIFICATION PENDING
-     - **Is recurring issue?** N
      - **Should Test frontend/backend/both after fix?** frontend
+     - **Blocked on other issue**: None. This blocks Issue 2.
+
+  - **Issue 2: WebRTC call does not connect, and hangup button is broken**
+     - **Attempted fixes**: The agent modified  and  to adjust the signaling flow. These changes introduced Issue 1.
+     - **Next debug checklist**: Once Issue 1 is resolved, perform an end-to-end test of the WebRTC call flow to confirm if the original fix was effective.
+        1. Log in as a staff member and set status to Available.
+        2. From the mobile app, initiate a call to the staff member.
+        3. Verify the call connects and two-way audio is established.
+        4. Verify the Hang Up button works for both the caller and the receiver.
+     - **Why fix this issue and what will be achieved with the fix?**: The in-app calling feature is a key requirement and is currently unusable.
+     - **Status**: BLOCKED
+     - **Is recurring issue?** Y
+     - **Should Test frontend/backend/both after fix?** both
+     - **Blocked on other issue**: Issue 1: Blank screen on pages using WebRTC hook
+
+  - **Issue 3: Stale user data (Barry Gib) in production database**
+     - **Attempted fixes**: Agent confirmed the user is not in the preview database.
+     - **Next debug checklist**: The user has confirmed they will delete old accounts. Provide the user with clear, simple instructions on how to delete this user from their **production database** using the Admin Portal's staff management section.
+     - **Why fix this issue and what will be achieved with the fix?**: Cleans up unwanted data from the production environment.
+     - **Status**: BLOCKED (on user action)
+     - **Is recurring issue?** N
+     - **Should Test frontend/backend/both after fix?** backend
      - **Blocked on other issue**: None
 
 **In progress Task List**:
-  - Task 1: Complete WebRTC Calling Implementation
-     - **Where to resume**: Resume debugging the call initiation in . Once fixed, the same WebRTC calling logic and UI must be implemented in  to enable calling counsellors.
-     - **What will be achieved with this?**: A fully functional, free, in-app calling system between users and all staff members (peers and counsellors).
-     - **Status**: IN PROGRESS
-     - **Should Test frontend/backend/both after fix?**: both
-     - **Blocked on something**: Issue 1 (WebRTC call initiation from the mobile app is not working)
+- None.
 
 **Upcoming and Future Tasks**
 
 **Upcoming Tasks:**
-- **P0: Implement WebRTC calling on Crisis Support page**: Apply the now-debugged WebRTC calling logic from  to  so users can call counsellors.
-- **P1: Execute Data Migration Script**: The script to encrypt existing PII () has been created. The user needs to be guided on how to run this one-off script against their production database.
-- **P2: Implement Training Portal API Endpoint**: Create a webhook endpoint in  () to receive and store trainee progress from the user's WordPress/LearnDash LMS.
-- **P3: Implement Calls Tab Functionality**: The Calls tab in the  is currently a UI placeholder. It needs to be connected to the Socket.IO server to provide a real-time view of online staff and active calls.
+- **P1: Training Portal API Endpoint**: Implement a webhook endpoint in  () for WordPress/LearnDash integration.
+- **P2: Add Legal Disclaimers to Staff Portal**: Add necessary legal disclaimers to the staff-facing web portal.
+- **P3: Privacy Policy & Terms of Service pages**: Create static pages in the mobile app for these legal documents.
 
 **Future Tasks:**
-- In-App Human-to-Human Chat (for non-crisis situations).
-- Favorites/Saved Contacts feature.
-- Static pages for Privacy Policy & Terms of Service.
-- Achievement Badges for training and engagement.
+- Achievement Badges system.
 - Referral System.
+- Implement live postcode search for the Find Local Support page.
 
 **Completed work in this session**
-- **SIP to WebRTC Migration**: Successfully pivoted the entire in-app calling feature from a complex, paid SIP/PBX system to a free, pure WebRTC solution using Socket.IO for signaling.
-- **Unified Staff Management System**: Completely refactored the backend () and  to unify the previously separate 'User' and 'Profile' systems into a single, automated workflow, resolving a major user pain point.
-- **Dynamic Admin UI**: The  Edit User modal now dynamically renders profile-specific fields based on the selected role (Counsellor or Peer Supporter).
-- **Legal Disclaimer for AI Chat**: Implemented a mandatory disclaimer modal that users must accept before starting a conversation with the AI chatbot.
-- **Data Migration Script Creation**: A Python script was created to encrypt all existing unencrypted PII in the database.
-- **Admin Status Control**: Implemented the functionality for admins to change the availability status of any staff member directly from the .
-- **Bug Fixes**:
-    - Resolved multiple critical bugs in  related to incorrect parameter order in encryption/decryption function calls.
-    - Fixed API endpoints () to correctly return  and decrypted data, unblocking the WebRTC implementation.
-    - Addressed a git conflict issue by guiding the user on how to Force Push from the platform.
-
-**Earlier issues found/mentioned but not fixed**
-- None.
+- **New Feature**: Implemented a comprehensive Substance Misuse Advice section, accessible from the home page ().
+- **New Feature**: Added a Grounding Techniques page to the self-help tools ().
+- **New Feature**: Created a Find Local Support page with a static list of national veteran services ().
+- **New Feature**: Developed a gamified Breathing Challenge with streak tracking and animated exercises ().
+- **Feature Implemented**: Built a real-time, human-to-human chat system using Socket.IO, with backend endpoints for message persistence and a refactored frontend UI ().
+- **Backend Fix**: Resolved a critical routing issue in  that was causing 404 errors on several API endpoints, including the WebRTC admin dashboard endpoints.
+- **Task Resolved**: Confirmed with the user that the PII migration script is no longer necessary, as they will be deleting old, unencrypted user accounts.
 
 **Known issue recurrence from previous fork**
-  - None.
+  - **Issue recurrence in previous fork**: Production Deployment & Caching Failures.
+  - **Recurrence count**: High.
+  - **Status**: RESOLVED (for now). The user confirmed P0 is all working I think, suggesting the deployment issues are resolved. However, the new agent should be mindful that this could resurface.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Frontend (Mobile)**: React Native, Expo, Expo Router, TypeScript
-- **Frontend (Web Portals)**: Vanilla JavaScript (ES6), HTML, CSS
+- **Frontend**: React Native, Expo, Expo Router, TypeScript
 - **Backend**: Python, FastAPI
 - **Database**: MongoDB
-- **Security**: Field-Level Encryption (AES-256), Role-Based Access Control (RBAC).
-- **Real-time Communication**: WebRTC (for peer-to-peer media) and WebSockets (via Socket.IO for signaling).
-- **AI Integration**: OpenAI API, Zentrafuge Safety Layer.
+- **Real-time**: WebRTC (for calling), Socket.IO (for signaling and chat)
+- **Security**: Field-Level Encryption (AES-256), RBAC
 
 **key DB schema**
-- :  (Core auth record).
-- :  (Profile record).
-- :  (Profile record).
-- The  in profile collections links back to the  of the  collection. Creating a user now auto-creates the corresponding profile.
+  - : 
+  - : 
+  - : 
+  - :  (New)
 
 **changes in tech stack**
-- **Added**:  and  (backend),  (frontend) to enable WebRTC signaling.
-- **Removed**: . The entire SIP/FusionPBX stack is now deprecated and has been replaced by the WebRTC implementation.
+- None.
 
 **All files of reference**
-- : Core backend logic, now with Socket.IO integration and unified staff management APIs.
-- : New module containing all Socket.IO event handlers for call signaling.
--  & : Heavily refactored to provide the new unified Staff management interface.
-- : The new WebRTC client for the staff portal, replacing the old SIP phone.
-- : The new React hook that encapsulates WebRTC logic for the mobile app.
-- : The mobile app screen where the WebRTC calling feature is being implemented.
-- : The new script for encrypting existing data.
+- : The source of the current critical bug.
+- : A page that is currently broken by the bug.
+- : Another page broken by the bug.
+- : Contains fixes for API routing and new chat endpoints.
+- : Contains updated logic for call signaling and chat events.
+- : Home page, updated with new self-care tools.
+- : The new real-time chat interface.
+- : Contains the latest product requirements and completed tasks.
+
+**Areas that need refactoring**
+- : This hook is complex and fragile. After fixing the current bug, it should be reviewed for simplification to prevent future regressions. Using refs for functions called within callbacks is a sign that the hook's structure could be improved.
+- : This is a monolithic file containing almost all application logic. It should be broken down into separate routers for different domains (auth, users, webrtc, chat, etc.) to improve maintainability.
+
+**key api endpoints**
+- : Sends a new chat message.
+- : Retrieves chat history for a user.
+- : (Fixed) Lists online staff for the admin dashboard.
+- : (Fixed) Lists active calls for the admin dashboard.
 
 **Critical Info for New Agent**
-- **WebRTC is the new standard**: The project has fully pivoted from SIP/VoIP to a pure WebRTC solution for in-app calling. All SIP-related code is deprecated. The new system uses the backend for signaling only, and a free Google STUN server for NAT traversal.
-- **Unified User Management is LIVE**: The  and backend now use a unified system for staff management. Creating a user with a 'peer' or 'counsellor' role automatically creates their associated profile. There is no longer a need to link profiles manually.
-- **Complex Deployment Environment**: The user manages four distinct deployments (Render backend, two 20i frontends, Vercel app). This has been a major source of confusion, as features implemented in the preview environment don't work in production until the correct component is redeployed. Be explicit about which part(s) (, , ) need to be deployed for a change to take effect.
-- **Git Push Workflow**: The user has previously encountered git conflicts by modifying files directly on GitHub. Remind the user to use the platform's Save to Github feature. Be prepared to guide them on resolving merge conflicts if they arise.
+- Your absolute first priority is to fix the blank screen regression in . The app's core calling functionality is completely blocked until this is resolved.
+- The bug is a JavaScript closure/hoisting issue. The previous agent's idea to use a  to hold the  function is the correct path, but it needs to be implemented properly.
+- Once the blank screen is fixed, you must immediately perform a full regression test of the WebRTC calling feature to see if the original call not connecting bug is also solved.
+- Do not work on any new features until the calling functionality is restored and verified.
 
 **documents and test reports created in this job**
 - 
+- 
+-  (updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1. **User**: Admin can't change staff status, and SIP username format is wrong. **Status**: Completed (Status change added, SIP format fixed then replaced by WebRTC).
-2. **User**: SIP is not working, IP might be banned. Open to using a new, easier PBX. **Status**: Addressed (Agent proposed a simpler, free WebRTC solution).
-3. **User**: The solution needs to be free for this pilot phase. **Status**: Addressed (WebRTC is free).
-4. **User**: Agreed to implement the pure WebRTC solution. **Status**: In Progress (Implementation started).
-5. **User**: Can we admin the new WebRTC system from the admin portal, and have you removed the old VoIP stuff? **Status**: Completed (VoIP tab replaced with placeholder Calls tab).
-6. **User**: Clicking Call in the mobile app dials the phone, it doesn't use WebRTC. **Status**: In Progress (Agent started updating the mobile app).
-7. **User**: After deploying, clicking Call does nothing, no connecting indicator. **Status**: In Progress (Agent is debugging the call initiation UI/UX).
-8. **User**: The backend on Render is auto-deployed. **Status**: Info Noted.
-9. **User**: Pointed out a git push error with a screenshot. **Status**: Resolved (Agent explained the conflict and advised on force pushing).
-10. **User**: Confirmed the git push is now working. **Status**: Resolved.
+10. **User**: Requests a gamified self-help tool, like a daily challenge or word game. **Status**: Completed (Breathing Challenge was implemented).
+9. **User**: Selects option 4 (Breathing Challenge). **Status**: Completed.
+8. **User**: Asks for the purpose of the  script. **Status**: Addressed (Agent explained its purpose).
+7. **User**: Confirms old accounts can be deleted and the PII migration is not needed. **Status**: Completed (Task removed from backlog).
+6. **User**: Reports a new bug: when using the call feature the call goes through but does not connect and the client end cant click to hangup. **Status**: Work started.
+5. **User**: Confirms the WebRTC fixes are done and asks to test. **Status**: Awaiting user test.
+4. **User**: Reports a critical regression: you broke something now when I try to open councellors or talk to a veteran its just a black page. Also asks to hide user Barry Gib. **Status**: This is the current active bug.
+3. **User**: Says I did not provide an image (in response to agent mistakenly calling image tool). **Status**: Noted.
+2. **User**: Repeats I did not provide an image. **Status**: Noted.
+1. **User**: Says fix it. **Status**: This is the current directive.
 
 **Project Health Check:**
-- **Broken**: The primary WebRTC calling feature is broken. The mobile app cannot successfully initiate a call to the staff portal.
-- **Mocked**: The Calls tab in the  is a UI placeholder. It does not yet connect to the signaling server to monitor online staff or active calls.
+- **Broken**: The WebRTC calling feature is critically broken. A regression introduced in the  hook causes any page using it to render as a blank screen, blocking all user-to-staff contact features.
+- **Mocked**: The Find Local Support page includes a postcode search input, but it is not yet functional. It only displays a static list of national services.
 
 **3rd Party Integrations**
-- **OpenAI**: Powers the AI Battle Buddies feature. Requires a User API Key.
-- **Zentrafuge AI Safety Layer**: Open-source (MIT license) framework integrated into the backend.
-- **Socket.IO**: Used for WebSocket-based signaling for the WebRTC calling feature.
-- **WebRTC**: Browser-native P2P communication for audio calls. Uses Google's free STUN server ().
-- **Resend**: Used for email notifications.
-- **ip-api.com**: Used for free IP-based geolocation lookup.
-- **OpenStreetMap/Leaflet.js**: Used for rendering maps in the staff portal.
+- **OpenAI**: Used for the AI chatbot. Requires a user-provided API key.
+- **Socket.IO**: Used for real-time WebRTC signaling and the new human-to-human chat.
+- **WebRTC**: Used for peer-to-peer in-app voice calls.
 
 **Testing status**
-  - Testing agent used after significant changes: YES (Once, early in the session for P0/P1/P2 tasks)
+  - Testing agent used after significant changes: YES, for the new self-help features and chat implementation.
   - Troubleshoot agent used after agent stuck in loop: NO
   - Test files created: []
-  - Known regressions: None.
+  - Known regressions: A critical regression in  causes pages that use the hook to show a blank screen, breaking the app's core calling functionality.
 
 **Credentials to test flow:**
 - **Admin**:  / 
+- **Peer Supporter (Kevin)**:  / 
 
 **What agent forgot to execute**
-- The WebRTC calling logic was only added to . It still needs to be implemented in  to allow users to call counsellors.
-- The Calls tab in the  was created as a UI placeholder, but the JavaScript logic to connect to the Socket.IO server and display real-time data (online users, active calls) was not implemented.</analysis>
+The agent failed to properly test the implications of their changes to the complex  hook. While attempting to fix one bug (call connection failure), they introduced a more severe regression (blank pages) and did not catch it before asking the user to test. The agent then got stuck in a debugging loop on the new issue.</analysis>
