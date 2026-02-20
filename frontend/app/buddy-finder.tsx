@@ -6,7 +6,8 @@ import {
   TouchableOpacity, 
   StyleSheet,
   TextInput,
-  ActivityIndicator
+  ActivityIndicator,
+  Modal
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -34,7 +35,281 @@ const UK_REGIONS = [
   'Scotland',
   'Wales',
   'Northern Ireland',
+  'Overseas/Germany (BAOR)',
+  'Overseas/Cyprus',
+  'Overseas/Other',
 ];
+
+// Regiments by service (since 1970)
+const REGIMENTS: { [key: string]: { category: string; units: string[] }[] } = {
+  army: [
+    {
+      category: 'Household Cavalry',
+      units: [
+        'The Life Guards',
+        'The Blues and Royals (Royal Horse Guards and 1st Dragoons)',
+      ]
+    },
+    {
+      category: 'Foot Guards',
+      units: [
+        'Grenadier Guards',
+        'Coldstream Guards',
+        'Scots Guards',
+        'Irish Guards',
+        'Welsh Guards',
+      ]
+    },
+    {
+      category: 'Royal Armoured Corps',
+      units: [
+        '1st The Queen\'s Dragoon Guards',
+        'Royal Scots Dragoon Guards (Carabiniers and Greys)',
+        'Royal Dragoon Guards',
+        'Queen\'s Royal Hussars (The Queen\'s Own and Royal Irish)',
+        '9th/12th Royal Lancers (Prince of Wales\'s)',
+        'King\'s Royal Hussars',
+        'Light Dragoons',
+        'Royal Tank Regiment',
+        '13th/18th Royal Hussars (Queen Mary\'s Own)',
+        '14th/20th King\'s Hussars',
+        '15th/19th The King\'s Royal Hussars',
+        '16th/5th The Queen\'s Royal Lancers',
+        '17th/21st Lancers',
+        '4th/7th Royal Dragoon Guards',
+        '5th Royal Inniskilling Dragoon Guards',
+      ]
+    },
+    {
+      category: 'Infantry - Scottish',
+      units: [
+        'Royal Regiment of Scotland',
+        'Royal Scots (The Royal Regiment)',
+        'Royal Highland Fusiliers',
+        'King\'s Own Scottish Borderers',
+        'Black Watch (Royal Highland Regiment)',
+        'Queen\'s Own Highlanders (Seaforth and Camerons)',
+        'Gordon Highlanders',
+        'Argyll and Sutherland Highlanders',
+        'Cameronians (Scottish Rifles)',
+      ]
+    },
+    {
+      category: 'Infantry - English',
+      units: [
+        'Royal Regiment of Fusiliers',
+        'Royal Anglian Regiment',
+        'Princess of Wales\'s Royal Regiment',
+        'Duke of Lancaster\'s Regiment',
+        'Yorkshire Regiment',
+        'Mercian Regiment',
+        'The Rifles',
+        'Queen\'s Regiment',
+        'Royal Hampshire Regiment',
+        'Gloucestershire Regiment',
+        'Worcestershire and Sherwood Foresters',
+        'Staffordshire Regiment',
+        'Cheshire Regiment',
+        'Royal Green Jackets',
+        'Light Infantry',
+        'Devon and Dorset Regiment',
+        'Royal Berkshire Regiment',
+        'Duke of Edinburgh\'s Royal Regiment',
+        'King\'s Regiment',
+        'King\'s Own Royal Border Regiment',
+        'Queen\'s Lancashire Regiment',
+        'Duke of Wellington\'s Regiment',
+        'Green Howards',
+        'Prince of Wales\'s Own Regiment of Yorkshire',
+      ]
+    },
+    {
+      category: 'Infantry - Welsh',
+      units: [
+        'Royal Welsh',
+        'Royal Regiment of Wales',
+        'Royal Welch Fusiliers',
+      ]
+    },
+    {
+      category: 'Infantry - Irish',
+      units: [
+        'Royal Irish Regiment',
+        'Royal Irish Rangers',
+        'Ulster Defence Regiment',
+      ]
+    },
+    {
+      category: 'Infantry - Airborne & Special',
+      units: [
+        'Parachute Regiment',
+        'Special Air Service (SAS)',
+        'Royal Gurkha Rifles',
+        '2nd King Edward VII\'s Own Gurkha Rifles',
+        '6th Queen Elizabeth\'s Own Gurkha Rifles',
+        '7th Duke of Edinburgh\'s Own Gurkha Rifles',
+        '10th Princess Mary\'s Own Gurkha Rifles',
+      ]
+    },
+    {
+      category: 'Royal Artillery',
+      units: [
+        'Royal Regiment of Artillery',
+        'Royal Horse Artillery',
+      ]
+    },
+    {
+      category: 'Royal Engineers',
+      units: [
+        'Corps of Royal Engineers',
+      ]
+    },
+    {
+      category: 'Royal Signals',
+      units: [
+        'Royal Corps of Signals',
+      ]
+    },
+    {
+      category: 'Army Air Corps',
+      units: [
+        'Army Air Corps',
+      ]
+    },
+    {
+      category: 'Logistics & Support',
+      units: [
+        'Royal Logistic Corps',
+        'Royal Army Medical Corps',
+        'Royal Electrical and Mechanical Engineers',
+        'Adjutant General\'s Corps',
+        'Royal Army Veterinary Corps',
+        'Royal Army Dental Corps',
+        'Intelligence Corps',
+        'Royal Army Physical Training Corps',
+        'Royal Military Police',
+      ]
+    },
+  ],
+  navy: [
+    {
+      category: 'Surface Fleet',
+      units: [
+        'HMS Ark Royal',
+        'HMS Invincible',
+        'HMS Illustrious',
+        'HMS Ocean',
+        'HMS Bulwark',
+        'HMS Albion',
+        'HMS Queen Elizabeth',
+        'HMS Prince of Wales',
+        'HMS Belfast',
+        'Type 42 Destroyer',
+        'Type 45 Destroyer',
+        'Type 23 Frigate',
+        'Type 26 Frigate',
+      ]
+    },
+    {
+      category: 'Submarine Service',
+      units: [
+        'HMS Vanguard',
+        'HMS Victorious',
+        'HMS Vigilant',
+        'HMS Vengeance',
+        'HMS Astute',
+        'Polaris Submarine',
+        'Trident Submarine',
+      ]
+    },
+    {
+      category: 'Fleet Air Arm',
+      units: [
+        'Fleet Air Arm',
+        '800 Naval Air Squadron',
+        '801 Naval Air Squadron',
+        '820 Naval Air Squadron',
+        '845 Naval Air Squadron',
+        '846 Naval Air Squadron',
+        '849 Naval Air Squadron',
+      ]
+    },
+  ],
+  raf: [
+    {
+      category: 'Fighter Command',
+      units: [
+        'No. 1 Squadron',
+        'No. 2 Squadron',
+        'No. 3 Squadron',
+        'No. 6 Squadron',
+        'No. 11 Squadron',
+        'No. 12 Squadron',
+        'No. 14 Squadron',
+        'No. 17 Squadron',
+        'No. 29 Squadron',
+        'No. 43 Squadron',
+        'No. 54 Squadron',
+        'No. 56 Squadron',
+        'No. 111 Squadron',
+      ]
+    },
+    {
+      category: 'Bomber/Strike',
+      units: [
+        'No. 9 Squadron',
+        'No. 12 Squadron',
+        'No. 27 Squadron',
+        'No. 31 Squadron',
+        'No. 617 Squadron (Dambusters)',
+      ]
+    },
+    {
+      category: 'Transport',
+      units: [
+        'No. 10 Squadron',
+        'No. 24 Squadron',
+        'No. 30 Squadron',
+        'No. 47 Squadron',
+        'No. 70 Squadron',
+        'No. 99 Squadron',
+        'No. 101 Squadron',
+      ]
+    },
+    {
+      category: 'Support',
+      units: [
+        'RAF Regiment',
+        'RAF Police',
+        'RAF Medical Services',
+      ]
+    },
+  ],
+  marines: [
+    {
+      category: 'Commando Units',
+      units: [
+        '40 Commando',
+        '42 Commando',
+        '45 Commando',
+        'Commando Logistics Regiment',
+        'Commando Helicopter Force',
+        '539 Assault Squadron',
+        '30 Commando Information Exploitation Group',
+        '43 Commando Fleet Protection Group',
+        'Special Boat Service (SBS)',
+      ]
+    },
+    {
+      category: 'Support Units',
+      units: [
+        '29 Commando Regiment Royal Artillery',
+        '24 Commando Royal Engineers',
+        'Commando Training Centre',
+      ]
+    },
+  ],
+};
 
 // Sample veterans data (in production this would come from backend)
 const SAMPLE_VETERANS = [
