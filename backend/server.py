@@ -3457,8 +3457,7 @@ async def get_active_chat_rooms(current_user: User = Depends(get_current_user)):
     
     return rooms
 
-# Include the router in the main app
-app.include_router(api_router)
+# Note: include_router moved to end of file after all routes are defined
 
 app.add_middleware(
     CORSMiddleware,
