@@ -1,0 +1,72 @@
+{
+  "summary": "Tested new Substance Support feature for UK military veterans. All features working correctly: home page card, navigation to /substance-support, all 4 sub-sections (overview, resources, selfhelp, warning), helpline buttons, and back navigation.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "data-testid selectors",
+        "issue": "data-testid attributes on TouchableOpacity components not rendering in web DOM - must use text-based selectors for Playwright testing",
+        "affected_selectors": ["[data-testid=\"substance-support-btn\"]", "[data-testid=\"combat-stress-call-btn\"]"],
+        "priority": "LOW",
+        "workaround": "Use text-based selectors like 'text=Alcohol & Substance Support'"
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_9.json"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "data-testid attributes may need testID prop (React Native) or explicit dataSet config for web compatibility - currently not blocking functionality"
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A - frontend only test", "frontend": "100%"},
+  "test_credentials": "None required",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Substance Support feature fully tested. All navigation works: Home -> Substance Support -> Overview/Resources/Self-Help/Warning Signs. Helplines include Combat Stress, AA, Tom Harrison House, Veterans Gateway, Op Courage, and general UK services. Back navigation works via arrow icon in header.",
+  "features_tested": {
+    "home_page_substance_card": {
+      "card_visible": "PASS - 'Alcohol & Substance Support' card with medkit icon visible",
+      "card_clickable": "PASS - navigation to /substance-support works",
+      "card_styling": "PASS - yellow/amber theme matching substance advice context"
+    },
+    "substance_support_overview": {
+      "hero_section": "PASS - 'You're Not Alone' with heart icon and supportive text",
+      "need_to_talk_now": "PASS - Combat Stress (0800 138 1619) and AA Helpline (0800 917 7650) quick call buttons",
+      "why_veterans_at_risk": "PASS - 6 risk factors listed with icons",
+      "tom_harrison_featured": "PASS - Veteran-specific badge, phone 0151 526 2109",
+      "navigation_cards": "PASS - Helplines & Resources, Self-Help Guide, Warning Signs"
+    },
+    "substance_support_resources": {
+      "page_loads": "PASS - Header shows 'Resources'",
+      "veteran_specific_services": "PASS - Tom Harrison House, Combat Stress, Op Courage, Veterans Gateway",
+      "general_uk_support": "PASS - Alcoholics Anonymous UK, Drinkline, FRANK, Change Grow Live, We Are With You, Turning Point",
+      "phone_numbers_visible": "PASS - All phone numbers displayed with green call icon"
+    },
+    "substance_support_selfhelp": {
+      "page_loads": "PASS - Header shows 'Self-Help'",
+      "6_tips_displayed": "PASS - Track Your Intake, Identify Your Triggers, Talk to Someone, Build New Routines, Set Small Goals, Avoid Temptation Early On",
+      "motivation_quote": "PASS - Former Royal Marine quote displayed",
+      "info_card": "PASS - SMART Recovery and AA online meetings info"
+    },
+    "substance_support_warning_signs": {
+      "page_loads": "PASS - Header shows 'Warning Signs'",
+      "8_warning_signs": "PASS - All 8 warning signs with checkbox indicators",
+      "take_action_card": "PASS - Green 'Ready to Take Action?' card with Veterans Gateway number",
+      "samaritans_card": "PASS - 'Feeling Low?' card with 116 123 number"
+    },
+    "navigation": {
+      "home_to_substance": "PASS",
+      "overview_to_resources": "PASS",
+      "overview_to_selfhelp": "PASS", 
+      "overview_to_warning": "PASS",
+      "back_to_overview": "PASS - via header arrow",
+      "back_to_home": "PASS - via header arrow from overview"
+    }
+  }
+}
