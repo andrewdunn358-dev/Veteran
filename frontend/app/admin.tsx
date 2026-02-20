@@ -16,7 +16,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../src/context/AuthContext';
 import { Toast } from '../src/components/Toast';
 
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://battle-buddies-ai.preview.emergentagent.com';
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://crisis-call-now.preview.emergentagent.com';
 
 interface Counsellor {
   id: string;
