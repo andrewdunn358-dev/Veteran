@@ -22,16 +22,32 @@ const showAlert = (title: string, message: string) => {
   }
 };
 
-// WebRTC configuration - Multiple STUN servers for better NAT traversal
-const RTC_CONFIG = {
+// WebRTC configuration - STUN + TURN servers for NAT traversal
+// TURN is essential for mobile networks and symmetric NATs
+const RTC_CONFIG: RTCConfiguration = {
   iceServers: [
+    // STUN servers
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-    { urls: 'stun:stun3.l.google.com:19302' },
-    { urls: 'stun:stun4.l.google.com:19302' },
+    // Free public TURN servers (for testing - replace with your own for production)
+    {
+      urls: 'turn:openrelay.metered.ca:80',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
   ],
   iceCandidatePoolSize: 10,
+  iceTransportPolicy: 'all',  // Try both direct and relay
 };
 
 export type CallState = 'idle' | 'connecting' | 'ringing' | 'connected' | 'ended';
@@ -271,10 +287,24 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
       };
 
       pc.ontrack = (event) => {
+        console.log('WebRTC: Received remote track', event.track.kind, event.streams);
         const audio = ensureRemoteAudio();
-        if (audio) {
+        if (audio && event.streams[0]) {
           audio.srcObject = event.streams[0];
-          audio.play().catch(console.error);
+          // Unmute and set volume explicitly
+          audio.muted = false;
+          audio.volume = 1.0;
+          // Play with user interaction workaround
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((error) => {
+              console.error('WebRTC: Audio play failed:', error);
+              // Try to play on next user interaction
+              document.addEventListener('click', () => {
+                audio.play().catch(console.error);
+              }, { once: true });
+            });
+          }
         }
       };
 
@@ -393,9 +423,11 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
 
   const acceptCall = useCallback(() => {
     if (!currentCallIdRef.current) return;
+    console.log('WebRTC: Accepting call', currentCallIdRef.current);
     socketRef.current?.emit('call_accept', { call_id: currentCallIdRef.current });
     setCallState('connecting');
-    startWebRTCConnection(false);
+    // Don't start WebRTC here - wait for call_accepted event to avoid race condition
+    // The call_accepted handler will trigger startWebRTCConnection
   }, []);
 
   const rejectCall = useCallback(() => {
