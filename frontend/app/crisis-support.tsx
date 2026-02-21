@@ -257,30 +257,30 @@ export default function CrisisSupport() {
 
           {isLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#4a90e2" />
-              <Text style={styles.loadingText}>Loading counsellors...</Text>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading counsellors...</Text>
             </View>
           ) : error ? (
             <View style={styles.errorContainer}>
               <Ionicons name="alert-circle" size={24} color="#ef4444" />
               <Text style={styles.errorText}>{error}</Text>
-              <TouchableOpacity style={styles.retryButton} onPress={fetchCounsellors}>
+              <TouchableOpacity style={[styles.retryButton, { backgroundColor: colors.primary }]} onPress={fetchCounsellors}>
                 <Text style={styles.retryButtonText}>Retry</Text>
               </TouchableOpacity>
             </View>
           ) : counsellors.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Ionicons name="time" size={32} color="#7c9cbf" />
-              <Text style={styles.emptyText}>No counsellors on duty at the moment</Text>
-              <Text style={styles.emptySubtext}>Please try the crisis services below</Text>
+              <Ionicons name="time" size={32} color={colors.textSecondary} />
+              <Text style={[styles.emptyText, { color: colors.text }]}>No counsellors on duty at the moment</Text>
+              <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>Please try the crisis services below</Text>
             </View>
           ) : (
             counsellors.map((counsellor, index) => (
-            <View key={counsellor.id || index} style={styles.counsellorCard}>
+            <View key={counsellor.id || index} style={[styles.counsellorCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={styles.counsellorHeader}>
                 <View style={styles.counsellorInfo}>
                   <View style={styles.counsellorNameRow}>
-                    <Text style={styles.counsellorName}>{counsellor.name}</Text>
+                    <Text style={[styles.counsellorName, { color: colors.text }]}>{counsellor.name}</Text>
                     <View style={[
                       styles.statusBadge,
                       counsellor.status === 'available' ? styles.statusAvailable : styles.statusBusy
@@ -297,16 +297,16 @@ export default function CrisisSupport() {
                       </Text>
                     </View>
                   </View>
-                  <Text style={styles.counsellorSpec}>{counsellor.specialization}</Text>
+                  <Text style={[styles.counsellorSpec, { color: colors.textSecondary }]}>{counsellor.specialization}</Text>
                   {counsellor.next_available && (
-                    <Text style={styles.nextAvailable}>Next available in {counsellor.next_available}</Text>
+                    <Text style={[styles.nextAvailable, { color: colors.textMuted }]}>Next available in {counsellor.next_available}</Text>
                   )}
                 </View>
               </View>
               {counsellor.status === 'available' && (
                 <View style={styles.counsellorContactButtons}>
                   <TouchableOpacity
-                    style={styles.counsellorCallButton}
+                    style={[styles.counsellorCallButton, { backgroundColor: colors.primary }]}
                     onPress={() => handleCall(counsellor.phone, counsellor.name, 'counsellor', counsellor.id, counsellor.user_id || null)}
                     activeOpacity={0.8}
                   >
@@ -316,23 +316,23 @@ export default function CrisisSupport() {
                   
                   {counsellor.sms && (
                     <TouchableOpacity
-                      style={styles.counsellorSecondaryButton}
+                      style={[styles.counsellorSecondaryButton, { backgroundColor: colors.surfaceHover, borderColor: colors.border }]}
                       onPress={() => handleSMS(counsellor.sms!, counsellor.name, 'counsellor', counsellor.id)}
                       activeOpacity={0.8}
                     >
-                      <Ionicons name="chatbubble" size={18} color="#7c9cbf" />
-                      <Text style={styles.counsellorSecondaryButtonText}>Text</Text>
+                      <Ionicons name="chatbubble" size={18} color={colors.textSecondary} />
+                      <Text style={[styles.counsellorSecondaryButtonText, { color: colors.textSecondary }]}>Text</Text>
                     </TouchableOpacity>
                   )}
 
                   {counsellor.whatsapp && (
                     <TouchableOpacity
-                      style={styles.counsellorSecondaryButton}
+                      style={[styles.counsellorSecondaryButton, { backgroundColor: colors.surfaceHover, borderColor: colors.border }]}
                       onPress={() => handleWhatsApp(counsellor.whatsapp!, counsellor.name, 'counsellor', counsellor.id)}
                       activeOpacity={0.8}
                     >
-                      <Ionicons name="logo-whatsapp" size={18} color="#7c9cbf" />
-                      <Text style={styles.counsellorSecondaryButtonText}>WhatsApp</Text>
+                      <Ionicons name="logo-whatsapp" size={18} color={colors.textSecondary} />
+                      <Text style={[styles.counsellorSecondaryButtonText, { color: colors.textSecondary }]}>WhatsApp</Text>
                     </TouchableOpacity>
                   )}
                 </View>
