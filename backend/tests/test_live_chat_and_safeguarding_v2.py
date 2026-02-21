@@ -12,7 +12,7 @@ import requests
 import os
 import uuid
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://buddy-finder-dev.preview.emergentagent.com'))
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://radio-check-app.preview.emergentagent.com'))
 BASE_URL = BASE_URL.rstrip('/')
 
 # Admin credentials

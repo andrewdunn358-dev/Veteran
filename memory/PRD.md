@@ -41,7 +41,7 @@ Removed ALL references to `https://customer-assets.emergentagent.com`:
 - Added `/app/staff-portal/logo.png`
 
 **Frontend App**:
-- `admin.tsx` - Removed fallback URL `https://buddy-finder-dev.preview.emergentagent.com`
+- `admin.tsx` - Removed fallback URL `https://radio-check-app.preview.emergentagent.com`
 - `callback.tsx` - Removed fallback URL
 
 #### Splash Screen Text Fix (21 Feb 2026)
