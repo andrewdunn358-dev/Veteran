@@ -25,6 +25,7 @@ interface Counsellor {
 
 export default function CrisisSupport() {
   const router = useRouter();
+  const { colors, isDark } = useTheme();
   const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +35,19 @@ export default function CrisisSupport() {
   const [isInitiatingCall, setIsInitiatingCall] = useState(false);
   const [callingCounsellorName, setCallingCounsellorName] = useState('');
   const showCallModal = callState !== 'idle' || isInitiatingCall;
+
+  // Dynamic styles based on theme
+  const dynamicStyles = {
+    safeArea: { flex: 1, backgroundColor: colors.background },
+    container: { flex: 1, backgroundColor: colors.background },
+    headerTitle: { fontSize: 24, fontWeight: '700' as const, color: colors.text },
+    sectionTitle: { fontSize: 20, fontWeight: '700' as const, color: colors.text },
+    sectionDescription: { fontSize: 14, color: colors.textSecondary, marginBottom: 16, lineHeight: 20 },
+    card: { backgroundColor: colors.card, borderColor: colors.border },
+    cardText: { color: colors.text },
+    secondaryText: { color: colors.textSecondary },
+    iconColor: colors.textSecondary,
+  };
 
   // Fetch counsellors from API
   const fetchCounsellors = async () => {
