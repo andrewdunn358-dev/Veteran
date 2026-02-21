@@ -58,7 +58,7 @@ export default function SplashScreen() {
           {/* Logo - New transparent version */}
           <View style={styles.logoContainer}>
             <Image 
-              source={{ uri: NEW_LOGO_URL }}
+              source={NEW_LOGO}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -135,7 +135,7 @@ export default function SplashScreen() {
                 style={styles.supporterLogoWrapper}
               >
                 <Image 
-                  source={{ uri: FRANKIES_POD_LOGO }}
+                  source={FRANKIES_POD_LOGO}
                   style={styles.supporterLogo}
                   resizeMode="contain"
                 />
@@ -146,7 +146,7 @@ export default function SplashScreen() {
                 style={styles.supporterLogoWrapper}
               >
                 <Image 
-                  source={{ uri: STANDING_TALL_LOGO }}
+                  source={STANDING_TALL_LOGO}
                   style={styles.supporterLogoStandingTall}
                   resizeMode="contain"
                 />
