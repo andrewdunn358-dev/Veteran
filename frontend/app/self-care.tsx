@@ -1,20 +1,13 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 
+const HUGO_AVATAR = 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png';
+
 const SELF_CARE_TOOLS = [
-  {
-    id: 'hugo-chat',
-    title: 'Chat with Hugo',
-    description: 'Self-help & wellness guide',
-    icon: 'chatbubbles',
-    color: '#10b981',
-    bgColor: '#d1fae5',
-    route: '/hugo-chat',
-  },
   {
     id: 'journal',
     title: 'My Journal',
