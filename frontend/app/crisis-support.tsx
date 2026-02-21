@@ -196,19 +196,19 @@ export default function CrisisSupport() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <StatusBar barStyle="light-content" backgroundColor="#1a2332" />
+    <SafeAreaView style={dynamicStyles.safeArea} edges={['top', 'bottom']}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
       <ScrollView 
-        style={styles.container}
+        style={dynamicStyles.container}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.replace('/home')} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#7c9cbf" />
+            <Ionicons name="arrow-back" size={24} color={dynamicStyles.iconColor} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Crisis Support</Text>
+          <Text style={dynamicStyles.headerTitle}>Crisis Support</Text>
         </View>
 
         {/* Emergency Banner - Display only, no call functionality */}
@@ -222,7 +222,7 @@ export default function CrisisSupport() {
 
         {/* AI Battle Buddies - Tommy & Doris */}
         <TouchableOpacity 
-          style={styles.aiBuddiesCard}
+          style={[styles.aiBuddiesCard, dynamicStyles.card]}
           onPress={() => router.push('/ai-buddies')}
           activeOpacity={0.9}
         >
@@ -238,20 +238,20 @@ export default function CrisisSupport() {
               />
             </View>
             <View style={styles.aiBuddiesTextContainer}>
-              <Text style={styles.aiBuddiesTitle}>We're on stag 24/7</Text>
-              <Text style={styles.aiBuddiesSubtitle}>Chat with Tommy or Doris</Text>
+              <Text style={[styles.aiBuddiesTitle, dynamicStyles.cardText]}>We're on stag 24/7</Text>
+              <Text style={[styles.aiBuddiesSubtitle, dynamicStyles.secondaryText]}>Chat with Tommy or Doris</Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#64748b" />
+            <Ionicons name="chevron-forward" size={24} color={dynamicStyles.iconColor} />
           </View>
         </TouchableOpacity>
 
         {/* On-Duty Counsellors Section */}
-        <View style={styles.counsellorsSection}>
+        <View style={[styles.counsellorsSection, dynamicStyles.card]}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="people-circle" size={24} color="#7c9cbf" />
-            <Text style={styles.sectionTitle}>On-Duty Counsellors</Text>
+            <Ionicons name="people-circle" size={24} color={dynamicStyles.iconColor} />
+            <Text style={dynamicStyles.sectionTitle}>On-Duty Counsellors</Text>
           </View>
-          <Text style={styles.sectionDescription}>
+          <Text style={dynamicStyles.sectionDescription}>
             Professional counsellors available now to speak with you
           </Text>
 
