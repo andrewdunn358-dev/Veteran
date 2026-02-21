@@ -1,18 +1,42 @@
-# Radio Check - UK Veterans Support App
+# Radio Check - UK Armed Forces Support App
 
 ## Original Problem Statement
-Build and enhance a mobile-first web application for UK military veterans with role-based portals, AI chatbots, safeguarding, and peer support features.
+Build and enhance a mobile-first web application for UK serving personnel and veterans with role-based portals, AI chatbots, safeguarding, and peer support features.
 
 ## What's Been Implemented (Updated 21 Feb 2026)
 
 ### Latest Session Updates
 
-#### 1. Bob AI Prompt Fixed
+#### 1. New AI Characters Added
+- **Margie**: Alcohol & substance misuse support AI
+- **Hugo**: Self-help & wellness guru AI
+- Both have safeguarding capabilities and friendly bios
+- Margie added to substance-support.tsx page
+- Hugo added to self-care.tsx as first card option
+
+#### 2. Supporter Logos on Splash Screen
+- Added Frankie's Pod logo (links to YouTube)
+- Added Standing Tall Foundation logo (links to website)
+- "Proudly supported by" section at bottom of splash screen
+
+#### 3. Staff Calendar/Availability (Frontend Added)
+- Created `/app/frontend/app/my-availability.tsx`
+- Calendar view for volunteers to log shifts
+- Added "My Availability" button on peer-support.tsx
+- Integrates with existing `/api/shifts` endpoints
+- Requires authentication to add shifts
+
+#### 4. Terminology Updated
+- Changed "veterans" to "serving personnel and veterans" throughout
+- Updated family-friends.tsx, substance-support.tsx, organizations.tsx, self-care.tsx
+- UK English grammar corrected across pages
+
+#### 5. Bob AI Prompt Fixed (Previous Session)
 - Removed repetitive "Alright mate, Bob here" intro
 - Added instruction to never introduce himself - just respond naturally
 - Updated welcome message in bob-chat.tsx
 
-#### 2. Shift/Rota System (Backend Complete)
+#### 6. Shift/Rota System (Backend Complete)
 New endpoints for peer supporter availability management:
 - `GET /api/shifts` - Get all shifts
 - `GET /api/shifts/today` - Get today's shifts (for "Someone on the net" status)
@@ -42,42 +66,61 @@ GDPR-compliant veteran networking:
 - Home page "Meet the AI Team" now has Show/Hide button
 - Team members collapsed by default, revealed on tap
 
-### Self-Care Tools (8 tools)
+### AI Characters (6 total)
+- **Tommy**: Friendly conversational support
+- **Doris**: Friendly conversational support
+- **Bob**: Ex-Para peer support, banter and guidance
+- **Finch/Sentry**: PTSD and mental health crisis support
+- **Margie** (NEW): Alcohol & substance misuse support
+- **Hugo** (NEW): Self-help & wellness guru
+
+### Self-Care Tools (9 tools)
+- Chat with Hugo (NEW)
 - My Journal
 - Daily Check-in
 - Grounding Tools
 - Breathing Exercises
-- Buddy Finder (NEW)
+- Buddy Finder
 - Regimental Associations (NEW)
 - Find Local Support
 - Resources Library
 
 ### Core Features (Complete)
-- AI Battle Buddies: Tommy, Doris, Bob, Finch - all with safeguarding
+- AI Battle Buddies: Tommy, Doris, Bob, Finch, Margie, Hugo - all with safeguarding
 - Safeguarding System: Detects crisis messages, creates alerts
 - Role-Based Portals: Admin, Counsellor, Peer Supporter
 - Staff Notes System: GDPR-compliant
 - WebRTC Calling: Fixed user_id blocker
 - Field-Level Encryption: PII encrypted at rest
 - Regimental Associations: 35+ associations searchable
+- Staff Calendar: Volunteers can log availability (my-availability.tsx)
+- Substance Support: Dedicated page with Margie AI
 
 ## Key Files Reference
 
 ### Backend
-- `/app/backend/server.py` - All API endpoints including new Shift and Buddy Finder endpoints
+- `/app/backend/server.py` - All API endpoints including Shift, Buddy Finder, and AI endpoints
 
 ### Frontend
+- `/app/frontend/app/margie-chat.tsx` - Margie AI for alcohol/substance support (NEW)
+- `/app/frontend/app/hugo-chat.tsx` - Hugo AI for self-help/wellness (NEW)
+- `/app/frontend/app/my-availability.tsx` - Staff calendar/shifts (NEW)
+- `/app/frontend/app/substance-support.tsx` - Alcohol & substance resources with Margie
 - `/app/frontend/app/buddy-finder.tsx` - Buddy Finder with GDPR signup
 - `/app/frontend/app/bob-chat.tsx` - Bob with AI profile card
 - `/app/frontend/app/home.tsx` - Meet the AI Team with toggle
 - `/app/frontend/app/self-care.tsx` - Self-care tools grid
+- `/app/frontend/app/index.tsx` - Splash screen with supporter logos
 
 ## Pending/TODO
 
-### Shift/Rota Frontend
-- Create "My Availability" page in staff portal
-- Calendar view for selecting dates/times
-- Show "Someone is on the net" indicator on home page
+### Family & Friends Dark Mode Fix
+- Page has hardcoded styles that don't respond to dark mode
+- Need to refactor to use ThemeContext colors
+
+### Buddy Finder Frontend
+- GDPR consent form needs completion
+- Profile browsing interface
 
 ### AI Profile Cards for Other Characters
 - Add AI profile cards to ai-chat.tsx (Tommy/Doris)
