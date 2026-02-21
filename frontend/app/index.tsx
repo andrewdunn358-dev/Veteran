@@ -164,14 +164,11 @@ const styles = StyleSheet.create({
     maxWidth: 400,
   },
   logoContainer: {
-    marginBottom: 20,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 20,
-    padding: 12,
+    marginBottom: 16,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 120,
+    height: 120,
   },
   title: {
     fontSize: 32,
@@ -183,23 +180,41 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: '#8ba4c4',
-    marginBottom: 32,
+    marginBottom: 16,
     textAlign: 'center',
   },
-  welcomeContainer: {
+  missionContainer: {
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+  },
+  missionText: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: '#93c5fd',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  learnMoreButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginBottom: 24,
+    gap: 6,
   },
-  welcomeText: {
-    fontSize: 17,
-    fontWeight: '500',
-    color: '#b8c9dd',
-    textAlign: 'center',
-    lineHeight: 26,
+  learnMoreText: {
+    fontSize: 14,
+    color: '#93c5fd',
+    textDecorationLine: 'underline',
   },
   questionContainer: {
     alignItems: 'center',
-    marginBottom: 28,
+    marginBottom: 20,
   },
   questionText: {
     fontSize: 20,
