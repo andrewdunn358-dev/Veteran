@@ -207,6 +207,29 @@ async function startWebRTCConnection(createOffer) {
             console.log('Local audio track:', track.label, 'enabled:', track.enabled, 'muted:', track.muted);
         });
         
+        // Monitor actual audio levels from microphone
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const microphone = audioContext.createMediaStreamSource(localStream);
+            microphone.connect(analyser);
+            analyser.fftSize = 256;
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            
+            // Check audio levels every second
+            const levelCheck = setInterval(() => {
+                if (!localStream) {
+                    clearInterval(levelCheck);
+                    return;
+                }
+                analyser.getByteFrequencyData(dataArray);
+                const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                console.log('Mic audio level:', average.toFixed(1), average > 5 ? '(SOUND DETECTED)' : '(silence)');
+            }, 1000);
+        } catch (e) {
+            console.log('Could not create audio level monitor:', e);
+        }
+        
         // Create peer connection
         peerConnection = new RTCPeerConnection(WEBRTC_CONFIG);
         
