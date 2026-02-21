@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StatusBar, Linking, ActivityIndicator, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,6 +21,7 @@ interface Organization {
 
 export default function Organizations() {
   const router = useRouter();
+  const { colors, isDark } = useTheme();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,126 +63,122 @@ export default function Organizations() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <StatusBar barStyle="light-content" backgroundColor="#1a2332" />
-      <View style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'bottom']}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#7c9cbf" />
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 16 }}>
+          <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginRight: 12 }}>
+            <Ionicons name="arrow-back" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Support Organisations</Text>
+          <Text style={{ fontSize: 22, fontWeight: '700', color: colors.text }}>Support Organisations</Text>
         </View>
 
         {/* Emergency Banner - Display only, no call functionality */}
-        <View style={styles.emergencyBanner}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#cc0000', paddingVertical: 12, paddingHorizontal: 24, marginHorizontal: 24, borderRadius: 8, gap: 12 }}>
           <Ionicons name="warning" size={24} color="#ffffff" />
-          <Text style={styles.emergencyText}>Emergency? Dial 999</Text>
+          <Text style={{ fontSize: 16, fontWeight: '700', color: '#ffffff' }}>Emergency? Dial 999</Text>
         </View>
 
         <ScrollView 
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: 24, paddingTop: 16, paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
         >
           {/* Description */}
-          <View style={styles.description}>
-            <Text style={styles.descriptionText}>
+          <View style={{ backgroundColor: colors.card, borderRadius: 8, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: colors.border }}>
+            <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 }}>
               UK organisations providing support to veterans. All services are confidential.
             </Text>
           </View>
 
           {/* Alcohol & Substance Support Card */}
           <TouchableOpacity 
-            style={styles.substanceCard}
+            style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: 12, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#d97706' }}
             onPress={() => router.push('/substance-support')}
           >
-            <View style={styles.substanceCardIcon}>
+            <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#451a03', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
               <FontAwesome5 name="wine-bottle" size={24} color="#d97706" />
             </View>
-            <View style={styles.substanceCardContent}>
-              <Text style={styles.substanceCardTitle}>Alcohol & Substance Support</Text>
-              <Text style={styles.substanceCardDesc}>Resources and AI support for recovery</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: '700', color: '#fcd34d', marginBottom: 2 }}>Alcohol & Substance Support</Text>
+              <Text style={{ fontSize: 13, color: colors.textSecondary }}>Resources and AI support for recovery</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#7c9cbf" />
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
           </TouchableOpacity>
 
           {/* Loading State */}
           {isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#4a90e2" />
-              <Text style={styles.loadingText}>Loading organizations...</Text>
+            <View style={{ alignItems: 'center', padding: 40 }}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={{ marginTop: 12, fontSize: 14, color: colors.textSecondary }}>Loading organizations...</Text>
             </View>
           ) : error ? (
-            <View style={styles.errorContainer}>
+            <View style={{ alignItems: 'center', padding: 40, gap: 12 }}>
               <Ionicons name="alert-circle" size={32} color="#ef4444" />
-              <Text style={styles.errorText}>{error}</Text>
-              <TouchableOpacity style={styles.retryButton} onPress={fetchOrganizations}>
-                <Text style={styles.retryButtonText}>Retry</Text>
+              <Text style={{ fontSize: 14, color: '#ef4444', textAlign: 'center' }}>{error}</Text>
+              <TouchableOpacity style={{ backgroundColor: colors.primary, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 }} onPress={fetchOrganizations}>
+                <Text style={{ color: '#ffffff', fontWeight: '600', fontSize: 14 }}>Retry</Text>
               </TouchableOpacity>
             </View>
           ) : organizations.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="business" size={48} color="#7c9cbf" />
-              <Text style={styles.emptyText}>No organizations available</Text>
-              <Text style={styles.emptySubtext}>Please contact support for assistance</Text>
+            <View style={{ alignItems: 'center', padding: 40, gap: 12 }}>
+              <Ionicons name="business" size={48} color={colors.textSecondary} />
+              <Text style={{ fontSize: 16, color: colors.text, fontWeight: '600', textAlign: 'center' }}>No organizations available</Text>
+              <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center' }}>Please contact support for assistance</Text>
             </View>
           ) : (
-          /* Organizations List */
-          organizations.map((org) => (
-            <View key={org.id} style={styles.orgCard}>
-              <View style={styles.orgHeader}>
-                <Ionicons name="shield-checkmark" size={24} color="#7c9cbf" />
-                <View style={styles.orgInfo}>
-                  <Text style={styles.orgName}>{org.name}</Text>
+            organizations.map((org) => (
+              <View key={org.id} style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                  <Ionicons name="shield-checkmark" size={24} color={colors.textSecondary} />
+                  <View style={{ marginLeft: 12, flex: 1 }}>
+                    <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text }}>{org.name}</Text>
+                  </View>
+                </View>
+                
+                <Text style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 20, marginBottom: 16 }}>{org.description}</Text>
+
+                <View style={{ flexDirection: 'row', gap: 12 }}>
+                  <TouchableOpacity
+                    style={{ flex: 1, flexDirection: 'row', backgroundColor: colors.primary, borderRadius: 8, padding: 14, alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 52 }}
+                    onPress={() => handleCall(org.phone)}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="call" size={20} color="#ffffff" />
+                    <Text style={{ fontSize: 15, fontWeight: '600', color: '#ffffff' }}>Call</Text>
+                  </TouchableOpacity>
+
+                  {org.sms && (
+                    <TouchableOpacity
+                      style={{ flexDirection: 'row', backgroundColor: colors.surfaceHover, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderColor: colors.border, minHeight: 52 }}
+                      onPress={() => handleSMS(org.sms!)}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="chatbubble" size={20} color={colors.textSecondary} />
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textSecondary }}>Text</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {org.whatsapp && (
+                    <TouchableOpacity
+                      style={{ flexDirection: 'row', backgroundColor: colors.surfaceHover, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderColor: colors.border, minHeight: 52 }}
+                      onPress={() => handleWhatsApp(org.whatsapp!)}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="logo-whatsapp" size={20} color={colors.textSecondary} />
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textSecondary }}>WhatsApp</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
-              
-              <Text style={styles.orgDescription}>{org.description}</Text>
-
-              <View style={styles.contactButtons}>
-                {/* Call Button - Always Present */}
-                <TouchableOpacity
-                  style={styles.callButton}
-                  onPress={() => handleCall(org.phone)}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="call" size={20} color="#ffffff" />
-                  <Text style={styles.callButtonText}>Call</Text>
-                </TouchableOpacity>
-
-                {/* SMS Button */}
-                {org.sms && (
-                  <TouchableOpacity
-                    style={styles.secondaryButton}
-                    onPress={() => handleSMS(org.sms!)}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons name="chatbubble" size={20} color="#7c9cbf" />
-                    <Text style={styles.secondaryButtonText}>Text</Text>
-                  </TouchableOpacity>
-                )}
-
-                {/* WhatsApp Button */}
-                {org.whatsapp && (
-                  <TouchableOpacity
-                    style={styles.secondaryButton}
-                    onPress={() => handleWhatsApp(org.whatsapp!)}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons name="logo-whatsapp" size={20} color="#7c9cbf" />
-                    <Text style={styles.secondaryButtonText}>WhatsApp</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-          ))
+            ))
           )}
 
           {/* Footer Note */}
-          <View style={styles.footer}>
-            <Ionicons name="information-circle" size={16} color="#b0c4de" />
-            <Text style={styles.footerText}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 24 }}>
+            <Ionicons name="information-circle" size={16} color={colors.textSecondary} />
+            <Text style={{ fontSize: 12, color: colors.textSecondary, textAlign: 'center', flex: 1 }}>
               All organisations are free to contact. Help is available 24/7.
             </Text>
           </View>
@@ -190,222 +187,3 @@ export default function Organizations() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#1a2332',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#1a2332',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  backButton: {
-    padding: 8,
-    marginRight: 12,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  emergencyBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#cc0000',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    marginHorizontal: 24,
-    borderRadius: 8,
-    gap: 12,
-  },
-  emergencyText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
-  },
-  description: {
-    backgroundColor: '#2d3748',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 20,
-  },
-  descriptionText: {
-    fontSize: 14,
-    color: '#b0c4de',
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  orgCard: {
-    backgroundColor: '#2d3748',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#4a5568',
-  },
-  orgHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  orgInfo: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  orgName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  orgDescription: {
-    fontSize: 14,
-    color: '#b0c4de',
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  contactButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  callButton: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: '#4a90e2',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    minHeight: 52,
-  },
-  callButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-  secondaryButton: {
-    flexDirection: 'row',
-    backgroundColor: '#374151',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderColor: '#4a5568',
-    minHeight: 52,
-  },
-  secondaryButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#7c9cbf',
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 24,
-  },
-  footerText: {
-    fontSize: 12,
-    color: '#b0c4de',
-    textAlign: 'center',
-    flex: 1,
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    padding: 40,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#b0c4de',
-  },
-  errorContainer: {
-    alignItems: 'center',
-    padding: 40,
-    gap: 12,
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#ef4444',
-    textAlign: 'center',
-  },
-  retryButton: {
-    backgroundColor: '#4a90e2',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: '#ffffff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    padding: 40,
-    gap: 12,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#ffffff',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#b0c4de',
-    textAlign: 'center',
-  },
-  substanceCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2d3748',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#d97706',
-  },
-  substanceCardIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#451a03',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  substanceCardContent: {
-    flex: 1,
-  },
-  substanceCardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#fcd34d',
-    marginBottom: 2,
-  },
-  substanceCardDesc: {
-    fontSize: 13,
-    color: '#b0c4de',
-  },
-});
