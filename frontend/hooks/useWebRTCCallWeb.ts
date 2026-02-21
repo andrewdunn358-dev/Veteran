@@ -336,33 +336,41 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
         // Ensure the remote track is enabled
         event.track.enabled = true;
         
-        const audio = ensureRemoteAudio();
-        if (audio && event.streams[0]) {
+        if (event.streams[0]) {
           console.log('WebRTC: Setting audio srcObject with', event.streams[0].getAudioTracks().length, 'audio tracks');
-          audio.srcObject = event.streams[0];
-          // Unmute and set volume explicitly
-          audio.muted = false;
-          audio.volume = 1.0;
           
-          // Log audio element state
-          console.log('WebRTC: Audio element - muted:', audio.muted, 'volume:', audio.volume, 'paused:', audio.paused);
-          
-          // Play with user interaction workaround
-          const playPromise = audio.play();
-          if (playPromise !== undefined) {
-            playPromise.then(() => {
-              console.log('WebRTC: Audio playback started successfully');
-              setDebugInfo(prev => ({ ...prev, audioPlaying: true }));
-            }).catch((error) => {
-              console.error('WebRTC: Audio play failed:', error);
-              setDebugInfo(prev => ({ ...prev, audioPlaying: false }));
-              // Try to play on next user interaction
-              document.addEventListener('click', () => {
-                audio.play().then(() => {
-                  setDebugInfo(prev => ({ ...prev, audioPlaying: true }));
-                }).catch(console.error);
-              }, { once: true });
-            });
+          // Method 1: Standard audio element
+          const audio = ensureRemoteAudio();
+          if (audio) {
+            audio.srcObject = event.streams[0];
+            audio.muted = false;
+            audio.volume = 1.0;
+            
+            // Method 2: Also use Web Audio API to force speaker output on mobile
+            try {
+              const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+              const source = audioContext.createMediaStreamSource(event.streams[0]);
+              source.connect(audioContext.destination);
+              console.log('WebRTC: Web Audio API connected for speaker output');
+            } catch (e) {
+              console.log('WebRTC: Web Audio API fallback failed, using standard audio element');
+            }
+            
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+              playPromise.then(() => {
+                console.log('WebRTC: Audio playback started successfully');
+                setDebugInfo(prev => ({ ...prev, audioPlaying: true }));
+              }).catch((error) => {
+                console.error('WebRTC: Audio play failed:', error);
+                setDebugInfo(prev => ({ ...prev, audioPlaying: false }));
+                document.addEventListener('click', () => {
+                  audio.play().then(() => {
+                    setDebugInfo(prev => ({ ...prev, audioPlaying: true }));
+                  }).catch(console.error);
+                }, { once: true });
+              });
+            }
           }
         }
       };
