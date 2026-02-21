@@ -306,6 +306,22 @@ export default function PeerPortal() {
           </TouchableOpacity>
         </View>
 
+        {/* My Availability Calendar */}
+        <TouchableOpacity 
+          style={styles.calendarCard}
+          onPress={() => router.push('/my-availability')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.calendarIconContainer}>
+            <Ionicons name="calendar" size={28} color="#10b981" />
+          </View>
+          <View style={styles.calendarContent}>
+            <Text style={styles.calendarTitle}>My Availability</Text>
+            <Text style={styles.calendarSubtitle}>Log your shifts and availability</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#64748b" />
+        </TouchableOpacity>
+
         {/* My Active Callbacks */}
         {myCallbacks.length > 0 && (
           <>
