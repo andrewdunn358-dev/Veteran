@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Radio, Heart, Users, Shield, MessageCircle, Phone, Smartphone, ChevronRight, CheckCircle, Clock, Brain } from 'lucide-react'
 
-const LOGO_URL = 'https://customer-assets.emergentagent.com/job_wellness-vibes/artifacts/um22zx0o_Gemini_Generated_Image_u4tpnxu4tpnxu4tp.png'
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_ae8f8501-55e8-47a0-8c0c-262b1bbbdefe/artifacts/ny233qxa_Gemini_Generated_Image_u4tpnxu4tpnxu4tp-removebg-preview.png'
 
 const features = [
   {
