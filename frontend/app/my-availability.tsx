@@ -147,8 +147,8 @@ export default function MyAvailabilityScreen() {
       return;
     }
 
-    // Get auth token
-    const token = await AsyncStorage.getItem('authToken');
+    // Get auth token (stored as 'auth_token' by AuthContext)
+    const token = await AsyncStorage.getItem('auth_token');
     if (!token) {
       Alert.alert('Login Required', 'You need to be logged in as a peer supporter to add shifts.', [
         { text: 'Cancel', style: 'cancel' },
