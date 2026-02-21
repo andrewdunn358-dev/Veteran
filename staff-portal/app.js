@@ -1666,8 +1666,8 @@ function showSelectedDayShifts(dateString) {
     }
     
     shiftsContainer.innerHTML = dayShifts.map(function(shift) {
-        var isMyShift = shift.peer_supporter_id === currentUser.id;
-        var name = isMyShift ? 'You' : (shift.peer_supporter_name || 'Staff');
+        var isMyShift = shift.staff_id === currentUser.id;
+        var name = isMyShift ? 'You' : (shift.staff_name || 'Staff');
         
         var actionsHtml = '';
         if (isMyShift) {
