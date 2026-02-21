@@ -57,6 +57,7 @@ const PRISON_RESOURCES = [
 
 export default function FamilyFriends() {
   const router = useRouter();
+  const { colors } = useTheme();
   const [view, setView] = useState<'main' | 'concern' | 'resources' | 'signs' | 'addiction' | 'prison'>('main');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
