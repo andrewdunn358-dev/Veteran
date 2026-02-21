@@ -69,7 +69,7 @@ export default function SplashScreen() {
           {/* Mission Statement */}
           <View style={styles.missionContainer}>
             <Text style={styles.missionText}>
-              "Radio Check" fuses real-time peer support with smart AI insight, creating more than just an app — it's a digital hand on your shoulder when it matters most.
+              {`"Radio Check" fuses real-time peer support with smart AI insight, creating more than just an app — it's a digital hand on your shoulder when it matters most.`}
             </Text>
           </View>
 
