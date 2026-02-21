@@ -74,7 +74,7 @@ export default function AboutPage() {
               <Text style={styles.bulletText}>Encourage healthy coping and real-world support</Text>
             </View>
           </View>
-          <Text style={styles.noteText}>You're always in control of the conversation.</Text>
+          <Text style={styles.noteText}>{"You're always in control of the conversation."}</Text>
         </View>
 
         {/* What the AI Is Not For */}
