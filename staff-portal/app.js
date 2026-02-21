@@ -6,14 +6,16 @@ let token = localStorage.getItem('staff_token');
 let currentUser = JSON.parse(localStorage.getItem('staff_user') || 'null');
 let myProfile = null;
 
-// Session timeout - 30 minutes of inactivity
-const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+// Session timeout - 2 hours of inactivity
+const SESSION_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
 let inactivityTimer = null;
 let lastActivityTime = Date.now();
 
 // Check if session has expired on page load
 function checkSessionExpiry() {
     const lastActivity = localStorage.getItem('staff_last_activity');
+    const tokenTime = localStorage.getItem('staff_token_time');
+    
     if (lastActivity) {
         const timeSinceActivity = Date.now() - parseInt(lastActivity);
         if (timeSinceActivity > SESSION_TIMEOUT_MS) {
@@ -23,6 +25,17 @@ function checkSessionExpiry() {
             return true;
         }
     }
+    
+    // Also check if token is older than 24 hours (absolute expiry)
+    if (tokenTime) {
+        const tokenAge = Date.now() - parseInt(tokenTime);
+        if (tokenAge > 24 * 60 * 60 * 1000) {
+            console.log('Token expired (24 hour limit)');
+            logout(true);
+            return true;
+        }
+    }
+    
     return false;
 }
 
