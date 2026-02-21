@@ -54,7 +54,7 @@ const SELF_CARE_TOOLS = [
   {
     id: 'buddy-finder',
     title: 'Buddy Finder',
-    description: 'Connect with veterans near you',
+    description: 'Connect with serving personnel and veterans near you',
     icon: 'people',
     color: '#10b981',
     bgColor: '#d1fae5',

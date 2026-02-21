@@ -299,7 +299,7 @@ export default function MargieChatScreen() {
             <Text style={styles.aiProfileName}>Margie</Text>
             <Text style={styles.aiProfileRole}>Alcohol & Substance Support</Text>
             <Text style={styles.aiProfileDesc}>
-              Here to listen without judgement. Many veterans struggle with alcohol or substances - you're not alone, and recovery is possible.
+              Here to listen without judgement. Many serving personnel and veterans struggle with alcohol or substances - you're not alone, and recovery is possible.
             </Text>
           </View>
         </View>
