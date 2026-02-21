@@ -180,7 +180,7 @@ export default function AdminDashboard() {
     setIsLoading(true);
     try {
       const authHeaders = { 'Authorization': `Bearer ${token}` };
-      const [counsellorsRes, peersRes, orgsRes, resourcesRes, usersRes, contentRes, metricsRes, callbacksRes, alertsRes, sipRes] = await Promise.all([
+      const [counsellorsRes, peersRes, orgsRes, resourcesRes, usersRes, contentRes, metricsRes, callbacksRes, alertsRes, sipRes, cmsPagesRes] = await Promise.all([
         fetch(`${API_URL}/api/counsellors`, { headers: authHeaders }),
         fetch(`${API_URL}/api/peer-supporters`, { headers: authHeaders }),
         fetch(`${API_URL}/api/organizations`),
@@ -191,6 +191,7 @@ export default function AdminDashboard() {
         fetch(`${API_URL}/api/callbacks`, { headers: authHeaders }),
         fetch(`${API_URL}/api/panic-alerts`, { headers: authHeaders }),
         fetch(`${API_URL}/api/admin/sip-extensions`, { headers: authHeaders }),
+        fetch(`${API_URL}/api/cms/pages/all`, { headers: authHeaders }),
       ]);
       
       if (counsellorsRes.ok) setCounsellors(await counsellorsRes.json());
@@ -206,10 +207,99 @@ export default function AdminDashboard() {
         const sipData = await sipRes.json();
         setSipAssignments(sipData.assignments || []);
       }
+      if (cmsPagesRes.ok) setCmsPages(await cmsPagesRes.json());
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // CMS Functions
+  const fetchCmsSections = async (pageSlug: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/cms/sections/${pageSlug}`);
+      if (response.ok) {
+        setCmsSections(await response.json());
+      }
+    } catch (error) {
+      console.error('Error fetching sections:', error);
+    }
+  };
+
+  const fetchCmsCards = async (sectionId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/cms/cards/${sectionId}`);
+      if (response.ok) {
+        setCmsCards(await response.json());
+      }
+    } catch (error) {
+      console.error('Error fetching cards:', error);
+    }
+  };
+
+  const handleSeedCmsData = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/cms/seed`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok) {
+        showToast('CMS data seeded successfully', 'success');
+        fetchData();
+      } else {
+        showToast('Failed to seed CMS data', 'error');
+      }
+    } catch (error) {
+      showToast('Failed to seed CMS data', 'error');
+    }
+  };
+
+  const handleDeleteCmsPage = async (slug: string) => {
+    Alert.alert('Delete Page', 'Are you sure? This will delete all sections and cards.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await fetch(`${API_URL}/api/cms/pages/${slug}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${token}` },
+            });
+            showToast('Page deleted', 'success');
+            fetchData();
+          } catch (error) {
+            showToast('Failed to delete page', 'error');
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleDeleteCmsSection = async (sectionId: string) => {
+    try {
+      await fetch(`${API_URL}/api/cms/sections/${sectionId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      showToast('Section deleted', 'success');
+      if (selectedCmsPage) fetchCmsSections(selectedCmsPage);
+    } catch (error) {
+      showToast('Failed to delete section', 'error');
+    }
+  };
+
+  const handleDeleteCmsCard = async (cardId: string) => {
+    try {
+      await fetch(`${API_URL}/api/cms/cards/${cardId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      showToast('Card deleted', 'success');
+      if (selectedCmsSection) fetchCmsCards(selectedCmsSection);
+    } catch (error) {
+      showToast('Failed to delete card', 'error');
     }
   };
 
