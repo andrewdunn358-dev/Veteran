@@ -5,6 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+// New transparent logo
+const NEW_LOGO_URL = 'https://customer-assets.emergentagent.com/job_wellness-vibes/artifacts/28igtlxj_image.png';
+
 export default function SplashScreen() {
   const router = useRouter();
   const [showCookieNotice, setShowCookieNotice] = useState(false);
@@ -41,15 +44,19 @@ export default function SplashScreen() {
     router.replace('/home');
   };
 
+  const handleLearnMore = () => {
+    router.push('/about');
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <StatusBar barStyle="light-content" backgroundColor="#1a2e44" />
       <View style={styles.container}>
         <View style={styles.content}>
-          {/* Logo */}
+          {/* Logo - New transparent version */}
           <View style={styles.logoContainer}>
             <Image 
-              source={{ uri: 'https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/vcqj3xma_logo.png' }}
+              source={{ uri: NEW_LOGO_URL }}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -59,12 +66,22 @@ export default function SplashScreen() {
           <Text style={styles.title}>Radio Check</Text>
           <Text style={styles.subtitle}>Your Support Network</Text>
 
-          {/* Welcoming Message */}
-          <View style={styles.welcomeContainer}>
-            <Text style={styles.welcomeText}>
-              You're not alone. We're here for you.
+          {/* Mission Statement */}
+          <View style={styles.missionContainer}>
+            <Text style={styles.missionText}>
+              "Radio Check" fuses real-time peer support with smart AI insight, creating more than just an app — it's a digital hand on your shoulder when it matters most.
             </Text>
           </View>
+
+          {/* Learn More Button */}
+          <TouchableOpacity 
+            style={styles.learnMoreButton} 
+            onPress={handleLearnMore}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="information-circle-outline" size={18} color="#93c5fd" />
+            <Text style={styles.learnMoreText}>Learn more about Radio Check</Text>
+          </TouchableOpacity>
 
           {/* Question */}
           <View style={styles.questionContainer}>
