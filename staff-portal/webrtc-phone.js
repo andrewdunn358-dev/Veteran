@@ -5,16 +5,32 @@
  * No PBX required - uses Socket.IO for signaling
  */
 
-// Configuration - Using multiple STUN servers for better NAT traversal
+// Configuration - STUN + TURN servers for NAT traversal
+// TURN is essential for mobile networks and symmetric NATs
 const WEBRTC_CONFIG = {
     iceServers: [
+        // STUN servers
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-        { urls: 'stun:stun3.l.google.com:19302' },
-        { urls: 'stun:stun4.l.google.com:19302' },
+        // Free public TURN servers (for testing - replace with your own for production)
+        {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject',
+        },
+        {
+            urls: 'turn:openrelay.metered.ca:443',
+            username: 'openrelayproject',
+            credential: 'openrelayproject',
+        },
+        {
+            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+            username: 'openrelayproject',
+            credential: 'openrelayproject',
+        },
     ],
-    iceCandidatePoolSize: 10
+    iceCandidatePoolSize: 10,
+    iceTransportPolicy: 'all'  // Try both direct and relay
 };
 
 // State
@@ -214,10 +230,25 @@ async function startWebRTCConnection(createOffer) {
         
         // Handle remote stream
         peerConnection.ontrack = (event) => {
-            console.log('Received remote track');
+            console.log('Received remote track:', event.track.kind, event.streams);
             const remoteAudio = document.getElementById('remote-audio') || createAudioElement();
-            remoteAudio.srcObject = event.streams[0];
-            remoteAudio.play().catch(e => console.error('Error playing audio:', e));
+            if (event.streams[0]) {
+                remoteAudio.srcObject = event.streams[0];
+                // Unmute and set volume explicitly
+                remoteAudio.muted = false;
+                remoteAudio.volume = 1.0;
+                // Play with error handling
+                const playPromise = remoteAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => {
+                        console.error('Error playing audio:', e);
+                        // Try to play on next user interaction
+                        document.addEventListener('click', () => {
+                            remoteAudio.play().catch(console.error);
+                        }, { once: true });
+                    });
+                }
+            }
         };
         
         // Handle connection state
