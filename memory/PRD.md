@@ -5,6 +5,36 @@ Build and enhance a mobile-first web application for UK serving personnel and ve
 
 ## What's Been Implemented (Updated 21 Feb 2026)
 
+### Latest Session - Marketing Website (NEW)
+
+#### Marketing Website for radiocheck.me
+A standalone React website for promoting Radio Check, to be deployed at radiocheck.me.
+
+**Location**: `/app/website/`
+
+**Pages Created**:
+- **Home** (`/`) - Hero section, features, CTA, emergency notice
+- **About the App** (`/about`) - What Radio Check is and isn't, AI limitations
+- **Meet the AI Team** (`/ai-team`) - All 6 AI companions with descriptions
+- **Contact** (`/contact`) - Contact form, crisis numbers, location info
+- **Legal** (`/legal`) - Terms of use, medical disclaimers, copyright
+- **Privacy** (`/privacy`) - GDPR compliance, data handling, user rights
+
+**Features**:
+- Responsive design (mobile, tablet, desktop)
+- Same color scheme as the app (navy blue, teal, green)
+- Sponsor logos (Frankie's Pod, Standing Tall)
+- Staff Portal login link
+- Emergency numbers prominently displayed
+- Built with React + Vite + Tailwind CSS
+
+**Deployment**:
+- Built files in `/app/website/dist/`
+- `.htaccess` for Apache SPA routing
+- See `/app/website/DEPLOYMENT.md` for 20i hosting instructions
+
+---
+
 ### Latest Session - Comprehensive CMS
 
 #### 1. Enhanced CMS System (Backend)
