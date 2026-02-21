@@ -119,7 +119,7 @@ export default function SelfCarePage() {
         <View style={styles.bottomNote}>
           <Ionicons name="information-circle" size={18} color={colors.textSecondary} />
           <Text style={[styles.bottomNoteText, { color: colors.textSecondary }]}>
-            If you're in crisis, call Samaritans on 116 123 or Combat Stress on 0800 138 1619
+            {"If you're in crisis, call Samaritans on 116 123 or Combat Stress on 0800 138 1619"}
           </Text>
         </View>
       </ScrollView>
