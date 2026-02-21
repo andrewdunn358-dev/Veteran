@@ -204,17 +204,28 @@ function setupSocketHandlers() {
  */
 async function startWebRTCConnection(createOffer) {
     try {
-        // Get local audio stream
+        // Get local audio stream with specific constraints
         localStream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+            },
             video: false
+        });
+        
+        // Ensure audio tracks are enabled
+        localStream.getAudioTracks().forEach(track => {
+            track.enabled = true;
+            console.log('Local audio track:', track.label, 'enabled:', track.enabled, 'muted:', track.muted);
         });
         
         // Create peer connection
         peerConnection = new RTCPeerConnection(WEBRTC_CONFIG);
         
-        // Add local stream
+        // Add local stream tracks
         localStream.getTracks().forEach(track => {
+            console.log('Adding track to peer connection:', track.kind);
             peerConnection.addTrack(track, localStream);
         });
         
@@ -228,19 +239,34 @@ async function startWebRTCConnection(createOffer) {
             }
         };
         
+        // Log ICE connection state
+        peerConnection.oniceconnectionstatechange = () => {
+            console.log('ICE connection state:', peerConnection.iceConnectionState);
+        };
+        
         // Handle remote stream
         peerConnection.ontrack = (event) => {
-            console.log('Received remote track:', event.track.kind, event.streams);
+            console.log('Received remote track:', event.track.kind, 'enabled:', event.track.enabled);
+            
+            // Ensure remote track is enabled
+            event.track.enabled = true;
+            
             const remoteAudio = document.getElementById('remote-audio') || createAudioElement();
             if (event.streams[0]) {
+                console.log('Setting audio srcObject with', event.streams[0].getAudioTracks().length, 'audio tracks');
                 remoteAudio.srcObject = event.streams[0];
                 // Unmute and set volume explicitly
                 remoteAudio.muted = false;
                 remoteAudio.volume = 1.0;
+                
+                console.log('Audio element state - muted:', remoteAudio.muted, 'volume:', remoteAudio.volume);
+                
                 // Play with error handling
                 const playPromise = remoteAudio.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(e => {
+                    playPromise.then(() => {
+                        console.log('Audio playback started successfully');
+                    }).catch(e => {
                         console.error('Error playing audio:', e);
                         // Try to play on next user interaction
                         document.addEventListener('click', () => {
