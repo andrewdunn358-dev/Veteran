@@ -5,112 +5,100 @@ Build and enhance a mobile-first web application for UK military veterans with r
 
 ## What's Been Implemented (Updated 21 Feb 2026)
 
-### Core Features (Complete)
-- **AI Battle Buddies**: Tommy, Doris, Bob, Finch - all with safeguarding
-- **Safeguarding System**: Detects crisis messages, creates alerts, flags RED/AMBER levels
-- **Role-Based Portals**: Admin, Counsellor, Peer Supporter
-- **Staff Notes System**: GDPR-compliant notes
-- **WebRTC Calling**: Fixed user_id blocker - all staff now have proper IDs
-- **Field-Level Encryption**: PII encrypted at rest
-- **Regimental Associations**: 35+ associations searchable by service
+### Latest Session Updates
 
-### Home Page Structure (Complete)
-Menu cards that navigate to sub-pages:
-- Need to Talk? → Contains Tommy & Doris ("We're on stag 24/7")
-- Talk to a Veteran → Contains Bob and peer supporters
-- Warfare on Lawfare → Finch legal info support
-- Support Organisations → Directory + Alcohol & Substance Support
-- Request a Callback
-- Self-Care Tools → NEW /self-care page with tools grid
-- Friends & Family
+#### 1. Bob AI Prompt Fixed
+- Removed repetitive "Alright mate, Bob here" intro
+- Added instruction to never introduce himself - just respond naturally
+- Updated welcome message in bob-chat.tsx
 
-### Splash Page Updates (21 Feb 2026)
-- ✅ New transparent logo from user's image
-- ✅ Mission statement added under title
-- ✅ "Learn more about Radio Check" button
-- ✅ About page (/about) with full content:
-  - What Is Radio Check?
-  - What the AI Is For
-  - What the AI Is Not For
-  - Is This Right for Me?
-  - Safety & Trust
-  - The Bottom Line
+#### 2. Shift/Rota System (Backend Complete)
+New endpoints for peer supporter availability management:
+- `GET /api/shifts` - Get all shifts
+- `GET /api/shifts/today` - Get today's shifts (for "Someone on the net" status)
+- `GET /api/shifts/my-shifts` - Staff member's own shifts
+- `POST /api/shifts` - Create a shift (peer, counsellor, or admin)
+- `PUT /api/shifts/{id}` - Update a shift
+- `DELETE /api/shifts/{id}` - Cancel a shift
+- `GET /api/shifts/coverage` - Admin coverage report
 
-### Self-Care Tools Page (21 Feb 2026) - NEW
-Created `/self-care` page with 6 tools:
+#### 3. Buddy Finder with GDPR (Backend Complete)
+GDPR-compliant veteran networking:
+- `POST /api/buddy-finder/signup` - Create profile (requires GDPR consent)
+- `GET /api/buddy-finder/profiles` - Search profiles by region/branch
+- `GET /api/buddy-finder/profile/{id}` - View a profile
+- `PUT /api/buddy-finder/profile/{id}` - Update profile
+- `DELETE /api/buddy-finder/profile/{id}` - Delete profile (GDPR right to be forgotten)
+- `POST /api/buddy-finder/message` - In-app messaging
+- `GET /api/buddy-finder/messages/{id}` - Get messages
+- `GET /api/buddy-finder/regions` - UK regions list
+- `GET /api/buddy-finder/branches` - Service branches list
+
+#### 4. AI Profile Cards Added
+- Bob chat now shows AI profile card with avatar, name, role, and description below header
+- Appears when conversation starts (messages <= 1)
+
+#### 5. Meet the AI Team Toggle
+- Home page "Meet the AI Team" now has Show/Hide button
+- Team members collapsed by default, revealed on tap
+
+### Self-Care Tools (8 tools)
 - My Journal
 - Daily Check-in
 - Grounding Tools
 - Breathing Exercises
+- Buddy Finder (NEW)
+- Regimental Associations (NEW)
 - Find Local Support
 - Resources Library
 
-### "Meet the AI Team" Section (Complete)
-Shows at bottom of home page with avatars:
-- Tommy - "Your battle buddy"
-- Doris - "Warm support"  
-- Bob - "Ex-Para peer support" (bald/tanned avatar)
-- Finch - "Legal info support"
-
-### Safeguarding Status (Complete - All 4 Characters)
-**Backend**: All AI characters use same safeguarding system via `/api/ai-buddies/chat`
-- Detects crisis keywords (score 200+ for RED level)
-- Creates SafeguardingAlert in database
-- Logs IP, geolocation, conversation history
-- Returns `safeguardingTriggered: true` and `riskLevel: "RED"`
-
-**Frontend Safeguarding Modals - ALL COMPLETE**:
-- ✅ ai-chat.tsx (Tommy/Doris) - Full safeguarding modal with callback options
-- ✅ bob-chat.tsx - Full safeguarding modal added
-- ✅ sentry-chat.tsx (Finch) - Full safeguarding modal added
-
-### Safeguarding Modal Features (All Characters)
-- "We're Here For You" header with heart icon
-- Request a Callback option with form
-- Connect Now section (shows available counsellors/peers)
-- Samaritans link (116 123)
-- Emergency 999 note
-- "I understand, continue chatting" dismiss option
+### Core Features (Complete)
+- AI Battle Buddies: Tommy, Doris, Bob, Finch - all with safeguarding
+- Safeguarding System: Detects crisis messages, creates alerts
+- Role-Based Portals: Admin, Counsellor, Peer Supporter
+- Staff Notes System: GDPR-compliant
+- WebRTC Calling: Fixed user_id blocker
+- Field-Level Encryption: PII encrypted at rest
+- Regimental Associations: 35+ associations searchable
 
 ## Key Files Reference
 
 ### Backend
-- `/app/backend/server.py` - AI characters, safeguarding check at line 3240
+- `/app/backend/server.py` - All API endpoints including new Shift and Buddy Finder endpoints
 
 ### Frontend
-- `/app/frontend/app/index.tsx` - Splash page with new logo, mission, Learn More
-- `/app/frontend/app/about.tsx` - NEW About Radio Check page
-- `/app/frontend/app/self-care.tsx` - NEW Self-Care Tools page
-- `/app/frontend/app/home.tsx` - Menu cards, Meet the AI Team
-- `/app/frontend/app/ai-chat.tsx` - Tommy/Doris with full safeguarding modal
-- `/app/frontend/app/bob-chat.tsx` - Bob chat with full safeguarding modal
-- `/app/frontend/app/sentry-chat.tsx` - Finch chat with full safeguarding modal
-- `/app/frontend/app/crisis-support.tsx` - Contains Tommy/Doris card
-- `/app/frontend/app/peer-support.tsx` - Contains Bob card
+- `/app/frontend/app/buddy-finder.tsx` - Buddy Finder with GDPR signup
+- `/app/frontend/app/bob-chat.tsx` - Bob with AI profile card
+- `/app/frontend/app/home.tsx` - Meet the AI Team with toggle
+- `/app/frontend/app/self-care.tsx` - Self-care tools grid
 
-### AI Characters in Backend
-```python
-AI_CHARACTERS = {
-    "tommy": {...},
-    "doris": {...},
-    "sentry": {"name": "Finch", ...},
-    "bob": {...}
-}
-```
+## Pending/TODO
 
-## Test Credentials
+### Shift/Rota Frontend
+- Create "My Availability" page in staff portal
+- Calendar view for selecting dates/times
+- Show "Someone is on the net" indicator on home page
+
+### AI Profile Cards for Other Characters
+- Add AI profile cards to ai-chat.tsx (Tommy/Doris)
+- Add AI profile cards to sentry-chat.tsx (Finch)
+
+### Test Credentials
 - Admin: `admin@veteran.dbty.co.uk` / `ChangeThisPassword123!`
 - Staff: `sarahm.counsellor@radiocheck.me` / `RadioCheck2026!`
 
-## Safeguarding Test Command
-```bash
-curl -X POST "$API_URL/api/ai-buddies/chat" \
-  -H "Content-Type: application/json" \
-  -d '{"message": "I want to end it all", "sessionId": "test", "character": "bob"}'
-```
-Should return: `safeguardingTriggered: true, riskLevel: "RED"`
+## API Test Commands
 
-## Backlog/Future Tasks
-- Email notifications for safeguarding alerts (Resend API key needed)
-- Voice message support for AI characters
-- Push notifications
+### Shift/Rota
+```bash
+curl http://localhost:8001/api/shifts/today
+```
+
+### Buddy Finder
+```bash
+curl http://localhost:8001/api/buddy-finder/regions
+curl http://localhost:8001/api/buddy-finder/branches
+curl -X POST http://localhost:8001/api/buddy-finder/signup \
+  -H "Content-Type: application/json" \
+  -d '{"display_name":"TestVet","region":"London","service_branch":"British Army","gdpr_consent":true}'
+```
