@@ -11,8 +11,9 @@ import {
   Platform
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../src/context/ThemeContext';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
