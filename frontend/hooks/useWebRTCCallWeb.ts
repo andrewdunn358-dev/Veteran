@@ -181,7 +181,12 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
         currentCallIdRef.current = data.call_id;
       }
       setCallState('connecting');
-      await startWebRTCConnection(true);
+      
+      // If we're the callee (is_callee=true), we wait for offer, don't create one
+      // If we're the caller, we create the offer
+      const shouldCreateOffer = !data.is_callee;
+      console.log('WebRTC: Starting connection, createOffer:', shouldCreateOffer);
+      await startWebRTCConnection(shouldCreateOffer);
     });
 
     // Call connected
