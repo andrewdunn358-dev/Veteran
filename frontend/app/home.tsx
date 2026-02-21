@@ -320,7 +320,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   primaryCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eff6ff',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 18,
     borderWidth: 2,
