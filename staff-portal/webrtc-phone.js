@@ -5,43 +5,17 @@
  * No PBX required - uses Socket.IO for signaling
  */
 
-// Configuration - STUN + TURN servers for NAT traversal
-// TURN is essential for mobile networks and symmetric NATs
+// Configuration - STUN servers for NAT traversal
 const WEBRTC_CONFIG = {
     iceServers: [
-        // STUN servers (free, unlimited)
+        // Google STUN servers (reliable)
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun.cloudflare.com:3478' },
-        // Free TURN servers for testing
-        {
-            urls: 'turn:freestun.net:3478',
-            username: 'free',
-            credential: 'free',
-        },
-        {
-            urls: 'turn:freestun.net:5349',
-            username: 'free',
-            credential: 'free',
-        },
-        // Metered TURN (free tier)
-        {
-            urls: 'turn:a.relay.metered.ca:80',
-            username: 'e8dd65d92c62d5e5c4b51710',
-            credential: 'uWdWNmkhvyqTmhWu',
-        },
-        {
-            urls: 'turn:a.relay.metered.ca:443',
-            username: 'e8dd65d92c62d5e5c4b51710',
-            credential: 'uWdWNmkhvyqTmhWu',
-        },
-        {
-            urls: 'turn:a.relay.metered.ca:443?transport=tcp',
-            username: 'e8dd65d92c62d5e5c4b51710',
-            credential: 'uWdWNmkhvyqTmhWu',
-        },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        // Twilio STUN (backup)
+        { urls: 'stun:global.stun.twilio.com:3478' },
     ],
-    iceCandidatePoolSize: 10,
-    iceTransportPolicy: 'all'
+    iceCandidatePoolSize: 10
 };
 
 // State
