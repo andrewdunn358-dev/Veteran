@@ -2,9 +2,9 @@ import { Outlet, Link, useLocation } from 'react-router-dom'
 import { Menu, X, Radio, Phone, Shield, Users, Mail, FileText, Lock } from 'lucide-react'
 import { useState } from 'react'
 
-const LOGO_URL = 'https://customer-assets.emergentagent.com/job_ae8f8501-55e8-47a0-8c0c-262b1bbbdefe/artifacts/ny233qxa_Gemini_Generated_Image_u4tpnxu4tpnxu4tp-removebg-preview.png'
-const FRANKIES_POD_LOGO = 'https://customer-assets.emergentagent.com/job_626f7586-925a-4eee-97a9-1ff3951998a4/artifacts/lfa2324z_Frankies-Pod_Youtube_logo.png'
-const STANDING_TALL_LOGO = 'https://customer-assets.emergentagent.com/job_626f7586-925a-4eee-97a9-1ff3951998a4/artifacts/wn5tds79_image.png'
+const LOGO_URL = '/images/logo.png'
+const FRANKIES_POD_LOGO = '/images/frankies-pod.png'
+const STANDING_TALL_LOGO = '/images/standing-tall.png'
 
 const navLinks = [
   { to: '/', label: 'Home' },
