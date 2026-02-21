@@ -337,11 +337,34 @@ async function handleAnswer(answer) {
 async function handleIceCandidate(candidate) {
     try {
         if (peerConnection && candidate) {
-            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            if (hasRemoteDescription) {
+                // Remote description is set, add candidate immediately
+                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                console.log('Added ICE candidate immediately');
+            } else {
+                // Queue the candidate for later
+                pendingIceCandidates.push(candidate);
+                console.log('Queued ICE candidate, waiting for remote description');
+            }
         }
     } catch (error) {
         console.error('Error adding ICE candidate:', error);
     }
+}
+
+/**
+ * Process queued ICE candidates after remote description is set
+ */
+async function processPendingIceCandidates() {
+    console.log('Processing', pendingIceCandidates.length, 'pending ICE candidates');
+    for (const candidate of pendingIceCandidates) {
+        try {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (error) {
+            console.error('Error adding queued ICE candidate:', error);
+        }
+    }
+    pendingIceCandidates = [];
 }
 
 /**
