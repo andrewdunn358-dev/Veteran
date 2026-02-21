@@ -5,7 +5,27 @@ Build and enhance a mobile-first web application for UK serving personnel and ve
 
 ## What's Been Implemented (Updated 21 Feb 2026)
 
-### Latest Session - Marketing Website (NEW)
+### Latest Session - Bug Fixes (21 Feb 2026)
+
+#### Splash Screen Text Readability Fix
+Fixed the readability of emergency notice and supporter text on the splash screen:
+- **Emergency text** ("In an emergency, always call 999"): Changed from `#94a3b8` to `#ffffff` (white), added `fontWeight: '500'`
+- **Shield icon**: Changed from `#94a3b8` to `#ffffff` (white)
+- **Supporters label** ("Proudly supported by"): Changed from `#64748b` to `#cbd5e1` (light gray)
+
+**File modified**: `/app/frontend/app/index.tsx`
+
+#### External URL Cleanup
+Removed hardcoded external URL fallbacks from multiple files:
+- `/app/frontend/app/admin.tsx`: Removed `https://buddy-finder-dev.preview.emergentagent.com` fallback
+- `/app/frontend/app/callback.tsx`: Removed `https://buddy-finder-dev.preview.emergentagent.com` fallback
+- `/app/admin-site/app.js`: Changed external logo URL to local `logo.png`
+
+**Local assets added**:
+- `/app/admin-site/logo.png` - Copied from frontend assets
+- `/app/staff-portal/logo.png` - Copied from frontend assets
+
+### Marketing Website (21 Feb 2026)
 
 #### Marketing Website for radiocheck.me
 A standalone React website for promoting Radio Check, to be deployed at radiocheck.me.
@@ -49,14 +69,7 @@ New page created:
 - Simplified layout matching peer-support page pattern
 
 ### Logo Update (21 Feb 2026)
-Updated to new transparent background logo:
-- `/app/frontend/app/home.tsx`
-- `/app/frontend/app/index.tsx`
-- `/app/website/src/pages/Home.tsx`
-- `/app/website/src/components/Layout.tsx`
-- `/app/website/index.html`
-
-New logo URL: `https://customer-assets.emergentagent.com/job_ae8f8501-55e8-47a0-8c0c-262b1bbbdefe/artifacts/ny233qxa_Gemini_Generated_Image_u4tpnxu4tpnxu4tp-removebg-preview.png`
+Updated to new transparent background logo across all locations.
 
 **Deployment**:
 - Built files in `/app/website/dist/`
@@ -65,106 +78,32 @@ New logo URL: `https://customer-assets.emergentagent.com/job_ae8f8501-55e8-47a0-
 
 ---
 
-### Latest Session - Comprehensive CMS
-
-#### 1. Enhanced CMS System (Backend)
+### CMS System (Backend)
 - **Pages API**: `/api/cms/pages` - CRUD for app pages
 - **Sections API**: `/api/cms/sections` - CRUD for page sections
 - **Cards API**: `/api/cms/cards` - CRUD for cards/items
 - **Seed endpoint**: `/api/cms/seed` - Initialize default CMS data
 - Supports: reordering, visibility toggle, custom metadata
 
-#### 2. Admin CMS Interface (Frontend)
+### Admin CMS Interface (Frontend)
 - Full page management (add/edit/delete)
 - Section management with drag-to-reorder
 - Card management (AI characters, tools, resources, links)
 - "Initialize CMS" button to seed default data
 - Legacy text content still supported
 
-#### 3. Staff Calendar
+### Staff Calendar
 - Peer Portal: "My Availability" card
 - Admin Portal: "Rota" tab
 - Removed from public peer-support page
-
-#### 4. New AI Characters
-- **Margie**: Alcohol & substance support
-- **Hugo**: Self-help & wellness guru
-- Added to Meet the AI Team (6 total)
-
-#### 5. Supporter Logos
-- Frankie's Pod (YouTube link)
-- Standing Tall Foundation (website link)
-- Added to splash screen
-
-### CMS Data Structure
-```
-Pages → Sections → Cards
-  └── slug, title, icon, nav_order
-        └── section_type, title, order
-              └── card_type, title, icon, route, etc.
-```
-
-### CMS Card Types
-- `ai_character` - AI team members
-- `tool` - Self-care tools
-- `resource` - Support resources
-- `organization` - Support organizations
-- `link` - Generic links
-
-### AI Characters (6 total)
-- **Tommy**: Your battle buddy
-- **Doris**: Warm support
-- **Bob**: Ex-Para peer support
-- **Finch**: Crisis & PTSD support
-- **Margie**: Alcohol & substance help
-- **Hugo**: Self-help & wellness
-New endpoints for peer supporter availability management:
-- `GET /api/shifts` - Get all shifts
-- `GET /api/shifts/today` - Get today's shifts (for "Someone on the net" status)
-- `GET /api/shifts/my-shifts` - Staff member's own shifts
-- `POST /api/shifts` - Create a shift (peer, counsellor, or admin)
-- `PUT /api/shifts/{id}` - Update a shift
-- `DELETE /api/shifts/{id}` - Cancel a shift
-- `GET /api/shifts/coverage` - Admin coverage report
-
-#### 3. Buddy Finder with GDPR (Backend Complete)
-GDPR-compliant veteran networking:
-- `POST /api/buddy-finder/signup` - Create profile (requires GDPR consent)
-- `GET /api/buddy-finder/profiles` - Search profiles by region/branch
-- `GET /api/buddy-finder/profile/{id}` - View a profile
-- `PUT /api/buddy-finder/profile/{id}` - Update profile
-- `DELETE /api/buddy-finder/profile/{id}` - Delete profile (GDPR right to be forgotten)
-- `POST /api/buddy-finder/message` - In-app messaging
-- `GET /api/buddy-finder/messages/{id}` - Get messages
-- `GET /api/buddy-finder/regions` - UK regions list
-- `GET /api/buddy-finder/branches` - Service branches list
-
-#### 4. AI Profile Cards Added
-- Bob chat now shows AI profile card with avatar, name, role, and description below header
-- Appears when conversation starts (messages <= 1)
-
-#### 5. Meet the AI Team Toggle
-- Home page "Meet the AI Team" now has Show/Hide button
-- Team members collapsed by default, revealed on tap
 
 ### AI Characters (6 total)
 - **Tommy**: Friendly conversational support
 - **Doris**: Friendly conversational support
 - **Bob**: Ex-Para peer support, banter and guidance
 - **Finch/Sentry**: PTSD and mental health crisis support
-- **Margie** (NEW): Alcohol & substance misuse support
-- **Hugo** (NEW): Self-help & wellness guru
-
-### Self-Care Tools (9 tools)
-- Chat with Hugo (NEW)
-- My Journal
-- Daily Check-in
-- Grounding Tools
-- Breathing Exercises
-- Buddy Finder
-- Regimental Associations (NEW)
-- Find Local Support
-- Resources Library
+- **Margie**: Alcohol & substance misuse support
+- **Hugo**: Self-help & wellness guru
 
 ### Core Features (Complete)
 - AI Battle Buddies: Tommy, Doris, Bob, Finch, Margie, Hugo - all with safeguarding
@@ -177,42 +116,80 @@ GDPR-compliant veteran networking:
 - Staff Calendar: Volunteers can log availability (my-availability.tsx)
 - Substance Support: Dedicated page with Margie AI
 
+## Known Issues
+
+### External Image URLs Still Present (P2)
+The following files still reference external image URLs (emergentagent.com) for AI avatars:
+- `/app/frontend/app/bob-chat.tsx`
+- `/app/frontend/app/crisis-support.tsx`
+- `/app/frontend/app/historical-investigations.tsx`
+- `/app/frontend/app/home.tsx`
+- `/app/frontend/app/hugo-chat.tsx`
+- `/app/frontend/app/margie-chat.tsx`
+- `/app/frontend/app/peer-support.tsx`
+- `/app/frontend/app/self-care.tsx`
+- `/app/frontend/app/sentry-chat.tsx`
+- `/app/frontend/app/substance-support.tsx`
+
+These work but should ideally be replaced with local assets in `/app/frontend/assets/images/`.
+
+### CMS Not Functional (P1)
+The CMS backend and admin UI exist, but app pages still use hardcoded content instead of fetching from CMS APIs. Pages that need to be refactored:
+- `home.tsx`
+- `self-care.tsx`
+- `support-organisations.tsx`
+
+## Upcoming Tasks
+
+### P1 - Make CMS Fully Dynamic
+Refactor all relevant frontend pages to fetch content from the CMS APIs.
+
+### P1 - Complete Buddy Finder Frontend
+Wire up the `buddy-finder.tsx` form to the backend APIs.
+
+### P2 - Implement Email Notifications for Rota
+Set up an email service to send notifications for peer support shifts.
+
+### P2 - Generate Contact CSV
+Run the script to generate contacts CSV (forgotten from previous session).
+
+## Future Tasks
+
+### Refactor - Modularize Backend
+Decompose the monolithic `server.py` into a structured architecture.
+
+### Refactor - Reusable AI Chat Component
+Abstract the duplicated chat UI into a single, reusable React component.
+
 ## Key Files Reference
 
 ### Backend
 - `/app/backend/server.py` - All API endpoints including Shift, Buddy Finder, and AI endpoints
 
 ### Frontend
-- `/app/frontend/app/margie-chat.tsx` - Margie AI for alcohol/substance support (NEW)
-- `/app/frontend/app/hugo-chat.tsx` - Hugo AI for self-help/wellness (NEW)
-- `/app/frontend/app/my-availability.tsx` - Staff calendar/shifts (NEW)
+- `/app/frontend/app/index.tsx` - Splash screen (text readability fixed)
+- `/app/frontend/app/admin.tsx` - Admin dashboard (URL cleanup)
+- `/app/frontend/app/callback.tsx` - Callback request (URL cleanup)
+- `/app/frontend/app/margie-chat.tsx` - Margie AI for alcohol/substance support
+- `/app/frontend/app/hugo-chat.tsx` - Hugo AI for self-help/wellness
+- `/app/frontend/app/my-availability.tsx` - Staff calendar/shifts
 - `/app/frontend/app/substance-support.tsx` - Alcohol & substance resources with Margie
 - `/app/frontend/app/buddy-finder.tsx` - Buddy Finder with GDPR signup
 - `/app/frontend/app/bob-chat.tsx` - Bob with AI profile card
 - `/app/frontend/app/home.tsx` - Meet the AI Team with toggle
 - `/app/frontend/app/self-care.tsx` - Self-care tools grid
-- `/app/frontend/app/index.tsx` - Splash screen with supporter logos
 
-## Pending/TODO
+### Admin/Staff Sites
+- `/app/admin-site/app.js` - Admin site JS (logo localized)
+- `/app/admin-site/logo.png` - Local logo asset
+- `/app/staff-portal/logo.png` - Local logo asset
 
-### ✅ Family & Friends Dark Mode (FIXED)
-- Page now uses dynamic styles with ThemeContext
-- All colors respond to light/dark mode
+### Website
+- `/app/website/` - Marketing website directory
+- `/app/website/dist/` - Built website for deployment
+- `/app/website/DEPLOYMENT.md` - Deployment instructions
 
-### ✅ Buddy Finder Frontend (COMPLETE)
-- GDPR consent form with checkbox
-- Profile browsing interface with filters
-- Search by region and service branch
-
-### AI Profile Cards for Other Characters
-- Add AI profile cards to ai-chat.tsx (Tommy/Doris)
-- Add AI profile cards to sentry-chat.tsx (Finch)
-
-### Security Fix Applied
-- Removed exposed OpenAI API key from backend/.env
-- Key must be added separately in deployment environment
-
-### Test Credentials
+## Test Credentials
 - Admin: `admin@veteran.dbty.co.uk` / `ChangeThisPassword123!`
 - Staff: `sarahm.counsellor@radiocheck.me` / `RadioCheck2026!`
 
