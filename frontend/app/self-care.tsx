@@ -221,6 +221,40 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: 'center',
   },
+  // Hugo AI Card
+  hugoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 2,
+  },
+  hugoAvatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    borderColor: '#10b981',
+    marginRight: 14,
+  },
+  hugoContent: {
+    flex: 1,
+  },
+  hugoName: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  hugoRole: {
+    fontSize: 13,
+    color: '#10b981',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  hugoDesc: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
   toolsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
