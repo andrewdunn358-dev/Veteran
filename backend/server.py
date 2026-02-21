@@ -954,6 +954,90 @@ class PageContent(BaseModel):
 class PageContentUpdate(BaseModel):
     content: str
 
+# ============ ENHANCED CMS MODELS ============
+
+class CMSPage(BaseModel):
+    """Full page definition for CMS"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    slug: str  # URL path e.g. 'home', 'self-care', 'support-orgs'
+    title: str
+    description: Optional[str] = None
+    icon: Optional[str] = None  # Ionicons name
+    is_visible: bool = True
+    show_in_nav: bool = True
+    nav_order: int = 99
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CMSSection(BaseModel):
+    """Section within a page"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    page_slug: str
+    section_type: str  # 'hero', 'cards', 'text', 'ai_team', 'resources', 'custom'
+    title: Optional[str] = None
+    subtitle: Optional[str] = None
+    content: Optional[str] = None
+    order: int = 0
+    is_visible: bool = True
+    settings: Optional[dict] = None  # For custom styling/config
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CMSCard(BaseModel):
+    """Card/item within a section"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    section_id: str
+    card_type: str  # 'ai_character', 'tool', 'resource', 'organization', 'link'
+    title: str
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    image_url: Optional[str] = None
+    color: Optional[str] = None
+    bg_color: Optional[str] = None
+    route: Optional[str] = None  # Internal route
+    external_url: Optional[str] = None
+    phone: Optional[str] = None
+    order: int = 0
+    is_visible: bool = True
+    metadata: Optional[dict] = None  # Extra data like AI prompts, etc.
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CMSPageCreate(BaseModel):
+    slug: str
+    title: str
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    is_visible: bool = True
+    show_in_nav: bool = True
+    nav_order: int = 99
+
+class CMSSectionCreate(BaseModel):
+    page_slug: str
+    section_type: str
+    title: Optional[str] = None
+    subtitle: Optional[str] = None
+    content: Optional[str] = None
+    order: int = 0
+    is_visible: bool = True
+    settings: Optional[dict] = None
+
+class CMSCardCreate(BaseModel):
+    section_id: str
+    card_type: str
+    title: str
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    image_url: Optional[str] = None
+    color: Optional[str] = None
+    bg_color: Optional[str] = None
+    route: Optional[str] = None
+    external_url: Optional[str] = None
+    phone: Optional[str] = None
+    order: int = 0
+    is_visible: bool = True
+    metadata: Optional[dict] = None
+
 # Resource Library Models
 class ResourceCreate(BaseModel):
     title: str
