@@ -72,7 +72,7 @@ export default function MyAvailabilityScreen() {
       const endDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
       
       const response = await fetch(
-        `${API_URL}/api/shifts?start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`
+        `${API_URL}/api/shifts?date_from=${startDate.toISOString().split('T')[0]}&date_to=${endDate.toISOString().split('T')[0]}`
       );
       
       if (response.ok) {
