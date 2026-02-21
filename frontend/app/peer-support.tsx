@@ -439,6 +439,23 @@ export default function PeerSupport() {
               <Text style={styles.primaryButtonSubtext}>Tap to see peer supporters</Text>
             </TouchableOpacity>
 
+            {/* Chat with Bob - AI Peer Support */}
+            <TouchableOpacity 
+              style={styles.bobCard}
+              onPress={() => router.push('/bob-chat')}
+              activeOpacity={0.9}
+            >
+              <Image 
+                source={{ uri: 'https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png' }}
+                style={styles.bobAvatar}
+              />
+              <View style={styles.bobTextContainer}>
+                <Text style={styles.bobTitle}>Chat with Bob</Text>
+                <Text style={styles.bobSubtitle}>Ex-Para AI peer support, 24/7</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#64748b" />
+            </TouchableOpacity>
+
             {/* What is it */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
