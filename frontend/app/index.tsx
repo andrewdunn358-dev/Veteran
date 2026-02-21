@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // New transparent logo
-const NEW_LOGO_URL = 'https://customer-assets.emergentagent.com/job_wellness-vibes/artifacts/28igtlxj_image.png';
+const NEW_LOGO_URL = 'https://customer-assets.emergentagent.com/job_wellness-vibes/artifacts/um22zx0o_Gemini_Generated_Image_u4tpnxu4tpnxu4tp.png';
 
 export default function SplashScreen() {
   const router = useRouter();
