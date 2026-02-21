@@ -560,7 +560,7 @@ AI_CHARACTERS = {
     "bob": {
         "name": "Bob",
         "prompt": BOB_SYSTEM_PROMPT,
-        "avatar": "https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png"
+        "avatar": "https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png"
     }
 }
 
