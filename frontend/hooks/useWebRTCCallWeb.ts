@@ -249,9 +249,18 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     if (!remoteAudioRef.current) {
       const audio = document.createElement('audio');
       audio.autoplay = true;
+      audio.playsInline = true; // Required for mobile browsers
       audio.id = 'webrtc-remote-audio';
+      // Important: Don't hide the audio element on mobile as it can cause issues
+      audio.style.position = 'fixed';
+      audio.style.bottom = '0';
+      audio.style.left = '0';
+      audio.style.width = '1px';
+      audio.style.height = '1px';
+      audio.style.opacity = '0.01'; // Nearly invisible but not hidden
       document.body.appendChild(audio);
       remoteAudioRef.current = audio;
+      console.log('WebRTC: Created audio element');
     }
     return remoteAudioRef.current;
   };
