@@ -3,7 +3,7 @@
 ## Original Problem Statement
 Build and enhance a mobile-first web application for UK military veterans with role-based portals, AI chatbots, safeguarding, and peer support features.
 
-## What's Been Implemented
+## What's Been Implemented (Updated 21 Feb 2026)
 
 ### Core Features (Complete)
 - **AI Battle Buddies**: Tommy, Doris, Bob, Finch - all with safeguarding
@@ -21,8 +21,29 @@ Menu cards that navigate to sub-pages:
 - Warfare on Lawfare → Finch legal info support
 - Support Organisations → Directory + Alcohol & Substance Support
 - Request a Callback
-- Self-Care Tools
+- Self-Care Tools → NEW /self-care page with tools grid
 - Friends & Family
+
+### Splash Page Updates (21 Feb 2026)
+- ✅ New transparent logo from user's image
+- ✅ Mission statement added under title
+- ✅ "Learn more about Radio Check" button
+- ✅ About page (/about) with full content:
+  - What Is Radio Check?
+  - What the AI Is For
+  - What the AI Is Not For
+  - Is This Right for Me?
+  - Safety & Trust
+  - The Bottom Line
+
+### Self-Care Tools Page (21 Feb 2026) - NEW
+Created `/self-care` page with 6 tools:
+- My Journal
+- Daily Check-in
+- Grounding Tools
+- Breathing Exercises
+- Find Local Support
+- Resources Library
 
 ### "Meet the AI Team" Section (Complete)
 Shows at bottom of home page with avatars:
@@ -31,29 +52,25 @@ Shows at bottom of home page with avatars:
 - Bob - "Ex-Para peer support" (bald/tanned avatar)
 - Finch - "Legal info support"
 
-### Safeguarding Status
+### Safeguarding Status (Complete - All 4 Characters)
 **Backend**: All AI characters use same safeguarding system via `/api/ai-buddies/chat`
-- Detects crisis keywords (score 235 for RED level)
+- Detects crisis keywords (score 200+ for RED level)
 - Creates SafeguardingAlert in database
 - Logs IP, geolocation, conversation history
 - Returns `safeguardingTriggered: true` and `riskLevel: "RED"`
 
-**Frontend Safeguarding Modals**:
+**Frontend Safeguarding Modals - ALL COMPLETE**:
 - ✅ ai-chat.tsx (Tommy/Doris) - Full safeguarding modal with callback options
-- ⚠️ bob-chat.tsx - Safeguarding state added, needs modal UI
-- ⚠️ sentry-chat.tsx (Finch) - Needs safeguarding state and modal
+- ✅ bob-chat.tsx - Full safeguarding modal added
+- ✅ sentry-chat.tsx (Finch) - Full safeguarding modal added
 
-## REMAINING WORK - Safeguarding UI
-
-### bob-chat.tsx needs:
-1. Add safeguarding modal UI (copy from ai-chat.tsx)
-2. Add styles for safeguarding modal
-
-### sentry-chat.tsx needs:
-1. Add safeguarding state variables
-2. Check for safeguardingTriggered in response
-3. Add safeguarding modal UI
-4. Add styles for safeguarding modal
+### Safeguarding Modal Features (All Characters)
+- "We're Here For You" header with heart icon
+- Request a Callback option with form
+- Connect Now section (shows available counsellors/peers)
+- Samaritans link (116 123)
+- Emergency 999 note
+- "I understand, continue chatting" dismiss option
 
 ## Key Files Reference
 
@@ -61,10 +78,13 @@ Shows at bottom of home page with avatars:
 - `/app/backend/server.py` - AI characters, safeguarding check at line 3240
 
 ### Frontend
+- `/app/frontend/app/index.tsx` - Splash page with new logo, mission, Learn More
+- `/app/frontend/app/about.tsx` - NEW About Radio Check page
+- `/app/frontend/app/self-care.tsx` - NEW Self-Care Tools page
 - `/app/frontend/app/home.tsx` - Menu cards, Meet the AI Team
 - `/app/frontend/app/ai-chat.tsx` - Tommy/Doris with full safeguarding modal
-- `/app/frontend/app/bob-chat.tsx` - Bob chat (needs safeguarding modal)
-- `/app/frontend/app/sentry-chat.tsx` - Finch chat (needs safeguarding)
+- `/app/frontend/app/bob-chat.tsx` - Bob chat with full safeguarding modal
+- `/app/frontend/app/sentry-chat.tsx` - Finch chat with full safeguarding modal
 - `/app/frontend/app/crisis-support.tsx` - Contains Tommy/Doris card
 - `/app/frontend/app/peer-support.tsx` - Contains Bob card
 
@@ -86,6 +106,11 @@ AI_CHARACTERS = {
 ```bash
 curl -X POST "$API_URL/api/ai-buddies/chat" \
   -H "Content-Type: application/json" \
-  -d '{"message": "I cant cope anymore", "sessionId": "test", "character": "bob"}'
+  -d '{"message": "I want to end it all", "sessionId": "test", "character": "bob"}'
 ```
 Should return: `safeguardingTriggered: true, riskLevel: "RED"`
+
+## Backlog/Future Tasks
+- Email notifications for safeguarding alerts (Resend API key needed)
+- Voice message support for AI characters
+- Push notifications
