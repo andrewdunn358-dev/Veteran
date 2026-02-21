@@ -18,10 +18,13 @@ They help you reach it.
 
 Because service doesn't end when the uniform comes off—and neither should support.`;
 
+const NEW_LOGO_URL = 'https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/0fe9b1e8f60d074b7e74cd775ba2b0cb846fca873835ce51497e447e2ffead4b.png';
+
 export default function Index() {
   const router = useRouter();
   const { colors, theme } = useTheme();
   const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showSelfCareTools, setShowSelfCareTools] = useState(false);
   const styles = createStyles(colors);
 
   return (
@@ -41,11 +44,11 @@ export default function Index() {
           <Ionicons name="settings-outline" size={24} color={colors.textSecondary} />
         </TouchableOpacity>
 
-        {/* Header with badge */}
+        {/* Header with new logo */}
         <View style={styles.header}>
-          <View style={[styles.logoWrapper, { backgroundColor: theme === 'dark' ? colors.surface : 'transparent' }]}>
+          <View style={styles.logoWrapper}>
             <Image 
-              source={{ uri: 'https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/vcqj3xma_logo.png' }}
+              source={{ uri: NEW_LOGO_URL }}
               style={styles.badgeImage}
               resizeMode="contain"
             />
@@ -54,8 +57,19 @@ export default function Index() {
           <Text style={styles.taglineEnglish}>"Radio Check" fuses real-time peer support with smart AI insight, creating more than just an app — it's a digital hand on your shoulder when it matters most.</Text>
         </View>
 
-        {/* AI Battle Buddies - Featured at Top */}
-        <View style={styles.aiBuddiesSection}>
+        {/* Need to Talk Section - Main CTA with Tommy/Doris inside */}
+        <View style={styles.needToTalkSection}>
+          <TouchableOpacity 
+            style={styles.primaryButton}
+            onPress={() => router.push('/crisis-support')}
+            activeOpacity={0.9}
+          >
+            <Ionicons name="heart" size={48} color="#ffffff" />
+            <Text style={styles.primaryButtonText}>Need to Talk?</Text>
+            <Text style={styles.primaryButtonSubtext}>Connect with support now</Text>
+          </TouchableOpacity>
+
+          {/* Tommy & Doris inside Need to Talk */}
           <TouchableOpacity 
             style={styles.aiBuddiesCard}
             onPress={() => router.push('/ai-buddies')}
@@ -90,87 +104,120 @@ export default function Index() {
             <Ionicons name="information-circle-outline" size={18} color="#3b82f6" />
             <Text style={styles.aboutButtonText}>About Tommy & Doris</Text>
           </TouchableOpacity>
-        </View>
 
-        {/* Main Actions */}
-        <View style={styles.mainActions}>
-          {/* Primary Help Button - Softer approach */}
-          <TouchableOpacity 
-            style={styles.primaryButton}
-            onPress={() => router.push('/crisis-support')}
-            activeOpacity={0.9}
-          >
-            <Ionicons name="heart" size={48} color="#ffffff" />
-            <Text style={styles.primaryButtonText}>Need to Talk?</Text>
-            <Text style={styles.primaryButtonSubtext}>Connect with support now</Text>
-          </TouchableOpacity>
-
-          {/* Emergency info - subtle text only */}
           <Text style={styles.emergencyNote}>
             In immediate danger? Call 999
           </Text>
-
-          {/* Secondary Actions */}
-          <View style={styles.secondaryActions}>
-            <TouchableOpacity 
-              style={styles.secondaryButton}
-              onPress={() => router.push('/peer-support')}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="people" size={32} color={colors.textSecondary} />
-              <Text style={styles.secondaryButtonText}>Talk to Another Veteran</Text>
-              <Text style={styles.secondaryButtonSubtext}>Peer support</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.secondaryButton}
-              onPress={() => router.push('/historical-investigations')}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="document-text" size={32} color={colors.textSecondary} />
-              <Text style={styles.secondaryButtonText}>Warfare on Lawfare</Text>
-              <Text style={styles.secondaryButtonSubtext}>Support for veterans facing investigations</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.secondaryButton}
-              onPress={() => router.push('/organizations')}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="list" size={32} color={colors.textSecondary} />
-              <Text style={styles.secondaryButtonText}>Support Organisations</Text>
-              <Text style={styles.secondaryButtonSubtext}>UK veteran services</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.secondaryButton, styles.callbackButton]}
-              onPress={() => router.push('/callback')}
-              activeOpacity={0.8}
-              data-testid="callback-request-btn"
-            >
-              <Ionicons name="call" size={32} color="#22c55e" />
-              <Text style={styles.secondaryButtonText}>Request a Callback</Text>
-              <Text style={styles.secondaryButtonSubtext}>We'll call you back</Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
-        {/* Substance Misuse Advice Section */}
-        <TouchableOpacity 
-          style={styles.substanceSupportCard}
-          onPress={() => router.push('/substance-support')}
-          activeOpacity={0.8}
-          data-testid="substance-support-btn"
-        >
-          <View style={styles.substanceSupportIcon}>
-            <Ionicons name="medkit" size={28} color="#f59e0b" />
-          </View>
-          <View style={styles.substanceSupportContent}>
-            <Text style={styles.substanceSupportTitle}>Alcohol & Substance Support</Text>
-            <Text style={styles.substanceSupportDesc}>Advice, helplines & self-help resources for veterans</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
-        </TouchableOpacity>
+        {/* Talk to a Veteran Section */}
+        <Text style={styles.sectionTitle}>Talk to a Veteran</Text>
+        <View style={styles.veteranCardsRow}>
+          <TouchableOpacity 
+            style={styles.veteranCard}
+            onPress={() => router.push('/peer-support')}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="people" size={28} color="#3b82f6" />
+            <Text style={styles.veteranCardTitle}>Peer Support</Text>
+            <Text style={styles.veteranCardSubtext}>Connect with trained peers</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.veteranCard}
+            onPress={() => router.push('/bob-chat')}
+            activeOpacity={0.8}
+            data-testid="bob-chat-btn"
+          >
+            <View style={styles.bobAvatarContainer}>
+              <Ionicons name="person" size={28} color="#22c55e" />
+            </View>
+            <Text style={styles.veteranCardTitle}>Chat with Bob</Text>
+            <Text style={styles.veteranCardSubtext}>Ex-Para AI peer support</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Support Organisations Section */}
+        <Text style={styles.sectionTitle}>Support Organisations</Text>
+        <View style={styles.supportOrgsContainer}>
+          <TouchableOpacity 
+            style={styles.supportOrgCard}
+            onPress={() => router.push('/organizations')}
+            activeOpacity={0.8}
+          >
+            <View style={styles.supportOrgIcon}>
+              <Ionicons name="list" size={24} color="#3b82f6" />
+            </View>
+            <View style={styles.supportOrgContent}>
+              <Text style={styles.supportOrgTitle}>UK Veteran Services</Text>
+              <Text style={styles.supportOrgDesc}>Directory of support organisations</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.supportOrgCard}
+            onPress={() => router.push('/substance-support')}
+            activeOpacity={0.8}
+            data-testid="substance-support-btn"
+          >
+            <View style={[styles.supportOrgIcon, { backgroundColor: '#fef3c7' }]}>
+              <Ionicons name="medkit" size={24} color="#f59e0b" />
+            </View>
+            <View style={styles.supportOrgContent}>
+              <Text style={styles.supportOrgTitle}>Alcohol & Substance Support</Text>
+              <Text style={styles.supportOrgDesc}>Helplines & self-help resources</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.supportOrgCard}
+            onPress={() => router.push('/regimental-associations')}
+            activeOpacity={0.8}
+            data-testid="regimental-associations-btn"
+          >
+            <View style={[styles.supportOrgIcon, { backgroundColor: '#fef3c7' }]}>
+              <Ionicons name="medal" size={24} color="#d97706" />
+            </View>
+            <View style={styles.supportOrgContent}>
+              <Text style={styles.supportOrgTitle}>Regimental Associations</Text>
+              <Text style={styles.supportOrgDesc}>Find your service family</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.supportOrgCard}
+            onPress={() => router.push('/historical-investigations')}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.supportOrgIcon, { backgroundColor: '#e0e7ff' }]}>
+              <Ionicons name="document-text" size={24} color="#6366f1" />
+            </View>
+            <View style={styles.supportOrgContent}>
+              <Text style={styles.supportOrgTitle}>Warfare on Lawfare</Text>
+              <Text style={styles.supportOrgDesc}>Support for veterans facing investigations</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.supportOrgCard, { borderColor: '#22c55e', borderWidth: 1 }]}
+            onPress={() => router.push('/callback')}
+            activeOpacity={0.8}
+            data-testid="callback-request-btn"
+          >
+            <View style={[styles.supportOrgIcon, { backgroundColor: '#dcfce7' }]}>
+              <Ionicons name="call" size={24} color="#22c55e" />
+            </View>
+            <View style={styles.supportOrgContent}>
+              <Text style={styles.supportOrgTitle}>Request a Callback</Text>
+              <Text style={styles.supportOrgDesc}>We'll call you back</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#22c55e" />
+          </TouchableOpacity>
+        </View>
 
         {/* Friends & Family Section */}
         <TouchableOpacity 
@@ -189,110 +236,113 @@ export default function Index() {
           <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
         </TouchableOpacity>
 
-        {/* Self-Care Tools Section */}
-        <Text style={styles.sectionTitle}>Self-Care Tools</Text>
-        <View style={styles.toolsRow}>
-          <TouchableOpacity 
-            style={styles.toolButton}
-            onPress={() => router.push('/mood')}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.toolIconBg, { backgroundColor: '#fef3c7' }]}>
-              <Text style={styles.toolEmoji}>😊</Text>
-            </View>
-            <Text style={styles.toolText}>Daily{'\n'}Check-in</Text>
-          </TouchableOpacity>
+        {/* Self-Care Tools Section - Collapsible */}
+        <TouchableOpacity 
+          style={styles.sectionTitleRow}
+          onPress={() => setShowSelfCareTools(!showSelfCareTools)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.sectionTitle}>Self-Care Tools</Text>
+          <Ionicons 
+            name={showSelfCareTools ? "chevron-up" : "chevron-down"} 
+            size={24} 
+            color={colors.textSecondary} 
+          />
+        </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.toolButton}
-            onPress={() => router.push('/journal')}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.toolIconBg, { backgroundColor: '#dbeafe' }]}>
-              <Ionicons name="book" size={24} color="#3b82f6" />
-            </View>
-            <Text style={styles.toolText}>My{'\n'}Journal</Text>
-          </TouchableOpacity>
+        {showSelfCareTools && (
+          <View style={styles.selfCareToolsContainer}>
+            <View style={styles.toolsRow}>
+              <TouchableOpacity 
+                style={styles.toolButton}
+                onPress={() => router.push('/mood')}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.toolIconBg, { backgroundColor: '#fef3c7' }]}>
+                  <Text style={styles.toolEmoji}>😊</Text>
+                </View>
+                <Text style={styles.toolText}>Daily{'\n'}Check-in</Text>
+              </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.toolButton}
-            onPress={() => router.push('/grounding')}
-            activeOpacity={0.8}
-            data-testid="grounding-tools-btn"
-          >
-            <View style={[styles.toolIconBg, { backgroundColor: '#e0e7ff' }]}>
-              <Ionicons name="hand-left" size={24} color="#6366f1" />
-            </View>
-            <Text style={styles.toolText}>Grounding{'\n'}Tools</Text>
-          </TouchableOpacity>
-        </View>
+              <TouchableOpacity 
+                style={styles.toolButton}
+                onPress={() => router.push('/journal')}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.toolIconBg, { backgroundColor: '#dbeafe' }]}>
+                  <Ionicons name="book" size={24} color="#3b82f6" />
+                </View>
+                <Text style={styles.toolText}>My{'\n'}Journal</Text>
+              </TouchableOpacity>
 
-        {/* Second row of tools */}
-        <View style={styles.toolsRow}>
-          <TouchableOpacity 
-            style={styles.toolButton}
-            onPress={() => router.push('/breathing-game')}
-            activeOpacity={0.8}
-            data-testid="breathing-game-btn"
-          >
-            <View style={[styles.toolIconBg, { backgroundColor: '#fce7f3' }]}>
-              <Ionicons name="fitness" size={24} color="#ec4899" />
+              <TouchableOpacity 
+                style={styles.toolButton}
+                onPress={() => router.push('/grounding')}
+                activeOpacity={0.8}
+                data-testid="grounding-tools-btn"
+              >
+                <View style={[styles.toolIconBg, { backgroundColor: '#e0e7ff' }]}>
+                  <Ionicons name="hand-left" size={24} color="#6366f1" />
+                </View>
+                <Text style={styles.toolText}>Grounding{'\n'}Tools</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.toolText}>Breathing{'\n'}Challenge</Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.toolButton}
-            onPress={() => router.push('/buddy-finder')}
-            activeOpacity={0.8}
-            data-testid="buddy-finder-btn"
-          >
-            <View style={[styles.toolIconBg, { backgroundColor: '#dbeafe' }]}>
-              <Ionicons name="people" size={24} color="#3b82f6" />
+            <View style={styles.toolsRow}>
+              <TouchableOpacity 
+                style={styles.toolButton}
+                onPress={() => router.push('/breathing-game')}
+                activeOpacity={0.8}
+                data-testid="breathing-game-btn"
+              >
+                <View style={[styles.toolIconBg, { backgroundColor: '#fce7f3' }]}>
+                  <Ionicons name="fitness" size={24} color="#ec4899" />
+                </View>
+                <Text style={styles.toolText}>Breathing{'\n'}Challenge</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.toolButton}
+                onPress={() => router.push('/buddy-finder')}
+                activeOpacity={0.8}
+                data-testid="buddy-finder-btn"
+              >
+                <View style={[styles.toolIconBg, { backgroundColor: '#dbeafe' }]}>
+                  <Ionicons name="people" size={24} color="#3b82f6" />
+                </View>
+                <Text style={styles.toolText}>Buddy{'\n'}Finder</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.toolButton}
+                onPress={() => router.push('/local-services')}
+                activeOpacity={0.8}
+                data-testid="local-services-btn"
+              >
+                <View style={[styles.toolIconBg, { backgroundColor: '#d1fae5' }]}>
+                  <Ionicons name="location" size={24} color="#10b981" />
+                </View>
+                <Text style={styles.toolText}>Find Local{'\n'}Support</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.toolText}>Buddy{'\n'}Finder</Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.toolButton}
-            onPress={() => router.push('/local-services')}
-            activeOpacity={0.8}
-            data-testid="local-services-btn"
-          >
-            <View style={[styles.toolIconBg, { backgroundColor: '#d1fae5' }]}>
-              <Ionicons name="location" size={24} color="#10b981" />
+            <View style={styles.toolsRow}>
+              <TouchableOpacity 
+                style={styles.toolButton}
+                onPress={() => router.push('/resources')}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.toolIconBg, { backgroundColor: '#dcfce7' }]}>
+                  <Ionicons name="library" size={24} color="#22c55e" />
+                </View>
+                <Text style={styles.toolText}>Resources{'\n'}Library</Text>
+              </TouchableOpacity>
+
+              <View style={styles.toolButton} />
+              <View style={styles.toolButton} />
             </View>
-            <Text style={styles.toolText}>Find Local{'\n'}Support</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Third row of tools */}
-        <View style={styles.toolsRow}>
-          <TouchableOpacity 
-            style={styles.toolButton}
-            onPress={() => router.push('/resources')}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.toolIconBg, { backgroundColor: '#dcfce7' }]}>
-              <Ionicons name="library" size={24} color="#22c55e" />
-            </View>
-            <Text style={styles.toolText}>Resources{'\n'}Library</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.toolButton}
-            onPress={() => router.push('/regimental-associations')}
-            activeOpacity={0.8}
-            data-testid="regimental-associations-btn"
-          >
-            <View style={[styles.toolIconBg, { backgroundColor: '#fef3c7' }]}>
-              <Ionicons name="medal" size={24} color="#d97706" />
-            </View>
-            <Text style={styles.toolText}>Regimental{'\n'}Associations</Text>
-          </TouchableOpacity>
-
-          <View style={styles.toolButton} />
-        </View>
+          </View>
+        )}
 
         {/* Disclaimer */}
         <View style={styles.disclaimer}>
@@ -329,30 +379,27 @@ export default function Index() {
                 />
                 <Image 
                   source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png' }}
-                  style={[styles.modalAvatar, styles.modalAvatarOverlap]}
+                  style={[styles.modalAvatar, { marginLeft: -15 }]}
                 />
               </View>
               <TouchableOpacity 
                 style={styles.modalCloseButton}
                 onPress={() => setShowAboutModal(false)}
               >
-                <Ionicons name="close" size={24} color="#94a3b8" />
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
-              <Text style={styles.modalTitle}>Meet Tommy & Doris</Text>
-              <Text style={styles.modalSubtitle}>We're on stag 24/7</Text>
               <Text style={styles.modalText}>{ABOUT_TOMMY_DORIS}</Text>
             </ScrollView>
             <TouchableOpacity 
-              style={styles.modalChatButton}
+              style={styles.modalButton}
               onPress={() => {
                 setShowAboutModal(false);
                 router.push('/ai-buddies');
               }}
             >
-              <Text style={styles.modalChatButtonText}>Start a Conversation</Text>
-              <Ionicons name="chatbubbles" size={20} color="#fff" />
+              <Text style={styles.modalButtonText}>Start Chatting</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -368,258 +415,76 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scrollContent: {
-    padding: 24,
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
   settingsIcon: {
     position: 'absolute',
     right: 0,
     top: 0,
-    padding: 8,
     zIndex: 10,
+    padding: 8,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
-    marginTop: 16,
-  },
-  badgeImage: {
-    width: 120,
-    height: 120,
+    marginTop: 20,
+    marginBottom: 24,
   },
   logoWrapper: {
-    borderRadius: 60,
-    padding: 8,
-    marginBottom: 16,
-  },
-  badgeContainer: {
-    flexDirection: 'row',
+    width: 100,
+    height: 100,
+    borderRadius: 20,
+    justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
   },
+  badgeImage: {
+    width: 100,
+    height: 100,
+  },
   headerTitle: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '700',
     color: colors.text,
     marginBottom: 8,
-    textAlign: 'center',
   },
   taglineEnglish: {
-    fontSize: 15,
+    fontSize: 14,
     color: colors.textSecondary,
     textAlign: 'center',
     fontStyle: 'italic',
-    marginBottom: 4,
+    lineHeight: 20,
+    paddingHorizontal: 10,
   },
-  taglineLatin: {
-    fontSize: 14,
-    color: colors.textMuted,
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  emergencyNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2d1f1f',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 32,
-    borderWidth: 2,
-    borderColor: '#ff4444',
-  },
-  emergencyTextContainer: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  emergencyTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#ff6666',
-    marginBottom: 4,
-  },
-  emergencyText: {
-    fontSize: 14,
-    color: '#ffcccc',
-  },
-  mainActions: {
-    marginBottom: 32,
-  },
-  emergencyNote: {
-    fontSize: 13,
-    color: '#94a3b8',
-    textAlign: 'center',
-    marginBottom: 20,
+  needToTalkSection: {
+    marginBottom: 24,
   },
   primaryButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#3b82f6',
     borderRadius: 16,
-    padding: 32,
+    paddingVertical: 24,
     alignItems: 'center',
     marginBottom: 12,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#2563eb',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
   },
   primaryButtonText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
     color: '#ffffff',
-    marginTop: 12,
-    textAlign: 'center',
+    marginTop: 8,
   },
   primaryButtonSubtext: {
     fontSize: 14,
-    color: '#ffcccc',
-    marginTop: 8,
-  },
-  secondaryActions: {
-    gap: 16,
-  },
-  secondaryButton: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 20,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  secondaryButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  secondaryButtonSubtext: {
-    fontSize: 13,
-    color: colors.textSecondary,
+    color: '#bfdbfe',
     marginTop: 4,
-    textAlign: 'center',
-  },
-  callbackButton: {
-    borderColor: '#22c55e',
-    borderWidth: 1,
-  },
-  aiBuddiesButton: {
-    borderColor: '#3b82f6',
-    borderWidth: 2,
-    backgroundColor: '#1a2744',
-  },
-  aiBuddiesIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  aiBuddyMiniAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#1a2744',
-  },
-  aiBuddyMiniAvatarOverlap: {
-    marginLeft: -12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 16,
-  },
-  toolsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-    gap: 12,
-  },
-  toolButton: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  toolIconBg: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  toolEmoji: {
-    fontSize: 24,
-  },
-  toolText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  disclaimer: {
-    backgroundColor: colors.surface,
-    borderRadius: 8,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  disclaimerText: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  staffLogin: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 24,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  staffLoginText: {
-    color: colors.textMuted,
-    fontSize: 14,
-  },
-  // AI Battle Buddies Featured Section
-  aiBuddiesSection: {
-    marginBottom: 24,
   },
   aiBuddiesCard: {
-    backgroundColor: '#1a2744',
+    backgroundColor: colors.surface,
     borderRadius: 16,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: '#3b82f6',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#3b82f6',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 6,
-      },
-    }),
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   aiBuddiesHeader: {
     flexDirection: 'row',
@@ -627,38 +492,36 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   aiBuddiesAvatars: {
     flexDirection: 'row',
-    alignItems: 'center',
+    marginRight: 12,
   },
   aiBuddyAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    borderWidth: 3,
-    borderColor: '#1a2744',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: colors.background,
   },
   aiBuddyAvatarOverlap: {
-    marginLeft: -16,
+    marginLeft: -12,
   },
   aiBuddiesTextContainer: {
     flex: 1,
-    marginLeft: 16,
   },
   aiBuddiesTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#ffffff',
+    color: colors.text,
   },
   aiBuddiesSubtitle: {
-    fontSize: 14,
-    color: '#94a3b8',
+    fontSize: 13,
+    color: colors.textSecondary,
     marginTop: 2,
   },
   aboutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
     gap: 6,
   },
   aboutButtonText: {
@@ -666,140 +529,230 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: '#3b82f6',
     fontWeight: '500',
   },
-  // Substance Support Card
-  substanceSupportCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fffbeb',
-    borderRadius: 12,
-    padding: 16,
+  emergencyNote: {
+    textAlign: 'center',
+    fontSize: 13,
+    color: colors.textMuted,
+    marginTop: 4,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#fde68a',
+    marginTop: 8,
   },
-  substanceSupportIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#fef3c7',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  substanceSupportContent: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  substanceSupportTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1e293b',
-  },
-  substanceSupportDesc: {
-    fontSize: 13,
-    color: '#64748b',
-    marginTop: 2,
-  },
-  // Friends & Family Card
-  familyFriendsCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#faf5ff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#e9d5ff',
-  },
-  familyFriendsIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#ede9fe',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  familyFriendsContent: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  familyFriendsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1e293b',
-  },
-  familyFriendsDesc: {
-    fontSize: 13,
-    color: '#64748b',
-    marginTop: 2,
-  },
-  // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#1a2332',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    maxHeight: '85%',
-  },
-  modalHeader: {
+  sectionTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginTop: 8,
+    marginBottom: 12,
+    paddingRight: 4,
+  },
+  veteranCardsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  veteranCard: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  bobAvatarContainer: {
+    marginBottom: 0,
+  },
+  veteranCardTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  veteranCardSubtext: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  supportOrgsContainer: {
+    gap: 8,
+    marginBottom: 16,
+  },
+  supportOrgCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  supportOrgIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#dbeafe',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  supportOrgContent: {
+    flex: 1,
+  },
+  supportOrgTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  supportOrgDesc: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  familyFriendsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  familyFriendsIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#ede9fe',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  familyFriendsContent: {
+    flex: 1,
+  },
+  familyFriendsTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  familyFriendsDesc: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  selfCareToolsContainer: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  toolsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  toolButton: {
+    alignItems: 'center',
+    width: '30%',
+  },
+  toolIconBg: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  toolEmoji: {
+    fontSize: 24,
+  },
+  toolText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  disclaimer: {
+    marginTop: 8,
+    marginBottom: 16,
+    paddingHorizontal: 20,
+  },
+  disclaimerText: {
+    fontSize: 12,
+    color: colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  staffLogin: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 8,
+  },
+  staffLoginText: {
+    fontSize: 14,
+    color: colors.textMuted,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    padding: 24,
+    width: '100%',
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   modalAvatars: {
     flexDirection: 'row',
   },
   modalAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 3,
-    borderColor: '#1a2332',
-  },
-  modalAvatarOverlap: {
-    marginLeft: -20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: colors.background,
   },
   modalCloseButton: {
-    padding: 8,
+    padding: 4,
   },
   modalScroll: {
-    maxHeight: 400,
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#ffffff',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  modalSubtitle: {
-    fontSize: 16,
-    color: '#3b82f6',
-    textAlign: 'center',
-    marginBottom: 20,
+    maxHeight: 300,
   },
   modalText: {
     fontSize: 15,
-    color: '#b0c4de',
     lineHeight: 24,
-    marginBottom: 20,
+    color: colors.text,
   },
-  modalChatButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+  modalButton: {
     backgroundColor: '#3b82f6',
-    paddingVertical: 16,
     borderRadius: 12,
-    gap: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
     marginTop: 16,
   },
-  modalChatButtonText: {
+  modalButtonText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#ffffff',
