@@ -459,23 +459,23 @@ export default function PeerSupport() {
             </TouchableOpacity>
 
             {/* What is it */}
-            <View style={styles.section}>
+            <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="checkmark-circle" size={24} color="#7c9cbf" />
-                <Text style={styles.sectionTitle}>What is peer support?</Text>
+                <Ionicons name="checkmark-circle" size={24} color={colors.textSecondary} />
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>What is peer support?</Text>
               </View>
-              <Text style={styles.sectionText}>
+              <Text style={[styles.sectionText, { color: colors.textSecondary }]}>
                 Connect with fellow veterans who understand what you're going through. Share experiences, offer mutual support, and know you're not alone.
               </Text>
             </View>
 
             {/* What it's not */}
-            <View style={styles.section}>
+            <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="information-circle" size={24} color="#7c9cbf" />
-                <Text style={styles.sectionTitle}>What it's not</Text>
+                <Ionicons name="information-circle" size={24} color={colors.textSecondary} />
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>What it's not</Text>
               </View>
-              <Text style={styles.sectionText}>
+              <Text style={[styles.sectionText, { color: colors.textSecondary }]}>
                 • Not professional therapy or counselling{"\n"}
                 • Not an emergency service{"\n"}
                 • Not a replacement for medical care
@@ -483,42 +483,42 @@ export default function PeerSupport() {
             </View>
 
             {/* Benefits */}
-            <View style={styles.section}>
+            <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="heart" size={24} color="#7c9cbf" />
-                <Text style={styles.sectionTitle}>How it helps</Text>
+                <Ionicons name="heart" size={24} color={colors.textSecondary} />
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>How it helps</Text>
               </View>
-              <Text style={styles.sectionText}>
+              <Text style={[styles.sectionText, { color: colors.textSecondary }]}>
                 Speaking with someone who's walked a similar path can make a real difference. Peer supporters are trained volunteers who've served and understand the challenges.
               </Text>
             </View>
 
             {/* Register to Give Support */}
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: colors.border }]} />
             
-            <Text style={styles.giveSupportTitle}>Want to Support Others?</Text>
-            <Text style={styles.giveSupportSubtitle}>Become a peer supporter and help fellow veterans</Text>
+            <Text style={[styles.giveSupportTitle, { color: colors.text }]}>Want to Support Others?</Text>
+            <Text style={[styles.giveSupportSubtitle, { color: colors.textSecondary }]}>Become a peer supporter and help fellow veterans</Text>
 
             {!showForm ? (
               <TouchableOpacity 
-                style={styles.secondaryButton}
+                style={[styles.secondaryButton, { backgroundColor: colors.card, borderColor: colors.border }]}
                 onPress={() => setShowForm(true)}
                 activeOpacity={0.8}
               >
-                <Ionicons name="person-add" size={20} color="#7c9cbf" />
-                <Text style={styles.secondaryButtonText}>Register to Give Support</Text>
+                <Ionicons name="person-add" size={20} color={colors.textSecondary} />
+                <Text style={[styles.secondaryButtonText, { color: colors.textSecondary }]}>Register to Give Support</Text>
               </TouchableOpacity>
             ) : (
-              <View style={styles.formContainer}>
-                <Text style={styles.formTitle}>Register to Give Peer Support</Text>
-                <Text style={styles.formDescription}>
+              <View style={[styles.formContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Text style={[styles.formTitle, { color: colors.text }]}>Register to Give Peer Support</Text>
+                <Text style={[styles.formDescription, { color: colors.textSecondary }]}>
                   If you're a veteran interested in supporting others, please share your email. We'll contact you with more details about the programme.
                 </Text>
                 
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                   placeholder="Your email address"
-                  placeholderTextColor="#6b7280"
+                  placeholderTextColor={colors.textMuted}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
