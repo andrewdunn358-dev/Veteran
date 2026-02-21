@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 24,
   },
   primaryButtonText: {
     fontSize: 18,
@@ -629,30 +629,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#bfdbfe',
     marginTop: 4,
-  },
-  calendarButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1e293b',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#10b981',
-  },
-  calendarButtonText: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  calendarButtonTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  calendarButtonSubtext: {
-    fontSize: 13,
-    color: '#94a3b8',
-    marginTop: 2,
   },
   bobCard: {
     flexDirection: 'row',
