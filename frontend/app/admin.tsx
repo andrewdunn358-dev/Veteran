@@ -74,7 +74,7 @@ interface SIPAssignment {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'orgs' | 'resources' | 'users' | 'content' | 'metrics' | 'callbacks' | 'alerts' | 'sip' | 'shifts'>('counsellors');
+  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'orgs' | 'resources' | 'users' | 'content' | 'metrics' | 'callbacks' | 'alerts' | 'shifts'>('counsellors');
   const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
   const [peers, setPeers] = useState<PeerSupporter[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -977,15 +977,15 @@ export default function AdminDashboard() {
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
         <View style={styles.tabs}>
-          {(['counsellors', 'peers', 'shifts', 'callbacks', 'alerts', 'sip', 'orgs', 'resources', 'users', 'content', 'metrics'] as const).map((tab) => (
+          {(['counsellors', 'peers', 'shifts', 'callbacks', 'alerts', 'orgs', 'resources', 'users', 'content', 'metrics'] as const).map((tab) => (
             <TouchableOpacity
               key={tab}
               data-testid={`admin-tab-${tab}`}
-              style={[styles.tab, activeTab === tab && styles.activeTab, (tab === 'alerts' && panicAlerts.filter(a => a.status === 'active').length > 0) && styles.alertTab, tab === 'sip' && styles.sipTab]}
+              style={[styles.tab, activeTab === tab && styles.activeTab, (tab === 'alerts' && panicAlerts.filter(a => a.status === 'active').length > 0) && styles.alertTab]}
               onPress={() => setActiveTab(tab)}
             >
               <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab === 'orgs' ? 'Orgs' : tab === 'resources' ? 'Resources' : tab === 'callbacks' ? 'Callbacks' : tab === 'shifts' ? 'Rota' : tab === 'alerts' ? `Alerts${panicAlerts.filter(a => a.status === 'active').length > 0 ? ` (${panicAlerts.filter(a => a.status === 'active').length})` : ''}` : tab === 'sip' ? 'VoIP' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab === 'orgs' ? 'Orgs' : tab === 'resources' ? 'Resources' : tab === 'callbacks' ? 'Callbacks' : tab === 'shifts' ? 'Rota' : tab === 'alerts' ? `Alerts${panicAlerts.filter(a => a.status === 'active').length > 0 ? ` (${panicAlerts.filter(a => a.status === 'active').length})` : ''}` : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>
             </TouchableOpacity>
           ))}
