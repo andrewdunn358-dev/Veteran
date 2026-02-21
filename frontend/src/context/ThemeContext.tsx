@@ -85,6 +85,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     try {
       await AsyncStorage.setItem(THEME_STORAGE_KEY, newTheme);
       setThemeState(newTheme);
+      // Update HTML class for web
+      if (typeof document !== 'undefined') {
+        if (newTheme === 'dark') {
+          document.documentElement.classList.add('dark-mode');
+        } else {
+          document.documentElement.classList.remove('dark-mode');
+        }
+      }
     } catch (error) {
       console.error('Error saving theme:', error);
     }
