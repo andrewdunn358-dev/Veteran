@@ -29,11 +29,24 @@ A standalone React website for promoting Radio Check, to be deployed at radioche
 - Built with React + Vite + Tailwind CSS
 
 ### Dark/Light Mode Fixes (21 Feb 2026)
+Fixed the global HTML wrapper (`+html.tsx`) that was forcing dark background:
+- Added CSS variables for theme-aware backgrounds
+- Added JavaScript to sync HTML class with saved theme
+- Updated ThemeContext to sync with document class on theme change
+
 Fixed 4 pages that were stuck in dark mode:
-- `/app/frontend/app/crisis-support.tsx` - Added theme support
-- `/app/frontend/app/peer-support.tsx` - Added theme support  
+- `/app/frontend/app/crisis-support.tsx` - Completely rewritten with theme support
+- `/app/frontend/app/peer-support.tsx` - Added theme support
 - `/app/frontend/app/historical-investigations.tsx` - Fully rewritten with theme
 - `/app/frontend/app/organizations.tsx` - Fully rewritten with theme
+
+New page created:
+- `/app/frontend/app/counsellors.tsx` - Dedicated page for viewing on-duty counsellors
+
+### Crisis Support Page Restructure (21 Feb 2026)
+- Samaritans moved above Combat Stress
+- "On-Duty Counsellors" is now a clickable card that navigates to `/counsellors`
+- Simplified layout matching peer-support page pattern
 
 ### Logo Update (21 Feb 2026)
 Updated to new transparent background logo:
