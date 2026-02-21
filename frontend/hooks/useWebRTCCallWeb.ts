@@ -322,10 +322,12 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
       // Log ICE connection state changes
       pc.oniceconnectionstatechange = () => {
         console.log('WebRTC: ICE connection state:', pc.iceConnectionState);
+        setDebugInfo(prev => ({ ...prev, iceState: pc.iceConnectionState }));
       };
 
       pc.ontrack = (event) => {
         console.log('WebRTC: Received remote track', event.track.kind, 'enabled:', event.track.enabled);
+        setDebugInfo(prev => ({ ...prev, remoteTrackReceived: true }));
         
         // Ensure the remote track is enabled
         event.track.enabled = true;
@@ -346,11 +348,15 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
           if (playPromise !== undefined) {
             playPromise.then(() => {
               console.log('WebRTC: Audio playback started successfully');
+              setDebugInfo(prev => ({ ...prev, audioPlaying: true }));
             }).catch((error) => {
               console.error('WebRTC: Audio play failed:', error);
+              setDebugInfo(prev => ({ ...prev, audioPlaying: false }));
               // Try to play on next user interaction
               document.addEventListener('click', () => {
-                audio.play().catch(console.error);
+                audio.play().then(() => {
+                  setDebugInfo(prev => ({ ...prev, audioPlaying: true }));
+                }).catch(console.error);
               }, { once: true });
             });
           }
@@ -358,6 +364,7 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
       };
 
       pc.onconnectionstatechange = () => {
+        setDebugInfo(prev => ({ ...prev, connectionState: pc.connectionState }));
         if (pc.connectionState === 'connected') {
           setCallState('connected');
           startCallTimer();
