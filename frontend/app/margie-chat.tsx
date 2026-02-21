@@ -14,7 +14,7 @@ import {
   Linking,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -37,6 +37,7 @@ interface Message {
 
 export default function MargieChatScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const scrollViewRef = useRef<ScrollView>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
@@ -252,6 +253,14 @@ export default function MargieChatScreen() {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
+  const handleGoBack = () => {
+    if (navigation.canGoBack()) {
+      router.back();
+    } else {
+      router.push('/substance-support');
+    }
+  };
+
   const clearConversation = () => {
     const welcomeMessage: Message = {
       id: 'welcome-new',
@@ -266,7 +275,7 @@ export default function MargieChatScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Image source={{ uri: MARGIE_AVATAR }} style={styles.headerAvatar} />
