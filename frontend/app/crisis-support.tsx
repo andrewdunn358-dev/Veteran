@@ -343,26 +343,26 @@ export default function CrisisSupport() {
         </View>
 
         {/* Instructions */}
-        <View style={styles.instructions}>
-          <Text style={styles.instructionsText}>
+        <View style={[styles.instructions, { backgroundColor: colors.card }]}>
+          <Text style={[styles.instructionsText, { color: colors.textSecondary }]}>
             Or choose another way to reach out for support:
           </Text>
         </View>
 
         {/* Crisis Services */}
         {crisisServices.map((service, index) => (
-          <View key={index} style={styles.serviceCard}>
+          <View key={index} style={[styles.serviceCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.serviceHeader}>
-              <Ionicons name={service.icon} size={28} color="#7c9cbf" />
+              <Ionicons name={service.icon} size={28} color={colors.textSecondary} />
               <View style={styles.serviceInfo}>
-                <Text style={styles.serviceName}>{service.name}</Text>
-                <Text style={styles.serviceDescription}>{service.description}</Text>
+                <Text style={[styles.serviceName, { color: colors.text }]}>{service.name}</Text>
+                <Text style={[styles.serviceDescription, { color: colors.textSecondary }]}>{service.description}</Text>
               </View>
             </View>
 
             <View style={styles.contactButtons}>
               <TouchableOpacity
-                style={styles.contactButton}
+                style={[styles.contactButton, { backgroundColor: colors.primary }]}
                 onPress={() => handleCall(service.phone, service.name, 'crisis_line', null)}
                 activeOpacity={0.8}
               >
@@ -372,23 +372,23 @@ export default function CrisisSupport() {
 
               {service.sms && (
                 <TouchableOpacity
-                  style={[styles.contactButton, styles.contactButtonSecondary]}
+                  style={[styles.contactButton, styles.contactButtonSecondary, { backgroundColor: colors.surfaceHover, borderColor: colors.border }]}
                   onPress={() => handleSMS(service.sms!, service.name, 'crisis_line', null)}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="chatbubble" size={24} color="#7c9cbf" />
-                  <Text style={[styles.contactButtonText, styles.contactButtonTextSecondary]}>Text</Text>
+                  <Ionicons name="chatbubble" size={24} color={colors.textSecondary} />
+                  <Text style={[styles.contactButtonText, styles.contactButtonTextSecondary, { color: colors.textSecondary }]}>Text</Text>
                 </TouchableOpacity>
               )}
 
               {service.whatsapp && (
                 <TouchableOpacity
-                  style={[styles.contactButton, styles.contactButtonSecondary]}
+                  style={[styles.contactButton, styles.contactButtonSecondary, { backgroundColor: colors.surfaceHover, borderColor: colors.border }]}
                   onPress={() => handleWhatsApp(service.whatsapp!, service.name, 'crisis_line', null)}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="logo-whatsapp" size={24} color="#7c9cbf" />
-                  <Text style={[styles.contactButtonText, styles.contactButtonTextSecondary]}>WhatsApp</Text>
+                  <Ionicons name="logo-whatsapp" size={24} color={colors.textSecondary} />
+                  <Text style={[styles.contactButtonText, styles.contactButtonTextSecondary, { color: colors.textSecondary }]}>WhatsApp</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -396,21 +396,21 @@ export default function CrisisSupport() {
         ))}
 
         {/* Additional Help */}
-        <View style={styles.additionalHelp}>
-          <Text style={styles.additionalHelpTitle}>Need more options?</Text>
+        <View style={[styles.additionalHelp, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={[styles.additionalHelpTitle, { color: colors.text }]}>Need more options?</Text>
           <TouchableOpacity 
             style={styles.linkButton}
             onPress={() => router.push('/organizations')}
           >
-            <Text style={styles.linkButtonText}>View all support organisations</Text>
-            <Ionicons name="arrow-forward" size={20} color="#7c9cbf" />
+            <Text style={[styles.linkButtonText, { color: colors.primary }]}>View all support organisations</Text>
+            <Ionicons name="arrow-forward" size={20} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
         {/* Disclaimer */}
-        <View style={styles.disclaimer}>
-          <Ionicons name="information-circle" size={16} color="#b0c4de" />
-          <Text style={styles.disclaimerText}>
+        <View style={[styles.disclaimer, { backgroundColor: colors.card }]}>
+          <Ionicons name="information-circle" size={16} color={colors.textSecondary} />
+          <Text style={[styles.disclaimerText, { color: colors.textSecondary }]}>
             All services listed are free and confidential
           </Text>
         </View>
