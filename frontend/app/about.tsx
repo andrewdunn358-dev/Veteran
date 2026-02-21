@@ -169,7 +169,7 @@ export default function AboutPage() {
             </View>
           </View>
           <Text style={styles.noteText}>
-            We're upfront about what this is — and what it isn't.
+            {"We're upfront about what this is — and what it isn't."}
           </Text>
         </View>
 
@@ -177,7 +177,7 @@ export default function AboutPage() {
         <View style={styles.bottomLineSection}>
           <Text style={styles.bottomLineTitle}>The Bottom Line</Text>
           <Text style={styles.bottomLineText}>
-            If Radio Check helps you feel even a little less alone, it's doing its job.
+            {"If Radio Check helps you feel even a little less alone, it's doing its job."}
           </Text>
           <View style={styles.signOffContainer}>
             <Ionicons name="radio" size={24} color="#22c55e" />
