@@ -114,17 +114,22 @@ GDPR-compliant veteran networking:
 
 ## Pending/TODO
 
-### Family & Friends Dark Mode Fix
-- Page has hardcoded styles that don't respond to dark mode
-- Need to refactor to use ThemeContext colors
+### ✅ Family & Friends Dark Mode (FIXED)
+- Page now uses dynamic styles with ThemeContext
+- All colors respond to light/dark mode
 
-### Buddy Finder Frontend
-- GDPR consent form needs completion
-- Profile browsing interface
+### ✅ Buddy Finder Frontend (COMPLETE)
+- GDPR consent form with checkbox
+- Profile browsing interface with filters
+- Search by region and service branch
 
 ### AI Profile Cards for Other Characters
 - Add AI profile cards to ai-chat.tsx (Tommy/Doris)
 - Add AI profile cards to sentry-chat.tsx (Finch)
+
+### Security Fix Applied
+- Removed exposed OpenAI API key from backend/.env
+- Key must be added separately in deployment environment
 
 ### Test Credentials
 - Admin: `admin@veteran.dbty.co.uk` / `ChangeThisPassword123!`
