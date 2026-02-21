@@ -260,12 +260,46 @@ h1, h2, h3, h4 {
     padding: 32px;
     border-radius: 16px;
     border: 1px solid var(--border);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
 }
 
 .feature-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    border-color: var(--primary);
+}
+
+.feature-card .feature-short {
+    color: var(--text-muted);
+    font-size: 15px;
+    transition: opacity 0.3s ease;
+}
+
+.feature-card .feature-expanded {
+    color: var(--text-body);
+    font-size: 14px;
+    line-height: 1.7;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+    margin-top: 0;
+}
+
+.feature-card:hover .feature-short {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+}
+
+.feature-card:hover .feature-expanded {
+    max-height: 300px;
+    opacity: 1;
+    margin-top: 12px;
 }
 
 .feature-icon {
