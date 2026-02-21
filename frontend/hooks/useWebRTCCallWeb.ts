@@ -366,6 +366,12 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     }
     
     await peerConnectionRef.current?.setRemoteDescription(new RTCSessionDescription(offer));
+    hasRemoteDescriptionRef.current = true;
+    console.log('WebRTC: Remote description set (offer)');
+    
+    // Process pending ICE candidates
+    await processPendingIceCandidates();
+    
     const answer = await peerConnectionRef.current?.createAnswer();
     await peerConnectionRef.current?.setLocalDescription(answer);
     
@@ -381,13 +387,42 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
   const handleAnswer = async (answer: RTCSessionDescriptionInit) => {
     if (Platform.OS !== 'web') return;
     await peerConnectionRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
+    hasRemoteDescriptionRef.current = true;
+    console.log('WebRTC: Remote description set (answer)');
+    
+    // Process pending ICE candidates
+    await processPendingIceCandidates();
+    
     setCallState('connected');
     startCallTimer();
   };
 
   const handleIceCandidate = async (candidate: RTCIceCandidateInit) => {
     if (Platform.OS !== 'web' || !candidate) return;
-    await peerConnectionRef.current?.addIceCandidate(new RTCIceCandidate(candidate));
+    
+    if (peerConnectionRef.current && hasRemoteDescriptionRef.current) {
+      // Remote description is set, add candidate immediately
+      await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+      console.log('WebRTC: Added ICE candidate immediately');
+    } else {
+      // Queue the candidate for later
+      pendingIceCandidatesRef.current.push(candidate);
+      console.log('WebRTC: Queued ICE candidate, waiting for remote description');
+    }
+  };
+
+  const processPendingIceCandidates = async () => {
+    const pending = pendingIceCandidatesRef.current;
+    console.log('WebRTC: Processing', pending.length, 'pending ICE candidates');
+    
+    for (const candidate of pending) {
+      try {
+        await peerConnectionRef.current?.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (error) {
+        console.error('WebRTC: Error adding queued ICE candidate:', error);
+      }
+    }
+    pendingIceCandidatesRef.current = [];
   };
 
   const initiateCall = async (targetUserId: string, targetName: string) => {
