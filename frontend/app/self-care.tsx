@@ -116,6 +116,24 @@ export default function SelfCarePage() {
           </Text>
         </View>
 
+        {/* Hugo AI Card */}
+        <TouchableOpacity 
+          style={[styles.hugoCard, { backgroundColor: colors.surface, borderColor: '#10b981' }]}
+          onPress={() => router.push('/hugo-chat')}
+          activeOpacity={0.8}
+          data-testid="hugo-chat-card"
+        >
+          <Image source={{ uri: HUGO_AVATAR }} style={styles.hugoAvatar} />
+          <View style={styles.hugoContent}>
+            <Text style={[styles.hugoName, { color: colors.text }]}>Hugo</Text>
+            <Text style={styles.hugoRole}>Self-Help & Wellness Guide</Text>
+            <Text style={[styles.hugoDesc, { color: colors.textSecondary }]}>
+              Chat with Hugo for daily motivation, grounding techniques, and building positive habits.
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={24} color="#10b981" />
+        </TouchableOpacity>
+
         {/* Tools Grid */}
         <View style={styles.toolsGrid}>
           {SELF_CARE_TOOLS.map((tool) => (
