@@ -9,28 +9,39 @@
 // TURN is essential for mobile networks and symmetric NATs
 const WEBRTC_CONFIG = {
     iceServers: [
-        // STUN servers
+        // STUN servers (free, unlimited)
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        // Free public TURN servers (for testing - replace with your own for production)
+        { urls: 'stun:stun.cloudflare.com:3478' },
+        // Free TURN servers for testing
         {
-            urls: 'turn:openrelay.metered.ca:80',
-            username: 'openrelayproject',
-            credential: 'openrelayproject',
+            urls: 'turn:freestun.net:3478',
+            username: 'free',
+            credential: 'free',
         },
         {
-            urls: 'turn:openrelay.metered.ca:443',
-            username: 'openrelayproject',
-            credential: 'openrelayproject',
+            urls: 'turn:freestun.net:5349',
+            username: 'free',
+            credential: 'free',
+        },
+        // Metered TURN (free tier)
+        {
+            urls: 'turn:a.relay.metered.ca:80',
+            username: 'e8dd65d92c62d5e5c4b51710',
+            credential: 'uWdWNmkhvyqTmhWu',
         },
         {
-            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-            username: 'openrelayproject',
-            credential: 'openrelayproject',
+            urls: 'turn:a.relay.metered.ca:443',
+            username: 'e8dd65d92c62d5e5c4b51710',
+            credential: 'uWdWNmkhvyqTmhWu',
+        },
+        {
+            urls: 'turn:a.relay.metered.ca:443?transport=tcp',
+            username: 'e8dd65d92c62d5e5c4b51710',
+            credential: 'uWdWNmkhvyqTmhWu',
         },
     ],
     iceCandidatePoolSize: 10,
-    iceTransportPolicy: 'all'  // Try both direct and relay
+    iceTransportPolicy: 'all'
 };
 
 // State
