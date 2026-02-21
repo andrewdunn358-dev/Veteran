@@ -554,12 +554,34 @@ function showIncomingCall(callerName, callType) {
 }
 
 function showActiveCall(peerName) {
+    // Hide incoming call UI first
+    var incomingBanner = document.getElementById('webrtc-incoming-call');
+    if (incomingBanner) {
+        incomingBanner.classList.add('hidden');
+    }
+    
+    // Update floating widget
     if (phoneUI.callInfo) phoneUI.callInfo.classList.remove('hidden');
     if (phoneUI.callerName) phoneUI.callerName.textContent = `On call: ${peerName}`;
     if (phoneUI.incomingActions) phoneUI.incomingActions.classList.add('hidden');
     if (phoneUI.activeActions) phoneUI.activeActions.classList.remove('hidden');
     if (phoneUI.container) phoneUI.container.classList.remove('ringing');
     if (phoneUI.container) phoneUI.container.classList.add('in-call');
+    
+    // Show active call controls in top-of-page section
+    var callControls = document.getElementById('webrtc-call-controls');
+    var phoneIcon = document.querySelector('.phone-icon');
+    
+    if (callControls) {
+        callControls.classList.remove('hidden');
+    }
+    if (phoneIcon) {
+        phoneIcon.classList.remove('ringing');
+        phoneIcon.classList.add('in-call');
+    }
+    
+    // Update status
+    updatePhoneStatus('in-call', 'In Call');
 }
 
 function hideCallUI() {
