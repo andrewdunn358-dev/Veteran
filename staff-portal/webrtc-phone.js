@@ -436,6 +436,8 @@ function cleanupCall() {
     
     // Clear call state
     currentCallId = null;
+    hasRemoteDescription = false;
+    pendingIceCandidates = [];
     
     // Stop timer
     stopCallTimer();
