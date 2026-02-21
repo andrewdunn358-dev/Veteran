@@ -36,7 +36,7 @@ export default function PeerSupport() {
   const [error, setError] = useState<string | null>(null);
   
   // WebRTC calling
-  const { callState, callInfo, callDuration, initiateCall, endCall } = useWebRTCCall();
+  const { callState, callInfo, callDuration, debugInfo, initiateCall, endCall } = useWebRTCCall();
   const [isInitiatingCall, setIsInitiatingCall] = useState(false);
   const [callingPeerName, setCallingPeerName] = useState('');
   const showCallModal = callState !== 'idle' || isInitiatingCall;
