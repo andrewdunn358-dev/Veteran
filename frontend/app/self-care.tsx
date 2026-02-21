@@ -1,0 +1,231 @@
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../src/context/ThemeContext';
+
+const SELF_CARE_TOOLS = [
+  {
+    id: 'journal',
+    title: 'My Journal',
+    description: 'Write down your thoughts',
+    icon: 'book',
+    color: '#3b82f6',
+    bgColor: '#dbeafe',
+    route: '/journal',
+  },
+  {
+    id: 'mood',
+    title: 'Daily Check-in',
+    description: 'Track how you\'re feeling',
+    icon: 'happy',
+    color: '#f59e0b',
+    bgColor: '#fef3c7',
+    route: '/mood',
+  },
+  {
+    id: 'grounding',
+    title: 'Grounding Tools',
+    description: '5-4-3-2-1 and more techniques',
+    icon: 'hand-left',
+    color: '#22c55e',
+    bgColor: '#dcfce7',
+    route: '/grounding',
+  },
+  {
+    id: 'breathing',
+    title: 'Breathing Exercises',
+    description: 'Box breathing & relaxation',
+    icon: 'cloud',
+    color: '#06b6d4',
+    bgColor: '#cffafe',
+    route: '/breathing-game',
+  },
+  {
+    id: 'local-services',
+    title: 'Find Local Support',
+    description: 'Services near you',
+    icon: 'location',
+    color: '#8b5cf6',
+    bgColor: '#ede9fe',
+    route: '/local-services',
+  },
+  {
+    id: 'resources',
+    title: 'Resources Library',
+    description: 'Helpful information',
+    icon: 'library',
+    color: '#ec4899',
+    bgColor: '#fce7f3',
+    route: '/resources',
+  },
+];
+
+export default function SelfCarePage() {
+  const router = useRouter();
+  const { colors, theme } = useTheme();
+
+  return (
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top']}>
+      <StatusBar barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
+      
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Self-Care Tools</Text>
+        <View style={styles.placeholder} />
+      </View>
+
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Intro Card */}
+        <View style={[styles.introCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={styles.introIconContainer}>
+            <Ionicons name="heart" size={28} color="#ec4899" />
+          </View>
+          <Text style={[styles.introTitle, { color: colors.text }]}>Take Care of Yourself</Text>
+          <Text style={[styles.introText, { color: colors.textSecondary }]}>
+            Small steps every day make a big difference. These tools are here to help you 
+            manage stress, track your wellbeing, and find support when you need it.
+          </Text>
+        </View>
+
+        {/* Tools Grid */}
+        <View style={styles.toolsGrid}>
+          {SELF_CARE_TOOLS.map((tool) => (
+            <TouchableOpacity
+              key={tool.id}
+              style={[styles.toolCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              onPress={() => router.push(tool.route as any)}
+              activeOpacity={0.8}
+              data-testid={`${tool.id}-tool-btn`}
+            >
+              <View style={[styles.toolIconContainer, { backgroundColor: tool.bgColor }]}>
+                <Ionicons name={tool.icon as any} size={28} color={tool.color} />
+              </View>
+              <Text style={[styles.toolTitle, { color: colors.text }]}>{tool.title}</Text>
+              <Text style={[styles.toolDescription, { color: colors.textSecondary }]}>{tool.description}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Bottom Note */}
+        <View style={styles.bottomNote}>
+          <Ionicons name="information-circle" size={18} color={colors.textSecondary} />
+          <Text style={[styles.bottomNoteText, { color: colors.textSecondary }]}>
+            If you're in crisis, call Samaritans on 116 123 or Combat Stress on 0800 138 1619
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+  },
+  backButton: {
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  placeholder: {
+    width: 32,
+  },
+  container: {
+    flex: 1,
+  },
+  content: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  introCard: {
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+  },
+  introIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#fce7f3',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  introTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  introText: {
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  toolsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  toolCard: {
+    width: '48%',
+    borderRadius: 14,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  toolIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  toolTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  toolDescription: {
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  bottomNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 24,
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  bottomNoteText: {
+    fontSize: 13,
+    textAlign: 'center',
+    flex: 1,
+  },
+});
