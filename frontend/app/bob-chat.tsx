@@ -79,7 +79,7 @@ export default function BobChatScreen() {
     if (hasLoadedSession && messages.length === 0) {
       const welcomeMessage: Message = {
         id: 'welcome',
-        text: "Alright mate, Bob here. Ex-Para, been around the block a bit. What's on your mind?",
+        text: "Hey, good to see you here. What's been going on?",
         sender: 'bob',
         timestamp: new Date(),
       };
