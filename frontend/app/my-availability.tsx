@@ -203,7 +203,7 @@ export default function MyAvailabilityScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              const token = await AsyncStorage.getItem('authToken');
+              const token = await AsyncStorage.getItem('auth_token');
               const response = await fetch(`${API_URL}/api/shifts/${shiftId}`, {
                 method: 'DELETE',
                 headers: token ? { 'Authorization': `Bearer ${token}` } : {},
