@@ -222,25 +222,25 @@ export default function PeerSupport() {
 
   if (showVeteransList) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-        <StatusBar barStyle="light-content" backgroundColor="#1a2332" />
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'bottom']}>
+        <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
         <ScrollView 
-          style={styles.container}
+          style={{ flex: 1, backgroundColor: colors.background }}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={() => setShowVeteransList(false)} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="#7c9cbf" />
+              <Ionicons name="arrow-back" size={24} color={colors.textSecondary} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Peer Supporters</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Peer Supporters</Text>
           </View>
 
           {/* Info */}
-          <View style={styles.infoBox}>
-            <Ionicons name="information-circle" size={20} color="#7c9cbf" />
-            <Text style={styles.infoText}>
+          <View style={[styles.infoBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Ionicons name="information-circle" size={20} color={colors.textSecondary} />
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
               Connect with fellow veterans who volunteer their time to support others. All conversations are confidential.
             </Text>
           </View>
@@ -248,8 +248,8 @@ export default function PeerSupport() {
           {/* Loading/Error/Empty States */}
           {isLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#4a90e2" />
-              <Text style={styles.loadingText}>Loading peer supporters...</Text>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading peer supporters...</Text>
             </View>
           ) : error ? (
             <View style={styles.errorContainer}>
@@ -261,19 +261,19 @@ export default function PeerSupport() {
             </View>
           ) : peerSupporters.filter(v => v.status !== 'unavailable').length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Ionicons name="time" size={32} color="#7c9cbf" />
-              <Text style={styles.emptyText}>No peer supporters available</Text>
-              <Text style={styles.emptySubtext}>Please check back later or register to become a supporter</Text>
+              <Ionicons name="time" size={32} color={colors.textSecondary} />
+              <Text style={[styles.emptyText, { color: colors.text }]}>No peer supporters available</Text>
+              <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>Please check back later or register to become a supporter</Text>
             </View>
           ) : (
             /* Veterans List */
             peerSupporters.filter(v => v.status !== 'unavailable').map((veteran, index) => (
-            <View key={veteran.id || index} style={styles.veteranCard}>
+            <View key={veteran.id || index} style={[styles.veteranCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={styles.veteranHeader}>
-                <Ionicons name="person-circle" size={40} color="#7c9cbf" />
+                <Ionicons name="person-circle" size={40} color={colors.textSecondary} />
                 <View style={styles.veteranMainInfo}>
                   <View style={styles.veteranNameRow}>
-                    <Text style={styles.veteranName}>{veteran.firstName}</Text>
+                    <Text style={[styles.veteranName, { color: colors.text }]}>{veteran.firstName}</Text>
                     <View style={[
                       styles.availabilityBadge,
                       veteran.status === 'available' ? styles.badgeAvailable : styles.badgeLimited
