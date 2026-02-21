@@ -119,7 +119,7 @@ export default function SplashScreen() {
 
           {/* Emergency Notice */}
           <View style={styles.emergencyNotice}>
-            <Ionicons name="shield-checkmark" size={16} color="#94a3b8" />
+            <Ionicons name="shield-checkmark" size={16} color="#ffffff" />
             <Text style={styles.emergencyText}>
               In an emergency, always call 999
             </Text>
