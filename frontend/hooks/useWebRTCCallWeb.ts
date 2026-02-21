@@ -265,6 +265,10 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
       audio.autoplay = true;
       audio.playsInline = true; // Required for mobile browsers
       audio.id = 'webrtc-remote-audio';
+      
+      // Force speaker output on mobile (not earpiece)
+      (audio as any).setSinkId?.('default').catch(() => {});
+      
       // Important: Don't hide the audio element on mobile as it can cause issues
       audio.style.position = 'fixed';
       audio.style.bottom = '0';
