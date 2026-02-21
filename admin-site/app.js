@@ -217,6 +217,12 @@ async function handleLogin(e) {
         currentUser = data.user;
         localStorage.setItem('auth_token', token);
         localStorage.setItem('current_user', JSON.stringify(currentUser));
+        localStorage.setItem('admin_token_time', Date.now().toString());
+        localStorage.setItem('admin_last_activity', Date.now().toString());
+        
+        // Setup activity tracking
+        setupActivityListeners();
+        resetInactivityTimer();
         
         // Show dashboard
         document.getElementById('user-name').textContent = `Welcome, ${currentUser.name}`;
@@ -231,10 +237,22 @@ async function handleLogin(e) {
 
 // Logout
 function handleLogout() {
+    logout();
+}
+
+function logout(silent = false) {
     token = null;
     currentUser = null;
     localStorage.removeItem('auth_token');
     localStorage.removeItem('current_user');
+    localStorage.removeItem('admin_token_time');
+    localStorage.removeItem('admin_last_activity');
+    
+    if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = null;
+    }
+    
     showScreen('login-screen');
     document.getElementById('login-form').reset();
 }
