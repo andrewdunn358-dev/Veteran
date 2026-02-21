@@ -570,6 +570,38 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#ffffff',
   },
+  calendarCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#243447',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#10b981',
+  },
+  calendarIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#064e3b',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  calendarContent: {
+    flex: 1,
+  },
+  calendarTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+  calendarSubtitle: {
+    fontSize: 13,
+    color: '#8899a6',
+    marginTop: 2,
+  },
   callbackCard: {
     backgroundColor: '#243447',
     borderRadius: 12,
