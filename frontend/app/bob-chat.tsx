@@ -289,7 +289,7 @@ export default function BobChatScreen() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: inputText.trim(),
-          sessionId: `bob-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          sessionId: sessionId,
           character: 'bob',
         }),
       });
@@ -301,6 +301,7 @@ export default function BobChatScreen() {
       // Check if safeguarding was triggered
       if (data.safeguardingTriggered) {
         setCurrentAlertId(data.safeguardingAlertId);
+        checkAvailability(); // Check who's available
         setShowSafeguardingModal(true);
       }
       
