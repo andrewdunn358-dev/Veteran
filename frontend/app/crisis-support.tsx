@@ -497,6 +497,45 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#ffcccc',
   },
+  aiBuddiesCard: {
+    backgroundColor: '#2d3748',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#4a5568',
+  },
+  aiBuddiesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  aiBuddiesAvatars: {
+    flexDirection: 'row',
+    marginRight: 12,
+  },
+  aiBuddyAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: '#1a2332',
+  },
+  aiBuddyAvatarOverlap: {
+    marginLeft: -12,
+  },
+  aiBuddiesTextContainer: {
+    flex: 1,
+  },
+  aiBuddiesTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  aiBuddiesSubtitle: {
+    fontSize: 13,
+    color: '#94a3b8',
+    marginTop: 2,
+  },
   counsellorsSection: {
     backgroundColor: '#2d3748',
     borderRadius: 12,
