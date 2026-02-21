@@ -3043,4 +3043,174 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 18,
   },
+  // CMS Styles
+  cmsContainer: {
+    padding: 16,
+  },
+  cmsActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 20,
+  },
+  seedButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#8b5cf6',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 6,
+  },
+  seedButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  addCmsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#22c55e',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 6,
+  },
+  addCmsButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  cmsHeading: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 12,
+  },
+  cmsPageCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#243447',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 8,
+  },
+  cmsPageCardSelected: {
+    backgroundColor: '#4a90d9',
+  },
+  cmsPageInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  cmsPageText: {
+    gap: 2,
+  },
+  cmsPageTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  cmsPageTitleSelected: {
+    color: '#fff',
+  },
+  cmsPageSlug: {
+    fontSize: 12,
+    color: '#8899a6',
+  },
+  cmsPageSlugSelected: {
+    color: '#bfdbfe',
+  },
+  cmsPageActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  cmsEditBtn: {
+    padding: 6,
+    backgroundColor: 'rgba(74, 144, 217, 0.2)',
+    borderRadius: 6,
+  },
+  cmsDeleteBtn: {
+    padding: 6,
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    borderRadius: 6,
+  },
+  cmsSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    marginBottom: 12,
+  },
+  addSmallBtn: {
+    backgroundColor: '#22c55e',
+    borderRadius: 6,
+    padding: 6,
+  },
+  cmsSectionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1e2d3d',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 6,
+    borderLeftWidth: 3,
+    borderLeftColor: '#4a90d9',
+  },
+  cmsSectionCardSelected: {
+    borderLeftColor: '#22c55e',
+    backgroundColor: '#243447',
+  },
+  cmsSectionInfo: {
+    gap: 4,
+  },
+  cmsSectionType: {
+    fontSize: 11,
+    color: '#4a90d9',
+    textTransform: 'uppercase',
+    fontWeight: '600',
+  },
+  cmsSectionTitle: {
+    fontSize: 14,
+    color: '#fff',
+  },
+  cmsSectionOrder: {
+    fontSize: 11,
+    color: '#64748b',
+  },
+  cmsCardItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1a2332',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 6,
+    marginLeft: 12,
+    borderLeftWidth: 2,
+    borderLeftColor: '#64748b',
+  },
+  cmsCardInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  cmsCardImageIcon: {
+    fontSize: 20,
+  },
+  cmsCardText: {
+    flex: 1,
+    gap: 2,
+  },
+  cmsCardTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  cmsCardDesc: {
+    fontSize: 12,
+    color: '#8899a6',
+  },
 });
