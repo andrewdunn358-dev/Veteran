@@ -630,6 +630,36 @@ const styles = StyleSheet.create({
     color: '#bfdbfe',
     marginTop: 4,
   },
+  bobCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2d3748',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#22c55e',
+  },
+  bobAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 14,
+  },
+  bobTextContainer: {
+    flex: 1,
+  },
+  bobTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  bobSubtitle: {
+    fontSize: 13,
+    color: '#94a3b8',
+    marginTop: 2,
+  },
   section: {
     backgroundColor: '#2d3748',
     borderRadius: 12,
