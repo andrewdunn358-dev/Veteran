@@ -164,40 +164,40 @@ export default function FamilyFriends() {
               <FontAwesome5 name="chevron-right" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionCard} onPress={() => setView('signs')}>
-              <View style={styles.actionIcon}>
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]} onPress={() => setView('signs')}>
+              <View style={[styles.actionIcon, { backgroundColor: colors.background }]}>
                 <FontAwesome5 name="search" size={24} color="#f59e0b" />
               </View>
               <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Signs to Look For</Text>
-                <Text style={styles.actionDesc}>Learn what changes might indicate someone needs support</Text>
+                <Text style={[styles.actionTitle, { color: colors.text }]}>Signs to Look For</Text>
+                <Text style={[styles.actionDesc, { color: colors.textSecondary }]}>Learn what changes might indicate someone needs support</Text>
               </View>
-              <FontAwesome5 name="chevron-right" size={16} color="#94a3b8" />
+              <FontAwesome5 name="chevron-right" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionCard} onPress={() => setView('resources')}>
-              <View style={styles.actionIcon}>
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]} onPress={() => setView('resources')}>
+              <View style={[styles.actionIcon, { backgroundColor: colors.background }]}>
                 <FontAwesome5 name="life-ring" size={24} color="#16a34a" />
               </View>
               <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Support Services</Text>
-                <Text style={styles.actionDesc}>Op Courage, Combat Stress, Men's Sheds & more</Text>
+                <Text style={[styles.actionTitle, { color: colors.text }]}>Support Services</Text>
+                <Text style={[styles.actionDesc, { color: colors.textSecondary }]}>Op Courage, Combat Stress, Men's Sheds & more</Text>
               </View>
-              <FontAwesome5 name="chevron-right" size={16} color="#94a3b8" />
+              <FontAwesome5 name="chevron-right" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionCard} onPress={() => setView('addiction')}>
-              <View style={[styles.actionIcon, { backgroundColor: '#fef3c7' }]}>
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]} onPress={() => setView('addiction')}>
+              <View style={[styles.actionIcon, { backgroundColor: colors.background }]}>
                 <FontAwesome5 name="wine-bottle" size={24} color="#d97706" />
               </View>
               <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Substance & Alcohol Support</Text>
-                <Text style={styles.actionDesc}>Help for addiction, alcoholism & recovery</Text>
+                <Text style={[styles.actionTitle, { color: colors.text }]}>Substance & Alcohol Support</Text>
+                <Text style={[styles.actionDesc, { color: colors.textSecondary }]}>Help for addiction, alcoholism & recovery</Text>
               </View>
-              <FontAwesome5 name="chevron-right" size={16} color="#94a3b8" />
+              <FontAwesome5 name="chevron-right" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionCard} onPress={() => setView('prison')}>
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]} onPress={() => setView('prison')}>
               <View style={[styles.actionIcon, { backgroundColor: '#e0e7ff' }]}>
                 <FontAwesome5 name="balance-scale" size={24} color="#4f46e5" />
               </View>
