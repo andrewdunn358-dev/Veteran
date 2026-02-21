@@ -368,6 +368,20 @@ export default function BobChatScreen() {
         </TouchableOpacity>
       )}
 
+      {/* AI Profile Card */}
+      {messages.length <= 1 && (
+        <View style={styles.aiProfileCard}>
+          <Image source={{ uri: BOB_AVATAR }} style={styles.aiProfileAvatar} />
+          <View style={styles.aiProfileInfo}>
+            <Text style={styles.aiProfileName}>Bob</Text>
+            <Text style={styles.aiProfileRole}>Ex-Para Peer Support</Text>
+            <Text style={styles.aiProfileDesc}>
+              British Army veteran. Here to listen, share a brew, and help you work through whatever is on your mind.
+            </Text>
+          </View>
+        </View>
+      )}
+
       {/* Messages */}
       <ScrollView 
         ref={scrollViewRef}
