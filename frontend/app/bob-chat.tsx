@@ -299,13 +299,10 @@ export default function BobChatScreen() {
       const data = await response.json();
       
       // Check if safeguarding was triggered
-      console.log('API Response safeguardingTriggered:', data.safeguardingTriggered, 'alertId:', data.safeguardingAlertId);
       if (data.safeguardingTriggered) {
-        console.log('Setting safeguarding modal to TRUE');
         setCurrentAlertId(data.safeguardingAlertId);
         checkAvailability(); // Check who's available
         setShowSafeguardingModal(true);
-        console.log('Safeguarding modal state set to true');
       }
       
       const bobMessage: Message = {
