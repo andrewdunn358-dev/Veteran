@@ -16,8 +16,17 @@ export default function Root({ children }: PropsWithChildren) {
         <style
           dangerouslySetInnerHTML={{
             __html: `
+              :root {
+                --app-background: #f5f7fa;
+                --app-border: #e5e7eb;
+              }
+              :root.dark-mode {
+                --app-background: #0f1419;
+                --app-border: #2d3748;
+              }
               html, body {
-                background-color: #0f1419 !important;
+                background-color: var(--app-background) !important;
+                transition: background-color 0.2s ease;
               }
               body > div:first-child { 
                 position: fixed !important; 
@@ -28,16 +37,30 @@ export default function Root({ children }: PropsWithChildren) {
                 bottom: 0; 
                 width: 100%;
                 max-width: 480px !important;
-                box-shadow: 0 0 40px rgba(0,0,0,0.5);
+                box-shadow: 0 0 40px rgba(0,0,0,0.3);
               }
               @media (min-width: 481px) {
                 body > div:first-child {
-                  border-left: 1px solid #2d3748;
-                  border-right: 1px solid #2d3748;
+                  border-left: 1px solid var(--app-border);
+                  border-right: 1px solid var(--app-border);
                 }
               }
               [role="tablist"] [role="tab"] * { overflow: visible !important; }
               [role="heading"], [role="heading"] * { overflow: visible !important; }
+            `,
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('@veterans_app_theme');
+                  if (theme === 'dark' || theme === '"dark"') {
+                    document.documentElement.classList.add('dark-mode');
+                  }
+                } catch(e) {}
+              })();
             `,
           }}
         />
@@ -49,7 +72,6 @@ export default function Root({ children }: PropsWithChildren) {
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          backgroundColor: "#0f1419",
         }}
       >
         {children}
