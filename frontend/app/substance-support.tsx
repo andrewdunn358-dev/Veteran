@@ -508,6 +508,40 @@ const createStyles = (colors: any, theme: string) => StyleSheet.create({
     padding: 16,
   },
 
+  // Margie Card
+  margieCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme === 'dark' ? '#451a03' : '#fffbeb',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#f59e0b',
+  },
+  margieAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: '#f59e0b',
+    marginRight: 14,
+  },
+  margieContent: {
+    flex: 1,
+  },
+  margieTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#f59e0b',
+    marginBottom: 4,
+  },
+  margieDesc: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    lineHeight: 18,
+  },
+
   // Hero Section
   heroCard: {
     backgroundColor: theme === 'dark' ? '#422006' : '#fffbeb',
