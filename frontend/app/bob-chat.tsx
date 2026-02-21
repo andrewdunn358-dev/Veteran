@@ -50,6 +50,15 @@ export default function BobChatScreen() {
   // Safeguarding state
   const [showSafeguardingModal, setShowSafeguardingModal] = useState(false);
   const [currentAlertId, setCurrentAlertId] = useState<string | null>(null);
+  const [safeguardingView, setSafeguardingView] = useState<'main' | 'callback' | 'connecting' | 'callback_success'>('main');
+  const [callbackPhone, setCallbackPhone] = useState('');
+  const [callbackName, setCallbackName] = useState('');
+  const [callbackEmail, setCallbackEmail] = useState('');
+  const [callbackMessage, setCallbackMessage] = useState('');
+  const [isSubmittingCallback, setIsSubmittingCallback] = useState(false);
+  const [availableStaff, setAvailableStaff] = useState<AvailableStaff>({ counsellors: [], peers: [] });
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [sessionId] = useState(() => `bob-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   
   // Verification modal state for returning users
   const [showVerifyModal, setShowVerifyModal] = useState(false);
