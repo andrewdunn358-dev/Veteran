@@ -300,6 +300,36 @@
         </div>
     </div>
 
+    <!-- Shift Modal -->
+    <div id="shift-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="shift-modal-title"><i class="fas fa-calendar-plus"></i> Add Shift</h3>
+                <button class="modal-close" onclick="closeShiftModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="shift-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <input type="time" id="shift-start" value="09:00" required>
+                </div>
+                <div class="form-group">
+                    <label>End Time</label>
+                    <input type="time" id="shift-end" value="17:00" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeShiftModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveShift()">
+                    <i class="fas fa-save"></i> Save Shift
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification Toast -->
     <div id="notification" class="notification hidden"></div>
 
