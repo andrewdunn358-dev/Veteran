@@ -1472,13 +1472,13 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.JWTError:
         raise HTTPException(status_code=401, detail="Could not validate credentials")
 
-def require_role(required_role: str):
-    """Dependency to check if user has required role"""
+def require_role(*required_roles: str):
+    """Dependency to check if user has one of the required roles"""
     async def role_checker(current_user: User = Depends(get_current_user)):
-        if current_user.role != required_role and current_user.role != "admin":
+        if current_user.role not in required_roles and current_user.role != "admin":
             raise HTTPException(
                 status_code=403,
-                detail=f"Access denied. Required role: {required_role}"
+                detail=f"Access denied. Required role: {', '.join(required_roles)}"
             )
         return current_user
     return role_checker
