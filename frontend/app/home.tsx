@@ -10,7 +10,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const NEW_LOGO_URL = 'https://customer-assets.emergentagent.com/job_wellness-vibes/artifacts/28igtlxj_image.png';
+const NEW_LOGO_URL = 'https://customer-assets.emergentagent.com/job_wellness-vibes/artifacts/um22zx0o_Gemini_Generated_Image_u4tpnxu4tpnxu4tp.png';
 
 // AI Team Avatars
 const AI_TEAM = [
