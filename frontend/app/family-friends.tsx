@@ -545,86 +545,89 @@ export default function FamilyFriends() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
+// Dynamic styles using theme colors
+const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    borderBottomColor: colors.border,
   },
   backButton: { padding: 8 },
-  headerTitle: { fontSize: 18, fontWeight: '600', color: '#1e293b' },
+  headerTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
   content: { flex: 1, padding: 16 },
   
   // Intro Card
   introCard: {
-    backgroundColor: '#eff6ff',
+    backgroundColor: isDark ? '#1e3a5f' : '#eff6ff',
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
     marginBottom: 20,
   },
-  introTitle: { fontSize: 22, fontWeight: '700', color: '#1e293b', marginTop: 16 },
-  introText: { fontSize: 15, color: '#475569', textAlign: 'center', marginTop: 8, lineHeight: 22 },
+  introTitle: { fontSize: 22, fontWeight: '700', color: colors.text, marginTop: 16 },
+  introText: { fontSize: 15, color: colors.textSecondary, textAlign: 'center', marginTop: 8, lineHeight: 22 },
   
   // Action Cards
   actionCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+    borderWidth: isDark ? 1 : 0,
+    borderColor: colors.border,
     ...Platform.select({
-      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
-      android: { elevation: 2 },
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: isDark ? 0 : 0.05, shadowRadius: 4 },
+      android: { elevation: isDark ? 0 : 2 },
     }),
   },
   actionIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: isDark ? '#334155' : '#f1f5f9',
     justifyContent: 'center',
     alignItems: 'center',
   },
   actionContent: { flex: 1, marginLeft: 12 },
-  actionTitle: { fontSize: 16, fontWeight: '600', color: '#1e293b' },
-  actionDesc: { fontSize: 13, color: '#64748b', marginTop: 2 },
+  actionTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  actionDesc: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
   
   // Tip Card
   tipCard: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: isDark ? '#451a03' : '#fef3c7',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
     gap: 12,
     marginTop: 8,
   },
-  tipText: { flex: 1, fontSize: 14, color: '#92400e', lineHeight: 20 },
+  tipText: { flex: 1, fontSize: 14, color: isDark ? '#fcd34d' : '#92400e', lineHeight: 20 },
   tipBold: { fontWeight: '700' },
   
   // Info Card (for addiction & prison sections)
   infoCard: {
-    backgroundColor: '#f0f9ff',
+    backgroundColor: isDark ? '#1e3a5f' : '#f0f9ff',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
     gap: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#bae6fd',
+    borderColor: isDark ? '#3b82f6' : '#bae6fd',
   },
-  infoText: { flex: 1, fontSize: 14, color: '#0369a1', lineHeight: 20 },
+  infoText: { flex: 1, fontSize: 14, color: isDark ? '#93c5fd' : '#0369a1', lineHeight: 20 },
   
   // Emergency Card
   emergencyCard: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: isDark ? '#450a0a' : '#fee2e2',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -632,22 +635,23 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: 12,
   },
-  emergencyText: { flex: 1, fontSize: 14, color: '#dc2626', fontWeight: '600' },
+  emergencyText: { flex: 1, fontSize: 14, color: isDark ? '#fca5a5' : '#dc2626', fontWeight: '600' },
   
   // Section Headers
-  sectionTitle: { fontSize: 24, fontWeight: '700', color: '#1e293b', marginBottom: 8 },
-  sectionSubtitle: { fontSize: 15, color: '#64748b', marginBottom: 20, lineHeight: 22 },
+  sectionTitle: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 8 },
+  sectionSubtitle: { fontSize: 15, color: colors.textSecondary, marginBottom: 20, lineHeight: 22 },
   
   // Form
   formSection: { marginBottom: 20 },
-  formLabel: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 8, marginTop: 16 },
+  formLabel: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 8, marginTop: 16 },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: colors.border,
     borderRadius: 10,
     padding: 14,
     fontSize: 16,
+    color: colors.text,
   },
   textArea: { height: 120, textAlignVertical: 'top' },
   
@@ -656,14 +660,14 @@ const styles = StyleSheet.create({
   signChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f1f5f9',
+    backgroundColor: isDark ? '#334155' : '#f1f5f9',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
     gap: 6,
   },
   signChipSelected: { backgroundColor: '#2563eb' },
-  signChipText: { fontSize: 13, color: '#64748b' },
+  signChipText: { fontSize: 13, color: colors.textSecondary },
   signChipTextSelected: { color: '#fff' },
   
   // Urgency Buttons
@@ -672,11 +676,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: isDark ? '#334155' : '#f1f5f9',
     alignItems: 'center',
   },
   urgencyBtnSelected: { backgroundColor: '#2563eb' },
-  urgencyBtnText: { fontSize: 14, color: '#64748b', fontWeight: '500' },
+  urgencyBtnText: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
   urgencyBtnTextSelected: { color: '#fff' },
   
   // Checkbox
@@ -686,12 +690,12 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#d1d5db',
+    borderColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxChecked: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  checkboxLabel: { flex: 1, fontSize: 14, color: '#475569' },
+  checkboxLabel: { flex: 1, fontSize: 14, color: colors.textSecondary },
   
   // Submit Button
   submitButton: {
@@ -708,43 +712,47 @@ const styles = StyleSheet.create({
   signCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
     gap: 12,
+    borderWidth: isDark ? 1 : 0,
+    borderColor: colors.border,
   },
   signIconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#eff6ff',
+    backgroundColor: isDark ? '#1e3a5f' : '#eff6ff',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  signLabel: { flex: 1, fontSize: 15, color: '#1e293b' },
+  signLabel: { flex: 1, fontSize: 15, color: colors.text },
   
   additionalSignsCard: {
-    backgroundColor: '#fff3cd',
+    backgroundColor: isDark ? '#451a03' : '#fff3cd',
     borderRadius: 12,
     padding: 16,
     marginTop: 12,
   },
-  additionalSignsTitle: { fontSize: 16, fontWeight: '600', color: '#92400e', marginBottom: 8 },
-  additionalSignsText: { fontSize: 14, color: '#92400e', marginBottom: 4 },
+  additionalSignsTitle: { fontSize: 16, fontWeight: '600', color: isDark ? '#fcd34d' : '#92400e', marginBottom: 8 },
+  additionalSignsText: { fontSize: 14, color: isDark ? '#fcd34d' : '#92400e', marginBottom: 4 },
   
   // Resource Cards
   resourceCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+    borderWidth: isDark ? 1 : 0,
+    borderColor: colors.border,
   },
   resourceContent: { flex: 1 },
-  resourceName: { fontSize: 16, fontWeight: '600', color: '#1e293b' },
-  resourceDesc: { fontSize: 13, color: '#64748b', marginTop: 2 },
+  resourceName: { fontSize: 16, fontWeight: '600', color: colors.text },
+  resourceDesc: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
   resourcePhone: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
   resourcePhoneText: { fontSize: 14, color: '#16a34a', fontWeight: '600' },
   
