@@ -879,6 +879,41 @@ const styles = StyleSheet.create({
     color: '#93c5fd',
     fontWeight: '500',
   },
+  aiProfileCard: {
+    flexDirection: 'row',
+    backgroundColor: '#1e3a5f',
+    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 4,
+    borderRadius: 14,
+    gap: 14,
+  },
+  aiProfileAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: '#3b82f6',
+  },
+  aiProfileInfo: {
+    flex: 1,
+  },
+  aiProfileName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  aiProfileRole: {
+    fontSize: 13,
+    color: '#93c5fd',
+    marginBottom: 6,
+  },
+  aiProfileDesc: {
+    fontSize: 13,
+    color: '#94a3b8',
+    lineHeight: 18,
+  },
   messagesContainer: {
     flex: 1,
   },
