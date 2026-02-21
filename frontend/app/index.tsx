@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,6 +7,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 // New transparent logo
 const NEW_LOGO_URL = 'https://customer-assets.emergentagent.com/job_wellness-vibes/artifacts/um22zx0o_Gemini_Generated_Image_u4tpnxu4tpnxu4tp.png';
+
+// Supporter logos
+const FRANKIES_POD_LOGO = 'https://customer-assets.emergentagent.com/job_626f7586-925a-4eee-97a9-1ff3951998a4/artifacts/lfa2324z_Frankies-Pod_Youtube_logo.png';
+const STANDING_TALL_LOGO = 'https://customer-assets.emergentagent.com/job_626f7586-925a-4eee-97a9-1ff3951998a4/artifacts/wn5tds79_image.png';
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -121,6 +125,35 @@ export default function SplashScreen() {
             <Text style={styles.emergencyText}>
               In an emergency, always call 999
             </Text>
+          </View>
+
+          {/* Supporter Logos */}
+          <View style={styles.supportersSection}>
+            <Text style={styles.supportersLabel}>Proudly supported by</Text>
+            <View style={styles.supportersLogos}>
+              <TouchableOpacity
+                onPress={() => Linking.openURL('https://www.youtube.com/@FrankiesPod')}
+                activeOpacity={0.8}
+                style={styles.supporterLogoWrapper}
+              >
+                <Image 
+                  source={{ uri: FRANKIES_POD_LOGO }}
+                  style={styles.supporterLogo}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => Linking.openURL('https://www.standingtall.co.uk/')}
+                activeOpacity={0.8}
+                style={styles.supporterLogoWrapper}
+              >
+                <Image 
+                  source={{ uri: STANDING_TALL_LOGO }}
+                  style={styles.supporterLogoStandingTall}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -276,6 +309,36 @@ const styles = StyleSheet.create({
   emergencyText: {
     fontSize: 14,
     color: '#94a3b8',
+  },
+  supportersSection: {
+    marginTop: 28,
+    alignItems: 'center',
+  },
+  supportersLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    marginBottom: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  supportersLogos: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 20,
+  },
+  supporterLogoWrapper: {
+    padding: 4,
+  },
+  supporterLogo: {
+    width: 100,
+    height: 50,
+  },
+  supporterLogoStandingTall: {
+    width: 80,
+    height: 60,
+    backgroundColor: '#fff',
+    borderRadius: 6,
   },
   // Cookie Notice
   cookieNotice: {
