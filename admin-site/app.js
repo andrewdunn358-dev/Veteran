@@ -1738,8 +1738,8 @@ async function loadSettings() {
         if (logoImg && siteSettings.logo_url) {
             logoImg.src = siteSettings.logo_url;
         } else if (logoImg) {
-            // Default logo
-            logoImg.src = 'https://customer-assets.emergentagent.com/job_22c2fac2-c7ea-4255-b9fb-379a93a49652/artifacts/vcqj3xma_logo.png';
+            // Default logo - use local asset
+            logoImg.src = 'logo.png';
         }
     } catch (error) {
         console.error('Error loading settings:', error);
