@@ -124,7 +124,7 @@ export default function BuddyFinderPage() {
       });
 
       if (res.ok) {
-        Alert.alert('Welcome!', 'Your profile has been created. Other veterans can now find you.');
+        Alert.alert('Welcome!', 'Your profile has been created. Other serving personnel and veterans can now find you.');
         setView('browse');
         loadData();
       } else {
@@ -142,7 +142,7 @@ export default function BuddyFinderPage() {
     <>
       {/* Filters */}
       <View style={styles.filterSection}>
-        <Text style={styles.filterLabel}>Find Veterans</Text>
+        <Text style={styles.filterLabel}>Find Serving Personnel & Veterans</Text>
         <View style={styles.filterRow}>
           <TouchableOpacity 
             style={[styles.filterDropdown, filterRegion && styles.filterActive]}
@@ -233,7 +233,7 @@ export default function BuddyFinderPage() {
         <FontAwesome5 name="shield-alt" size={24} color="#3b82f6" />
         <Text style={styles.gdprTitle}>Your Privacy Matters</Text>
         <Text style={styles.gdprText}>
-          We only collect information needed to connect you with other veterans. 
+          We only collect information needed to connect you with other serving personnel and veterans. 
           You can delete your profile at any time. Your data is handled in accordance with GDPR.
         </Text>
       </View>
@@ -345,7 +345,7 @@ export default function BuddyFinderPage() {
           {formData.gdpr_consent && <Ionicons name="checkmark" size={16} color="#fff" />}
         </View>
         <Text style={styles.consentText}>
-          I consent to my information being stored and shared with other veterans for the 
+          I consent to my information being stored and shared with other serving personnel and veterans for the 
           purpose of peer connection. I understand I can delete my profile at any time.
         </Text>
       </TouchableOpacity>
