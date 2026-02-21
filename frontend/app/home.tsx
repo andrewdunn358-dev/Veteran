@@ -40,13 +40,13 @@ const AI_TEAM = [
   },
   {
     name: 'Margie',
-    avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png',
+    avatar: 'https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/66c1d16c16a2b48675d2dd547d7c478f851091bca64411967ec1e1e493beb0ce.png',
     description: 'Alcohol & substance help',
     route: '/margie-chat',
   },
   {
     name: 'Hugo',
-    avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png',
+    avatar: 'https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/c442477c08a58f435e73415dff4c7f2949a6bb2f7cd718e02e540951182dc14b.png',
     description: 'Self-help & wellness',
     route: '/hugo-chat',
   },
