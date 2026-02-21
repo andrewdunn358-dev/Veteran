@@ -194,6 +194,12 @@ export default function BobChatScreen() {
 
       const data = await response.json();
       
+      // Check if safeguarding was triggered
+      if (data.safeguardingTriggered) {
+        setCurrentAlertId(data.safeguardingAlertId);
+        setShowSafeguardingModal(true);
+      }
+      
       const bobMessage: Message = {
         id: `bob-${Date.now()}`,
         text: data.reply || "I'm here to listen. Tell me more, mate.",
