@@ -735,6 +735,16 @@ AI_CHARACTERS = {
         "name": "Bob",
         "prompt": BOB_SYSTEM_PROMPT,
         "avatar": "https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png"
+    },
+    "margie": {
+        "name": "Margie",
+        "prompt": MARGIE_SYSTEM_PROMPT,
+        "avatar": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png"
+    },
+    "hugo": {
+        "name": "Hugo",
+        "prompt": HUGO_SYSTEM_PROMPT,
+        "avatar": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png"
     }
 }
 
