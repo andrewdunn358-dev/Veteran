@@ -68,6 +68,8 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const callTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentCallIdRef = useRef<string | null>(null);
+  const pendingIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
+  const hasRemoteDescriptionRef = useRef<boolean>(false);
 
   // Define cleanupCall first since it's used by many other functions
   const cleanupCallFn = () => {
@@ -83,6 +85,8 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     }
 
     currentCallIdRef.current = null;
+    pendingIceCandidatesRef.current = [];
+    hasRemoteDescriptionRef.current = false;
     setCallState('idle');
     setCallInfo(null);
     setCallDuration(0);
