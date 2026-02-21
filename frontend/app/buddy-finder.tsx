@@ -1,979 +1,735 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  TouchableOpacity, 
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
   StyleSheet,
+  ScrollView,
+  StatusBar,
   TextInput,
+  Alert,
   ActivityIndicator,
-  Modal
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../src/context/ThemeContext';
 
-// Service branches
-const SERVICE_BRANCHES = [
-  { id: 'army', name: 'British Army', icon: 'shield', color: '#dc2626' },
-  { id: 'navy', name: 'Royal Navy', icon: 'boat', color: '#1d4ed8' },
-  { id: 'raf', name: 'Royal Air Force', icon: 'airplane', color: '#0891b2' },
-  { id: 'marines', name: 'Royal Marines', icon: 'fitness', color: '#15803d' },
-];
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
-// UK Regions
-const UK_REGIONS = [
-  'London & South East',
-  'South West',
-  'East of England',
-  'East Midlands',
-  'West Midlands',
-  'Yorkshire & Humber',
-  'North West',
-  'North East',
-  'Scotland',
-  'Wales',
-  'Northern Ireland',
-  'Overseas/Germany (BAOR)',
-  'Overseas/Cyprus',
-  'Overseas/Other',
-];
+interface BuddyProfile {
+  id: string;
+  display_name: string;
+  region: string;
+  service_branch: string;
+  regiment?: string;
+  years_served?: string;
+  bio?: string;
+  interests: string[];
+  last_active: string;
+}
 
-// Regiments by service (since 1970)
-const REGIMENTS = {
-  army: [
-    {
-      category: 'Household Cavalry',
-      units: [
-        'The Life Guards',
-        'The Blues and Royals (Royal Horse Guards and 1st Dragoons)',
-      ]
-    },
-    {
-      category: 'Foot Guards',
-      units: [
-        'Grenadier Guards',
-        'Coldstream Guards',
-        'Scots Guards',
-        'Irish Guards',
-        'Welsh Guards',
-      ]
-    },
-    {
-      category: 'Royal Armoured Corps',
-      units: [
-        '1st The Queen\'s Dragoon Guards',
-        'Royal Scots Dragoon Guards (Carabiniers and Greys)',
-        'Royal Dragoon Guards',
-        'Queen\'s Royal Hussars (The Queen\'s Own and Royal Irish)',
-        '9th/12th Royal Lancers (Prince of Wales\'s)',
-        'King\'s Royal Hussars',
-        'Light Dragoons',
-        'Royal Tank Regiment',
-        '13th/18th Royal Hussars (Queen Mary\'s Own)',
-        '14th/20th King\'s Hussars',
-        '15th/19th The King\'s Royal Hussars',
-        '16th/5th The Queen\'s Royal Lancers',
-        '17th/21st Lancers',
-        '4th/7th Royal Dragoon Guards',
-        '5th Royal Inniskilling Dragoon Guards',
-      ]
-    },
-    {
-      category: 'Infantry - Scottish',
-      units: [
-        'Royal Regiment of Scotland',
-        'Royal Scots (The Royal Regiment)',
-        'Royal Highland Fusiliers',
-        'King\'s Own Scottish Borderers',
-        'Black Watch (Royal Highland Regiment)',
-        'Queen\'s Own Highlanders (Seaforth and Camerons)',
-        'Gordon Highlanders',
-        'Argyll and Sutherland Highlanders',
-        'Cameronians (Scottish Rifles)',
-      ]
-    },
-    {
-      category: 'Infantry - English',
-      units: [
-        'Royal Regiment of Fusiliers',
-        'Royal Anglian Regiment',
-        'Princess of Wales\'s Royal Regiment',
-        'Duke of Lancaster\'s Regiment',
-        'Yorkshire Regiment',
-        'Mercian Regiment',
-        'The Rifles',
-        'Queen\'s Regiment',
-        'Royal Hampshire Regiment',
-        'Gloucestershire Regiment',
-        'Worcestershire and Sherwood Foresters',
-        'Staffordshire Regiment',
-        'Cheshire Regiment',
-        'Royal Green Jackets',
-        'Light Infantry',
-        'Devon and Dorset Regiment',
-        'Royal Berkshire Regiment',
-        'Duke of Edinburgh\'s Royal Regiment',
-        'King\'s Regiment',
-        'King\'s Own Royal Border Regiment',
-        'Queen\'s Lancashire Regiment',
-        'Duke of Wellington\'s Regiment',
-        'Green Howards',
-        'Prince of Wales\'s Own Regiment of Yorkshire',
-      ]
-    },
-    {
-      category: 'Infantry - Welsh',
-      units: [
-        'Royal Welsh',
-        'Royal Regiment of Wales',
-        'Royal Welch Fusiliers',
-      ]
-    },
-    {
-      category: 'Infantry - Irish',
-      units: [
-        'Royal Irish Regiment',
-        'Royal Irish Rangers',
-        'Ulster Defence Regiment',
-      ]
-    },
-    {
-      category: 'Infantry - Airborne & Special',
-      units: [
-        'Parachute Regiment',
-        'Special Air Service (SAS)',
-        'Royal Gurkha Rifles',
-        '2nd King Edward VII\'s Own Gurkha Rifles',
-        '6th Queen Elizabeth\'s Own Gurkha Rifles',
-        '7th Duke of Edinburgh\'s Own Gurkha Rifles',
-        '10th Princess Mary\'s Own Gurkha Rifles',
-      ]
-    },
-    {
-      category: 'Royal Artillery',
-      units: [
-        'Royal Regiment of Artillery',
-        'Royal Horse Artillery',
-      ]
-    },
-    {
-      category: 'Royal Engineers',
-      units: [
-        'Corps of Royal Engineers',
-      ]
-    },
-    {
-      category: 'Royal Signals',
-      units: [
-        'Royal Corps of Signals',
-      ]
-    },
-    {
-      category: 'Army Air Corps',
-      units: [
-        'Army Air Corps',
-      ]
-    },
-    {
-      category: 'Logistics & Support',
-      units: [
-        'Royal Logistic Corps',
-        'Royal Army Medical Corps',
-        'Royal Electrical and Mechanical Engineers',
-        'Adjutant General\'s Corps',
-        'Royal Army Veterinary Corps',
-        'Royal Army Dental Corps',
-        'Intelligence Corps',
-        'Royal Army Physical Training Corps',
-        'Royal Military Police',
-      ]
-    },
-  ],
-  navy: [
-    {
-      category: 'Surface Fleet',
-      units: [
-        'HMS Ark Royal',
-        'HMS Invincible',
-        'HMS Illustrious',
-        'HMS Ocean',
-        'HMS Bulwark',
-        'HMS Albion',
-        'HMS Queen Elizabeth',
-        'HMS Prince of Wales',
-        'HMS Belfast',
-        'Type 42 Destroyer',
-        'Type 45 Destroyer',
-        'Type 23 Frigate',
-        'Type 26 Frigate',
-      ]
-    },
-    {
-      category: 'Submarine Service',
-      units: [
-        'HMS Vanguard',
-        'HMS Victorious',
-        'HMS Vigilant',
-        'HMS Vengeance',
-        'HMS Astute',
-        'Polaris Submarine',
-        'Trident Submarine',
-      ]
-    },
-    {
-      category: 'Fleet Air Arm',
-      units: [
-        'Fleet Air Arm',
-        '800 Naval Air Squadron',
-        '801 Naval Air Squadron',
-        '820 Naval Air Squadron',
-        '845 Naval Air Squadron',
-        '846 Naval Air Squadron',
-        '849 Naval Air Squadron',
-      ]
-    },
-  ],
-  raf: [
-    {
-      category: 'Fighter Command',
-      units: [
-        'No. 1 Squadron',
-        'No. 2 Squadron',
-        'No. 3 Squadron',
-        'No. 6 Squadron',
-        'No. 11 Squadron',
-        'No. 12 Squadron',
-        'No. 14 Squadron',
-        'No. 17 Squadron',
-        'No. 29 Squadron',
-        'No. 43 Squadron',
-        'No. 54 Squadron',
-        'No. 56 Squadron',
-        'No. 111 Squadron',
-      ]
-    },
-    {
-      category: 'Bomber/Strike',
-      units: [
-        'No. 9 Squadron',
-        'No. 12 Squadron',
-        'No. 27 Squadron',
-        'No. 31 Squadron',
-        'No. 617 Squadron (Dambusters)',
-      ]
-    },
-    {
-      category: 'Transport',
-      units: [
-        'No. 10 Squadron',
-        'No. 24 Squadron',
-        'No. 30 Squadron',
-        'No. 47 Squadron',
-        'No. 70 Squadron',
-        'No. 99 Squadron',
-        'No. 101 Squadron',
-      ]
-    },
-    {
-      category: 'Support',
-      units: [
-        'RAF Regiment',
-        'RAF Police',
-        'RAF Medical Services',
-      ]
-    },
-  ],
-  marines: [
-    {
-      category: 'Commando Units',
-      units: [
-        '40 Commando',
-        '42 Commando',
-        '45 Commando',
-        'Commando Logistics Regiment',
-        'Commando Helicopter Force',
-        '539 Assault Squadron',
-        '30 Commando Information Exploitation Group',
-        '43 Commando Fleet Protection Group',
-        'Special Boat Service (SBS)',
-      ]
-    },
-    {
-      category: 'Support Units',
-      units: [
-        '29 Commando Regiment Royal Artillery',
-        '24 Commando Royal Engineers',
-        'Commando Training Centre',
-      ]
-    },
-  ],
-};
-
-// Sample veterans data (in production this would come from backend)
-const SAMPLE_VETERANS = [
-  { id: '1', name: 'Dave M.', service: 'army', region: 'North West', regiment: 'Royal Regiment of Fusiliers', years: '1995-2010' },
-  { id: '2', name: 'Steve R.', service: 'army', region: 'Yorkshire & Humber', regiment: 'Yorkshire Regiment', years: '2001-2015' },
-  { id: '3', name: 'Mike T.', service: 'navy', region: 'South West', regiment: 'HMS Ocean', years: '1998-2012' },
-  { id: '4', name: 'John B.', service: 'raf', region: 'East of England', regiment: 'No. 617 Squadron (Dambusters)', years: '2005-2018' },
-  { id: '5', name: 'Chris P.', service: 'marines', region: 'Scotland', regiment: '45 Commando', years: '2000-2014' },
-  { id: '6', name: 'Paul W.', service: 'army', region: 'London & South East', regiment: 'Parachute Regiment', years: '1992-2008' },
-  { id: '7', name: 'Gary L.', service: 'army', region: 'West Midlands', regiment: 'Mercian Regiment', years: '2003-2016' },
-  { id: '8', name: 'Ian K.', service: 'navy', region: 'Scotland', regiment: 'HMS Illustrious', years: '1997-2011' },
-  { id: '9', name: 'Rob H.', service: 'army', region: 'North East', regiment: 'Green Howards', years: '1985-2000' },
-  { id: '10', name: 'Kev D.', service: 'army', region: 'Overseas/Germany (BAOR)', regiment: 'Royal Tank Regiment', years: '1988-2004' },
-];
-
-export default function BuddyFinderScreen() {
+export default function BuddyFinderPage() {
   const router = useRouter();
-  const { isDark } = useTheme();
-  const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-  const [selectedRegiment, setSelectedRegiment] = useState<string | null>(null);
-  const [showRegimentPicker, setShowRegimentPicker] = useState(false);
-  const [searchResults, setSearchResults] = useState<typeof SAMPLE_VETERANS>([]);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
+  const [view, setView] = useState<'browse' | 'signup' | 'profile'>('browse');
+  const [profiles, setProfiles] = useState<BuddyProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [regions, setRegions] = useState<string[]>([]);
+  const [branches, setBranches] = useState<string[]>([]);
+  
+  // Filter state
+  const [filterRegion, setFilterRegion] = useState('');
+  const [filterBranch, setFilterBranch] = useState('');
+  
+  // Signup form state
+  const [formData, setFormData] = useState({
+    display_name: '',
+    region: '',
+    service_branch: '',
+    regiment: '',
+    years_served: '',
+    bio: '',
+    interests: '',
+    contact_preference: 'in_app',
+    email: '',
+    gdpr_consent: false,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSearch = () => {
-    setIsSearching(true);
-    setHasSearched(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      let results = SAMPLE_VETERANS;
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [profilesRes, regionsRes, branchesRes] = await Promise.all([
+        fetch(`${API_URL}/api/buddy-finder/profiles`),
+        fetch(`${API_URL}/api/buddy-finder/regions`),
+        fetch(`${API_URL}/api/buddy-finder/branches`),
+      ]);
       
-      if (selectedService) {
-        results = results.filter(v => v.service === selectedService);
-      }
-      if (selectedRegion) {
-        results = results.filter(v => v.region === selectedRegion);
-      }
-      if (selectedRegiment) {
-        results = results.filter(v => v.regiment === selectedRegiment);
-      }
+      const profilesData = await profilesRes.json();
+      const regionsData = await regionsRes.json();
+      const branchesData = await branchesRes.json();
       
-      setSearchResults(results);
-      setIsSearching(false);
-    }, 500);
+      setProfiles(Array.isArray(profilesData) ? profilesData : []);
+      setRegions(regionsData.regions || []);
+      setBranches(branchesData.branches || []);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const clearFilters = () => {
-    setSelectedService(null);
-    setSelectedRegion(null);
-    setSelectedRegiment(null);
-    setSearchResults([]);
-    setHasSearched(false);
+  const searchProfiles = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (filterRegion) params.append('region', filterRegion);
+      if (filterBranch) params.append('service_branch', filterBranch);
+      
+      const res = await fetch(`${API_URL}/api/buddy-finder/profiles?${params}`);
+      const data = await res.json();
+      setProfiles(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getServiceInfo = (serviceId: string) => {
-    return SERVICE_BRANCHES.find(s => s.id === serviceId);
+  const handleSignup = async () => {
+    if (!formData.gdpr_consent) {
+      Alert.alert('Consent Required', 'Please accept the GDPR consent to continue.');
+      return;
+    }
+    if (!formData.display_name || !formData.region || !formData.service_branch) {
+      Alert.alert('Required Fields', 'Please fill in your name, region, and service branch.');
+      return;
+    }
+    if (formData.contact_preference === 'email' && !formData.email) {
+      Alert.alert('Email Required', 'Please provide an email for contact preference.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`${API_URL}/api/buddy-finder/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          interests: formData.interests.split(',').map(i => i.trim()).filter(i => i),
+        }),
+      });
+
+      if (res.ok) {
+        Alert.alert('Welcome!', 'Your profile has been created. Other veterans can now find you.');
+        setView('browse');
+        loadData();
+      } else {
+        const error = await res.json();
+        Alert.alert('Error', error.detail || 'Failed to create profile');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to create profile. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const getRegimentsForService = () => {
-    if (!selectedService) return [];
-    return REGIMENTS[selectedService] || [];
-  };
-
-  return (
-    <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
+  const renderBrowse = () => (
+    <>
+      {/* Filters */}
+      <View style={styles.filterSection}>
+        <Text style={styles.filterLabel}>Find Veterans</Text>
+        <View style={styles.filterRow}>
           <TouchableOpacity 
-            style={styles.backButton} 
-            onPress={() => router.back()}
+            style={[styles.filterDropdown, filterRegion && styles.filterActive]}
+            onPress={() => {
+              const idx = regions.indexOf(filterRegion);
+              setFilterRegion(idx < regions.length - 1 ? regions[idx + 1] : '');
+            }}
           >
-            <Ionicons name="arrow-back" size={24} color={isDark ? '#ffffff' : '#1e293b'} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, isDark && styles.textLight]}>Buddy Finder</Text>
-          <View style={styles.placeholder} />
-        </View>
-
-        {/* Intro */}
-        <View style={[styles.introCard, isDark && styles.cardDark]}>
-          <Ionicons name="people" size={32} color="#3b82f6" />
-          <Text style={[styles.introTitle, isDark && styles.textLight]}>Find Fellow Veterans</Text>
-          <Text style={[styles.introText, isDark && styles.textMuted]}>
-            Connect with veterans who served in the same branch or region. 
-            Sometimes it helps to talk to someone who's walked a similar path.
-          </Text>
-        </View>
-
-        {/* Service Branch Filter */}
-        <View style={styles.filterSection}>
-          <Text style={[styles.filterLabel, isDark && styles.textLight]}>Service Branch</Text>
-          <View style={styles.serviceGrid}>
-            {SERVICE_BRANCHES.map((service) => (
-              <TouchableOpacity
-                key={service.id}
-                style={[
-                  styles.serviceButton,
-                  isDark && styles.serviceButtonDark,
-                  selectedService === service.id && { backgroundColor: service.color, borderColor: service.color }
-                ]}
-                onPress={() => setSelectedService(selectedService === service.id ? null : service.id)}
-              >
-                <Ionicons 
-                  name={service.icon as any} 
-                  size={20} 
-                  color={selectedService === service.id ? '#ffffff' : service.color} 
-                />
-                <Text style={[
-                  styles.serviceButtonText,
-                  isDark && styles.textMuted,
-                  selectedService === service.id && styles.serviceButtonTextSelected
-                ]}>
-                  {service.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Region Filter */}
-        <View style={styles.filterSection}>
-          <Text style={[styles.filterLabel, isDark && styles.textLight]}>Region</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.regionScroll}>
-            {UK_REGIONS.map((region) => (
-              <TouchableOpacity
-                key={region}
-                style={[
-                  styles.regionChip,
-                  isDark && styles.regionChipDark,
-                  selectedRegion === region && styles.regionChipSelected
-                ]}
-                onPress={() => setSelectedRegion(selectedRegion === region ? null : region)}
-              >
-                <Text style={[
-                  styles.regionChipText,
-                  isDark && styles.textMuted,
-                  selectedRegion === region && styles.regionChipTextSelected
-                ]}>
-                  {region}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Regiment Filter - Only show if service is selected */}
-        {selectedService && (
-          <View style={styles.filterSection}>
-            <Text style={[styles.filterLabel, isDark && styles.textLight]}>Regiment / Unit</Text>
-            <TouchableOpacity
-              style={[styles.regimentSelector, isDark && styles.regimentSelectorDark]}
-              onPress={() => setShowRegimentPicker(true)}
-            >
-              <Ionicons name="list" size={20} color={isDark ? '#94a3b8' : '#64748b'} />
-              <Text style={[
-                styles.regimentSelectorText,
-                isDark && styles.textMuted,
-                selectedRegiment && styles.regimentSelectorTextSelected
-              ]}>
-                {selectedRegiment || 'Select Regiment / Unit (Optional)'}
-              </Text>
-              <Ionicons name="chevron-down" size={20} color={isDark ? '#94a3b8' : '#64748b'} />
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* Regiment Picker Modal */}
-        <Modal
-          visible={showRegimentPicker}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setShowRegimentPicker(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, isDark && styles.modalContentDark]}>
-              <View style={styles.modalHeader}>
-                <Text style={[styles.modalTitle, isDark && styles.textLight]}>Select Regiment / Unit</Text>
-                <TouchableOpacity onPress={() => setShowRegimentPicker(false)}>
-                  <Ionicons name="close" size={24} color={isDark ? '#ffffff' : '#1e293b'} />
-                </TouchableOpacity>
-              </View>
-              <ScrollView style={styles.modalScroll}>
-                {/* Clear selection option */}
-                <TouchableOpacity
-                  style={[styles.regimentItem, isDark && styles.regimentItemDark]}
-                  onPress={() => {
-                    setSelectedRegiment(null);
-                    setShowRegimentPicker(false);
-                  }}
-                >
-                  <Text style={[styles.regimentItemText, isDark && styles.textMuted]}>
-                    Any Regiment / Unit
-                  </Text>
-                </TouchableOpacity>
-                
-                {getRegimentsForService().map((category) => (
-                  <View key={category.category}>
-                    <Text style={[styles.categoryHeader, isDark && styles.textLight]}>
-                      {category.category}
-                    </Text>
-                    {category.units.map((unit) => (
-                      <TouchableOpacity
-                        key={unit}
-                        style={[
-                          styles.regimentItem,
-                          isDark && styles.regimentItemDark,
-                          selectedRegiment === unit && styles.regimentItemSelected
-                        ]}
-                        onPress={() => {
-                          setSelectedRegiment(unit);
-                          setShowRegimentPicker(false);
-                        }}
-                      >
-                        <Text style={[
-                          styles.regimentItemText,
-                          isDark && styles.textMuted,
-                          selectedRegiment === unit && styles.regimentItemTextSelected
-                        ]}>
-                          {unit}
-                        </Text>
-                        {selectedRegiment === unit && (
-                          <Ionicons name="checkmark" size={20} color="#3b82f6" />
-                        )}
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                ))}
-              </ScrollView>
-            </View>
-          </View>
-        </Modal>
-
-        {/* Search Button */}
-        <View style={styles.searchActions}>
-          <TouchableOpacity 
-            style={styles.searchButton}
-            onPress={handleSearch}
-          >
-            <Ionicons name="search" size={20} color="#ffffff" />
-            <Text style={styles.searchButtonText}>Find Veterans</Text>
+            <Text style={styles.filterText}>{filterRegion || 'Any Region'}</Text>
+            <Ionicons name="chevron-down" size={16} color="#94a3b8" />
           </TouchableOpacity>
           
-          {(selectedService || selectedRegion) && (
-            <TouchableOpacity 
-              style={[styles.clearButton, isDark && styles.clearButtonDark]}
-              onPress={clearFilters}
-            >
-              <Ionicons name="close-circle" size={18} color={isDark ? '#94a3b8' : '#64748b'} />
-              <Text style={[styles.clearButtonText, isDark && styles.textMuted]}>Clear</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity 
+            style={[styles.filterDropdown, filterBranch && styles.filterActive]}
+            onPress={() => {
+              const idx = branches.indexOf(filterBranch);
+              setFilterBranch(idx < branches.length - 1 ? branches[idx + 1] : '');
+            }}
+          >
+            <Text style={styles.filterText}>{filterBranch || 'Any Branch'}</Text>
+            <Ionicons name="chevron-down" size={16} color="#94a3b8" />
+          </TouchableOpacity>
         </View>
+        <TouchableOpacity style={styles.searchButton} onPress={searchProfiles}>
+          <Ionicons name="search" size={18} color="#fff" />
+          <Text style={styles.searchButtonText}>Search</Text>
+        </TouchableOpacity>
+      </View>
 
-        {/* Results */}
-        {isSearching && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#3b82f6" />
-            <Text style={[styles.loadingText, isDark && styles.textMuted]}>Searching...</Text>
-          </View>
-        )}
-
-        {hasSearched && !isSearching && (
-          <View style={styles.resultsSection}>
-            <Text style={[styles.resultsTitle, isDark && styles.textLight]}>
-              {searchResults.length} {searchResults.length === 1 ? 'Veteran' : 'Veterans'} Found
-            </Text>
-            
-            {searchResults.length === 0 ? (
-              <View style={[styles.noResultsCard, isDark && styles.cardDark]}>
-                <Ionicons name="search-outline" size={48} color="#94a3b8" />
-                <Text style={[styles.noResultsText, isDark && styles.textMuted]}>
-                  No veterans found matching your criteria. Try adjusting your filters.
-                </Text>
+      {/* Results */}
+      {loading ? (
+        <ActivityIndicator size="large" color="#3b82f6" style={{ marginTop: 40 }} />
+      ) : profiles.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Ionicons name="people-outline" size={64} color="#475569" />
+          <Text style={styles.emptyTitle}>No Veterans Found</Text>
+          <Text style={styles.emptyText}>Be the first to join from your area!</Text>
+          <TouchableOpacity style={styles.signupPrompt} onPress={() => setView('signup')}>
+            <Text style={styles.signupPromptText}>Sign Up Now</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <ScrollView style={styles.profilesList} showsVerticalScrollIndicator={false}>
+          {profiles.map((profile) => (
+            <TouchableOpacity key={profile.id} style={styles.profileCard}>
+              <View style={styles.profileHeader}>
+                <View style={styles.avatarPlaceholder}>
+                  <Text style={styles.avatarText}>
+                    {profile.display_name.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+                <View style={styles.profileInfo}>
+                  <Text style={styles.profileName}>{profile.display_name}</Text>
+                  <Text style={styles.profileMeta}>
+                    {profile.service_branch} - {profile.region}
+                  </Text>
+                  {profile.regiment && (
+                    <Text style={styles.profileRegiment}>{profile.regiment}</Text>
+                  )}
+                </View>
               </View>
-            ) : (
-              searchResults.map((veteran) => {
-                const serviceInfo = getServiceInfo(veteran.service);
-                return (
-                  <View key={veteran.id} style={[styles.veteranCard, isDark && styles.cardDark]}>
-                    <View style={[styles.veteranAvatar, { backgroundColor: serviceInfo?.color || '#64748b' }]}>
-                      <Ionicons name={serviceInfo?.icon as any || 'person'} size={24} color="#ffffff" />
+              {profile.bio && (
+                <Text style={styles.profileBio} numberOfLines={2}>{profile.bio}</Text>
+              )}
+              {profile.interests.length > 0 && (
+                <View style={styles.interestsTags}>
+                  {profile.interests.slice(0, 3).map((interest, idx) => (
+                    <View key={idx} style={styles.interestTag}>
+                      <Text style={styles.interestText}>{interest}</Text>
                     </View>
-                    <View style={styles.veteranInfo}>
-                      <Text style={[styles.veteranName, isDark && styles.textLight]}>{veteran.name}</Text>
-                      <Text style={[styles.veteranDetail, isDark && styles.textMuted]}>
-                        {serviceInfo?.name} • {veteran.regiment}
-                      </Text>
-                      <Text style={[styles.veteranDetail, isDark && styles.textMuted]}>
-                        {veteran.region} • Served {veteran.years}
-                      </Text>
-                    </View>
-                    <TouchableOpacity style={styles.connectButton}>
-                      <Ionicons name="chatbubble-ellipses" size={20} color="#3b82f6" />
-                    </TouchableOpacity>
-                  </View>
-                );
-              })
-            )}
-          </View>
-        )}
+                  ))}
+                </View>
+              )}
+              <TouchableOpacity style={styles.connectButton}>
+                <Ionicons name="chatbubble-outline" size={16} color="#3b82f6" />
+                <Text style={styles.connectText}>Send Message</Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
+    </>
+  );
 
-        {/* Info Notice */}
-        <View style={[styles.infoNotice, isDark && styles.infoNoticeDark]}>
-          <Ionicons name="information-circle" size={20} color="#3b82f6" />
-          <Text style={[styles.infoNoticeText, isDark && styles.textMuted]}>
-            This is a peer connection feature. All communications are voluntary 
-            and should not replace professional support.
-          </Text>
+  const renderSignup = () => (
+    <ScrollView style={styles.signupForm} showsVerticalScrollIndicator={false}>
+      <View style={styles.gdprNotice}>
+        <FontAwesome5 name="shield-alt" size={24} color="#3b82f6" />
+        <Text style={styles.gdprTitle}>Your Privacy Matters</Text>
+        <Text style={styles.gdprText}>
+          We only collect information needed to connect you with other veterans. 
+          You can delete your profile at any time. Your data is handled in accordance with GDPR.
+        </Text>
+      </View>
+
+      <Text style={styles.inputLabel}>Display Name *</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="How you want to be known (can be a nickname)"
+        placeholderTextColor="#64748b"
+        value={formData.display_name}
+        onChangeText={(text) => setFormData({...formData, display_name: text})}
+      />
+
+      <Text style={styles.inputLabel}>Region *</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pickerScroll}>
+        <View style={styles.pickerWrapper}>
+          {regions.map((region) => (
+            <TouchableOpacity
+              key={region}
+              style={[
+                styles.pickerOption,
+                formData.region === region && styles.pickerOptionSelected
+              ]}
+              onPress={() => setFormData({...formData, region})}
+            >
+              <Text style={[
+                styles.pickerOptionText,
+                formData.region === region && styles.pickerOptionTextSelected
+              ]}>{region}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
-
-        <View style={{ height: 40 }} />
       </ScrollView>
+
+      <Text style={styles.inputLabel}>Service Branch *</Text>
+      <View style={styles.pickerWrapperWrap}>
+        {branches.map((branch) => (
+          <TouchableOpacity
+            key={branch}
+            style={[
+              styles.pickerOption,
+              formData.service_branch === branch && styles.pickerOptionSelected
+            ]}
+            onPress={() => setFormData({...formData, service_branch: branch})}
+          >
+            <Text style={[
+              styles.pickerOptionText,
+              formData.service_branch === branch && styles.pickerOptionTextSelected
+            ]}>{branch}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <Text style={styles.inputLabel}>Regiment (Optional)</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="e.g., Royal Anglian Regiment"
+        placeholderTextColor="#64748b"
+        value={formData.regiment}
+        onChangeText={(text) => setFormData({...formData, regiment: text})}
+      />
+
+      <Text style={styles.inputLabel}>Years Served (Optional)</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="e.g., 1990-2005"
+        placeholderTextColor="#64748b"
+        value={formData.years_served}
+        onChangeText={(text) => setFormData({...formData, years_served: text})}
+      />
+
+      <Text style={styles.inputLabel}>About You (Optional)</Text>
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        placeholder="A brief introduction..."
+        placeholderTextColor="#64748b"
+        value={formData.bio}
+        onChangeText={(text) => setFormData({...formData, bio: text})}
+        multiline
+        numberOfLines={3}
+      />
+
+      <Text style={styles.inputLabel}>Interests (Optional)</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="e.g., hiking, fishing, football (comma separated)"
+        placeholderTextColor="#64748b"
+        value={formData.interests}
+        onChangeText={(text) => setFormData({...formData, interests: text})}
+      />
+
+      <Text style={styles.inputLabel}>Email (for account recovery)</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="your.email@example.com"
+        placeholderTextColor="#64748b"
+        value={formData.email}
+        onChangeText={(text) => setFormData({...formData, email: text})}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+
+      {/* GDPR Consent */}
+      <TouchableOpacity 
+        style={styles.consentRow}
+        onPress={() => setFormData({...formData, gdpr_consent: !formData.gdpr_consent})}
+      >
+        <View style={[styles.checkbox, formData.gdpr_consent && styles.checkboxChecked]}>
+          {formData.gdpr_consent && <Ionicons name="checkmark" size={16} color="#fff" />}
+        </View>
+        <Text style={styles.consentText}>
+          I consent to my information being stored and shared with other veterans for the 
+          purpose of peer connection. I understand I can delete my profile at any time.
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={[styles.submitButton, isSubmitting && styles.buttonDisabled]}
+        onPress={handleSignup}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text style={styles.submitButtonText}>Create My Profile</Text>
+        )}
+      </TouchableOpacity>
+    </ScrollView>
+  );
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Buddy Finder</Text>
+        <View style={styles.placeholder} />
+      </View>
+
+      {/* Tab Buttons */}
+      <View style={styles.tabs}>
+        <TouchableOpacity 
+          style={[styles.tab, view === 'browse' && styles.tabActive]}
+          onPress={() => setView('browse')}
+        >
+          <Ionicons name="search" size={18} color={view === 'browse' ? '#fff' : '#94a3b8'} />
+          <Text style={[styles.tabText, view === 'browse' && styles.tabTextActive]}>Browse</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.tab, view === 'signup' && styles.tabActive]}
+          onPress={() => setView('signup')}
+        >
+          <Ionicons name="person-add" size={18} color={view === 'signup' ? '#fff' : '#94a3b8'} />
+          <Text style={[styles.tabText, view === 'signup' && styles.tabTextActive]}>Sign Up</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.container}>
+        {view === 'browse' ? renderBrowse() : renderSignup()}
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  containerDark: {
     backgroundColor: '#0f172a',
-  },
-  scrollView: {
-    flex: 1,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: '#1e293b',
+    borderBottomWidth: 1,
+    borderBottomColor: '#334155',
   },
   backButton: {
-    padding: 8,
+    padding: 4,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#1e293b',
+    color: '#fff',
   },
   placeholder: {
-    width: 40,
+    width: 32,
   },
-  textLight: {
-    color: '#f1f5f9',
+  tabs: {
+    flexDirection: 'row',
+    padding: 12,
+    gap: 12,
   },
-  textMuted: {
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: '#1e293b',
+    gap: 8,
+  },
+  tabActive: {
+    backgroundColor: '#3b82f6',
+  },
+  tabText: {
+    fontSize: 15,
+    fontWeight: '600',
     color: '#94a3b8',
   },
-  introCard: {
-    backgroundColor: '#ffffff',
-    marginHorizontal: 20,
-    padding: 24,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+  tabTextActive: {
+    color: '#fff',
   },
-  cardDark: {
-    backgroundColor: '#1e293b',
-  },
-  introTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1e293b',
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  introText: {
-    fontSize: 14,
-    color: '#64748b',
-    textAlign: 'center',
-    lineHeight: 20,
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
   },
   filterSection: {
-    marginHorizontal: 20,
-    marginBottom: 20,
+    backgroundColor: '#1e293b',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 16,
   },
   filterLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1e293b',
+    color: '#fff',
     marginBottom: 12,
   },
-  serviceGrid: {
+  filterRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 10,
+    marginBottom: 12,
   },
-  serviceButton: {
+  filterDropdown: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#ffffff',
-    gap: 8,
-  },
-  serviceButtonDark: {
-    backgroundColor: '#1e293b',
-    borderColor: '#334155',
-  },
-  serviceButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#475569',
-  },
-  serviceButtonTextSelected: {
-    color: '#ffffff',
-  },
-  regionScroll: {
-    marginHorizontal: -20,
-    paddingHorizontal: 20,
-  },
-  regionChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: '#ffffff',
+    justifyContent: 'space-between',
+    backgroundColor: '#0f172a',
+    padding: 12,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginRight: 8,
-  },
-  regionChipDark: {
-    backgroundColor: '#1e293b',
     borderColor: '#334155',
   },
-  regionChipSelected: {
-    backgroundColor: '#3b82f6',
+  filterActive: {
     borderColor: '#3b82f6',
   },
-  regionChipText: {
+  filterText: {
     fontSize: 14,
-    color: '#475569',
-  },
-  regionChipTextSelected: {
-    color: '#ffffff',
-  },
-  searchActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 20,
-    marginBottom: 24,
-    gap: 12,
+    color: '#e2e8f0',
   },
   searchButton: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#3b82f6',
-    paddingVertical: 14,
-    borderRadius: 12,
+    padding: 12,
+    borderRadius: 8,
     gap: 8,
   },
   searchButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
+    color: '#fff',
   },
-  clearButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: '#f1f5f9',
-    gap: 6,
+  profilesList: {
+    flex: 1,
   },
-  clearButtonDark: {
+  profileCard: {
     backgroundColor: '#1e293b',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
   },
-  clearButtonText: {
-    color: '#64748b',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#64748b',
-  },
-  resultsSection: {
-    marginHorizontal: 20,
-  },
-  resultsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1e293b',
-    marginBottom: 16,
-  },
-  noResultsCard: {
-    backgroundColor: '#ffffff',
-    padding: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  noResultsText: {
-    fontSize: 14,
-    color: '#64748b',
-    textAlign: 'center',
-    marginTop: 16,
-  },
-  veteranCard: {
+  profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    padding: 16,
-    borderRadius: 12,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
   },
-  veteranAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
+  avatarPlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#3b82f6',
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  veteranInfo: {
+  avatarText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  profileInfo: {
     flex: 1,
     marginLeft: 12,
   },
-  veteranName: {
-    fontSize: 16,
+  profileName: {
+    fontSize: 17,
     fontWeight: '600',
-    color: '#1e293b',
+    color: '#fff',
   },
-  veteranDetail: {
+  profileMeta: {
     fontSize: 13,
+    color: '#94a3b8',
+    marginTop: 2,
+  },
+  profileRegiment: {
+    fontSize: 12,
     color: '#64748b',
     marginTop: 2,
   },
-  connectButton: {
-    padding: 12,
-    backgroundColor: '#eff6ff',
-    borderRadius: 10,
-  },
-  infoNotice: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: '#eff6ff',
-    marginHorizontal: 20,
-    marginTop: 24,
-    padding: 16,
-    borderRadius: 12,
-    gap: 12,
-  },
-  infoNoticeDark: {
-    backgroundColor: '#1e3a5f',
-  },
-  infoNoticeText: {
-    flex: 1,
-    fontSize: 13,
-    color: '#475569',
-    lineHeight: 18,
-  },
-  regimentSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    gap: 10,
-  },
-  regimentSelectorDark: {
-    backgroundColor: '#1e293b',
-    borderColor: '#334155',
-  },
-  regimentSelectorText: {
-    flex: 1,
+  profileBio: {
     fontSize: 14,
+    color: '#cbd5e1',
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  interestsTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 12,
+  },
+  interestTag: {
+    backgroundColor: '#0f172a',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  interestText: {
+    fontSize: 12,
     color: '#94a3b8',
   },
-  regimentSelectorTextSelected: {
-    color: '#1e293b',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: '80%',
-  },
-  modalContentDark: {
-    backgroundColor: '#1e293b',
-  },
-  modalHeader: {
+  connectButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1e293b',
-  },
-  modalScroll: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  categoryHeader: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#1e293b',
-    backgroundColor: '#f1f5f9',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginTop: 16,
-    marginBottom: 4,
+    justifyContent: 'center',
+    backgroundColor: '#1e3a5f',
+    padding: 10,
     borderRadius: 8,
+    gap: 6,
   },
-  regimentItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  regimentItemDark: {
-    borderBottomColor: '#334155',
-  },
-  regimentItemSelected: {
-    backgroundColor: '#eff6ff',
-  },
-  regimentItemText: {
+  connectText: {
     fontSize: 14,
-    color: '#475569',
+    fontWeight: '600',
+    color: '#3b82f6',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingTop: 60,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#fff',
+    marginTop: 16,
+  },
+  emptyText: {
+    fontSize: 15,
+    color: '#94a3b8',
+    marginTop: 8,
+  },
+  signupPrompt: {
+    backgroundColor: '#3b82f6',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+    marginTop: 24,
+  },
+  signupPromptText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  signupForm: {
     flex: 1,
   },
-  regimentItemTextSelected: {
-    color: '#3b82f6',
-    fontWeight: '500',
+  gdprNotice: {
+    backgroundColor: '#1e3a5f',
+    borderRadius: 14,
+    padding: 16,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  gdprTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#fff',
+    marginTop: 10,
+  },
+  gdprText: {
+    fontSize: 13,
+    color: '#93c5fd',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginTop: 8,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#94a3b8',
+    marginBottom: 8,
+    marginTop: 16,
+  },
+  input: {
+    backgroundColor: '#1e293b',
+    borderRadius: 10,
+    padding: 14,
+    fontSize: 15,
+    color: '#fff',
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  textArea: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  pickerScroll: {
+    marginBottom: 8,
+  },
+  pickerWrapper: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  pickerWrapperWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  pickerOption: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#1e293b',
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  pickerOptionSelected: {
+    backgroundColor: '#3b82f6',
+    borderColor: '#3b82f6',
+  },
+  pickerOptionText: {
+    fontSize: 13,
+    color: '#94a3b8',
+  },
+  pickerOptionTextSelected: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  consentRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 20,
+    gap: 12,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#475569',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: '#22c55e',
+    borderColor: '#22c55e',
+  },
+  consentText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#94a3b8',
+    lineHeight: 20,
+  },
+  submitButton: {
+    backgroundColor: '#22c55e',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 24,
+    marginBottom: 40,
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  buttonDisabled: {
+    backgroundColor: '#475569',
   },
 });
