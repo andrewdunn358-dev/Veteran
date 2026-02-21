@@ -1049,6 +1049,19 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
+  debugInfo: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 8,
+    padding: 8,
+    marginTop: 12,
+    gap: 16,
+  },
+  debugText: {
+    fontSize: 12,
+    color: '#94a3b8',
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
   callEndButton: {
     backgroundColor: '#ef4444',
     flexDirection: 'row',
