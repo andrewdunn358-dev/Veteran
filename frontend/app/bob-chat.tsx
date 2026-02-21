@@ -572,6 +572,242 @@ export default function BobChatScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Safeguarding Support Modal */}
+      <Modal
+        visible={showSafeguardingModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => {}}
+      >
+        <View style={styles.safeguardingOverlay}>
+          <View style={styles.safeguardingModal}>
+            {/* Main View */}
+            {safeguardingView === 'main' && (
+              <>
+                <View style={styles.safeguardingHeader}>
+                  <FontAwesome5 name="heart" size={32} color="#dc2626" />
+                  <Text style={styles.safeguardingTitle}>We're Here For You</Text>
+                </View>
+                
+                <Text style={styles.safeguardingText}>
+                  It sounds like you might be going through something difficult. 
+                  You don't have to face this alone.
+                </Text>
+                
+                <ScrollView style={styles.safeguardingScroll} showsVerticalScrollIndicator={false}>
+                  {/* Option A: Request Callback */}
+                  <TouchableOpacity
+                    style={styles.safeguardingOption}
+                    onPress={() => setSafeguardingView('callback')}
+                  >
+                    <FontAwesome5 name="phone-alt" size={24} color="#2563eb" />
+                    <View style={styles.safeguardingOptionContent}>
+                      <Text style={styles.safeguardingOptionTitle}>Request a Callback</Text>
+                      <Text style={styles.safeguardingOptionDesc}>Leave your number, we'll call you</Text>
+                    </View>
+                    <FontAwesome5 name="chevron-right" size={16} color="#94a3b8" />
+                  </TouchableOpacity>
+                  
+                  {/* Connect Now Section */}
+                  <View style={styles.liveConnectSection}>
+                    <Text style={styles.liveConnectLabel}>Connect Now</Text>
+                    {isCheckingAvailability ? (
+                      <ActivityIndicator size="small" color="#2563eb" />
+                    ) : (
+                      <>
+                        {availableStaff.counsellors.length > 0 && (
+                          <TouchableOpacity
+                            style={[styles.safeguardingOption, styles.liveOption]}
+                            onPress={() => handleLiveConnect('counsellor')}
+                          >
+                            <View style={styles.availableDot} />
+                            <FontAwesome5 name="user-md" size={20} color="#16a34a" />
+                            <View style={styles.safeguardingOptionContent}>
+                              <Text style={styles.safeguardingOptionTitle}>Counsellor Available</Text>
+                              <Text style={styles.safeguardingOptionDesc}>{availableStaff.counsellors[0].name} is online</Text>
+                            </View>
+                            <FontAwesome5 name="chevron-right" size={16} color="#94a3b8" />
+                          </TouchableOpacity>
+                        )}
+                        
+                        {availableStaff.peers.length > 0 && (
+                          <TouchableOpacity
+                            style={[styles.safeguardingOption, styles.liveOption]}
+                            onPress={() => handleLiveConnect('peer')}
+                          >
+                            <View style={styles.availableDot} />
+                            <FontAwesome5 name="users" size={20} color="#16a34a" />
+                            <View style={styles.safeguardingOptionContent}>
+                              <Text style={styles.safeguardingOptionTitle}>Peer Available</Text>
+                              <Text style={styles.safeguardingOptionDesc}>{availableStaff.peers[0].name} is online</Text>
+                            </View>
+                            <FontAwesome5 name="chevron-right" size={16} color="#94a3b8" />
+                          </TouchableOpacity>
+                        )}
+                        
+                        {availableStaff.counsellors.length === 0 && availableStaff.peers.length === 0 && (
+                          <Text style={styles.noOneAvailable}>No one available right now - please request a callback</Text>
+                        )}
+                      </>
+                    )}
+                  </View>
+                  
+                  {/* External Options */}
+                  <TouchableOpacity
+                    style={styles.safeguardingOption}
+                    onPress={() => Linking.openURL('tel:116123')}
+                  >
+                    <FontAwesome5 name="phone-volume" size={24} color="#7c3aed" />
+                    <View style={styles.safeguardingOptionContent}>
+                      <Text style={styles.safeguardingOptionTitle}>Samaritans</Text>
+                      <Text style={styles.safeguardingOptionDesc}>Call 116 123 (free, 24/7)</Text>
+                    </View>
+                    <FontAwesome5 name="external-link-alt" size={14} color="#94a3b8" />
+                  </TouchableOpacity>
+                </ScrollView>
+                
+                <View style={styles.emergencyNote}>
+                  <FontAwesome5 name="exclamation-triangle" size={14} color="#f59e0b" />
+                  <Text style={styles.emergencyNoteText}>
+                    If you're in immediate danger, call 999
+                  </Text>
+                </View>
+                
+                <TouchableOpacity
+                  style={styles.safeguardingContinue}
+                  onPress={() => {
+                    setShowSafeguardingModal(false);
+                    setSafeguardingView('main');
+                  }}
+                >
+                  <Text style={styles.safeguardingContinueText}>
+                    I understand, continue chatting
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+            
+            {/* Callback View */}
+            {safeguardingView === 'callback' && (
+              <>
+                <TouchableOpacity 
+                  style={styles.backToMain}
+                  onPress={() => setSafeguardingView('main')}
+                >
+                  <FontAwesome5 name="arrow-left" size={16} color="#64748b" />
+                  <Text style={styles.backToMainText}>Back</Text>
+                </TouchableOpacity>
+                
+                <View style={styles.safeguardingHeader}>
+                  <FontAwesome5 name="phone-alt" size={28} color="#2563eb" />
+                  <Text style={styles.safeguardingTitle}>Request a Callback</Text>
+                </View>
+                
+                <Text style={styles.safeguardingText}>
+                  Leave your details and someone will call you back as soon as possible.
+                </Text>
+                
+                <View style={styles.callbackForm}>
+                  <Text style={styles.callbackInputLabel}>Your Name (optional)</Text>
+                  <TextInput
+                    style={styles.callbackInput}
+                    placeholder="Your name"
+                    placeholderTextColor="#94a3b8"
+                    value={callbackName}
+                    onChangeText={setCallbackName}
+                  />
+                  
+                  <Text style={styles.callbackInputLabel}>Phone Number *</Text>
+                  <TextInput
+                    style={styles.callbackInput}
+                    placeholder="Your phone number"
+                    placeholderTextColor="#94a3b8"
+                    value={callbackPhone}
+                    onChangeText={setCallbackPhone}
+                    keyboardType="phone-pad"
+                  />
+                  
+                  <Text style={styles.callbackInputLabel}>Email (optional)</Text>
+                  <TextInput
+                    style={styles.callbackInput}
+                    placeholder="your.email@example.com"
+                    placeholderTextColor="#94a3b8"
+                    value={callbackEmail}
+                    onChangeText={setCallbackEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                  
+                  <Text style={styles.callbackInputLabel}>Anything you'd like us to know? (optional)</Text>
+                  <TextInput
+                    style={[styles.callbackInput, styles.callbackMessageInput]}
+                    placeholder="Is there anything you'd like to share?"
+                    placeholderTextColor="#94a3b8"
+                    value={callbackMessage}
+                    onChangeText={setCallbackMessage}
+                    multiline
+                    numberOfLines={3}
+                    textAlignVertical="top"
+                  />
+                  
+                  <TouchableOpacity
+                    style={[styles.submitCallbackButton, isSubmittingCallback && styles.buttonDisabled]}
+                    onPress={submitCallbackRequest}
+                    disabled={isSubmittingCallback}
+                  >
+                    {isSubmittingCallback ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <Text style={styles.submitCallbackText}>Request Callback</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+            
+            {/* Callback Success View */}
+            {safeguardingView === 'callback_success' && (
+              <View style={styles.successView}>
+                <View style={styles.successIcon}>
+                  <FontAwesome5 name="check-circle" size={48} color="#16a34a" />
+                </View>
+                <Text style={styles.successTitle}>Callback Requested</Text>
+                <Text style={styles.successText}>
+                  Someone will call you back as soon as possible. Please keep your phone nearby.
+                </Text>
+                <Text style={styles.successSubtext}>
+                  If you need immediate help, call 999 or Samaritans on 116 123.
+                </Text>
+                <TouchableOpacity
+                  style={styles.successCloseButton}
+                  onPress={() => {
+                    setShowSafeguardingModal(false);
+                    setSafeguardingView('main');
+                    setCallbackPhone('');
+                    setCallbackName('');
+                    setCallbackEmail('');
+                    setCallbackMessage('');
+                  }}
+                >
+                  <Text style={styles.successCloseText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            
+            {/* Connecting View */}
+            {safeguardingView === 'connecting' && (
+              <View style={styles.connectingView}>
+                <ActivityIndicator size="large" color="#2563eb" />
+                <Text style={styles.connectingTitle}>Connecting you now...</Text>
+                <Text style={styles.connectingText}>
+                  We're alerting the team that you need to speak with someone.
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
