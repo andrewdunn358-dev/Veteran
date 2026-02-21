@@ -205,6 +205,31 @@ export default function CrisisSupport() {
           </View>
         </View>
 
+        {/* AI Battle Buddies - Tommy & Doris */}
+        <TouchableOpacity 
+          style={styles.aiBuddiesCard}
+          onPress={() => router.push('/ai-buddies')}
+          activeOpacity={0.9}
+        >
+          <View style={styles.aiBuddiesHeader}>
+            <View style={styles.aiBuddiesAvatars}>
+              <Image 
+                source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png' }}
+                style={styles.aiBuddyAvatar}
+              />
+              <Image 
+                source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png' }}
+                style={[styles.aiBuddyAvatar, styles.aiBuddyAvatarOverlap]}
+              />
+            </View>
+            <View style={styles.aiBuddiesTextContainer}>
+              <Text style={styles.aiBuddiesTitle}>We're on stag 24/7</Text>
+              <Text style={styles.aiBuddiesSubtitle}>Chat with Tommy or Doris</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#64748b" />
+          </View>
+        </TouchableOpacity>
+
         {/* On-Duty Counsellors Section */}
         <View style={styles.counsellorsSection}>
           <View style={styles.sectionHeader}>
