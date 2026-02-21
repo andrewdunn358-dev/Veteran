@@ -5,31 +5,34 @@ import {
   ScrollView, 
   TouchableOpacity, 
   StyleSheet, 
-  Linking
+  Linking,
+  Image
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 
-// UK Veteran-Specific Resources
+const MARGIE_AVATAR = 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png';
+
+// UK Armed Forces-Specific Resources
 const VETERAN_RESOURCES = [
   { 
     name: 'Tom Harrison House', 
-    desc: 'UK\'s only residential rehab for veterans and emergency services', 
+    desc: 'UK\'s only residential rehab for veterans, serving personnel and emergency services', 
     phone: '0151 526 2109', 
     url: 'https://www.tomharrisonhouse.org.uk',
     highlight: true
   },
   { 
     name: 'Combat Stress', 
-    desc: 'Veterans mental health charity - addiction support available', 
+    desc: 'Armed forces mental health charity - addiction support available', 
     phone: '0800 138 1619', 
     url: 'https://combatstress.org.uk' 
   },
   { 
     name: 'Op Courage', 
-    desc: 'NHS specialist service for veterans - includes substance misuse support', 
+    desc: 'NHS specialist service for serving personnel and veterans - includes substance misuse support', 
     phone: '0300 323 0137', 
     url: 'https://www.nhs.uk/nhs-services/armed-forces-community/mental-health/veterans-reservists/' 
   },
@@ -136,14 +139,30 @@ export default function SubstanceSupport() {
 
   const renderOverview = () => (
     <>
+      {/* Chat with Margie Card */}
+      <TouchableOpacity 
+        style={styles.margieCard}
+        onPress={() => router.push('/margie-chat')}
+        data-testid="chat-margie-btn"
+      >
+        <Image source={{ uri: MARGIE_AVATAR }} style={styles.margieAvatar} />
+        <View style={styles.margieContent}>
+          <Text style={styles.margieTitle}>Chat with Margie</Text>
+          <Text style={styles.margieDesc}>
+            Non-judgemental AI support for alcohol and substance issues. Available 24/7.
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#fcd34d" />
+      </TouchableOpacity>
+
       {/* Hero Section */}
       <View style={styles.heroCard}>
         <Ionicons name="heart" size={48} color="#f59e0b" />
-        <Text style={styles.heroTitle}>You&apos;re Not Alone</Text>
+        <Text style={styles.heroTitle}>You're Not Alone</Text>
         <Text style={styles.heroText}>
-          Many veterans struggle with alcohol or substances after service. 
+          Many serving personnel and veterans struggle with alcohol or substances. 
           It often starts as a way to cope - to sleep, to forget, to fit in. 
-          Recognising the problem is the hardest part. You&apos;ve already shown courage.
+          Recognising the problem is the hardest part. You've already shown courage.
         </Text>
       </View>
 
@@ -172,9 +191,9 @@ export default function SubstanceSupport() {
 
       {/* Veterans & Addiction */}
       <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>Why Veterans Are at Higher Risk</Text>
+        <Text style={styles.sectionTitle}>Why the Armed Forces Are at Higher Risk</Text>
         <Text style={styles.infoText}>
-          Veterans are significantly more likely to develop problems with alcohol and substances than civilians. This isn&apos;t weakness - it&apos;s often the result of:
+          Serving personnel and veterans are significantly more likely to develop problems with alcohol and substances than civilians. This isn't weakness - it's often the result of:
         </Text>
         <View style={styles.reasonsList}>
           <View style={styles.reasonItem}>
@@ -211,11 +230,11 @@ export default function SubstanceSupport() {
         data-testid="tom-harrison-featured-btn"
       >
         <View style={styles.featuredBadge}>
-          <Text style={styles.featuredBadgeText}>VETERAN-SPECIFIC</Text>
+          <Text style={styles.featuredBadgeText}>ARMED FORCES SPECIFIC</Text>
         </View>
         <Text style={styles.featuredTitle}>Tom Harrison House</Text>
         <Text style={styles.featuredDesc}>
-          The UK&apos;s only residential rehabilitation centre exclusively for veterans and emergency services personnel. 
+          The UK's only residential rehabilitation centre exclusively for veterans, serving personnel and emergency services. 
           They understand military culture and the unique challenges you face.
         </Text>
         <View style={styles.featuredPhone}>
@@ -268,9 +287,9 @@ export default function SubstanceSupport() {
   const renderResources = () => (
     <>
       <Text style={styles.pageTitle}>Helplines & Resources</Text>
-      <Text style={styles.pageSubtitle}>All calls are confidential. You don&apos;t need to give your name.</Text>
+      <Text style={styles.pageSubtitle}>All calls are confidential. You don't need to give your name.</Text>
 
-      <Text style={styles.resourceGroupTitle}>Veteran-Specific Services</Text>
+      <Text style={styles.resourceGroupTitle}>Armed Forces Services</Text>
       {VETERAN_RESOURCES.map((resource, index) => (
         <TouchableOpacity 
           key={index}
@@ -357,8 +376,8 @@ export default function SubstanceSupport() {
       <View style={styles.motivationCard}>
         <Text style={styles.motivationTitle}>Remember</Text>
         <Text style={styles.motivationText}>
-          &quot;Asking for help is not a sign of weakness. In the forces, we had each other&apos;s backs. 
-          Let someone have yours now.&quot;
+          "Asking for help is not a sign of weakness. In the forces, we had each other's backs. 
+          Let someone have yours now."
         </Text>
         <Text style={styles.motivationAttrib}>- Former Royal Marine, 12 years sober</Text>
       </View>
@@ -366,7 +385,7 @@ export default function SubstanceSupport() {
       <View style={styles.infoCard}>
         <Ionicons name="information-circle" size={20} color="#2563eb" />
         <Text style={styles.infoCardText}>
-          SMART Recovery and AA both have online meetings if you&apos;re not ready for face-to-face. 
+          SMART Recovery and AA both have online meetings if you're not ready for face-to-face. 
           You can listen without speaking.
         </Text>
       </View>
@@ -381,7 +400,7 @@ export default function SubstanceSupport() {
       <View style={styles.warningIntro}>
         <Ionicons name="help-circle" size={24} color="#f59e0b" />
         <Text style={styles.warningIntroText}>
-          Do any of these sound familiar? Ticking even one or two might mean it&apos;s time to talk to someone.
+          Do any of these sound familiar? Ticking even one or two might mean it's time to talk to someone.
         </Text>
       </View>
 
@@ -397,7 +416,7 @@ export default function SubstanceSupport() {
       <View style={styles.takeActionCard}>
         <Text style={styles.takeActionTitle}>Ready to Take Action?</Text>
         <Text style={styles.takeActionText}>
-          You don&apos;t have to hit rock bottom to get help. The earlier you reach out, the easier the path back.
+          You don't have to hit rock bottom to get help. The earlier you reach out, the easier the path back.
         </Text>
         <TouchableOpacity 
           style={styles.takeActionBtn}
@@ -405,7 +424,7 @@ export default function SubstanceSupport() {
           data-testid="take-action-btn"
         >
           <Ionicons name="call" size={20} color="#fff" />
-          <Text style={styles.takeActionBtnText}>Call Veterans&apos; Gateway: 0808 802 1212</Text>
+          <Text style={styles.takeActionBtnText}>Call Veterans' Gateway: 0808 802 1212</Text>
         </TouchableOpacity>
       </View>
 
