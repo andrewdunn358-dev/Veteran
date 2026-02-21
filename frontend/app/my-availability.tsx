@@ -142,8 +142,18 @@ export default function MyAvailabilityScreen() {
   };
 
   const handleAddShift = async () => {
-    if (!selectedDate || !userId) {
+    if (!selectedDate) {
       Alert.alert('Error', 'Please select a date first');
+      return;
+    }
+
+    // Get auth token
+    const token = await AsyncStorage.getItem('authToken');
+    if (!token) {
+      Alert.alert('Login Required', 'You need to be logged in as a peer supporter to add shifts.', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Login', onPress: () => router.push('/login') }
+      ]);
       return;
     }
 
@@ -151,10 +161,11 @@ export default function MyAvailabilityScreen() {
     try {
       const response = await fetch(`${API_URL}/api/shifts`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
-          peer_supporter_id: userId,
-          peer_supporter_name: userName,
           date: selectedDate,
           start_time: newShiftStart,
           end_time: newShiftEnd,
@@ -167,7 +178,11 @@ export default function MyAvailabilityScreen() {
         fetchShifts();
       } else {
         const error = await response.json();
-        Alert.alert('Error', error.detail || 'Failed to add shift');
+        if (response.status === 403) {
+          Alert.alert('Access Denied', 'You need to be registered as a peer supporter to add shifts.');
+        } else {
+          Alert.alert('Error', error.detail || 'Failed to add shift');
+        }
       }
     } catch (error) {
       console.error('Error adding shift:', error);
@@ -188,8 +203,10 @@ export default function MyAvailabilityScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
+              const token = await AsyncStorage.getItem('authToken');
               const response = await fetch(`${API_URL}/api/shifts/${shiftId}`, {
                 method: 'DELETE',
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
               });
               if (response.ok) {
                 fetchShifts();
