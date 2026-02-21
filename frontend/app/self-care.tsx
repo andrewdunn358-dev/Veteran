@@ -18,7 +18,7 @@ const SELF_CARE_TOOLS = [
   {
     id: 'mood',
     title: 'Daily Check-in',
-    description: 'Track how you\'re feeling',
+    description: "Track how you're feeling",
     icon: 'happy',
     color: '#f59e0b',
     bgColor: '#fef3c7',
@@ -41,6 +41,24 @@ const SELF_CARE_TOOLS = [
     color: '#06b6d4',
     bgColor: '#cffafe',
     route: '/breathing-game',
+  },
+  {
+    id: 'buddy-finder',
+    title: 'Buddy Finder',
+    description: 'Connect with veterans near you',
+    icon: 'people',
+    color: '#10b981',
+    bgColor: '#d1fae5',
+    route: '/buddy-finder',
+  },
+  {
+    id: 'regimental',
+    title: 'Regimental Associations',
+    description: 'Find your regiment network',
+    icon: 'flag',
+    color: '#ef4444',
+    bgColor: '#fee2e2',
+    route: '/regimental-associations',
   },
   {
     id: 'local-services',
