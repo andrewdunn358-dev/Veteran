@@ -38,8 +38,8 @@ export default function AboutPage() {
           </Text>
           <View style={styles.highlightBox}>
             <Text style={styles.highlightText}>
-              Sometimes a real person isn't available straight away.{'\n'}
-              When that happens, the chat is there — so you're not carrying things alone.
+              {`Sometimes a real person isn't available straight away.`}{'\n'}
+              {`When that happens, the chat is there — so you're not carrying things alone.`}
             </Text>
           </View>
           <Text style={styles.emphasisText}>
