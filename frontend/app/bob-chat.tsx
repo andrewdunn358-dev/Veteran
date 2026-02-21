@@ -39,6 +39,10 @@ export default function BobChatScreen() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
   
+  // Safeguarding state
+  const [showSafeguardingModal, setShowSafeguardingModal] = useState(false);
+  const [currentAlertId, setCurrentAlertId] = useState<string | null>(null);
+  
   // Verification modal state for returning users
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [verifyEmail, setVerifyEmail] = useState('');
