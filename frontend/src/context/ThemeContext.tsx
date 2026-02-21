@@ -75,6 +75,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const storedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
       if (storedTheme === 'light' || storedTheme === 'dark') {
         setThemeState(storedTheme);
+        // Update HTML class for web
+        if (typeof document !== 'undefined') {
+          if (storedTheme === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          } else {
+            document.documentElement.classList.remove('dark-mode');
+          }
+        }
       }
     } catch (error) {
       console.error('Error loading theme:', error);
