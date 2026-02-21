@@ -286,8 +286,8 @@ export default function MyAvailabilityScreen() {
           ) : (
             <View style={styles.daysGrid}>
               {calendarDays.map((day, index) => {
-                const hasMyShift = day.shifts.some(s => s.peer_supporter_id === userId);
-                const hasOtherShifts = day.shifts.some(s => s.peer_supporter_id !== userId);
+                const hasMyShift = day.shifts.some(s => s.staff_id === userId);
+                const hasOtherShifts = day.shifts.some(s => s.staff_id !== userId);
                 const isSelected = day.dateString === selectedDate;
                 
                 return (
