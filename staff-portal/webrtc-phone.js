@@ -302,6 +302,12 @@ async function handleOffer(offer) {
         }
         
         await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        hasRemoteDescription = true;
+        console.log('Remote description set (offer)');
+        
+        // Process any ICE candidates that arrived before remote description was set
+        await processPendingIceCandidates();
+        
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
         
@@ -324,6 +330,12 @@ async function handleOffer(offer) {
 async function handleAnswer(answer) {
     try {
         await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        hasRemoteDescription = true;
+        console.log('Remote description set (answer)');
+        
+        // Process any ICE candidates that arrived before remote description was set
+        await processPendingIceCandidates();
+        
         showActiveCall('Connected');
         startCallTimer();
     } catch (error) {
