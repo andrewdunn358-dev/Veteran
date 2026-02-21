@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking, ActivityIndicator, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const API_URL = Platform.select({
@@ -89,6 +89,21 @@ export default function Organizations() {
               UK organisations providing support to veterans. All services are confidential.
             </Text>
           </View>
+
+          {/* Alcohol & Substance Support Card */}
+          <TouchableOpacity 
+            style={styles.substanceCard}
+            onPress={() => router.push('/margie-chat')}
+          >
+            <View style={styles.substanceCardIcon}>
+              <FontAwesome5 name="wine-bottle" size={24} color="#d97706" />
+            </View>
+            <View style={styles.substanceCardContent}>
+              <Text style={styles.substanceCardTitle}>Alcohol & Substance Support</Text>
+              <Text style={styles.substanceCardDesc}>Chat with Margie - non-judgmental support for recovery</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#7c9cbf" />
+          </TouchableOpacity>
 
           {/* Loading State */}
           {isLoading ? (
@@ -359,5 +374,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#b0c4de',
     textAlign: 'center',
+  },
+  substanceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2d3748',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#d97706',
+  },
+  substanceCardIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#451a03',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  substanceCardContent: {
+    flex: 1,
+  },
+  substanceCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fcd34d',
+    marginBottom: 2,
+  },
+  substanceCardDesc: {
+    fontSize: 13,
+    color: '#b0c4de',
   },
 });
