@@ -230,6 +230,14 @@ export default function HugoChatScreen() {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
+  const handleGoBack = () => {
+    if (navigation.canGoBack()) {
+      router.back();
+    } else {
+      router.push('/self-care');
+    }
+  };
+
   const clearConversation = () => {
     const welcomeMessage: Message = {
       id: 'welcome-new',
@@ -244,7 +252,7 @@ export default function HugoChatScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Image source={{ uri: HUGO_AVATAR }} style={styles.headerAvatar} />
