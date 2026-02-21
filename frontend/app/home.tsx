@@ -51,8 +51,7 @@ export default function Index() {
             />
           </View>
           <Text style={styles.headerTitle}>Radio Check</Text>
-          <Text style={styles.taglineEnglish}>Once in service, forever united</Text>
-          <Text style={styles.taglineLatin}>Semel Servientes, Semper Uniti</Text>
+          <Text style={styles.taglineEnglish}>"Radio Check" fuses real-time peer support with smart AI insight, creating more than just an app — it's a digital hand on your shoulder when it matters most.</Text>
         </View>
 
         {/* AI Battle Buddies - Featured at Top */}
