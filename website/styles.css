@@ -558,10 +558,23 @@ h1, h2, h3, h4 {
 .ai-avatar-img {
     width: 80px;
     height: 80px;
+    min-width: 80px;
+    min-height: 80px;
+    max-width: 80px;
+    max-height: 80px;
     border-radius: 50%;
     object-fit: cover;
+    object-position: center top;
     border: 3px solid var(--primary);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+}
+
+.ai-card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
 }
 
 .ai-info h3 {
