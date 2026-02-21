@@ -151,11 +151,21 @@ function switchTab(tabName) {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Check session expiry first
+    if (checkSessionExpiry()) {
+        showScreen('login-screen');
+        return;
+    }
+    
+    // Setup activity listeners for session timeout
+    setupActivityListeners();
+    
     // Check if logged in
     if (token && currentUser) {
         showScreen('dashboard-screen');
         document.getElementById('user-name').textContent = `Welcome, ${currentUser.name}`;
         loadAllData();
+        resetInactivityTimer(); // Start the inactivity timer
     } else {
         showScreen('login-screen');
     }
