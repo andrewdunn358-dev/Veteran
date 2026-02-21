@@ -41,7 +41,7 @@ const AI_TEAM = [
   {
     name: 'Margie',
     role: 'Alcohol & Substance Support',
-    avatar: '/images/doris.png',
+    avatar: '/images/margie.png',
     description: 'Understands the challenges of substance use and recovery. Margie offers non-judgemental support for those struggling with alcohol or other substances.',
     speciality: 'Addiction support & recovery',
     color: 'from-amber-500/20 to-orange-500/20',
@@ -50,7 +50,7 @@ const AI_TEAM = [
   {
     name: 'Hugo',
     role: 'Self-Help & Wellness Guide',
-    avatar: '/images/tommy.png',
+    avatar: '/images/hugo.png',
     description: 'Your daily motivation and wellness companion. Hugo helps with grounding techniques, building positive habits, and maintaining mental fitness.',
     speciality: 'Wellness, motivation & self-care',
     color: 'from-teal-500/20 to-cyan-500/20',
