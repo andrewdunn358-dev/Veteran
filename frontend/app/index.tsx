@@ -306,7 +306,8 @@ const styles = StyleSheet.create({
   },
   emergencyText: {
     fontSize: 14,
-    color: '#94a3b8',
+    color: '#ffffff',
+    fontWeight: '500',
   },
   supportersSection: {
     marginTop: 28,
@@ -314,7 +315,7 @@ const styles = StyleSheet.create({
   },
   supportersLabel: {
     fontSize: 12,
-    color: '#64748b',
+    color: '#cbd5e1',
     marginBottom: 12,
     textTransform: 'uppercase',
     letterSpacing: 1,
