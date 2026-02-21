@@ -521,6 +521,15 @@ h1, h2, h3, h4 {
     color: var(--text-light);
 }
 
+.ai-avatar-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 .ai-info h3 {
     font-size: 22px;
     margin-bottom: 4px;
