@@ -17,7 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://wellness-vibes.preview.emergentagent.com';
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://radio-check-staging-2.preview.emergentagent.com';
 
 export default function CallbackRequest() {
   const router = useRouter();
