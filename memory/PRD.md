@@ -5,83 +5,88 @@ Build and enhance a mobile-first web application for UK serving personnel and ve
 
 ## What's Been Implemented (Updated 21 Feb 2026)
 
-### Latest Session - Website Rebuild & External URL Cleanup (21 Feb 2026)
+### Latest Session - Calendar/Availability Feature Added (21 Feb 2026)
 
-#### Marketing Website Rebuilt (No React)
-Completely rebuilt the marketing website as plain HTML/CSS/JS for compatibility with 20i hosting:
-- **Previous issue**: React/Vite website had `main.tsx:1 Failed to load resource: 404` error
-- **Solution**: Pure static HTML files, no build process needed
+#### Staff Portal Calendar Feature Added
+Added full availability/calendar management to the Staff Portal (`/app/staff-portal/`):
 
-**Location**: `/app/website/`
+**HTML Changes** (`index.html`):
+- Added "My Availability" section with interactive calendar
+- Month navigation (prev/next)
+- Calendar grid showing shifts
+- Legend for "Your Shifts" vs "Other Staff"
+- Selected day panel showing shift details
+- "Add Shift" modal with date, start time, end time inputs
 
-**Pages Created**:
-- `index.html` - Home page with hero, features, audience cards
-- `about.html` - What Radio Check is and isn't
-- `ai-team.html` - All 6 AI companions with descriptions
-- `contact.html` - Contact form, crisis numbers
-- `legal.html` - Terms of use
-- `privacy.html` - Privacy policy (UK GDPR compliant)
-- `styles.css` - All styling
-- `script.js` - Mobile nav, smooth scroll
-- `.htaccess` - Apache config for 20i
-- `DEPLOYMENT.md` - Deployment instructions
+**CSS Changes** (`styles.css`):
+- New `.availability-section` styles
+- Calendar grid styles (`.calendar-day`, `.calendar-header`)
+- Shift indicators (`.shift-dot`)
+- Legend styles
+- Selected day panel styles
+- Mobile responsive adjustments
 
-**Deployment**: Just upload all files to `public_html` - no build required!
+**JavaScript Changes** (`app.js`):
+- `loadShifts()` - Fetches shifts from `/api/shifts` API
+- `renderCalendar()` - Draws calendar grid with shift indicators
+- `selectCalendarDate()` - Handles date selection
+- `showSelectedDayShifts()` - Shows shifts for selected day
+- `prevMonth()` / `nextMonth()` - Month navigation
+- `openShiftModal()` / `closeShiftModal()` - Modal management
+- `saveShift()` - Creates new shift via API
+- `deleteShift()` - Removes shift via API
 
-#### External URL Cleanup Complete
-Removed ALL references to `https://customer-assets.emergentagent.com`:
+**API Integration**:
+- GET `/api/shifts` - List shifts by date range
+- POST `/api/shifts` - Create new shift (requires auth)
+- DELETE `/api/shifts/{id}` - Delete shift (requires auth)
 
-**Admin Site** (`/app/admin-site/`):
-- `index.html` - Changed logo src to `logo.png`
-- `app.js` - Changed default logo to `logo.png`
-- Added `/app/admin-site/logo.png`
+#### Staff Portal Config Updated
+- Updated `config.js` to use preview environment URL for testing
 
-**Staff Portal** (`/app/staff-portal/`):
-- `index.html` - Changed both logo references to `logo.png`
-- Added `/app/staff-portal/logo.png`
-
-**Frontend App**:
-- `admin.tsx` - Removed fallback URL `https://radio-check-app.preview.emergentagent.com`
-- `callback.tsx` - Removed fallback URL
-
-#### Splash Screen Text Fix (21 Feb 2026)
-Fixed readability of text on splash screen:
-- "In an emergency, always call 999" - Now white (`#ffffff`) with bold
-- "Proudly supported by" - Now light gray (`#cbd5e1`)
-- Shield icon - Now white
-
-**File**: `/app/frontend/app/index.tsx`
-
----
+#### Mobile App Availability Verified
+- Confirmed `/app/frontend/app/my-availability.tsx` is working
+- Calendar renders correctly
+- Date selection works
+- "Add Availability" modal opens
+- Requires login to save (correct behavior)
 
 ### Previous Session Work
 
-#### Dark/Light Mode Fixes
-Fixed global theming in `+html.tsx` and multiple pages.
+#### Marketing Website Rebuilt (No React)
+Pure static HTML/CSS/JS website in `/app/website/`
 
-#### CMS System
-Backend and admin UI for content management (not yet connected to app pages).
+#### External URL Cleanup
+Removed references to external asset URLs in admin-site and staff-portal
 
-#### AI Characters (6 total)
-- Tommy, Doris, Bob, Finch, Margie, Hugo
+#### Splash Screen Text Fix
+Fixed readability of text on splash screen
 
-#### Staff Calendar
-Peer supporters can log availability via My Availability page.
+---
 
 ## Known Issues
 
-### External Image URLs Still Present (P2)
-These files still use external URLs for AI avatars (they work, but not self-contained):
-- `/app/frontend/app/bob-chat.tsx`
-- `/app/frontend/app/crisis-support.tsx`
-- `/app/frontend/app/home.tsx`
-- `/app/frontend/app/hugo-chat.tsx`
-- `/app/frontend/app/margie-chat.tsx`
-- `/app/frontend/app/peer-support.tsx`
-- `/app/frontend/app/self-care.tsx`
-- `/app/frontend/app/sentry-chat.tsx`
-- `/app/frontend/app/substance-support.tsx`
-- `/app/frontend/app/historical-investigations.tsx`
+### Staff Portal Mobile View - Clarification Needed (P0)
+**User reported**: On mobile staff portal, only sees Panic button, status, "My Availability", pending callbacks.
+
+**Analysis**: 
+- The user may be confusing the **React Native app's Peer Portal** (`/app/frontend/app/peer-portal.tsx`) with the **Staff Portal website** (`/app/staff-portal/`).
+- The React Native app's Peer Portal DOES have: Panic button, status, "My Availability" link, callbacks.
+- The Staff Portal website SHOULD show: Safeguarding alerts, Live Chats, Phone, Notes, etc. for all staff roles.
+- The 403 errors in console logs were likely from expired session tokens (session timeout feature).
+
+**Next Step**: User needs to clarify which portal they're using - the app or the website.
+
+### Calendar Saving - Authentication Required
+When users click "Add Shift" and nothing happens, it's likely because:
+1. They're not logged in
+2. Their session token expired
+3. They're not registered as a peer supporter
+
+The app shows an alert asking to login - user needs to be authenticated.
+
+### External Image URLs (P2)
+Some app pages still use external URLs for AI avatars.
 
 ### CMS Not Connected (P1)
 CMS exists but app pages use hardcoded content.
@@ -90,24 +95,22 @@ CMS exists but app pages use hardcoded content.
 
 ### Marketing Website
 **Location**: `/app/website/` and `/app/radiocheck-website.zip`
-**Type**: Static HTML/CSS/JS
-**Host**: Any web server (tested for 20i Apache)
-**Instructions**: See `/app/website/DEPLOYMENT.md`
 
 ### Admin Site
 **Location**: `/app/admin-site/`
-**Assets**: All local, no external URLs
 
 ### Staff Portal
 **Location**: `/app/staff-portal/`
-**Assets**: All local, no external URLs
+**Note**: Includes new calendar/availability feature
 
 ## Upcoming Tasks
 
-1. **P1 - Make CMS Fully Dynamic**: Connect app pages to CMS APIs
-2. **P1 - Buddy Finder Frontend**: Wire up form to backend
-3. **P2 - Replace AI Avatar URLs**: Download images and use local assets
-4. **P2 - Email Notifications**: Set up for rota shifts
+1. **P0 - Verify Staff Portal Mobile View**: Get clarification from user if they mean app or website
+2. **P1 - Make CMS Fully Dynamic**: Connect app pages to CMS APIs
+3. **P1 - Buddy Finder Frontend**: Wire up form to backend
+4. **P2 - Replace AI Avatar URLs**: Download images and use local assets
+5. **P2 - Email Notifications**: Set up for rota shifts
+6. **P2 - Generate Contact CSV**: Run script to export contacts
 
 ## Test Credentials
 - Admin: `admin@veteran.dbty.co.uk` / `ChangeThisPassword123!`
@@ -117,14 +120,16 @@ CMS exists but app pages use hardcoded content.
 
 ### Website (Static HTML)
 - `/app/website/` - Marketing website directory
-- `/app/radiocheck-website.zip` - Ready for deployment
 
 ### Portals (Static HTML/JS)
 - `/app/admin-site/` - Admin dashboard
-- `/app/staff-portal/` - Staff/counsellor dashboard
+- `/app/staff-portal/` - Staff/counsellor dashboard (now with calendar)
 
 ### Frontend (React Native/Expo)
 - `/app/frontend/app/` - All app screens
+- `/app/frontend/app/my-availability.tsx` - Mobile app availability calendar
+- `/app/frontend/app/peer-portal.tsx` - Mobile app peer supporter portal
 
 ### Backend
 - `/app/backend/server.py` - FastAPI server
+- Shifts API: `/api/shifts`
