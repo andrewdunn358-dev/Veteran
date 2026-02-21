@@ -130,13 +130,13 @@ export default function FamilyFriends() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => view === 'main' ? router.back() : setView('main')} style={styles.backButton}>
-          <FontAwesome5 name="arrow-left" size={20} color="#1e293b" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Friends & Family</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Friends & Family</Text>
         <View style={{ width: 36 }} />
       </View>
 
@@ -144,24 +144,24 @@ export default function FamilyFriends() {
         {/* Main View */}
         {view === 'main' && (
           <>
-            <View style={styles.introCard}>
+            <View style={[styles.introCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}>
               <FontAwesome5 name="hands-helping" size={40} color="#2563eb" />
-              <Text style={styles.introTitle}>Worried About Someone?</Text>
-              <Text style={styles.introText}>
+              <Text style={[styles.introTitle, { color: colors.text }]}>Worried About Someone?</Text>
+              <Text style={[styles.introText, { color: colors.textSecondary }]}>
                 If you're concerned about a veteran or serving person in your life, you're not alone. 
                 Recognising that someone needs support is the first step.
               </Text>
             </View>
 
-            <TouchableOpacity style={styles.actionCard} onPress={() => setView('concern')}>
-              <View style={styles.actionIcon}>
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]} onPress={() => setView('concern')}>
+              <View style={[styles.actionIcon, { backgroundColor: colors.background }]}>
                 <FontAwesome5 name="exclamation-circle" size={24} color="#dc2626" />
               </View>
               <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Raise a Concern</Text>
-                <Text style={styles.actionDesc}>Let us know about your worries - we'll reach out to help</Text>
+                <Text style={[styles.actionTitle, { color: colors.text }]}>Raise a Concern</Text>
+                <Text style={[styles.actionDesc, { color: colors.textSecondary }]}>Let us know about your worries - we'll reach out to help</Text>
               </View>
-              <FontAwesome5 name="chevron-right" size={16} color="#94a3b8" />
+              <FontAwesome5 name="chevron-right" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionCard} onPress={() => setView('signs')}>
