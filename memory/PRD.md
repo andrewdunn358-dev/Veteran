@@ -5,38 +5,59 @@ Build and enhance a mobile-first web application for UK serving personnel and ve
 
 ## What's Been Implemented (Updated 21 Feb 2026)
 
-### Latest Session Updates
+### Latest Session - Comprehensive CMS
 
-#### 1. New AI Characters Added
-- **Margie**: Alcohol & substance misuse support AI
-- **Hugo**: Self-help & wellness guru AI
-- Both have safeguarding capabilities and friendly bios
-- Margie added to substance-support.tsx page
-- Hugo added to self-care.tsx as first card option
+#### 1. Enhanced CMS System (Backend)
+- **Pages API**: `/api/cms/pages` - CRUD for app pages
+- **Sections API**: `/api/cms/sections` - CRUD for page sections
+- **Cards API**: `/api/cms/cards` - CRUD for cards/items
+- **Seed endpoint**: `/api/cms/seed` - Initialize default CMS data
+- Supports: reordering, visibility toggle, custom metadata
 
-#### 2. Supporter Logos on Splash Screen
-- Added Frankie's Pod logo (links to YouTube)
-- Added Standing Tall Foundation logo (links to website)
-- "Proudly supported by" section at bottom of splash screen
+#### 2. Admin CMS Interface (Frontend)
+- Full page management (add/edit/delete)
+- Section management with drag-to-reorder
+- Card management (AI characters, tools, resources, links)
+- "Initialize CMS" button to seed default data
+- Legacy text content still supported
 
-#### 3. Staff Calendar/Availability (Frontend Added)
-- Created `/app/frontend/app/my-availability.tsx`
-- Calendar view for volunteers to log shifts
-- Added "My Availability" button on peer-support.tsx
-- Integrates with existing `/api/shifts` endpoints
-- Requires authentication to add shifts
+#### 3. Staff Calendar
+- Peer Portal: "My Availability" card
+- Admin Portal: "Rota" tab
+- Removed from public peer-support page
 
-#### 4. Terminology Updated
-- Changed "veterans" to "serving personnel and veterans" throughout
-- Updated family-friends.tsx, substance-support.tsx, organizations.tsx, self-care.tsx
-- UK English grammar corrected across pages
+#### 4. New AI Characters
+- **Margie**: Alcohol & substance support
+- **Hugo**: Self-help & wellness guru
+- Added to Meet the AI Team (6 total)
 
-#### 5. Bob AI Prompt Fixed (Previous Session)
-- Removed repetitive "Alright mate, Bob here" intro
-- Added instruction to never introduce himself - just respond naturally
-- Updated welcome message in bob-chat.tsx
+#### 5. Supporter Logos
+- Frankie's Pod (YouTube link)
+- Standing Tall Foundation (website link)
+- Added to splash screen
 
-#### 6. Shift/Rota System (Backend Complete)
+### CMS Data Structure
+```
+Pages → Sections → Cards
+  └── slug, title, icon, nav_order
+        └── section_type, title, order
+              └── card_type, title, icon, route, etc.
+```
+
+### CMS Card Types
+- `ai_character` - AI team members
+- `tool` - Self-care tools
+- `resource` - Support resources
+- `organization` - Support organizations
+- `link` - Generic links
+
+### AI Characters (6 total)
+- **Tommy**: Your battle buddy
+- **Doris**: Warm support
+- **Bob**: Ex-Para peer support
+- **Finch**: Crisis & PTSD support
+- **Margie**: Alcohol & substance help
+- **Hugo**: Self-help & wellness
 New endpoints for peer supporter availability management:
 - `GET /api/shifts` - Get all shifts
 - `GET /api/shifts/today` - Get today's shifts (for "Someone on the net" status)
