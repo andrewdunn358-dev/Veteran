@@ -428,18 +428,7 @@ export default function PeerSupport() {
             <Text style={styles.title}>Talk to Another Veteran</Text>
             <Text style={styles.subtitle}>Peer support from those who understand</Text>
 
-            {/* View Available Veterans Button */}
-            <TouchableOpacity 
-              style={styles.primaryButton}
-              onPress={() => setShowVeteransList(true)}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="people" size={24} color="#ffffff" />
-              <Text style={styles.primaryButtonText}>View Available Veterans</Text>
-              <Text style={styles.primaryButtonSubtext}>Tap to see peer supporters</Text>
-            </TouchableOpacity>
-
-            {/* Chat with Bob - AI Peer Support */}
+            {/* Chat with Bob - AI Peer Support (moved to top) */}
             <TouchableOpacity 
               style={styles.bobCard}
               onPress={() => router.push('/bob-chat')}
@@ -454,6 +443,17 @@ export default function PeerSupport() {
                 <Text style={styles.bobSubtitle}>Ex-Para AI peer support, 24/7</Text>
               </View>
               <Ionicons name="chevron-forward" size={24} color="#64748b" />
+            </TouchableOpacity>
+
+            {/* View Available Veterans Button */}
+            <TouchableOpacity 
+              style={styles.primaryButton}
+              onPress={() => setShowVeteransList(true)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="people" size={24} color="#ffffff" />
+              <Text style={styles.primaryButtonText}>View Available Veterans</Text>
+              <Text style={styles.primaryButtonSubtext}>Tap to see peer supporters</Text>
             </TouchableOpacity>
 
             {/* What is it */}
