@@ -74,7 +74,7 @@ interface SIPAssignment {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'orgs' | 'resources' | 'users' | 'content' | 'metrics' | 'callbacks' | 'alerts' | 'sip'>('counsellors');
+  const [activeTab, setActiveTab] = useState<'counsellors' | 'peers' | 'orgs' | 'resources' | 'users' | 'content' | 'metrics' | 'callbacks' | 'alerts' | 'sip' | 'shifts'>('counsellors');
   const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
   const [peers, setPeers] = useState<PeerSupporter[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -875,7 +875,7 @@ export default function AdminDashboard() {
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
         <View style={styles.tabs}>
-          {(['counsellors', 'peers', 'callbacks', 'alerts', 'sip', 'orgs', 'resources', 'users', 'content', 'metrics'] as const).map((tab) => (
+          {(['counsellors', 'peers', 'shifts', 'callbacks', 'alerts', 'sip', 'orgs', 'resources', 'users', 'content', 'metrics'] as const).map((tab) => (
             <TouchableOpacity
               key={tab}
               data-testid={`admin-tab-${tab}`}
@@ -883,20 +883,39 @@ export default function AdminDashboard() {
               onPress={() => setActiveTab(tab)}
             >
               <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab === 'orgs' ? 'Orgs' : tab === 'resources' ? 'Resources' : tab === 'callbacks' ? 'Callbacks' : tab === 'alerts' ? `Alerts${panicAlerts.filter(a => a.status === 'active').length > 0 ? ` (${panicAlerts.filter(a => a.status === 'active').length})` : ''}` : tab === 'sip' ? 'VoIP' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'content' ? 'CMS' : tab === 'metrics' ? 'Calls' : tab === 'orgs' ? 'Orgs' : tab === 'resources' ? 'Resources' : tab === 'callbacks' ? 'Callbacks' : tab === 'shifts' ? 'Rota' : tab === 'alerts' ? `Alerts${panicAlerts.filter(a => a.status === 'active').length > 0 ? ` (${panicAlerts.filter(a => a.status === 'active').length})` : ''}` : tab === 'sip' ? 'VoIP' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
 
-      {activeTab !== 'content' && activeTab !== 'metrics' && activeTab !== 'resources' && activeTab !== 'callbacks' && activeTab !== 'alerts' && activeTab !== 'sip' && (
+      {activeTab !== 'content' && activeTab !== 'metrics' && activeTab !== 'resources' && activeTab !== 'callbacks' && activeTab !== 'alerts' && activeTab !== 'sip' && activeTab !== 'shifts' && (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
             <Ionicons name="add" size={20} color="#ffffff" />
             <Text style={styles.addButtonText}>
               Add New {activeTab === 'counsellors' ? 'Counsellor' : activeTab === 'peers' ? 'Peer Supporter' : activeTab === 'orgs' ? 'Organization' : 'User'}
             </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {activeTab === 'shifts' && (
+        <View style={styles.shiftsContainer}>
+          <View style={styles.shiftsHeader}>
+            <Ionicons name="calendar" size={32} color="#10b981" />
+            <Text style={styles.shiftsTitle}>Staff Rota & Availability</Text>
+          </View>
+          <Text style={styles.shiftsDesc}>
+            View and manage peer supporter shift schedules. Volunteers can log their availability from their portal.
+          </Text>
+          <TouchableOpacity 
+            style={styles.viewRotaButton}
+            onPress={() => router.push('/my-availability')}
+          >
+            <Ionicons name="calendar-outline" size={20} color="#ffffff" />
+            <Text style={styles.viewRotaButtonText}>View Full Calendar</Text>
           </TouchableOpacity>
         </View>
       )}
