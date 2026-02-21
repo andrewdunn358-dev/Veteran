@@ -11,15 +11,22 @@ import {
   ActivityIndicator,
   Image,
   Modal,
+  Linking,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const FINCH_AVATAR = 'https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png';
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
+interface AvailableStaff {
+  counsellors: any[];
+  peers: any[];
+}
 
 interface Message {
   id: string;
@@ -39,6 +46,19 @@ export default function FinchChatScreen() {
   const [pin, setPin] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
+  
+  // Safeguarding state
+  const [showSafeguardingModal, setShowSafeguardingModal] = useState(false);
+  const [currentAlertId, setCurrentAlertId] = useState<string | null>(null);
+  const [safeguardingView, setSafeguardingView] = useState<'main' | 'callback' | 'connecting' | 'callback_success'>('main');
+  const [callbackPhone, setCallbackPhone] = useState('');
+  const [callbackName, setCallbackName] = useState('');
+  const [callbackEmail, setCallbackEmail] = useState('');
+  const [callbackMessage, setCallbackMessage] = useState('');
+  const [isSubmittingCallback, setIsSubmittingCallback] = useState(false);
+  const [availableStaff, setAvailableStaff] = useState<AvailableStaff>({ counsellors: [], peers: [] });
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [sessionId] = useState(() => `finch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   
   // Verification modal state for returning users
   const [showVerifyModal, setShowVerifyModal] = useState(false);
