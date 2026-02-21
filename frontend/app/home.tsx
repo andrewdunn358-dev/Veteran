@@ -10,7 +10,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const NEW_LOGO_URL = 'https://customer-assets.emergentagent.com/job_ae8f8501-55e8-47a0-8c0c-262b1bbbdefe/artifacts/ny233qxa_Gemini_Generated_Image_u4tpnxu4tpnxu4tp-removebg-preview.png';
+const NEW_LOGO_URL = require('../assets/images/logo.png');
 
 // AI Team Avatars
 const AI_TEAM = [
