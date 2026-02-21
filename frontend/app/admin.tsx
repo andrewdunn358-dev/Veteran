@@ -2033,6 +2033,42 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1a2332',
   },
+  shiftsContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  shiftsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  shiftsTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  shiftsDesc: {
+    fontSize: 14,
+    color: '#8899a6',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  viewRotaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#10b981',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+    gap: 10,
+  },
+  viewRotaButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
