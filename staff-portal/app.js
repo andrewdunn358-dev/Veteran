@@ -1531,3 +1531,275 @@ document.addEventListener('DOMContentLoaded', function() {
         privateCheckbox.addEventListener('change', toggleShareGroup);
     }
 });
+
+
+// ============ AVAILABILITY/CALENDAR FUNCTIONALITY ============
+
+var currentCalendarMonth = new Date();
+var selectedCalendarDate = null;
+var calendarShifts = [];
+var editingShiftId = null;
+
+// Load shifts for current month
+async function loadShifts() {
+    try {
+        var year = currentCalendarMonth.getFullYear();
+        var month = currentCalendarMonth.getMonth();
+        var startDate = new Date(year, month, 1).toISOString().split('T')[0];
+        var endDate = new Date(year, month + 1, 0).toISOString().split('T')[0];
+        
+        var shifts = await apiCall('/shifts?date_from=' + startDate + '&date_to=' + endDate);
+        calendarShifts = Array.isArray(shifts) ? shifts : [];
+        renderCalendar();
+    } catch (error) {
+        console.error('Error loading shifts:', error);
+        calendarShifts = [];
+        renderCalendar();
+    }
+}
+
+// Render calendar
+function renderCalendar() {
+    var year = currentCalendarMonth.getFullYear();
+    var month = currentCalendarMonth.getMonth();
+    
+    // Update month display
+    var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+    document.getElementById('current-month-display').textContent = monthNames[month] + ' ' + year;
+    
+    var firstDay = new Date(year, month, 1);
+    var lastDay = new Date(year, month + 1, 0);
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Calculate start padding (Monday = 0)
+    var startPadding = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+    
+    var calendarDays = document.getElementById('calendar-days');
+    calendarDays.innerHTML = '';
+    
+    // Add padding days from previous month
+    for (var i = startPadding; i > 0; i--) {
+        var date = new Date(year, month, 1 - i);
+        addDayCell(calendarDays, date, false, today);
+    }
+    
+    // Add days of current month
+    for (var day = 1; day <= lastDay.getDate(); day++) {
+        var date = new Date(year, month, day);
+        addDayCell(calendarDays, date, true, today);
+    }
+    
+    // Add padding to complete 6 rows (42 days)
+    var totalCells = calendarDays.children.length;
+    var endPadding = 42 - totalCells;
+    for (var i = 1; i <= endPadding; i++) {
+        var date = new Date(year, month + 1, i);
+        addDayCell(calendarDays, date, false, today);
+    }
+}
+
+// Add a day cell to the calendar
+function addDayCell(container, date, isCurrentMonth, today) {
+    var dateString = date.toISOString().split('T')[0];
+    var isToday = date.getTime() === today.getTime();
+    var isSelected = dateString === selectedCalendarDate;
+    
+    // Find shifts for this day
+    var dayShifts = calendarShifts.filter(function(s) { return s.date === dateString; });
+    var hasMyShift = dayShifts.some(function(s) { return s.peer_supporter_id === currentUser.id; });
+    var hasOtherShifts = dayShifts.some(function(s) { return s.peer_supporter_id !== currentUser.id; });
+    
+    var cell = document.createElement('div');
+    cell.className = 'calendar-day';
+    if (!isCurrentMonth) cell.className += ' outside';
+    if (isToday) cell.className += ' today';
+    if (isSelected) cell.className += ' selected';
+    
+    cell.innerHTML = '<span class="day-number">' + date.getDate() + '</span>' +
+        ((hasMyShift || hasOtherShifts) ? 
+            '<div class="shift-indicators">' +
+                (hasMyShift ? '<span class="shift-dot my-shift"></span>' : '') +
+                (hasOtherShifts ? '<span class="shift-dot other-shift"></span>' : '') +
+            '</div>' : '');
+    
+    if (isCurrentMonth) {
+        cell.onclick = function() {
+            selectCalendarDate(dateString);
+        };
+    }
+    
+    container.appendChild(cell);
+}
+
+// Select a date
+function selectCalendarDate(dateString) {
+    selectedCalendarDate = dateString;
+    renderCalendar();
+    showSelectedDayShifts(dateString);
+}
+
+// Show shifts for selected day
+function showSelectedDayShifts(dateString) {
+    var panel = document.getElementById('selected-day-panel');
+    var titleEl = document.getElementById('selected-day-title');
+    var shiftsContainer = document.getElementById('selected-day-shifts');
+    
+    panel.style.display = 'block';
+    
+    var date = new Date(dateString);
+    titleEl.textContent = date.toLocaleDateString('en-GB', { 
+        weekday: 'long', 
+        day: 'numeric', 
+        month: 'long' 
+    });
+    
+    var dayShifts = calendarShifts.filter(function(s) { return s.date === dateString; });
+    
+    if (dayShifts.length === 0) {
+        shiftsContainer.innerHTML = '<div class="empty-shifts"><i class="fas fa-calendar-times"></i> No shifts scheduled for this day</div>' +
+            '<button class="btn btn-primary btn-block" onclick="openShiftModalForDate(\'' + dateString + '\')" style="margin-top: 12px;">' +
+                '<i class="fas fa-plus"></i> Add Your Availability' +
+            '</button>';
+        return;
+    }
+    
+    shiftsContainer.innerHTML = dayShifts.map(function(shift) {
+        var isMyShift = shift.peer_supporter_id === currentUser.id;
+        var name = isMyShift ? 'You' : (shift.peer_supporter_name || 'Staff');
+        
+        var actionsHtml = '';
+        if (isMyShift) {
+            actionsHtml = '<div class="shift-card-actions">' +
+                '<button class="btn btn-small btn-danger" onclick="deleteShift(\'' + shift.id + '\')">' +
+                    '<i class="fas fa-trash"></i>' +
+                '</button>' +
+            '</div>';
+        }
+        
+        return '<div class="shift-card-item' + (isMyShift ? '' : ' other') + '">' +
+            '<div class="shift-card-info">' +
+                '<span class="shift-card-name"><i class="fas fa-user"></i> ' + name + '</span>' +
+                '<span class="shift-card-time"><i class="fas fa-clock"></i> ' + shift.start_time + ' - ' + shift.end_time + '</span>' +
+            '</div>' +
+            actionsHtml +
+        '</div>';
+    }).join('') +
+    '<button class="btn btn-primary btn-block" onclick="openShiftModalForDate(\'' + dateString + '\')" style="margin-top: 12px;">' +
+        '<i class="fas fa-plus"></i> Add Your Availability' +
+    '</button>';
+}
+
+// Navigate to previous month
+function prevMonth() {
+    currentCalendarMonth = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth() - 1, 1);
+    selectedCalendarDate = null;
+    document.getElementById('selected-day-panel').style.display = 'none';
+    loadShifts();
+}
+
+// Navigate to next month
+function nextMonth() {
+    currentCalendarMonth = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth() + 1, 1);
+    selectedCalendarDate = null;
+    document.getElementById('selected-day-panel').style.display = 'none';
+    loadShifts();
+}
+
+// Open shift modal
+function openShiftModal() {
+    editingShiftId = null;
+    document.getElementById('shift-modal-title').innerHTML = '<i class="fas fa-calendar-plus"></i> Add Shift';
+    
+    // Default to today or selected date
+    var defaultDate = selectedCalendarDate || new Date().toISOString().split('T')[0];
+    document.getElementById('shift-date').value = defaultDate;
+    document.getElementById('shift-start').value = '09:00';
+    document.getElementById('shift-end').value = '17:00';
+    
+    document.getElementById('shift-modal').classList.remove('hidden');
+}
+
+// Open shift modal for specific date
+function openShiftModalForDate(dateString) {
+    editingShiftId = null;
+    document.getElementById('shift-modal-title').innerHTML = '<i class="fas fa-calendar-plus"></i> Add Shift';
+    document.getElementById('shift-date').value = dateString;
+    document.getElementById('shift-start').value = '09:00';
+    document.getElementById('shift-end').value = '17:00';
+    document.getElementById('shift-modal').classList.remove('hidden');
+}
+
+// Close shift modal
+function closeShiftModal() {
+    document.getElementById('shift-modal').classList.add('hidden');
+    editingShiftId = null;
+}
+
+// Save shift
+async function saveShift() {
+    var date = document.getElementById('shift-date').value;
+    var startTime = document.getElementById('shift-start').value;
+    var endTime = document.getElementById('shift-end').value;
+    
+    if (!date || !startTime || !endTime) {
+        showNotification('Please fill in all fields', 'error');
+        return;
+    }
+    
+    try {
+        var response = await apiCall('/shifts', {
+            method: 'POST',
+            body: JSON.stringify({
+                date: date,
+                start_time: startTime,
+                end_time: endTime
+            })
+        });
+        
+        showNotification('Shift added successfully');
+        closeShiftModal();
+        
+        // Refresh calendar if the date is in current view
+        var shiftDate = new Date(date);
+        if (shiftDate.getMonth() === currentCalendarMonth.getMonth() && 
+            shiftDate.getFullYear() === currentCalendarMonth.getFullYear()) {
+            loadShifts();
+            if (selectedCalendarDate === date) {
+                // Re-show the selected day with updated shifts
+                setTimeout(function() {
+                    showSelectedDayShifts(date);
+                }, 300);
+            }
+        }
+    } catch (error) {
+        showNotification('Failed to add shift: ' + error.message, 'error');
+    }
+}
+
+// Delete shift
+async function deleteShift(shiftId) {
+    if (!confirm('Are you sure you want to delete this shift?')) return;
+    
+    try {
+        await apiCall('/shifts/' + shiftId, { method: 'DELETE' });
+        showNotification('Shift deleted');
+        loadShifts();
+        if (selectedCalendarDate) {
+            setTimeout(function() {
+                showSelectedDayShifts(selectedCalendarDate);
+            }, 300);
+        }
+    } catch (error) {
+        showNotification('Failed to delete shift: ' + error.message, 'error');
+    }
+}
+
+// Initialize calendar when portal loads (hook into initPortal)
+var originalInitPortal = initPortal;
+initPortal = async function() {
+    await originalInitPortal();
+    // Load shifts after other data
+    loadShifts();
+};
