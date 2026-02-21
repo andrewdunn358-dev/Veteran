@@ -7,6 +7,7 @@ interface ThemeColors {
   background: string;
   surface: string;
   surfaceHover: string;
+  card: string;
   text: string;
   textSecondary: string;
   textMuted: string;
@@ -21,6 +22,7 @@ interface ThemeColors {
 interface ThemeContextType {
   theme: ThemeMode;
   colors: ThemeColors;
+  isDark: boolean;
   toggleTheme: () => void;
   setTheme: (theme: ThemeMode) => void;
 }
