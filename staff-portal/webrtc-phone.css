@@ -293,4 +293,35 @@
         width: 100%;
         justify-content: center;
     }
+    
+    .phone-section {
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .phone-status-bar {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .phone-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    .phone-info h3 {
+        font-size: 14px;
+    }
+    
+    .incoming-call-banner {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .incoming-call-banner .call-actions {
+        width: 100%;
+        justify-content: center;
+    }
 }
