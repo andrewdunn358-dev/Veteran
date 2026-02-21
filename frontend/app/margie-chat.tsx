@@ -20,7 +20,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const MARGIE_AVATAR = 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png';
+const MARGIE_AVATAR = 'https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/66c1d16c16a2b48675d2dd547d7c478f851091bca64411967ec1e1e493beb0ce.png';
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
 interface AvailableStaff {
