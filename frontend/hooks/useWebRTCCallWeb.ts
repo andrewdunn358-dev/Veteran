@@ -44,11 +44,19 @@ interface CallInfo {
   isIncoming: boolean;
 }
 
+interface DebugInfo {
+  remoteTrackReceived: boolean;
+  audioPlaying: boolean;
+  iceState: string;
+  connectionState: string;
+}
+
 interface UseWebRTCCallReturn {
   callState: CallState;
   callInfo: CallInfo | null;
   isConnected: boolean;
   callDuration: number;
+  debugInfo: DebugInfo;
   initiateCall: (targetUserId: string, targetName: string) => Promise<void>;
   acceptCall: () => void;
   rejectCall: () => void;
@@ -61,6 +69,12 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
   const [callInfo, setCallInfo] = useState<CallInfo | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
+  const [debugInfo, setDebugInfo] = useState<DebugInfo>({
+    remoteTrackReceived: false,
+    audioPlaying: false,
+    iceState: 'new',
+    connectionState: 'new',
+  });
   
   const socketRef = useRef<Socket | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
