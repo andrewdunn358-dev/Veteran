@@ -1,909 +1,202 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Linking, Platform, ActivityIndicator, Modal, Alert, Image } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StatusBar, Linking, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useWebRTCCall, formatCallDuration } from '../hooks/useWebRTCCallWeb';
 import { useTheme } from '../src/context/ThemeContext';
-
-const API_URL = Platform.select({
-  web: process.env.EXPO_PUBLIC_BACKEND_URL || '',
-  default: process.env.EXPO_PUBLIC_BACKEND_URL || ''
-});
-
-interface Counsellor {
-  id: string;
-  name: string;
-  status: 'available' | 'busy' | 'off';
-  specialization: string;
-  next_available?: string;
-  phone: string;
-  sms?: string;
-  whatsapp?: string;
-  user_id?: string;
-}
 
 export default function CrisisSupport() {
   const router = useRouter();
   const { colors, isDark } = useTheme();
-  const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // WebRTC calling
-  const { callState, callInfo, callDuration, initiateCall, endCall } = useWebRTCCall();
-  const [isInitiatingCall, setIsInitiatingCall] = useState(false);
-  const [callingCounsellorName, setCallingCounsellorName] = useState('');
-  const showCallModal = callState !== 'idle' || isInitiatingCall;
-
-  // Dynamic styles based on theme
-  const dynamicStyles = {
-    safeArea: { flex: 1, backgroundColor: colors.background },
-    container: { flex: 1, backgroundColor: colors.background },
-    headerTitle: { fontSize: 24, fontWeight: '700' as const, color: colors.text },
-    sectionTitle: { fontSize: 20, fontWeight: '700' as const, color: colors.text },
-    sectionDescription: { fontSize: 14, color: colors.textSecondary, marginBottom: 16, lineHeight: 20 },
-    card: { backgroundColor: colors.card, borderColor: colors.border },
-    cardText: { color: colors.text },
-    secondaryText: { color: colors.textSecondary },
-    iconColor: colors.textSecondary,
+  const handleCall = (number: string) => {
+    Linking.openURL(`tel:${number}`);
   };
 
-  // Fetch counsellors from API
-  const fetchCounsellors = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // Use /available endpoint - returns only public-safe data
-      const response = await fetch(`${API_URL}/api/counsellors/available`);
-      if (response.ok) {
-        const data = await response.json();
-        setCounsellors(data);
-      } else {
-        setError('Unable to load counsellors');
-      }
-    } catch (err) {
-      console.error('Error fetching counsellors:', err);
-      setError('Unable to connect. Please check your connection.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCounsellors();
-  }, []);
-
-  const crisisServices = [
-    {
-      name: 'Combat Stress',
-      description: '24/7 veteran mental health helpline',
-      phone: '01912704378',
-      sms: '01912704378',
-      whatsapp: '441912704378',
-      icon: 'shield' as const,
-    },
-    {
-      name: 'Samaritans',
-      description: '24/7 confidential emotional support',
-      phone: '01912704378',
-      sms: '01912704378',
-      whatsapp: '441912704378',
-      icon: 'heart' as const,
-    },
-    {
-      name: 'Veterans UK',
-      description: 'Government support and guidance',
-      phone: '01912704378',
-      sms: '01912704378',
-      whatsapp: '441912704378',
-      icon: 'information-circle' as const,
-    },
-  ];
-
-  // Log call intent to backend
-  const logCallIntent = async (contactType: string, contactId: string | null, contactName: string, contactPhone: string, callMethod: string) => {
-    try {
-      await fetch(`${API_URL}/api/call-logs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contact_type: contactType,
-          contact_id: contactId,
-          contact_name: contactName,
-          contact_phone: contactPhone,
-          call_method: callMethod,
-        }),
-      });
-    } catch (err) {
-      // Silent fail - don't block the user from making the call
-      console.log('Failed to log call intent:', err);
-    }
-  };
-
-  const handleCall = (number: string, contactName: string = 'Unknown', contactType: string = 'crisis_line', contactId: string | null = null, userId: string | null = null) => {
-    // Only log call intent if we have a phone number
-    if (number) {
-      logCallIntent(contactType, contactId, contactName, number, 'phone');
-    }
-    
-    // Use WebRTC for in-app calling if on web platform AND user_id is available (for counsellors only)
-    if (Platform.OS === 'web' && userId && contactType === 'counsellor') {
-      console.log('WebRTC: Initiating call to counsellor', contactName, 'user_id:', userId);
-      setCallingCounsellorName(contactName);
-      setIsInitiatingCall(true);
-      
-      initiateCall(userId, contactName).catch((error) => {
-        console.error('WebRTC call failed:', error);
-        setIsInitiatingCall(false);
-        // Use window.alert for web since RN Alert.alert doesn't work on web
-        if (typeof window !== 'undefined') {
-          window.alert('Call Failed: Unable to connect. Please try again.');
-        } else {
-          Alert.alert('Call Failed', 'Unable to connect. Please try again.');
-        }
-      });
-    } else if (Platform.OS === 'web' && !userId && contactType === 'counsellor') {
-      // Counsellor doesn't have WebRTC set up, show message using window.confirm for web
-      if (typeof window !== 'undefined') {
-        const userWantsToCall = window.confirm(
-          'In-App Calling Not Available\n\n' +
-          'This counsellor hasn\'t set up in-app calling yet. Would you like to call their phone instead?'
-        );
-        if (userWantsToCall && number) {
-          Linking.openURL(`tel:${number}`);
-        }
-      } else {
-        Alert.alert(
-          'In-App Calling Not Available',
-          'This counsellor hasn\'t set up in-app calling yet. Would you like to call their phone instead?',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Call Phone', onPress: () => Linking.openURL(`tel:${number}`) }
-          ]
-        );
-      }
-    } else {
-      // Crisis lines or native app - use phone dialer directly
-      Linking.openURL(`tel:${number}`);
-    }
-  };
-
-  // Handle call end
-  const handleEndCall = () => {
-    endCall();
-    setIsInitiatingCall(false);
-    setCallingCounsellorName('');
-  };
-
-  // Update initiating state when call state changes
-  useEffect(() => {
-    if (callState !== 'idle' && isInitiatingCall) {
-      setIsInitiatingCall(false);
-    }
-  }, [callState]);
-
-  const handleSMS = (number: string, contactName: string = 'Unknown', contactType: string = 'crisis_line', contactId: string | null = null) => {
-    logCallIntent(contactType, contactId, contactName, number, 'sms');
+  const handleSMS = (number: string) => {
     Linking.openURL(`sms:${number}`);
   };
 
-  const handleWhatsApp = (number: string, contactName: string = 'Unknown', contactType: string = 'crisis_line', contactId: string | null = null) => {
-    logCallIntent(contactType, contactId, contactName, number, 'whatsapp');
-    const formattedNumber = number.replace(/\s/g, '');
-    const whatsappUrl = `https://wa.me/${formattedNumber}`;
-    Linking.openURL(whatsappUrl);
-  };
-
   return (
-    <SafeAreaView style={dynamicStyles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'bottom']}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
       <ScrollView 
-        style={dynamicStyles.container}
-        contentContainerStyle={styles.scrollContent}
+        style={{ flex: 1, backgroundColor: colors.background }}
+        contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.replace('/home')} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={dynamicStyles.iconColor} />
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 24 }}>
+          <TouchableOpacity onPress={() => router.replace('/home')} style={{ padding: 8, marginRight: 12 }}>
+            <Ionicons name="arrow-back" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
-          <Text style={dynamicStyles.headerTitle}>Crisis Support</Text>
+          <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text }}>Crisis Support</Text>
         </View>
 
-        {/* Emergency Banner - Display only, no call functionality */}
-        <View style={styles.emergencyBanner}>
+        {/* Emergency Banner */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#cc0000', borderRadius: 12, padding: 20, marginBottom: 24 }}>
           <Ionicons name="warning" size={28} color="#ffffff" />
-          <View style={styles.emergencyTextContainer}>
-            <Text style={styles.emergencyTitle}>Emergency: Call 999</Text>
-            <Text style={styles.emergencySubtext}>For immediate danger, dial 999 directly</Text>
+          <View style={{ marginLeft: 16, flex: 1 }}>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: '#ffffff', marginBottom: 4 }}>Emergency: Call 999</Text>
+            <Text style={{ fontSize: 14, color: '#ffcccc' }}>For immediate danger, dial 999 directly</Text>
           </View>
         </View>
 
-        {/* AI Battle Buddies - Tommy & Doris */}
+        {/* AI Battle Buddies */}
         <TouchableOpacity 
-          style={[styles.aiBuddiesCard, dynamicStyles.card]}
+          style={{ backgroundColor: colors.card, borderRadius: 16, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: colors.border }}
           onPress={() => router.push('/ai-buddies')}
           activeOpacity={0.9}
         >
-          <View style={styles.aiBuddiesHeader}>
-            <View style={styles.aiBuddiesAvatars}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', marginRight: 12 }}>
               <Image 
                 source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png' }}
-                style={styles.aiBuddyAvatar}
+                style={{ width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: colors.border }}
               />
               <Image 
                 source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png' }}
-                style={[styles.aiBuddyAvatar, styles.aiBuddyAvatarOverlap]}
+                style={{ width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: colors.border, marginLeft: -16 }}
               />
             </View>
-            <View style={styles.aiBuddiesTextContainer}>
-              <Text style={[styles.aiBuddiesTitle, dynamicStyles.cardText]}>We're on stag 24/7</Text>
-              <Text style={[styles.aiBuddiesSubtitle, dynamicStyles.secondaryText]}>Chat with Tommy or Doris</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text }}>We're on stag 24/7</Text>
+              <Text style={{ fontSize: 14, color: colors.textSecondary }}>Chat with Tommy or Doris</Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color={dynamicStyles.iconColor} />
+            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
           </View>
         </TouchableOpacity>
 
-        {/* On-Duty Counsellors Section */}
-        <View style={[styles.counsellorsSection, dynamicStyles.card]}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="people-circle" size={24} color={dynamicStyles.iconColor} />
-            <Text style={dynamicStyles.sectionTitle}>On-Duty Counsellors</Text>
+        {/* On-Duty Counsellors Card */}
+        <TouchableOpacity 
+          style={{ backgroundColor: colors.primary, borderRadius: 16, padding: 20, marginBottom: 24 }}
+          onPress={() => router.push('/counsellors')}
+          activeOpacity={0.8}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center', marginRight: 16 }}>
+              <Ionicons name="people-circle" size={32} color="#ffffff" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 18, fontWeight: '700', color: '#ffffff', marginBottom: 4 }}>On-Duty Counsellors</Text>
+              <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)' }}>Professional support available now</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#ffffff" />
           </View>
-          <Text style={dynamicStyles.sectionDescription}>
-            Professional counsellors available now to speak with you
-          </Text>
+        </TouchableOpacity>
 
-          {isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading counsellors...</Text>
-            </View>
-          ) : error ? (
-            <View style={styles.errorContainer}>
-              <Ionicons name="alert-circle" size={24} color="#ef4444" />
-              <Text style={styles.errorText}>{error}</Text>
-              <TouchableOpacity style={[styles.retryButton, { backgroundColor: colors.primary }]} onPress={fetchCounsellors}>
-                <Text style={styles.retryButtonText}>Retry</Text>
-              </TouchableOpacity>
-            </View>
-          ) : counsellors.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="time" size={32} color={colors.textSecondary} />
-              <Text style={[styles.emptyText, { color: colors.text }]}>No counsellors on duty at the moment</Text>
-              <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>Please try the crisis services below</Text>
-            </View>
-          ) : (
-            counsellors.map((counsellor, index) => (
-            <View key={counsellor.id || index} style={[styles.counsellorCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <View style={styles.counsellorHeader}>
-                <View style={styles.counsellorInfo}>
-                  <View style={styles.counsellorNameRow}>
-                    <Text style={[styles.counsellorName, { color: colors.text }]}>{counsellor.name}</Text>
-                    <View style={[
-                      styles.statusBadge,
-                      counsellor.status === 'available' ? styles.statusAvailable : styles.statusBusy
-                    ]}>
-                      <View style={[
-                        styles.statusDot,
-                        counsellor.status === 'available' ? styles.dotAvailable : styles.dotBusy
-                      ]} />
-                      <Text style={[
-                        styles.statusText,
-                        counsellor.status === 'available' ? styles.statusTextAvailable : styles.statusTextBusy
-                      ]}>
-                        {counsellor.status === 'available' ? 'Available' : 'Busy'}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text style={[styles.counsellorSpec, { color: colors.textSecondary }]}>{counsellor.specialization}</Text>
-                  {counsellor.next_available && (
-                    <Text style={[styles.nextAvailable, { color: colors.textMuted }]}>Next available in {counsellor.next_available}</Text>
-                  )}
-                </View>
-              </View>
-              {counsellor.status === 'available' && (
-                <View style={styles.counsellorContactButtons}>
-                  <TouchableOpacity
-                    style={[styles.counsellorCallButton, { backgroundColor: colors.primary }]}
-                    onPress={() => handleCall(counsellor.phone, counsellor.name, 'counsellor', counsellor.id, counsellor.user_id || null)}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons name="call" size={20} color="#ffffff" />
-                    <Text style={styles.counsellorCallButtonText}>Call</Text>
-                  </TouchableOpacity>
-                  
-                  {counsellor.sms && (
-                    <TouchableOpacity
-                      style={[styles.counsellorSecondaryButton, { backgroundColor: colors.surfaceHover, borderColor: colors.border }]}
-                      onPress={() => handleSMS(counsellor.sms!, counsellor.name, 'counsellor', counsellor.id)}
-                      activeOpacity={0.8}
-                    >
-                      <Ionicons name="chatbubble" size={18} color={colors.textSecondary} />
-                      <Text style={[styles.counsellorSecondaryButtonText, { color: colors.textSecondary }]}>Text</Text>
-                    </TouchableOpacity>
-                  )}
+        {/* Section Title */}
+        <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textSecondary, marginBottom: 16 }}>
+          Crisis Helplines
+        </Text>
 
-                  {counsellor.whatsapp && (
-                    <TouchableOpacity
-                      style={[styles.counsellorSecondaryButton, { backgroundColor: colors.surfaceHover, borderColor: colors.border }]}
-                      onPress={() => handleWhatsApp(counsellor.whatsapp!, counsellor.name, 'counsellor', counsellor.id)}
-                      activeOpacity={0.8}
-                    >
-                      <Ionicons name="logo-whatsapp" size={18} color={colors.textSecondary} />
-                      <Text style={[styles.counsellorSecondaryButtonText, { color: colors.textSecondary }]}>WhatsApp</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              )}
-            </View>
-          ))
-          )}
-        </View>
-
-        {/* Instructions */}
-        <View style={[styles.instructions, { backgroundColor: colors.card }]}>
-          <Text style={[styles.instructionsText, { color: colors.textSecondary }]}>
-            Or choose another way to reach out for support:
-          </Text>
-        </View>
-
-        {/* Crisis Services */}
-        {crisisServices.map((service, index) => (
-          <View key={index} style={[styles.serviceCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={styles.serviceHeader}>
-              <Ionicons name={service.icon} size={28} color={colors.textSecondary} />
-              <View style={styles.serviceInfo}>
-                <Text style={[styles.serviceName, { color: colors.text }]}>{service.name}</Text>
-                <Text style={[styles.serviceDescription, { color: colors.textSecondary }]}>{service.description}</Text>
-              </View>
-            </View>
-
-            <View style={styles.contactButtons}>
-              <TouchableOpacity
-                style={[styles.contactButton, { backgroundColor: colors.primary }]}
-                onPress={() => handleCall(service.phone, service.name, 'crisis_line', null)}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="call" size={24} color="#ffffff" />
-                <Text style={styles.contactButtonText}>Call</Text>
-              </TouchableOpacity>
-
-              {service.sms && (
-                <TouchableOpacity
-                  style={[styles.contactButton, styles.contactButtonSecondary, { backgroundColor: colors.surfaceHover, borderColor: colors.border }]}
-                  onPress={() => handleSMS(service.sms!, service.name, 'crisis_line', null)}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="chatbubble" size={24} color={colors.textSecondary} />
-                  <Text style={[styles.contactButtonText, styles.contactButtonTextSecondary, { color: colors.textSecondary }]}>Text</Text>
-                </TouchableOpacity>
-              )}
-
-              {service.whatsapp && (
-                <TouchableOpacity
-                  style={[styles.contactButton, styles.contactButtonSecondary, { backgroundColor: colors.surfaceHover, borderColor: colors.border }]}
-                  onPress={() => handleWhatsApp(service.whatsapp!, service.name, 'crisis_line', null)}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="logo-whatsapp" size={24} color={colors.textSecondary} />
-                  <Text style={[styles.contactButtonText, styles.contactButtonTextSecondary, { color: colors.textSecondary }]}>WhatsApp</Text>
-                </TouchableOpacity>
-              )}
+        {/* Samaritans - FIRST */}
+        <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 }}>
+            <Ionicons name="heart" size={28} color={colors.textSecondary} />
+            <View style={{ marginLeft: 16, flex: 1 }}>
+              <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 4 }}>Samaritans</Text>
+              <Text style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 20 }}>24/7 emotional support for anyone in distress</Text>
             </View>
           </View>
-        ))}
-
-        {/* Additional Help */}
-        <View style={[styles.additionalHelp, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.additionalHelpTitle, { color: colors.text }]}>Need more options?</Text>
-          <TouchableOpacity 
-            style={styles.linkButton}
-            onPress={() => router.push('/organizations')}
+          <TouchableOpacity
+            style={{ flexDirection: 'row', backgroundColor: colors.primary, borderRadius: 8, padding: 16, alignItems: 'center', justifyContent: 'center', gap: 8 }}
+            onPress={() => handleCall('116123')}
+            activeOpacity={0.8}
           >
-            <Text style={[styles.linkButtonText, { color: colors.primary }]}>View all support organisations</Text>
-            <Ionicons name="arrow-forward" size={20} color={colors.primary} />
+            <Ionicons name="call" size={24} color="#ffffff" />
+            <Text style={{ fontSize: 16, fontWeight: '600', color: '#ffffff' }}>Call 116 123</Text>
           </TouchableOpacity>
         </View>
 
+        {/* Combat Stress - SECOND */}
+        <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 }}>
+            <Ionicons name="shield" size={28} color={colors.textSecondary} />
+            <View style={{ marginLeft: 16, flex: 1 }}>
+              <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 4 }}>Combat Stress</Text>
+              <Text style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 20 }}>Veterans' mental health charity helpline</Text>
+            </View>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <TouchableOpacity
+              style={{ flex: 1, flexDirection: 'row', backgroundColor: colors.primary, borderRadius: 8, padding: 14, alignItems: 'center', justifyContent: 'center', gap: 8 }}
+              onPress={() => handleCall('01912704378')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="call" size={20} color="#ffffff" />
+              <Text style={{ fontSize: 15, fontWeight: '600', color: '#ffffff' }}>Call</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ flexDirection: 'row', backgroundColor: colors.surfaceHover, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderColor: colors.border }}
+              onPress={() => handleSMS('61212')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="chatbubble" size={18} color={colors.textSecondary} />
+              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textSecondary }}>Text</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Veterans UK */}
+        <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 }}>
+            <Ionicons name="flag" size={28} color={colors.textSecondary} />
+            <View style={{ marginLeft: 16, flex: 1 }}>
+              <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 4 }}>Veterans UK</Text>
+              <Text style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 20 }}>Government welfare and support services</Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={{ flexDirection: 'row', backgroundColor: colors.primary, borderRadius: 8, padding: 16, alignItems: 'center', justifyContent: 'center', gap: 8 }}
+            onPress={() => handleCall('08081914218')}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="call" size={24} color="#ffffff" />
+            <Text style={{ fontSize: 16, fontWeight: '600', color: '#ffffff' }}>Call 0808 191 4218</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* SSAFA */}
+        <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20, marginBottom: 24, borderWidth: 1, borderColor: colors.border }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 }}>
+            <Ionicons name="people" size={28} color={colors.textSecondary} />
+            <View style={{ marginLeft: 16, flex: 1 }}>
+              <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 4 }}>SSAFA</Text>
+              <Text style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 20 }}>Armed Forces charity supporting serving personnel, veterans and families</Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={{ flexDirection: 'row', backgroundColor: colors.primary, borderRadius: 8, padding: 16, alignItems: 'center', justifyContent: 'center', gap: 8 }}
+            onPress={() => handleCall('08007314880')}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="call" size={24} color="#ffffff" />
+            <Text style={{ fontSize: 16, fontWeight: '600', color: '#ffffff' }}>Call 0800 731 4880</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* More Options Link */}
+        <TouchableOpacity 
+          style={{ backgroundColor: colors.card, borderRadius: 12, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+          onPress={() => router.push('/organizations')}
+          activeOpacity={0.8}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <Ionicons name="business" size={24} color={colors.textSecondary} />
+            <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text }}>View all support organisations</Text>
+          </View>
+          <Ionicons name="arrow-forward" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
+
         {/* Disclaimer */}
-        <View style={[styles.disclaimer, { backgroundColor: colors.card }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           <Ionicons name="information-circle" size={16} color={colors.textSecondary} />
-          <Text style={[styles.disclaimerText, { color: colors.textSecondary }]}>
+          <Text style={{ fontSize: 12, color: colors.textSecondary, textAlign: 'center', flex: 1 }}>
             All services listed are free and confidential
           </Text>
         </View>
       </ScrollView>
-
-      {/* WebRTC Call Modal */}
-      <Modal visible={showCallModal} transparent animationType="fade">
-        <View style={styles.callModalOverlay}>
-          <View style={styles.callModalContent}>
-            <View style={styles.callModalHeader}>
-              {/* Animated icon based on call state */}
-              <View style={styles.callIconContainer}>
-                <Ionicons 
-                  name={callState === 'connected' ? 'call' : 'call-outline'} 
-                  size={48} 
-                  color={callState === 'connected' ? '#22c55e' : '#3b82f6'} 
-                />
-              </View>
-              
-              <Text style={styles.callModalTitle}>
-                {isInitiatingCall ? 'Connecting...' :
-                 callState === 'connecting' ? 'Connecting...' : 
-                 callState === 'ringing' ? 'Ringing...' : 
-                 callState === 'connected' ? 'Connected' : 'Calling...'}
-              </Text>
-              
-              <Text style={styles.callModalPeerName}>
-                {callInfo?.peerName || callingCounsellorName || 'Counsellor'}
-              </Text>
-              
-              {callState === 'connected' && (
-                <Text style={styles.callModalDuration}>{formatCallDuration(callDuration)}</Text>
-              )}
-              
-              {(isInitiatingCall || callState === 'connecting' || callState === 'ringing') && (
-                <ActivityIndicator size="small" color="#3b82f6" style={{ marginTop: 16 }} />
-              )}
-            </View>
-            
-            <TouchableOpacity style={styles.callEndButton} onPress={handleEndCall}>
-              <Ionicons name="call" size={28} color="#fff" style={{ transform: [{ rotate: '135deg' }] }} />
-              <Text style={styles.callEndButtonText}>
-                {callState === 'connected' ? 'End Call' : 'Cancel'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#1a2332',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#1a2332',
-  },
-  scrollContent: {
-    padding: 24,
-    paddingBottom: 40,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  backButton: {
-    padding: 8,
-    marginRight: 12,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  emergencyBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#cc0000',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 24,
-  },
-  emergencyTextContainer: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  emergencyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 4,
-  },
-  emergencySubtext: {
-    fontSize: 14,
-    color: '#ffcccc',
-  },
-  aiBuddiesCard: {
-    backgroundColor: '#2d3748',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#4a5568',
-  },
-  aiBuddiesHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  aiBuddiesAvatars: {
-    flexDirection: 'row',
-    marginRight: 12,
-  },
-  aiBuddyAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: '#1a2332',
-  },
-  aiBuddyAvatarOverlap: {
-    marginLeft: -12,
-  },
-  aiBuddiesTextContainer: {
-    flex: 1,
-  },
-  aiBuddiesTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  aiBuddiesSubtitle: {
-    fontSize: 13,
-    color: '#94a3b8',
-    marginTop: 2,
-  },
-  counsellorsSection: {
-    backgroundColor: '#2d3748',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#4a5568',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  sectionDescription: {
-    fontSize: 14,
-    color: '#b0c4de',
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  counsellorCard: {
-    backgroundColor: '#1a2332',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#4a5568',
-  },
-  counsellorHeader: {
-    marginBottom: 12,
-  },
-  counsellorInfo: {
-    flex: 1,
-  },
-  counsellorNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  counsellorName: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 6,
-  },
-  statusAvailable: {
-    backgroundColor: '#2d4a3e',
-  },
-  statusBusy: {
-    backgroundColor: '#4a3a2d',
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  dotAvailable: {
-    backgroundColor: '#4ade80',
-  },
-  dotBusy: {
-    backgroundColor: '#fbbf24',
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  statusTextAvailable: {
-    color: '#a8e6cf',
-  },
-  statusTextBusy: {
-    color: '#fde68a',
-  },
-  counsellorSpec: {
-    fontSize: 14,
-    color: '#b0c4de',
-    marginBottom: 4,
-  },
-  nextAvailable: {
-    fontSize: 13,
-    color: '#9ca3af',
-    fontStyle: 'italic',
-  },
-  talkButton: {
-    flexDirection: 'row',
-    backgroundColor: '#4a90e2',
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  talkButtonText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  counsellorContactButtons: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  counsellorCallButton: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: '#4a90e2',
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  counsellorCallButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  counsellorSecondaryButton: {
-    flexDirection: 'row',
-    backgroundColor: '#374151',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    borderWidth: 1,
-    borderColor: '#4a5568',
-    minWidth: 80,
-  },
-  counsellorSecondaryButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#7c9cbf',
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    padding: 24,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#b0c4de',
-  },
-  errorContainer: {
-    alignItems: 'center',
-    padding: 24,
-    gap: 12,
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#ef4444',
-    textAlign: 'center',
-  },
-  retryButton: {
-    backgroundColor: '#4a90e2',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: '#ffffff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    padding: 24,
-    gap: 8,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#ffffff',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#b0c4de',
-    textAlign: 'center',
-  },
-  instructions: {
-    backgroundColor: '#2d3748',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 24,
-  },
-  instructionsText: {
-    fontSize: 16,
-    color: '#b0c4de',
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  serviceCard: {
-    backgroundColor: '#2d3748',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#4a5568',
-  },
-  serviceHeader: {
-    flexDirection: 'row',
-    marginBottom: 16,
-  },
-  serviceInfo: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  serviceName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 4,
-  },
-  serviceDescription: {
-    fontSize: 14,
-    color: '#b0c4de',
-    lineHeight: 20,
-  },
-  contactButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  contactButton: {
-    flex: 1,
-    backgroundColor: '#4a90e2',
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-  },
-  contactButtonSecondary: {
-    backgroundColor: '#374151',
-    borderWidth: 1,
-    borderColor: '#4a5568',
-  },
-  contactButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#ffffff',
-    marginTop: 4,
-  },
-  contactButtonTextSecondary: {
-    color: '#7c9cbf',
-  },
-  additionalHelp: {
-    backgroundColor: '#2d3748',
-    borderRadius: 12,
-    padding: 20,
-    marginTop: 8,
-    marginBottom: 24,
-  },
-  additionalHelpTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  linkButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 12,
-    gap: 8,
-  },
-  linkButtonText: {
-    fontSize: 15,
-    color: '#7c9cbf',
-    fontWeight: '600',
-  },
-  disclaimer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  disclaimerText: {
-    fontSize: 12,
-    color: '#b0c4de',
-    textAlign: 'center',
-  },
-  // Call Modal Styles
-  callModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  callModalContent: {
-    backgroundColor: '#1a2332',
-    borderRadius: 20,
-    padding: 32,
-    alignItems: 'center',
-    minWidth: 280,
-    borderWidth: 1,
-    borderColor: '#2d3748',
-  },
-  callModalHeader: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  callIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(59, 130, 246, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  callModalTitle: {
-    fontSize: 18,
-    color: '#94a3b8',
-    marginTop: 16,
-  },
-  callModalPeerName: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#ffffff',
-    marginTop: 8,
-  },
-  callModalDuration: {
-    fontSize: 32,
-    fontWeight: '300',
-    color: '#22c55e',
-    marginTop: 12,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-  },
-  callEndButton: {
-    backgroundColor: '#ef4444',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 30,
-    gap: 10,
-  },
-  callEndButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});
