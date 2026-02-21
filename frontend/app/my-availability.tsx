@@ -19,8 +19,8 @@ const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
 interface Shift {
   id: string;
-  peer_supporter_id: string;
-  peer_supporter_name?: string;
+  staff_id: string;
+  staff_name?: string;
   date: string;
   start_time: string;
   end_time: string;
@@ -55,10 +55,13 @@ export default function MyAvailabilityScreen() {
 
   const loadUserAndShifts = async () => {
     try {
-      const storedUserId = await AsyncStorage.getItem('userId');
-      const storedUserName = await AsyncStorage.getItem('userName');
-      setUserId(storedUserId);
-      setUserName(storedUserName || 'Volunteer');
+      // Load user info from auth_user (stored as JSON by AuthContext)
+      const storedUser = await AsyncStorage.getItem('auth_user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        setUserId(user.id);
+        setUserName(user.name || 'Volunteer');
+      }
       await fetchShifts();
     } catch (error) {
       console.error('Error loading data:', error);
