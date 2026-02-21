@@ -101,6 +101,18 @@ export default function AdminDashboard() {
   const { user, token, logout } = useAuth();
   const router = useRouter();
 
+  // Enhanced CMS State
+  const [cmsPages, setCmsPages] = useState<any[]>([]);
+  const [cmsSections, setCmsSections] = useState<any[]>([]);
+  const [cmsCards, setCmsCards] = useState<any[]>([]);
+  const [selectedCmsPage, setSelectedCmsPage] = useState<string | null>(null);
+  const [selectedCmsSection, setSelectedCmsSection] = useState<string | null>(null);
+  const [showCmsPageModal, setShowCmsPageModal] = useState(false);
+  const [showCmsSectionModal, setShowCmsSectionModal] = useState(false);
+  const [showCmsCardModal, setShowCmsCardModal] = useState(false);
+  const [cmsEditMode, setCmsEditMode] = useState<'add' | 'edit'>('add');
+  const [cmsEditItem, setCmsEditItem] = useState<any>(null);
+
   // Toast state
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' | 'info' }>({
     visible: false,
