@@ -213,7 +213,22 @@ async function startWebRTCConnection(createOffer) {
         // Add local stream tracks
         localStream.getTracks().forEach(track => {
             console.log('Adding track to peer connection:', track.kind);
-            peerConnection.addTrack(track, localStream);
+            const sender = peerConnection.addTrack(track, localStream);
+            
+            // Monitor audio levels being sent
+            if (track.kind === 'audio') {
+                setInterval(() => {
+                    if (peerConnection && sender) {
+                        sender.getStats().then(stats => {
+                            stats.forEach(report => {
+                                if (report.type === 'outbound-rtp' && report.kind === 'audio') {
+                                    console.log('Audio sending - bytes:', report.bytesSent, 'packets:', report.packetsSent);
+                                }
+                            });
+                        });
+                    }
+                }, 3000);
+            }
         });
         
         // Handle ICE candidates
