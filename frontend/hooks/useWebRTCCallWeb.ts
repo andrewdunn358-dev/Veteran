@@ -272,13 +272,29 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     if (Platform.OS !== 'web') return;
     
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      // Get audio with specific constraints for better compatibility
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        }, 
+        video: false 
+      });
       localStreamRef.current = stream;
+      
+      // Ensure audio tracks are enabled
+      stream.getAudioTracks().forEach((track) => {
+        track.enabled = true;
+        console.log('WebRTC: Local audio track:', track.label, 'enabled:', track.enabled, 'muted:', track.muted);
+      });
 
       const pc = new RTCPeerConnection(RTC_CONFIG);
       peerConnectionRef.current = pc;
 
+      // Add tracks with explicit stream reference
       stream.getTracks().forEach((track) => {
+        console.log('WebRTC: Adding track to peer connection:', track.kind);
         pc.addTrack(track, stream);
       });
 
@@ -290,19 +306,35 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
           });
         }
       };
+      
+      // Log ICE connection state changes
+      pc.oniceconnectionstatechange = () => {
+        console.log('WebRTC: ICE connection state:', pc.iceConnectionState);
+      };
 
       pc.ontrack = (event) => {
-        console.log('WebRTC: Received remote track', event.track.kind, event.streams);
+        console.log('WebRTC: Received remote track', event.track.kind, 'enabled:', event.track.enabled);
+        
+        // Ensure the remote track is enabled
+        event.track.enabled = true;
+        
         const audio = ensureRemoteAudio();
         if (audio && event.streams[0]) {
+          console.log('WebRTC: Setting audio srcObject with', event.streams[0].getAudioTracks().length, 'audio tracks');
           audio.srcObject = event.streams[0];
           // Unmute and set volume explicitly
           audio.muted = false;
           audio.volume = 1.0;
+          
+          // Log audio element state
+          console.log('WebRTC: Audio element - muted:', audio.muted, 'volume:', audio.volume, 'paused:', audio.paused);
+          
           // Play with user interaction workaround
           const playPromise = audio.play();
           if (playPromise !== undefined) {
-            playPromise.catch((error) => {
+            playPromise.then(() => {
+              console.log('WebRTC: Audio playback started successfully');
+            }).catch((error) => {
               console.error('WebRTC: Audio play failed:', error);
               // Try to play on next user interaction
               document.addEventListener('click', () => {
