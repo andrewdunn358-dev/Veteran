@@ -2310,6 +2310,277 @@ async def seed_default_content(current_user: User = Depends(require_role("admin"
     
     return {"message": "Default content seeded successfully"}
 
+# ============ ENHANCED CMS ENDPOINTS ============
+
+# --- CMS PAGES ---
+
+@api_router.get("/cms/pages")
+async def get_cms_pages():
+    """Get all CMS pages (public - for navigation)"""
+    pages = await db.cms_pages.find({"is_visible": True}, {"_id": 0}).sort("nav_order", 1).to_list(100)
+    return pages
+
+@api_router.get("/cms/pages/all")
+async def get_all_cms_pages(current_user: User = Depends(require_role("admin"))):
+    """Get all CMS pages including hidden (admin)"""
+    pages = await db.cms_pages.find({}, {"_id": 0}).sort("nav_order", 1).to_list(100)
+    return pages
+
+@api_router.get("/cms/pages/{slug}")
+async def get_cms_page(slug: str):
+    """Get a single page with its sections and cards"""
+    page = await db.cms_pages.find_one({"slug": slug}, {"_id": 0})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
+    
+    sections = await db.cms_sections.find(
+        {"page_slug": slug, "is_visible": True}, {"_id": 0}
+    ).sort("order", 1).to_list(100)
+    
+    for section in sections:
+        cards = await db.cms_cards.find(
+            {"section_id": section["id"], "is_visible": True}, {"_id": 0}
+        ).sort("order", 1).to_list(100)
+        section["cards"] = cards
+    
+    page["sections"] = sections
+    return page
+
+@api_router.post("/cms/pages")
+async def create_cms_page(
+    page_data: CMSPageCreate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Create a new CMS page (admin)"""
+    existing = await db.cms_pages.find_one({"slug": page_data.slug})
+    if existing:
+        raise HTTPException(status_code=400, detail="Page with this slug already exists")
+    
+    page = CMSPage(**page_data.dict())
+    await db.cms_pages.insert_one(page.dict())
+    return {"message": "Page created", "page": page.dict()}
+
+@api_router.put("/cms/pages/{slug}")
+async def update_cms_page(
+    slug: str,
+    page_data: dict,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Update a CMS page (admin)"""
+    page_data["updated_at"] = datetime.utcnow()
+    result = await db.cms_pages.update_one({"slug": slug}, {"$set": page_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Page not found")
+    return {"message": "Page updated"}
+
+@api_router.delete("/cms/pages/{slug}")
+async def delete_cms_page(
+    slug: str,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Delete a CMS page and its sections/cards (admin)"""
+    # Delete related sections and cards first
+    sections = await db.cms_sections.find({"page_slug": slug}).to_list(100)
+    for section in sections:
+        await db.cms_cards.delete_many({"section_id": section["id"]})
+    await db.cms_sections.delete_many({"page_slug": slug})
+    await db.cms_pages.delete_one({"slug": slug})
+    return {"message": "Page deleted"}
+
+# --- CMS SECTIONS ---
+
+@api_router.get("/cms/sections/{page_slug}")
+async def get_cms_sections(page_slug: str):
+    """Get all sections for a page"""
+    sections = await db.cms_sections.find(
+        {"page_slug": page_slug}, {"_id": 0}
+    ).sort("order", 1).to_list(100)
+    return sections
+
+@api_router.post("/cms/sections")
+async def create_cms_section(
+    section_data: CMSSectionCreate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Create a new section (admin)"""
+    section = CMSSection(**section_data.dict())
+    await db.cms_sections.insert_one(section.dict())
+    return {"message": "Section created", "section": section.dict()}
+
+@api_router.put("/cms/sections/{section_id}")
+async def update_cms_section(
+    section_id: str,
+    section_data: dict,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Update a section (admin)"""
+    section_data["updated_at"] = datetime.utcnow()
+    result = await db.cms_sections.update_one({"id": section_id}, {"$set": section_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Section not found")
+    return {"message": "Section updated"}
+
+@api_router.delete("/cms/sections/{section_id}")
+async def delete_cms_section(
+    section_id: str,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Delete a section and its cards (admin)"""
+    await db.cms_cards.delete_many({"section_id": section_id})
+    await db.cms_sections.delete_one({"id": section_id})
+    return {"message": "Section deleted"}
+
+@api_router.put("/cms/sections/reorder")
+async def reorder_cms_sections(
+    reorder_data: dict,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Reorder sections within a page (admin)"""
+    for section_id, new_order in reorder_data.get("sections", {}).items():
+        await db.cms_sections.update_one({"id": section_id}, {"$set": {"order": new_order}})
+    return {"message": "Sections reordered"}
+
+# --- CMS CARDS ---
+
+@api_router.get("/cms/cards/{section_id}")
+async def get_cms_cards(section_id: str):
+    """Get all cards for a section"""
+    cards = await db.cms_cards.find(
+        {"section_id": section_id}, {"_id": 0}
+    ).sort("order", 1).to_list(100)
+    return cards
+
+@api_router.post("/cms/cards")
+async def create_cms_card(
+    card_data: CMSCardCreate,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Create a new card (admin)"""
+    card = CMSCard(**card_data.dict())
+    await db.cms_cards.insert_one(card.dict())
+    return {"message": "Card created", "card": card.dict()}
+
+@api_router.put("/cms/cards/{card_id}")
+async def update_cms_card(
+    card_id: str,
+    card_data: dict,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Update a card (admin)"""
+    card_data["updated_at"] = datetime.utcnow()
+    result = await db.cms_cards.update_one({"id": card_id}, {"$set": card_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Card not found")
+    return {"message": "Card updated"}
+
+@api_router.delete("/cms/cards/{card_id}")
+async def delete_cms_card(
+    card_id: str,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Delete a card (admin)"""
+    await db.cms_cards.delete_one({"id": card_id})
+    return {"message": "Card deleted"}
+
+@api_router.put("/cms/cards/reorder")
+async def reorder_cms_cards(
+    reorder_data: dict,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Reorder cards within a section (admin)"""
+    for card_id, new_order in reorder_data.get("cards", {}).items():
+        await db.cms_cards.update_one({"id": card_id}, {"$set": {"order": new_order}})
+    return {"message": "Cards reordered"}
+
+# --- CMS SEED DATA ---
+
+@api_router.post("/cms/seed")
+async def seed_cms_data(current_user: User = Depends(require_role("admin"))):
+    """Seed default CMS pages, sections, and cards (admin)"""
+    
+    # Default pages
+    pages = [
+        {"slug": "home", "title": "Home", "icon": "home", "nav_order": 1},
+        {"slug": "self-care", "title": "Self-Care", "icon": "heart", "nav_order": 2},
+        {"slug": "peer-support", "title": "Peer Support", "icon": "people", "nav_order": 3},
+        {"slug": "organizations", "title": "Support Orgs", "icon": "business", "nav_order": 4},
+        {"slug": "family-friends", "title": "Family & Friends", "icon": "home", "nav_order": 5},
+        {"slug": "substance-support", "title": "Substance Support", "icon": "medkit", "nav_order": 6},
+    ]
+    
+    for page in pages:
+        existing = await db.cms_pages.find_one({"slug": page["slug"]})
+        if not existing:
+            page_obj = CMSPage(**page)
+            await db.cms_pages.insert_one(page_obj.dict())
+    
+    # AI Team cards for home page
+    ai_team_section = await db.cms_sections.find_one({"page_slug": "home", "section_type": "ai_team"})
+    if not ai_team_section:
+        section = CMSSection(
+            page_slug="home",
+            section_type="ai_team",
+            title="Meet the AI Team",
+            order=1
+        )
+        await db.cms_sections.insert_one(section.dict())
+        
+        ai_characters = [
+            {"title": "Tommy", "description": "Your battle buddy", "image_url": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png", "route": "/ai-chat?character=tommy"},
+            {"title": "Doris", "description": "Warm support", "image_url": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png", "route": "/ai-chat?character=doris"},
+            {"title": "Bob", "description": "Ex-Para peer support", "image_url": "https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png", "route": "/bob-chat"},
+            {"title": "Finch", "description": "Crisis & PTSD support", "image_url": "https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png", "route": "/sentry-chat"},
+            {"title": "Margie", "description": "Alcohol & substance help", "image_url": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png", "route": "/margie-chat"},
+            {"title": "Hugo", "description": "Self-help & wellness", "image_url": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png", "route": "/hugo-chat"},
+        ]
+        
+        for i, char in enumerate(ai_characters):
+            card = CMSCard(
+                section_id=section.id,
+                card_type="ai_character",
+                title=char["title"],
+                description=char["description"],
+                image_url=char["image_url"],
+                route=char["route"],
+                order=i
+            )
+            await db.cms_cards.insert_one(card.dict())
+    
+    # Self-care tools section
+    selfcare_section = await db.cms_sections.find_one({"page_slug": "self-care", "section_type": "cards"})
+    if not selfcare_section:
+        section = CMSSection(
+            page_slug="self-care",
+            section_type="cards",
+            title="Self-Care Tools",
+            order=1
+        )
+        await db.cms_sections.insert_one(section.dict())
+        
+        tools = [
+            {"title": "Chat with Hugo", "description": "Self-help & wellness guide", "icon": "chatbubbles", "color": "#10b981", "route": "/hugo-chat"},
+            {"title": "My Journal", "description": "Write down your thoughts", "icon": "book", "color": "#3b82f6", "route": "/journal"},
+            {"title": "Daily Check-in", "description": "Track how you're feeling", "icon": "happy", "color": "#f59e0b", "route": "/mood"},
+            {"title": "Grounding Tools", "description": "5-4-3-2-1 and more techniques", "icon": "hand-left", "color": "#22c55e", "route": "/grounding"},
+            {"title": "Breathing Exercises", "description": "Box breathing & relaxation", "icon": "cloud", "color": "#06b6d4", "route": "/breathing-game"},
+            {"title": "Buddy Finder", "description": "Connect with veterans near you", "icon": "people", "color": "#10b981", "route": "/buddy-finder"},
+        ]
+        
+        for i, tool in enumerate(tools):
+            card = CMSCard(
+                section_id=section.id,
+                card_type="tool",
+                title=tool["title"],
+                description=tool["description"],
+                icon=tool["icon"],
+                color=tool["color"],
+                route=tool["route"],
+                order=i
+            )
+            await db.cms_cards.insert_one(card.dict())
+    
+    return {"message": "CMS data seeded successfully"}
+
 # ============ COUNSELLOR ENDPOINTS ============
 
 @api_router.post("/counsellors", response_model=Counsellor)
