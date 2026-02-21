@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useWebRTCCall, formatCallDuration } from '../hooks/useWebRTCCallWeb';
+import { useTheme } from '../src/context/ThemeContext';
 
 const API_URL = Platform.select({
   web: process.env.EXPO_PUBLIC_BACKEND_URL || '',
