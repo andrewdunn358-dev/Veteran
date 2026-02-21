@@ -1,3 +1,3 @@
 var CONFIG = {
-    API_URL: 'https://veterans-support-api.onrender.com'
+    API_URL: 'https://radio-check-app.preview.emergentagent.com'
 };
