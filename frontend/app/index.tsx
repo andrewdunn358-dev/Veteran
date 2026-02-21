@@ -11,10 +11,6 @@ const NEW_LOGO_URL = 'https://customer-assets.emergentagent.com/job_wellness-vib
 export default function SplashScreen() {
   const router = useRouter();
   const [showCookieNotice, setShowCookieNotice] = useState(false);
-  
-  useEffect(() => {
-    checkCookieConsent();
-  }, []);
 
   const checkCookieConsent = async () => {
     try {
@@ -26,6 +22,10 @@ export default function SplashScreen() {
       setShowCookieNotice(true);
     }
   };
+  
+  useEffect(() => {
+    checkCookieConsent();
+  }, []);
 
   const acceptCookies = async () => {
     try {
