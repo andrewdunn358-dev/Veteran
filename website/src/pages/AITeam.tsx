@@ -5,7 +5,7 @@ const AI_TEAM = [
   {
     name: 'Tommy',
     role: 'Your Battle Buddy',
-    avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png',
+    avatar: '/images/tommy.png',
     description: 'A fellow soldier who understands the weight of service. Tommy speaks your language and provides that comforting presence of a mate who\'s been through it.',
     speciality: 'General support & companionship',
     color: 'from-blue-500/20 to-blue-600/20',
@@ -14,7 +14,7 @@ const AI_TEAM = [
   {
     name: 'Doris',
     role: 'Warm Support',
-    avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png',
+    avatar: '/images/doris.png',
     description: 'Like the warm, caring presence of a grandmother who\'s seen it all. Doris offers gentle wisdom, patience, and unconditional support.',
     speciality: 'Emotional comfort & listening',
     color: 'from-pink-500/20 to-rose-500/20',
@@ -23,7 +23,7 @@ const AI_TEAM = [
   {
     name: 'Bob',
     role: 'Ex-Para Peer Support',
-    avatar: 'https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png',
+    avatar: '/images/bob.png',
     description: 'A former paratrooper who knows the airborne brotherhood. Bob brings direct, no-nonsense support with deep understanding of regiment life.',
     speciality: 'Military experience & peer support',
     color: 'from-green-500/20 to-emerald-500/20',
@@ -32,7 +32,7 @@ const AI_TEAM = [
   {
     name: 'Finch',
     role: 'Crisis & PTSD Support',
-    avatar: 'https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png',
+    avatar: '/images/finch.png',
     description: 'Specialised in supporting those dealing with trauma and difficult moments. Finch helps guide you through dark patches with calm, trained expertise.',
     speciality: 'Crisis intervention & trauma support',
     color: 'from-purple-500/20 to-violet-500/20',
@@ -41,7 +41,7 @@ const AI_TEAM = [
   {
     name: 'Margie',
     role: 'Alcohol & Substance Support',
-    avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png',
+    avatar: '/images/doris.png',
     description: 'Understands the challenges of substance use and recovery. Margie offers non-judgemental support for those struggling with alcohol or other substances.',
     speciality: 'Addiction support & recovery',
     color: 'from-amber-500/20 to-orange-500/20',
@@ -50,7 +50,7 @@ const AI_TEAM = [
   {
     name: 'Hugo',
     role: 'Self-Help & Wellness Guide',
-    avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png',
+    avatar: '/images/tommy.png',
     description: 'Your daily motivation and wellness companion. Hugo helps with grounding techniques, building positive habits, and maintaining mental fitness.',
     speciality: 'Wellness, motivation & self-care',
     color: 'from-teal-500/20 to-cyan-500/20',
