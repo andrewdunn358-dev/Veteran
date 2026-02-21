@@ -25,6 +25,8 @@ let peerConnection = null;
 let currentCallId = null;
 let isRegistered = false;
 let ringtone = null;
+let pendingIceCandidates = []; // Queue for ICE candidates that arrive before remote description is set
+let hasRemoteDescription = false;
 
 // DOM Elements (will be set on init)
 let phoneUI = {
