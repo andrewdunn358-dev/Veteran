@@ -28,6 +28,23 @@ A standalone React website for promoting Radio Check, to be deployed at radioche
 - Emergency numbers prominently displayed
 - Built with React + Vite + Tailwind CSS
 
+### Dark/Light Mode Fixes (21 Feb 2026)
+Fixed 4 pages that were stuck in dark mode:
+- `/app/frontend/app/crisis-support.tsx` - Added theme support
+- `/app/frontend/app/peer-support.tsx` - Added theme support  
+- `/app/frontend/app/historical-investigations.tsx` - Fully rewritten with theme
+- `/app/frontend/app/organizations.tsx` - Fully rewritten with theme
+
+### Logo Update (21 Feb 2026)
+Updated to new transparent background logo:
+- `/app/frontend/app/home.tsx`
+- `/app/frontend/app/index.tsx`
+- `/app/website/src/pages/Home.tsx`
+- `/app/website/src/components/Layout.tsx`
+- `/app/website/index.html`
+
+New logo URL: `https://customer-assets.emergentagent.com/job_ae8f8501-55e8-47a0-8c0c-262b1bbbdefe/artifacts/ny233qxa_Gemini_Generated_Image_u4tpnxu4tpnxu4tp-removebg-preview.png`
+
 **Deployment**:
 - Built files in `/app/website/dist/`
 - `.htaccess` for Apache SPA routing
