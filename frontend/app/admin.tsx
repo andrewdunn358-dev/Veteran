@@ -1378,32 +1378,212 @@ export default function AdminDashboard() {
           )}
 
           {activeTab === 'content' && (
-            Object.keys(content).length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No content found</Text>
-                <Text style={styles.emptySubtext}>Click "Load Default Content" to get started</Text>
+            <View style={styles.cmsContainer}>
+              {/* CMS Header Actions */}
+              <View style={styles.cmsActions}>
+                <TouchableOpacity style={styles.seedButton} onPress={handleSeedCmsData}>
+                  <Ionicons name="flash" size={18} color="#fff" />
+                  <Text style={styles.seedButtonText}>Initialize CMS</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.addCmsButton}
+                  onPress={() => {
+                    setCmsEditMode('add');
+                    setCmsEditItem(null);
+                    setShowCmsPageModal(true);
+                  }}
+                >
+                  <Ionicons name="add" size={18} color="#fff" />
+                  <Text style={styles.addCmsButtonText}>Add Page</Text>
+                </TouchableOpacity>
               </View>
-            ) : (
-              Object.entries(content).map(([pageName, sections]) => (
-                <View key={pageName} style={styles.contentCard}>
-                  <Text style={styles.contentPageTitle}>{pageNames[pageName] || pageName}</Text>
-                  {Object.entries(sections).map(([section, value]) => (
+
+              {/* Pages List */}
+              <Text style={styles.cmsHeading}>Pages</Text>
+              {cmsPages.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Ionicons name="document-outline" size={48} color="#64748b" />
+                  <Text style={styles.emptyText}>No CMS pages found</Text>
+                  <Text style={styles.emptySubtext}>Click "Initialize CMS" to create default pages</Text>
+                </View>
+              ) : (
+                cmsPages.map((page) => (
+                  <TouchableOpacity
+                    key={page.slug}
+                    style={[styles.cmsPageCard, selectedCmsPage === page.slug && styles.cmsPageCardSelected]}
+                    onPress={() => {
+                      setSelectedCmsPage(page.slug);
+                      setSelectedCmsSection(null);
+                      fetchCmsSections(page.slug);
+                    }}
+                  >
+                    <View style={styles.cmsPageInfo}>
+                      <Ionicons name={(page.icon || 'document') as any} size={24} color={selectedCmsPage === page.slug ? '#fff' : '#4a90d9'} />
+                      <View style={styles.cmsPageText}>
+                        <Text style={[styles.cmsPageTitle, selectedCmsPage === page.slug && styles.cmsPageTitleSelected]}>{page.title}</Text>
+                        <Text style={[styles.cmsPageSlug, selectedCmsPage === page.slug && styles.cmsPageSlugSelected]}>/{page.slug}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.cmsPageActions}>
+                      <TouchableOpacity
+                        style={styles.cmsEditBtn}
+                        onPress={() => {
+                          setCmsEditMode('edit');
+                          setCmsEditItem(page);
+                          setShowCmsPageModal(true);
+                        }}
+                      >
+                        <Ionicons name="pencil" size={16} color="#4a90d9" />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.cmsDeleteBtn}
+                        onPress={() => handleDeleteCmsPage(page.slug)}
+                      >
+                        <Ionicons name="trash" size={16} color="#ef4444" />
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )}
+
+              {/* Sections for Selected Page */}
+              {selectedCmsPage && (
+                <>
+                  <View style={styles.cmsSectionHeader}>
+                    <Text style={styles.cmsHeading}>Sections in "{cmsPages.find(p => p.slug === selectedCmsPage)?.title}"</Text>
                     <TouchableOpacity
-                      key={section}
-                      style={styles.contentItem}
+                      style={styles.addSmallBtn}
                       onPress={() => {
-                        setEditingContent({ page: pageName, section, value });
-                        setShowContentModal(true);
+                        setCmsEditMode('add');
+                        setCmsEditItem({ page_slug: selectedCmsPage });
+                        setShowCmsSectionModal(true);
                       }}
                     >
-                      <Text style={styles.contentSection}>{section.replace(/_/g, ' ')}</Text>
-                      <Text style={styles.contentValue} numberOfLines={2}>{value}</Text>
-                      <Ionicons name="pencil" size={16} color="#4a90d9" style={styles.editIcon} />
+                      <Ionicons name="add" size={16} color="#fff" />
                     </TouchableOpacity>
-                  ))}
-                </View>
-              ))
-            )
+                  </View>
+
+                  {cmsSections.length === 0 ? (
+                    <Text style={styles.emptySubtext}>No sections. Add one above.</Text>
+                  ) : (
+                    cmsSections.map((section) => (
+                      <TouchableOpacity
+                        key={section.id}
+                        style={[styles.cmsSectionCard, selectedCmsSection === section.id && styles.cmsSectionCardSelected]}
+                        onPress={() => {
+                          setSelectedCmsSection(section.id);
+                          fetchCmsCards(section.id);
+                        }}
+                      >
+                        <View style={styles.cmsSectionInfo}>
+                          <Text style={styles.cmsSectionType}>{section.section_type}</Text>
+                          <Text style={styles.cmsSectionTitle}>{section.title || '(No title)'}</Text>
+                          <Text style={styles.cmsSectionOrder}>Order: {section.order}</Text>
+                        </View>
+                        <View style={styles.cmsPageActions}>
+                          <TouchableOpacity
+                            style={styles.cmsEditBtn}
+                            onPress={() => {
+                              setCmsEditMode('edit');
+                              setCmsEditItem(section);
+                              setShowCmsSectionModal(true);
+                            }}
+                          >
+                            <Ionicons name="pencil" size={16} color="#4a90d9" />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.cmsDeleteBtn}
+                            onPress={() => handleDeleteCmsSection(section.id)}
+                          >
+                            <Ionicons name="trash" size={16} color="#ef4444" />
+                          </TouchableOpacity>
+                        </View>
+                      </TouchableOpacity>
+                    ))
+                  )}
+                </>
+              )}
+
+              {/* Cards for Selected Section */}
+              {selectedCmsSection && (
+                <>
+                  <View style={styles.cmsSectionHeader}>
+                    <Text style={styles.cmsHeading}>Cards in Section</Text>
+                    <TouchableOpacity
+                      style={styles.addSmallBtn}
+                      onPress={() => {
+                        setCmsEditMode('add');
+                        setCmsEditItem({ section_id: selectedCmsSection });
+                        setShowCmsCardModal(true);
+                      }}
+                    >
+                      <Ionicons name="add" size={16} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+
+                  {cmsCards.length === 0 ? (
+                    <Text style={styles.emptySubtext}>No cards. Add one above.</Text>
+                  ) : (
+                    cmsCards.map((card) => (
+                      <View key={card.id} style={styles.cmsCardItem}>
+                        <View style={styles.cmsCardInfo}>
+                          {card.icon && <Ionicons name={card.icon as any} size={20} color={card.color || '#4a90d9'} />}
+                          {card.image_url && <Text style={styles.cmsCardImageIcon}>🖼</Text>}
+                          <View style={styles.cmsCardText}>
+                            <Text style={styles.cmsCardTitle}>{card.title}</Text>
+                            <Text style={styles.cmsCardDesc}>{card.description || card.route}</Text>
+                          </View>
+                        </View>
+                        <View style={styles.cmsPageActions}>
+                          <TouchableOpacity
+                            style={styles.cmsEditBtn}
+                            onPress={() => {
+                              setCmsEditMode('edit');
+                              setCmsEditItem(card);
+                              setShowCmsCardModal(true);
+                            }}
+                          >
+                            <Ionicons name="pencil" size={16} color="#4a90d9" />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.cmsDeleteBtn}
+                            onPress={() => handleDeleteCmsCard(card.id)}
+                          >
+                            <Ionicons name="trash" size={16} color="#ef4444" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    ))
+                  )}
+                </>
+              )}
+
+              {/* Legacy Content Section */}
+              <Text style={[styles.cmsHeading, { marginTop: 24 }]}>Legacy Text Content</Text>
+              {Object.keys(content).length === 0 ? (
+                <Text style={styles.emptySubtext}>No legacy content</Text>
+              ) : (
+                Object.entries(content).map(([pageName, sections]) => (
+                  <View key={pageName} style={styles.contentCard}>
+                    <Text style={styles.contentPageTitle}>{pageNames[pageName] || pageName}</Text>
+                    {Object.entries(sections).map(([section, value]) => (
+                      <TouchableOpacity
+                        key={section}
+                        style={styles.contentItem}
+                        onPress={() => {
+                          setEditingContent({ page: pageName, section, value });
+                          setShowContentModal(true);
+                        }}
+                      >
+                        <Text style={styles.contentSection}>{section.replace(/_/g, ' ')}</Text>
+                        <Text style={styles.contentValue} numberOfLines={2}>{value}</Text>
+                        <Ionicons name="pencil" size={16} color="#4a90d9" style={styles.editIcon} />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                ))
+              )}
+            </View>
           )}
 
           {/* Call Metrics Tab */}
