@@ -205,23 +205,41 @@ export default function Index() {
 
         {/* Meet the AI Team Section */}
         <View style={styles.aiTeamSection}>
-          <Text style={styles.aiTeamTitle}>Meet the AI Team</Text>
-          <Text style={styles.aiTeamSubtitle}>Available 24/7 to chat</Text>
+          <TouchableOpacity 
+            style={styles.aiTeamHeader}
+            onPress={toggleAITeam}
+            activeOpacity={0.8}
+          >
+            <View>
+              <Text style={styles.aiTeamTitle}>Meet the AI Team</Text>
+              <Text style={styles.aiTeamSubtitle}>Available 24/7 to chat</Text>
+            </View>
+            <View style={styles.aiTeamToggle}>
+              <Text style={styles.aiTeamToggleText}>{showAITeam ? 'Hide' : 'Show'}</Text>
+              <Ionicons 
+                name={showAITeam ? 'chevron-up' : 'chevron-down'} 
+                size={20} 
+                color={colors.primary} 
+              />
+            </View>
+          </TouchableOpacity>
           
-          <View style={styles.aiTeamGrid}>
-            {AI_TEAM.map((member) => (
-              <TouchableOpacity 
-                key={member.name}
-                style={styles.aiTeamMember}
-                onPress={() => router.push(member.route as any)}
-                activeOpacity={0.8}
-              >
-                <Image source={{ uri: member.avatar }} style={styles.aiTeamAvatar} />
-                <Text style={styles.aiTeamName}>{member.name}</Text>
-                <Text style={styles.aiTeamDesc}>{member.description}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          {showAITeam && (
+            <View style={styles.aiTeamGrid}>
+              {AI_TEAM.map((member) => (
+                <TouchableOpacity 
+                  key={member.name}
+                  style={styles.aiTeamMember}
+                  onPress={() => router.push(member.route as any)}
+                  activeOpacity={0.8}
+                >
+                  <Image source={{ uri: member.avatar }} style={styles.aiTeamAvatar} />
+                  <Text style={styles.aiTeamName}>{member.name}</Text>
+                  <Text style={styles.aiTeamDesc}>{member.description}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
 
         {/* Disclaimer */}
