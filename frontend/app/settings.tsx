@@ -39,7 +39,7 @@ export default function Settings() {
   };
 
   const handleContact = () => {
-    Linking.openURL('mailto:support@veteran.dbty.co.uk?subject=App Feedback');
+    Linking.openURL('mailto:support@radiocheck.me?subject=App Feedback');
   };
 
   const styles = createStyles(colors);
