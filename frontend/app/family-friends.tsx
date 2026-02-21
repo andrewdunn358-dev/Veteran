@@ -29,8 +29,8 @@ const SIGNS_OF_CHANGE = [
 ];
 
 const SUPPORT_RESOURCES = [
-  { name: 'Op Courage', desc: 'NHS mental health service for veterans', phone: '0300 323 0137', url: 'https://www.nhs.uk/nhs-services/armed-forces-community/mental-health/veterans-reservists/' },
-  { name: 'Combat Stress', desc: '24hr helpline for veterans', phone: '0800 138 1619', url: 'https://combatstress.org.uk' },
+  { name: 'Op Courage', desc: 'NHS mental health service for serving personnel and veterans', phone: '0300 323 0137', url: 'https://www.nhs.uk/nhs-services/armed-forces-community/mental-health/veterans-reservists/' },
+  { name: 'Combat Stress', desc: '24hr helpline for the armed forces community', phone: '0800 138 1619', url: 'https://combatstress.org.uk' },
   { name: 'SSAFA', desc: 'Armed Forces charity support', phone: '0800 260 6767', url: 'https://www.ssafa.org.uk' },
   { name: 'Royal British Legion', desc: 'Support for serving and ex-serving', phone: '0808 802 8080', url: 'https://www.britishlegion.org.uk' },
   { name: "Men's Sheds", desc: 'Community spaces for men', url: 'https://menssheds.org.uk' },
@@ -38,7 +38,7 @@ const SUPPORT_RESOURCES = [
 ];
 
 const ADDICTION_RESOURCES = [
-  { name: 'Tom Harrison House', desc: 'Residential rehab for veterans with addiction', phone: '0151 526 2109', url: 'https://www.tomharrisonhouse.org.uk' },
+  { name: 'Tom Harrison House', desc: 'Residential rehab for armed forces personnel with addiction', phone: '0151 526 2109', url: 'https://www.tomharrisonhouse.org.uk' },
   { name: 'Change Grow Live', desc: 'Free drug & alcohol support', phone: '0808 802 9000', url: 'https://www.changegrowlive.org' },
   { name: 'Alcoholics Anonymous', desc: '24hr helpline for alcohol addiction', phone: '0800 917 7650', url: 'https://www.alcoholics-anonymous.org.uk' },
   { name: 'FRANK', desc: 'Friendly drug advice service', phone: '0300 123 6600', url: 'https://www.talktofrank.com' },
@@ -49,8 +49,8 @@ const ADDICTION_RESOURCES = [
 const PRISON_RESOURCES = [
   { name: 'NACRO', desc: 'Support for people with criminal records', phone: '0300 123 1999', url: 'https://www.nacro.org.uk' },
   { name: 'Forces in Mind Trust', desc: 'Research on veterans in justice system', url: 'https://www.fim-trust.org' },
-  { name: 'Walking With The Wounded', desc: 'Employment & justice support for veterans', url: 'https://walkingwiththewounded.org.uk' },
-  { name: 'Project Nova', desc: 'Veterans in the criminal justice system', phone: '0800 917 7299', url: 'https://www.rfea.org.uk/our-programmes/project-nova/' },
+  { name: 'Walking With The Wounded', desc: 'Employment & justice support for the armed forces', url: 'https://walkingwiththewounded.org.uk' },
+  { name: 'Project Nova', desc: 'Armed forces personnel in the criminal justice system', phone: '0800 917 7299', url: 'https://www.rfea.org.uk/our-programmes/project-nova/' },
   { name: 'Probation Services', desc: 'Support after prison release', phone: '0800 464 0708', url: 'https://www.gov.uk/guidance/probation-services' },
   { name: "Veterans' Gateway", desc: 'First point of contact for veterans', phone: '0808 802 1212', url: 'https://www.veteransgateway.org.uk' },
 ];
@@ -446,13 +446,13 @@ export default function FamilyFriends() {
           <>
             <Text style={styles.sectionTitle}>Substance & Alcohol Support</Text>
             <Text style={styles.sectionSubtitle}>
-              Specialist help for veterans dealing with addiction, alcoholism, or substance misuse.
+              Specialist help for serving personnel and veterans dealing with addiction, alcoholism, or substance misuse.
             </Text>
 
             <View style={styles.infoCard}>
               <FontAwesome5 name="info-circle" size={18} color="#d97706" />
               <Text style={styles.infoText}>
-                Many veterans turn to alcohol or substances to cope with trauma, pain, or the transition to civilian life. 
+                Many in the armed forces turn to alcohol or substances to cope with trauma, pain, or the transition to civilian life. 
                 Seeking help is a sign of strength, not weakness.
               </Text>
             </View>
@@ -501,7 +501,7 @@ export default function FamilyFriends() {
             <View style={styles.infoCard}>
               <FontAwesome5 name="info-circle" size={18} color="#4f46e5" />
               <Text style={styles.infoText}>
-                Veterans can face unique challenges with the law, often linked to untreated PTSD, substance misuse, 
+                Serving personnel and veterans can face unique challenges with the law, often linked to untreated PTSD, substance misuse, 
                 or difficulty adjusting to civilian life. Specialist support is available.
               </Text>
             </View>
