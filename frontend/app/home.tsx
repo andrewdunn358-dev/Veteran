@@ -44,6 +44,12 @@ export default function Index() {
   const router = useRouter();
   const { colors, theme } = useTheme();
   const styles = createStyles(colors);
+  const [showAITeam, setShowAITeam] = useState(false);
+
+  const toggleAITeam = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setShowAITeam(!showAITeam);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
