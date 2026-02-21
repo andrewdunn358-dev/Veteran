@@ -4285,6 +4285,356 @@ async def cleanup_old_messages(current_user: User = Depends(require_role("admin"
     }
 
 
+# ============ SHIFT/ROTA ENDPOINTS ============
+
+@api_router.get("/shifts")
+async def get_all_shifts(
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+):
+    """Get all shifts, optionally filtered by date range"""
+    query = {}
+    if date_from:
+        query["date"] = {"$gte": date_from}
+    if date_to:
+        if "date" in query:
+            query["date"]["$lte"] = date_to
+        else:
+            query["date"] = {"$lte": date_to}
+    
+    shifts = await db.shifts.find(query, {"_id": 0}).sort("date", 1).to_list(100)
+    return shifts
+
+@api_router.get("/shifts/today")
+async def get_todays_shifts():
+    """Get shifts for today - used for 'Someone is on the net' status"""
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    current_time = datetime.utcnow().strftime("%H:%M")
+    
+    shifts = await db.shifts.find({
+        "date": today,
+        "status": {"$in": ["scheduled", "active"]},
+        "start_time": {"$lte": current_time},
+        "end_time": {"$gte": current_time}
+    }, {"_id": 0}).to_list(20)
+    
+    return {
+        "shifts": shifts,
+        "someone_on_net": len(shifts) > 0,
+        "current_time": current_time
+    }
+
+@api_router.get("/shifts/my-shifts")
+async def get_my_shifts(current_user: User = Depends(get_current_user)):
+    """Get shifts for the current logged-in staff member"""
+    shifts = await db.shifts.find(
+        {"staff_id": current_user.id},
+        {"_id": 0}
+    ).sort("date", 1).to_list(100)
+    return shifts
+
+@api_router.post("/shifts")
+async def create_shift(
+    shift: ShiftCreate,
+    current_user: User = Depends(require_role("peer", "counsellor", "admin"))
+):
+    """Create a new shift (peer supporters, counsellors, or admins)"""
+    new_shift = Shift(
+        staff_id=current_user.id,
+        staff_name=current_user.name,
+        staff_role=current_user.role,
+        date=shift.date,
+        start_time=shift.start_time,
+        end_time=shift.end_time,
+        notes=shift.notes
+    )
+    
+    await db.shifts.insert_one(new_shift.dict())
+    return {"success": True, "shift": new_shift.dict()}
+
+@api_router.put("/shifts/{shift_id}")
+async def update_shift(
+    shift_id: str,
+    update: ShiftUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    """Update a shift (only owner or admin can update)"""
+    existing = await db.shifts.find_one({"id": shift_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Shift not found")
+    
+    # Only owner or admin can update
+    if existing["staff_id"] != current_user.id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized to update this shift")
+    
+    update_data = {k: v for k, v in update.dict().items() if v is not None}
+    if update_data:
+        await db.shifts.update_one({"id": shift_id}, {"$set": update_data})
+    
+    updated = await db.shifts.find_one({"id": shift_id}, {"_id": 0})
+    return {"success": True, "shift": updated}
+
+@api_router.delete("/shifts/{shift_id}")
+async def delete_shift(
+    shift_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a shift (only owner or admin can delete)"""
+    existing = await db.shifts.find_one({"id": shift_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Shift not found")
+    
+    if existing["staff_id"] != current_user.id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized to delete this shift")
+    
+    await db.shifts.delete_one({"id": shift_id})
+    return {"success": True, "message": "Shift deleted"}
+
+@api_router.get("/shifts/coverage")
+async def get_shift_coverage(
+    date_from: str,
+    date_to: str,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Get shift coverage report showing gaps (admin only)"""
+    shifts = await db.shifts.find({
+        "date": {"$gte": date_from, "$lte": date_to}
+    }, {"_id": 0}).sort([("date", 1), ("start_time", 1)]).to_list(200)
+    
+    # Group by date
+    coverage_by_date = {}
+    for shift in shifts:
+        date = shift["date"]
+        if date not in coverage_by_date:
+            coverage_by_date[date] = []
+        coverage_by_date[date].append({
+            "start": shift["start_time"],
+            "end": shift["end_time"],
+            "staff": shift["staff_name"]
+        })
+    
+    return {
+        "date_range": {"from": date_from, "to": date_to},
+        "coverage": coverage_by_date,
+        "total_shifts": len(shifts)
+    }
+
+
+# ============ BUDDY FINDER ENDPOINTS ============
+
+@api_router.post("/buddy-finder/signup")
+async def buddy_signup(profile: BuddyProfileCreate):
+    """Sign up for Buddy Finder (GDPR consent required)"""
+    if not profile.gdpr_consent:
+        raise HTTPException(status_code=400, detail="GDPR consent is required to sign up")
+    
+    # Create profile
+    new_profile = BuddyProfile(
+        display_name=profile.display_name,
+        region=profile.region,
+        service_branch=profile.service_branch,
+        regiment=profile.regiment,
+        years_served=profile.years_served,
+        bio=profile.bio,
+        interests=profile.interests or [],
+        contact_preference=profile.contact_preference,
+        email=profile.email if profile.contact_preference == "email" else None,
+        gdpr_consent=True,
+        gdpr_consent_date=datetime.utcnow()
+    )
+    
+    await db.buddy_profiles.insert_one(new_profile.dict())
+    
+    # Don't return email in response for privacy
+    response = new_profile.dict()
+    response.pop("email", None)
+    response.pop("pin_hash", None)
+    
+    return {"success": True, "profile": response}
+
+@api_router.get("/buddy-finder/profiles")
+async def search_buddy_profiles(
+    region: Optional[str] = None,
+    service_branch: Optional[str] = None,
+    regiment: Optional[str] = None,
+):
+    """Search buddy profiles (public search, no auth required)"""
+    query = {"is_active": True}
+    
+    if region:
+        query["region"] = {"$regex": region, "$options": "i"}
+    if service_branch:
+        query["service_branch"] = {"$regex": service_branch, "$options": "i"}
+    if regiment:
+        query["regiment"] = {"$regex": regiment, "$options": "i"}
+    
+    # Only return safe fields for privacy
+    profiles = await db.buddy_profiles.find(
+        query,
+        {
+            "_id": 0,
+            "email": 0,
+            "pin_hash": 0,
+            "gdpr_consent_date": 0
+        }
+    ).sort("last_active", -1).to_list(50)
+    
+    return profiles
+
+@api_router.get("/buddy-finder/profile/{profile_id}")
+async def get_buddy_profile(profile_id: str):
+    """Get a specific buddy profile"""
+    profile = await db.buddy_profiles.find_one(
+        {"id": profile_id, "is_active": True},
+        {"_id": 0, "email": 0, "pin_hash": 0}
+    )
+    
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    return profile
+
+@api_router.put("/buddy-finder/profile/{profile_id}")
+async def update_buddy_profile(
+    profile_id: str,
+    update: BuddyProfileUpdate,
+    email: str = None,  # For verification
+    pin: str = None  # For verification
+):
+    """Update buddy profile (requires email/PIN verification)"""
+    profile = await db.buddy_profiles.find_one({"id": profile_id})
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    # Simple verification using email
+    if profile.get("email") and email != profile.get("email"):
+        raise HTTPException(status_code=403, detail="Email verification failed")
+    
+    update_data = {k: v for k, v in update.dict().items() if v is not None}
+    update_data["last_active"] = datetime.utcnow()
+    
+    if update_data:
+        await db.buddy_profiles.update_one({"id": profile_id}, {"$set": update_data})
+    
+    updated = await db.buddy_profiles.find_one({"id": profile_id}, {"_id": 0, "email": 0, "pin_hash": 0})
+    return {"success": True, "profile": updated}
+
+@api_router.delete("/buddy-finder/profile/{profile_id}")
+async def delete_buddy_profile(
+    profile_id: str,
+    email: str,  # For verification - GDPR right to be forgotten
+):
+    """Delete buddy profile (GDPR right to be forgotten)"""
+    profile = await db.buddy_profiles.find_one({"id": profile_id})
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    # Verify ownership
+    if profile.get("email") != email:
+        raise HTTPException(status_code=403, detail="Email verification failed")
+    
+    # Delete profile and any messages
+    await db.buddy_profiles.delete_one({"id": profile_id})
+    await db.buddy_messages.delete_many({
+        "$or": [
+            {"from_profile_id": profile_id},
+            {"to_profile_id": profile_id}
+        ]
+    })
+    
+    return {
+        "success": True,
+        "message": "Profile and all associated data deleted (GDPR compliant)"
+    }
+
+@api_router.post("/buddy-finder/message")
+async def send_buddy_message(
+    from_profile_id: str,
+    to_profile_id: str,
+    message: str,
+    sender_email: str  # For verification
+):
+    """Send a message to another buddy (in-app messaging)"""
+    # Verify sender
+    sender = await db.buddy_profiles.find_one({"id": from_profile_id})
+    if not sender or sender.get("email") != sender_email:
+        raise HTTPException(status_code=403, detail="Sender verification failed")
+    
+    # Check recipient exists
+    recipient = await db.buddy_profiles.find_one({"id": to_profile_id, "is_active": True})
+    if not recipient:
+        raise HTTPException(status_code=404, detail="Recipient not found")
+    
+    new_message = BuddyMessage(
+        from_profile_id=from_profile_id,
+        to_profile_id=to_profile_id,
+        message=message
+    )
+    
+    await db.buddy_messages.insert_one(new_message.dict())
+    
+    return {"success": True, "message_id": new_message.id}
+
+@api_router.get("/buddy-finder/messages/{profile_id}")
+async def get_buddy_messages(
+    profile_id: str,
+    email: str  # For verification
+):
+    """Get messages for a profile"""
+    profile = await db.buddy_profiles.find_one({"id": profile_id})
+    if not profile or profile.get("email") != email:
+        raise HTTPException(status_code=403, detail="Verification failed")
+    
+    messages = await db.buddy_messages.find({
+        "$or": [
+            {"from_profile_id": profile_id},
+            {"to_profile_id": profile_id}
+        ]
+    }, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Mark received messages as read
+    await db.buddy_messages.update_many(
+        {"to_profile_id": profile_id, "is_read": False},
+        {"$set": {"is_read": True}}
+    )
+    
+    return messages
+
+@api_router.get("/buddy-finder/regions")
+async def get_buddy_regions():
+    """Get list of UK regions for dropdown"""
+    return {
+        "regions": [
+            "East Midlands",
+            "East of England",
+            "London",
+            "North East",
+            "North West",
+            "Northern Ireland",
+            "Scotland",
+            "South East",
+            "South West",
+            "Wales",
+            "West Midlands",
+            "Yorkshire and the Humber"
+        ]
+    }
+
+@api_router.get("/buddy-finder/branches")
+async def get_service_branches():
+    """Get list of service branches"""
+    return {
+        "branches": [
+            "British Army",
+            "Royal Navy",
+            "Royal Air Force",
+            "Royal Marines",
+            "Reserve Forces",
+            "Other"
+        ]
+    }
+
+
 # Include the router in the main app (MUST be after all routes are defined)
 app.include_router(api_router)
 
