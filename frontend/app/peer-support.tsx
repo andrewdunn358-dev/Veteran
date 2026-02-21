@@ -400,14 +400,14 @@ export default function PeerSupport() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <StatusBar barStyle="light-content" backgroundColor="#1a2332" />
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'bottom']}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
       <KeyboardAvoidingView 
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView 
-          style={styles.container}
+          style={{ flex: 1, backgroundColor: colors.background }}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -415,24 +415,24 @@ export default function PeerSupport() {
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="#7c9cbf" />
+              <Ionicons name="arrow-back" size={24} color={colors.textSecondary} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Peer Support</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Peer Support</Text>
           </View>
 
           {/* Icon */}
           <View style={styles.iconContainer}>
-            <Ionicons name="people-circle" size={80} color="#7c9cbf" />
+            <Ionicons name="people-circle" size={80} color={colors.textSecondary} />
           </View>
 
           {/* Main Content */}
           <View style={styles.content}>
-            <Text style={styles.title}>Talk to Another Veteran</Text>
-            <Text style={styles.subtitle}>Peer support from those who understand</Text>
+            <Text style={[styles.title, { color: colors.text }]}>Talk to Another Veteran</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Peer support from those who understand</Text>
 
             {/* Chat with Bob - AI Peer Support (moved to top) */}
             <TouchableOpacity 
-              style={styles.bobCard}
+              style={[styles.bobCard, { backgroundColor: colors.card, borderColor: colors.border }]}
               onPress={() => router.push('/bob-chat')}
               activeOpacity={0.9}
             >
@@ -441,10 +441,10 @@ export default function PeerSupport() {
                 style={styles.bobAvatar}
               />
               <View style={styles.bobTextContainer}>
-                <Text style={styles.bobTitle}>Chat with Bob</Text>
-                <Text style={styles.bobSubtitle}>Ex-Para AI peer support, 24/7</Text>
+                <Text style={[styles.bobTitle, { color: colors.text }]}>Chat with Bob</Text>
+                <Text style={[styles.bobSubtitle, { color: colors.textSecondary }]}>Ex-Para AI peer support, 24/7</Text>
               </View>
-              <Ionicons name="chevron-forward" size={24} color="#64748b" />
+              <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
             </TouchableOpacity>
 
             {/* View Available Veterans Button */}
