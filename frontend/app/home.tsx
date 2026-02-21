@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 
-const NEW_LOGO_URL = 'https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/0fe9b1e8f60d074b7e74cd775ba2b0cb846fca873835ce51497e447e2ffead4b.png';
+const NEW_LOGO_URL = 'https://customer-assets.emergentagent.com/job_wellness-vibes/artifacts/28igtlxj_image.png';
 
 // AI Team Avatars
 const AI_TEAM = [
