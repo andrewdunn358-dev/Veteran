@@ -938,6 +938,87 @@ class Concern(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
+# ============ SHIFT/ROTA MODELS ============
+class ShiftCreate(BaseModel):
+    date: str  # YYYY-MM-DD format
+    start_time: str  # HH:MM format (24hr)
+    end_time: str  # HH:MM format (24hr)
+    notes: Optional[str] = None
+
+class Shift(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    staff_id: str  # ID of the peer supporter
+    staff_name: str
+    staff_role: str  # "peer" or "counsellor"
+    date: str  # YYYY-MM-DD
+    start_time: str  # HH:MM
+    end_time: str  # HH:MM
+    notes: Optional[str] = None
+    status: str = "scheduled"  # scheduled, active, completed, cancelled
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ShiftUpdate(BaseModel):
+    date: Optional[str] = None
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    notes: Optional[str] = None
+    status: Optional[str] = None
+
+# ============ BUDDY FINDER MODELS ============
+class BuddyProfileCreate(BaseModel):
+    display_name: str  # Can be nickname for privacy
+    region: str  # General location (e.g., "North West", "London")
+    service_branch: str  # Army, Navy, RAF, Marines, etc.
+    regiment: Optional[str] = None
+    years_served: Optional[str] = None  # e.g., "1990-2005"
+    bio: Optional[str] = None  # Brief intro
+    interests: Optional[List[str]] = None  # e.g., ["hiking", "fishing", "football"]
+    contact_preference: str = "in_app"  # in_app, email
+    email: Optional[str] = None  # Only if contact_preference is email
+    gdpr_consent: bool  # Must be True to sign up
+    gdpr_consent_date: Optional[datetime] = None
+
+class BuddyProfile(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    display_name: str
+    region: str
+    service_branch: str
+    regiment: Optional[str] = None
+    years_served: Optional[str] = None
+    bio: Optional[str] = None
+    interests: List[str] = Field(default_factory=list)
+    contact_preference: str = "in_app"
+    email: Optional[str] = None
+    gdpr_consent: bool = True
+    gdpr_consent_date: datetime = Field(default_factory=datetime.utcnow)
+    is_active: bool = True
+    last_active: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    # For authentication
+    pin_hash: Optional[str] = None  # Hashed 4-digit PIN
+
+class BuddyProfileUpdate(BaseModel):
+    display_name: Optional[str] = None
+    region: Optional[str] = None
+    service_branch: Optional[str] = None
+    regiment: Optional[str] = None
+    years_served: Optional[str] = None
+    bio: Optional[str] = None
+    interests: Optional[List[str]] = None
+    contact_preference: Optional[str] = None
+    email: Optional[str] = None
+    is_active: Optional[bool] = None
+
+class BuddyMessage(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    from_profile_id: str
+    to_profile_id: str
+    message: str
+    is_read: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+
 # AI Battle Buddy Chat Models
 class BuddyChatRequest(BaseModel):
     message: str
