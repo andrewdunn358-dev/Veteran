@@ -552,6 +552,7 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     callInfo,
     isConnected,
     callDuration,
+    debugInfo,
     initiateCall,
     acceptCall,
     rejectCall,
