@@ -62,11 +62,16 @@ A searchable page listing UK military associations with contact details.
 ## What's Been Implemented (Session: Feb 2026)
 
 ### Completed This Session:
-1. **Fixed Sentry AI Connection** - Changed API endpoint from non-existent `/api/ai/chat` to working `/api/ai-buddies/chat`
-2. **Added Sentry to Backend AI Characters** - Sentry now has proper system prompt in backend
-3. **Enhanced Tommy & Doris Squaddie Banter** - Updated prompts with more British military slang and banter expressions
-4. **Created Regimental Associations Page** - 35 associations searchable/filterable by service (Navy/Army/RAF)
-5. **Added Regimental Associations to Home Screen** - Medal icon button in Self-Care Tools section
+1. **New Logo** - Heart with radio waves symbolizing empathetic communication
+2. **Home Page Restructured**:
+   - "Need to Talk?" section now contains Tommy & Doris ("We're on stag 24/7")
+   - "Talk to a Veteran" section with Peer Support and Chat with Bob
+   - "Support Organisations" now includes Alcohol & Substance Support
+   - "Self-Care Tools" is now a collapsible section
+3. **Bob AI Character Created** - Ex-Para veteran peer support with dry humour and safeguarding
+4. **Fixed Sentry → Finch rename**
+5. **Fixed AI Chat Identity Verification** - Returning users must enter email + PIN
+6. **Fixed WebRTC user_id blocker** - All staff now have proper user_id values
 
 ---
 
