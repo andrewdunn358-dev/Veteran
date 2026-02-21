@@ -93,14 +93,14 @@ export default function Organizations() {
           {/* Alcohol & Substance Support Card */}
           <TouchableOpacity 
             style={styles.substanceCard}
-            onPress={() => router.push('/margie-chat')}
+            onPress={() => router.push('/substance-support')}
           >
             <View style={styles.substanceCardIcon}>
               <FontAwesome5 name="wine-bottle" size={24} color="#d97706" />
             </View>
             <View style={styles.substanceCardContent}>
               <Text style={styles.substanceCardTitle}>Alcohol & Substance Support</Text>
-              <Text style={styles.substanceCardDesc}>Chat with Margie - non-judgmental support for recovery</Text>
+              <Text style={styles.substanceCardDesc}>Resources and AI support for recovery</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#7c9cbf" />
           </TouchableOpacity>
