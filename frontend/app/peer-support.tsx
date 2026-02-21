@@ -26,6 +26,7 @@ interface PeerVeteran {
 
 export default function PeerSupport() {
   const router = useRouter();
+  const { colors, isDark } = useTheme();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
