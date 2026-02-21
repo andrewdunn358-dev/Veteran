@@ -111,7 +111,7 @@ export default function SplashScreen() {
               activeOpacity={0.8}
             >
               <Ionicons name="apps" size={20} color="#ffffff" />
-              <Text style={styles.noButtonText}>I'm ok, take me to the app</Text>
+              <Text style={styles.noButtonText}>{"I'm ok, take me to the app"}</Text>
             </TouchableOpacity>
           </View>
 
