@@ -181,6 +181,93 @@ export default function BobChatScreen() {
     }
   };
 
+  // Check for available counsellors/peers
+  const checkAvailability = async () => {
+    setIsCheckingAvailability(true);
+    try {
+      const [counsellorsRes, peersRes] = await Promise.all([
+        fetch(`${API_URL}/api/counsellors/available`),
+        fetch(`${API_URL}/api/peer-supporters/available`)
+      ]);
+      
+      const counsellors = await counsellorsRes.json();
+      const peers = await peersRes.json();
+      
+      setAvailableStaff({
+        counsellors: Array.isArray(counsellors) ? counsellors : [],
+        peers: Array.isArray(peers) ? peers : []
+      });
+    } catch (error) {
+      console.error('Error checking availability:', error);
+      setAvailableStaff({ counsellors: [], peers: [] });
+    } finally {
+      setIsCheckingAvailability(false);
+    }
+  };
+
+  // Submit callback request
+  const submitCallbackRequest = async () => {
+    if (!callbackPhone.trim()) {
+      Alert.alert('Phone Required', 'Please enter your phone number so we can call you back.');
+      return;
+    }
+
+    setIsSubmittingCallback(true);
+
+    try {
+      let fullMessage = `Safeguarding callback request from Bob chat. Session: ${sessionId}.`;
+      if (currentAlertId) {
+        fullMessage += ` Alert ID: ${currentAlertId}.`;
+      }
+      if (callbackMessage.trim()) {
+        fullMessage += ` User message: "${callbackMessage.trim()}"`;
+      }
+
+      const response = await fetch(`${API_URL}/api/callbacks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: callbackName.trim() || 'Anonymous',
+          phone: callbackPhone.trim(),
+          email: callbackEmail.trim() || null,
+          request_type: 'counsellor',
+          message: fullMessage,
+          is_urgent: true,
+          safeguarding_alert_id: currentAlertId || null
+        }),
+      });
+
+      if (response.ok) {
+        setSafeguardingView('callback_success');
+      } else {
+        Alert.alert('Error', 'Failed to submit callback request. Please try again or call 116 123.');
+      }
+    } catch (error) {
+      console.error('Callback error:', error);
+      Alert.alert('Error', 'Failed to submit callback request. Please try again or call 116 123.');
+    } finally {
+      setIsSubmittingCallback(false);
+    }
+  };
+
+  // Handle connecting to live person
+  const handleLiveConnect = async (type: 'counsellor' | 'peer') => {
+    setSafeguardingView('connecting');
+    
+    setTimeout(() => {
+      setShowSafeguardingModal(false);
+      setSafeguardingView('main');
+      router.push({
+        pathname: '/live-chat',
+        params: { 
+          staffType: type,
+          alertId: currentAlertId || '',
+          sessionId: sessionId,
+        }
+      });
+    }, 1500);
+  };
+
   const handleSendMessage = async () => {
     if (!inputText.trim() || isLoading) return;
 
