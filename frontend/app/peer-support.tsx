@@ -456,20 +456,6 @@ export default function PeerSupport() {
               <Text style={styles.primaryButtonSubtext}>Tap to see peer supporters</Text>
             </TouchableOpacity>
 
-            {/* Staff Calendar Button */}
-            <TouchableOpacity 
-              style={styles.calendarButton}
-              onPress={() => router.push('/my-availability')}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="calendar" size={24} color="#10b981" />
-              <View style={styles.calendarButtonText}>
-                <Text style={styles.calendarButtonTitle}>My Availability</Text>
-                <Text style={styles.calendarButtonSubtext}>Log your shifts and availability</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#64748b" />
-            </TouchableOpacity>
-
             {/* What is it */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
