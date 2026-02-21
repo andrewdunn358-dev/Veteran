@@ -151,23 +151,6 @@ export default function Index() {
             <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
 
-          {/* Request a Callback */}
-          <TouchableOpacity 
-            style={[styles.menuCard, styles.callbackCard]}
-            onPress={() => router.push('/callback')}
-            activeOpacity={0.9}
-            data-testid="callback-btn"
-          >
-            <View style={[styles.cardIconContainer, { backgroundColor: '#dcfce7' }]}>
-              <Ionicons name="call" size={28} color="#22c55e" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Request a Callback</Text>
-              <Text style={styles.cardDescription}>We'll call you back</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#22c55e" />
-          </TouchableOpacity>
-
           {/* Self-Care Tools */}
           <TouchableOpacity 
             style={styles.menuCard}
@@ -200,6 +183,23 @@ export default function Index() {
               <Text style={styles.cardDescription}>Worried about a veteran?</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          {/* Request a Callback - now below Friends & Family */}
+          <TouchableOpacity 
+            style={[styles.menuCard, styles.callbackCard]}
+            onPress={() => router.push('/callback')}
+            activeOpacity={0.9}
+            data-testid="callback-btn"
+          >
+            <View style={[styles.cardIconContainer, { backgroundColor: '#dcfce7' }]}>
+              <Ionicons name="call" size={28} color="#22c55e" />
+            </View>
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>Request a Callback</Text>
+              <Text style={styles.cardDescription}>{"We'll call you back"}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#22c55e" />
           </TouchableOpacity>
         </View>
 
