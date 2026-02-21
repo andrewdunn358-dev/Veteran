@@ -1608,8 +1608,8 @@ function addDayCell(container, date, isCurrentMonth, today) {
     
     // Find shifts for this day
     var dayShifts = calendarShifts.filter(function(s) { return s.date === dateString; });
-    var hasMyShift = dayShifts.some(function(s) { return s.peer_supporter_id === currentUser.id; });
-    var hasOtherShifts = dayShifts.some(function(s) { return s.peer_supporter_id !== currentUser.id; });
+    var hasMyShift = dayShifts.some(function(s) { return s.staff_id === currentUser.id; });
+    var hasOtherShifts = dayShifts.some(function(s) { return s.staff_id !== currentUser.id; });
     
     var cell = document.createElement('div');
     cell.className = 'calendar-day';
