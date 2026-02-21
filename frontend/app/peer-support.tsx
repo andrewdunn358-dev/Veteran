@@ -381,6 +381,15 @@ export default function PeerSupport() {
                   <Text style={styles.callModalDuration}>{formatCallDuration(callDuration)}</Text>
                 )}
                 
+                {/* Debug Info - visible on screen */}
+                {callState === 'connected' && (
+                  <View style={styles.debugInfo}>
+                    <Text style={styles.debugText}>Track: {debugInfo.remoteTrackReceived ? '✓' : '✗'}</Text>
+                    <Text style={styles.debugText}>Audio: {debugInfo.audioPlaying ? '✓' : '✗'}</Text>
+                    <Text style={styles.debugText}>ICE: {debugInfo.iceState}</Text>
+                  </View>
+                )}
+                
                 {(isInitiatingCall || callState === 'connecting' || callState === 'ringing') && (
                   <ActivityIndicator size="small" color="#3b82f6" style={{ marginTop: 16 }} />
                 )}
