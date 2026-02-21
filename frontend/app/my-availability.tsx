@@ -353,16 +353,16 @@ export default function MyAvailabilityScreen() {
                     <FontAwesome5 
                       name="user-clock" 
                       size={16} 
-                      color={shift.peer_supporter_id === userId ? '#10b981' : '#94a3b8'} 
+                      color={shift.staff_id === userId ? '#10b981' : '#94a3b8'} 
                     />
                     <View style={styles.shiftDetails}>
                       <Text style={styles.shiftName}>
-                        {shift.peer_supporter_id === userId ? 'You' : (shift.peer_supporter_name || 'Volunteer')}
+                        {shift.staff_id === userId ? 'You' : (shift.staff_name || 'Volunteer')}
                       </Text>
                       <Text style={styles.shiftTime}>{shift.start_time} - {shift.end_time}</Text>
                     </View>
                   </View>
-                  {shift.peer_supporter_id === userId && (
+                  {shift.staff_id === userId && (
                     <TouchableOpacity 
                       onPress={() => handleDeleteShift(shift.id)}
                       style={styles.deleteBtn}
