@@ -107,7 +107,7 @@ export default function AboutPage() {
           <View style={styles.warningBox}>
             <Ionicons name="warning" size={20} color="#f59e0b" />
             <Text style={styles.warningText}>
-              If you're in immediate danger, human help matters most — and we'll always encourage that.
+              {"If you're in immediate danger, human help matters most — and we'll always encourage that."}
             </Text>
           </View>
         </View>
@@ -132,14 +132,14 @@ export default function AboutPage() {
             </View>
             <View style={styles.bulletItem}>
               <Ionicons name="ellipse" size={8} color="#94a3b8" />
-              <Text style={styles.bulletText}>Don't want to feel like a burden</Text>
+              <Text style={styles.bulletText}>{"Don't want to feel like a burden"}</Text>
             </View>
             <View style={styles.bulletItem}>
               <Ionicons name="ellipse" size={8} color="#94a3b8" />
               <Text style={styles.bulletText}>Just need somewhere safe to talk</Text>
             </View>
           </View>
-          <Text style={styles.emphasisText}>You don't need to be in crisis to use this.</Text>
+          <Text style={styles.emphasisText}>{"You don't need to be in crisis to use this."}</Text>
         </View>
 
         {/* Safety & Trust */}
