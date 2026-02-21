@@ -231,6 +231,8 @@ async function handleLogin(e) {
         currentUser = data.user;
         localStorage.setItem('staff_token', token);
         localStorage.setItem('staff_user', JSON.stringify(currentUser));
+        localStorage.setItem('staff_token_time', Date.now().toString());
+        localStorage.setItem('staff_last_activity', Date.now().toString());
         
         // Start session timer
         resetInactivityTimer();
@@ -259,6 +261,7 @@ function logout(silent) {
     localStorage.removeItem('staff_token');
     localStorage.removeItem('staff_user');
     localStorage.removeItem('staff_last_activity');
+    localStorage.removeItem('staff_token_time');
     
     if (!silent) {
         showNotification('Logged out successfully', 'success');
