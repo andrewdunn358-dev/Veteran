@@ -1,101 +1,106 @@
-# Radio Check Marketing Website - Deployment Guide
+# Radio Check Marketing Website - Deployment Guide for 20i (Apache)
 
-## Overview
-This is the marketing website for Radio Check, to be deployed at **radiocheck.me**.
+## Quick Deploy
 
-## Technology Stack
-- React 18 with TypeScript
-- Vite (build tool)
-- Tailwind CSS
-- React Router (client-side routing)
+A ZIP file has been created for easy deployment:
+**File:** `/app/radiocheck-website.zip` (3.7MB)
 
-## Build & Deploy Instructions
+### Steps:
+1. Download the ZIP file from this project
+2. Log into your 20i control panel
+3. Go to File Manager for radiocheck.me
+4. Upload `radiocheck-website.zip` to the `public_html` folder
+5. Extract the ZIP file in place
+6. Delete the ZIP file after extraction
 
-### 1. Build the Website
-```bash
-cd /app/website
-yarn install
-yarn build
+**Important:** Upload the contents TO the `public_html` root, not INTO a subfolder.
+
+## Manual Deploy (FTP)
+
+If you prefer FTP:
+
+1. Connect to your 20i FTP server
+2. Navigate to `public_html/`
+3. Upload ALL files from `/app/website/dist/`:
+   - `index.html`
+   - `.htaccess` (hidden file - make sure to include it!)
+   - `assets/` folder (contains CSS and JS)
+   - `images/` folder (contains all images)
+
+## File Structure After Deployment
+
+Your `public_html/` should look like:
+```
+public_html/
+├── index.html
+├── .htaccess
+├── assets/
+│   ├── index-*.css
+│   └── index-*.js
+└── images/
+    ├── logo.png
+    ├── tommy.png
+    ├── doris.png
+    ├── bob.png
+    ├── finch.png
+    ├── margie.png
+    ├── hugo.png
+    ├── frankies-pod.png
+    └── standing-tall.png
 ```
 
-The built files will be in `/app/website/dist/`
+## Troubleshooting
 
-### 2. Deploy to 20i Hosting
+### 404 Errors on Pages
+- Make sure `.htaccess` file is uploaded (it's a hidden file)
+- Check that `mod_rewrite` is enabled on your hosting
+- Verify `.htaccess` is in the root `public_html/` folder
 
-#### Option A: Manual Upload
-1. Log in to your 20i control panel
-2. Navigate to File Manager for radiocheck.me
-3. Upload all files from `/app/website/dist/` to the root directory
-4. Ensure the `.htaccess` file is included (see below)
+### Images Not Loading
+- Ensure the `images/` folder is in `public_html/` root (not a subfolder)
+- Check file permissions (should be 644 for files, 755 for folders)
 
-#### Option B: FTP Upload
-1. Use an FTP client (FileZilla, etc.)
-2. Connect to your 20i FTP server
-3. Upload all files from `/app/website/dist/` to `public_html/`
+### Site Shows Blank Page
+- Check browser console for errors (F12 → Console)
+- Verify all files in `assets/` folder uploaded correctly
 
-### 3. Configure SPA Routing
+## HTTPS Setup
 
-For proper client-side routing, create an `.htaccess` file in the root:
-
+The `.htaccess` file has HTTPS redirect commented out. To enable:
+1. Make sure SSL certificate is active on 20i
+2. Edit `.htaccess` and uncomment the HTTPS lines:
 ```apache
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
-</IfModule>
-```
-
-### 4. SSL Certificate
-20i should provide a free SSL certificate. Ensure HTTPS is enforced:
-
-```apache
-# Add to .htaccess
-RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 ```
 
-## File Structure
-```
-dist/
-├── index.html       # Main HTML file
-├── assets/
-│   ├── index-*.css  # Compiled CSS
-│   └── index-*.js   # Compiled JavaScript
-└── .htaccess        # Apache routing config
-```
+## What's Included
 
-## Pages Included
-- `/` - Home page (hero, features, CTA)
-- `/about` - About the app (what it is, what it isn't)
-- `/ai-team` - Meet the AI Team (all 6 AI companions)
-- `/contact` - Contact form and information
-- `/legal` - Terms of use and disclaimers
-- `/privacy` - Privacy policy and GDPR information
+### Pages
+- **Home** (`/`) - Hero, features, CTAs
+- **About the App** (`/about`) - What Radio Check is/isn't
+- **Meet the AI Team** (`/ai-team`) - All 6 AI companions with bios
+- **Contact** (`/contact`) - Contact form
+- **Legal** (`/legal`) - Terms & disclaimers
+- **Privacy** (`/privacy`) - Privacy policy & GDPR
 
-## External Links Configured
-- **Staff Portal**: Links to `https://app.radiocheck.me/login`
-- **Open the App**: Links to `https://app.radiocheck.me`
-- **Frankie's Pod**: https://www.youtube.com/@FrankiesPod
-- **Standing Tall**: https://www.standingtall.co.uk/
+### AI Characters Included
+1. Tommy - Your Battle Buddy
+2. Doris - Warm Support
+3. Bob - Ex-Para Peer Support
+4. Finch - Crisis & PTSD Support
+5. Margie - Alcohol & Substance Support
+6. Hugo - Self-Help & Wellness Guide
 
-## Contact Form
-The contact form currently shows a success message on submission. To make it functional:
+### All Images Included Locally
+- Radio Check logo
+- All 6 AI character avatars
+- Sponsor logos (Frankie's Pod, Standing Tall)
 
-1. Set up an email endpoint on your backend
-2. Or integrate with a service like Formspree, Netlify Forms, or similar
-3. Update `/app/website/src/pages/Contact.tsx` to POST to your endpoint
+**No external dependencies** - the website works completely standalone.
 
-## Customization
-- Colors are defined in `/app/website/tailwind.config.js`
-- Logo and image URLs are in the component files
-- Update contact emails in Contact.tsx and Privacy.tsx
+## External Links
 
-## Notes
-- The website matches the app's color scheme (navy blue, teal, etc.)
-- Fully responsive (mobile, tablet, desktop)
-- Includes all required legal pages (GDPR, disclaimers)
-- Staff portal access is available via the navigation
+These link to your main app (update if needed):
+- Staff Portal button → `https://app.radiocheck.me/login`
+- Open the App button → `https://app.radiocheck.me`
