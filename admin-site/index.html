@@ -150,8 +150,8 @@
                 <div id="peers-list" class="cards-grid"></div>
             </div>
 
-            <!-- Organizations Tab -->
-            <div id="orgs-tab" class="tab-content">
+            <!-- Organizations Tab (hidden - moved to CMS) -->
+            <div id="orgs-tab" class="tab-content" style="display: none;">
                 <div class="tab-header">
                     <h2>Support Organizations</h2>
                     <div class="tab-actions">
@@ -161,6 +161,65 @@
                     </div>
                 </div>
                 <div id="organizations-list" class="cards-grid"></div>
+            </div>
+
+            <!-- Rota Tab - Who's On Shift -->
+            <div id="rota-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2><i class="fas fa-calendar-check"></i> Staff Rota</h2>
+                    <div class="tab-actions">
+                        <button class="btn btn-secondary" onclick="loadRotaData()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Today's Staff On Duty -->
+                <div class="rota-section">
+                    <h3 class="rota-section-title"><i class="fas fa-user-clock"></i> On Duty Today</h3>
+                    <div class="rota-cards" id="today-shifts">
+                        <p class="loading-text">Loading today's shifts...</p>
+                    </div>
+                </div>
+                
+                <!-- Tomorrow's Staff -->
+                <div class="rota-section">
+                    <h3 class="rota-section-title"><i class="fas fa-calendar-day"></i> Tomorrow</h3>
+                    <div class="rota-cards" id="tomorrow-shifts">
+                        <p class="loading-text">Loading tomorrow's shifts...</p>
+                    </div>
+                </div>
+                
+                <!-- Week View Calendar -->
+                <div class="rota-section">
+                    <h3 class="rota-section-title"><i class="fas fa-calendar-week"></i> This Week</h3>
+                    <div class="rota-week-view" id="week-view">
+                        <!-- Week calendar rendered by JS -->
+                    </div>
+                </div>
+                
+                <!-- Staff Coverage Stats -->
+                <div class="rota-section">
+                    <h3 class="rota-section-title"><i class="fas fa-chart-pie"></i> Coverage Overview</h3>
+                    <div class="coverage-stats" id="coverage-stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="counsellors-today">-</div>
+                            <div class="stat-label">Counsellors Today</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="peers-today">-</div>
+                            <div class="stat-label">Peers Today</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="total-shifts-week">-</div>
+                            <div class="stat-label">Shifts This Week</div>
+                        </div>
+                        <div class="stat-card warning" id="coverage-gaps-card" style="display: none;">
+                            <div class="stat-value" id="coverage-gaps">0</div>
+                            <div class="stat-label">Coverage Gaps</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Users Tab (hidden - merged into Staff) -->
@@ -176,8 +235,8 @@
                 <div id="users-list" class="cards-grid"></div>
             </div>
 
-            <!-- Resources Tab -->
-            <div id="resources-tab" class="tab-content">
+            <!-- Resources Tab (hidden - moved to CMS) -->
+            <div id="resources-tab" class="tab-content" style="display: none;">
                 <div class="tab-header">
                     <h2>Resources Library</h2>
                     <div class="tab-actions">
