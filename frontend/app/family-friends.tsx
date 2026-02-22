@@ -196,16 +196,7 @@ export default function FamilyFriends() {
         {/* Main View */}
         {view === 'main' && (
           <>
-            <View style={[styles.introCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}>
-              <FontAwesome5 name="hands-helping" size={40} color="#2563eb" />
-              <Text style={[styles.introTitle, { color: colors.text }]}>Worried About Someone?</Text>
-              <Text style={[styles.introText, { color: colors.textSecondary }]}>
-                If you're concerned about a veteran or serving person in your life, you're not alone. 
-                Recognising that someone needs support is the first step.
-              </Text>
-            </View>
-
-            {/* Rita AI Chat Card */}
+            {/* Rita AI Chat Card - at the very top */}
             <TouchableOpacity 
               style={[styles.ritaCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => router.push({ pathname: '/ai-chat', params: { character: 'rita' } })}
@@ -247,6 +238,16 @@ export default function FamilyFriends() {
                 <FontAwesome5 name="arrow-right" size={12} color="#2563eb" />
               </View>
             </TouchableOpacity>
+
+            {/* Intro Card */}
+            <View style={[styles.introCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}>
+              <FontAwesome5 name="hands-helping" size={40} color="#2563eb" />
+              <Text style={[styles.introTitle, { color: colors.text }]}>Worried About Someone?</Text>
+              <Text style={[styles.introText, { color: colors.textSecondary }]}>
+                If you're concerned about a veteran or serving person in your life, you're not alone. 
+                Recognising that someone needs support is the first step.
+              </Text>
+            </View>
 
             <TouchableOpacity style={[styles.actionCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]} onPress={() => setView('concern')}>
               <View style={[styles.actionIcon, { backgroundColor: colors.background }]}>
