@@ -459,52 +459,71 @@ export default function AIChat() {
         <View style={styles.disclaimerModalOverlay}>
           <View style={styles.disclaimerModalContent}>
             <View style={styles.disclaimerModalHeader}>
-              <FontAwesome5 name="shield-alt" size={32} color="#4a90d9" />
-              <Text style={styles.disclaimerModalTitle}>Before We Begin</Text>
+              <FontAwesome5 name="shield-alt" size={32} color="#0d9488" />
+              <Text style={styles.disclaimerModalTitle}>Before You Chat</Text>
+              <Text style={styles.disclaimerSubtitle}>Important information about AI support</Text>
             </View>
 
             <ScrollView style={styles.disclaimerModalScroll}>
-              <Text style={styles.disclaimerModalSection}>What This Chat Is</Text>
+              <Text style={styles.disclaimerModalSection}>AI Companion Notice</Text>
               <Text style={styles.disclaimerModalText}>
-                You're about to chat with {characterInfo.name}, an AI companion designed to offer a 
-                supportive, non-judgmental space for conversation. This is a safe place to chat, 
-                have a laugh, or just have someone listen.
+                {characterInfo.name} is an <Text style={{fontWeight: '600'}}>AI companion</Text>, not a human 
+                counsellor or therapist. While they can offer support and a listening ear, 
+                they cannot provide professional mental health treatment.
               </Text>
 
-              <Text style={styles.disclaimerModalSection}>What This Chat Is NOT</Text>
+              <Text style={styles.disclaimerModalSection}>What {characterInfo.name} Can Do</Text>
               <View style={styles.disclaimerModalList}>
                 <Text style={styles.disclaimerModalListItem}>
-                  <FontAwesome5 name="times-circle" size={12} color="#ef4444" /> Not a mental health service or diagnosis tool
+                  <FontAwesome5 name="check-circle" size={12} color="#10b981" /> Listen without judgement
                 </Text>
                 <Text style={styles.disclaimerModalListItem}>
-                  <FontAwesome5 name="times-circle" size={12} color="#ef4444" /> Not a replacement for professional care
+                  <FontAwesome5 name="check-circle" size={12} color="#10b981" /> Offer emotional support
                 </Text>
                 <Text style={styles.disclaimerModalListItem}>
-                  <FontAwesome5 name="times-circle" size={12} color="#ef4444" /> Not an emergency service
+                  <FontAwesome5 name="check-circle" size={12} color="#10b981" /> Share coping techniques
+                </Text>
+                <Text style={styles.disclaimerModalListItem}>
+                  <FontAwesome5 name="check-circle" size={12} color="#10b981" /> Provide UK veteran resources
                 </Text>
               </View>
 
-              <Text style={styles.disclaimerModalSection}>Crisis Support</Text>
+              <Text style={styles.disclaimerModalSection}>What {characterInfo.name} Cannot Do</Text>
+              <View style={styles.disclaimerModalList}>
+                <Text style={styles.disclaimerModalListItem}>
+                  <FontAwesome5 name="times-circle" size={12} color="#ef4444" /> Diagnose conditions
+                </Text>
+                <Text style={styles.disclaimerModalListItem}>
+                  <FontAwesome5 name="times-circle" size={12} color="#ef4444" /> Prescribe medication
+                </Text>
+                <Text style={styles.disclaimerModalListItem}>
+                  <FontAwesome5 name="times-circle" size={12} color="#ef4444" /> Replace professional therapy
+                </Text>
+                <Text style={styles.disclaimerModalListItem}>
+                  <FontAwesome5 name="times-circle" size={12} color="#ef4444" /> Provide emergency response
+                </Text>
+              </View>
+
+              <Text style={styles.disclaimerModalSection}>Your Privacy & Safety</Text>
               <Text style={styles.disclaimerModalText}>
-                If you're in immediate danger or having thoughts of harming yourself:
+                Your conversations are processed to provide support and detect crisis 
+                situations. We use encryption to protect your data. If our system detects 
+                you may be in crisis, we may alert our safeguarding team to ensure you 
+                get the support you need.
               </Text>
+
               <View style={styles.disclaimerCrisisBox}>
+                <Text style={styles.disclaimerCrisisTitle}>In an Emergency</Text>
                 <Text style={styles.disclaimerCrisisText}>
                   <FontAwesome5 name="phone-alt" size={14} color="#fff" /> Call 999 for emergencies
                 </Text>
                 <Text style={styles.disclaimerCrisisText}>
-                  <FontAwesome5 name="phone-alt" size={14} color="#fff" /> Samaritans: 116 123 (24/7)
+                  <FontAwesome5 name="phone-alt" size={14} color="#fff" /> Samaritans: 116 123 (free, 24/7)
                 </Text>
                 <Text style={styles.disclaimerCrisisText}>
                   <FontAwesome5 name="phone-alt" size={14} color="#fff" /> Combat Stress: 0800 138 1619
                 </Text>
               </View>
-
-              <Text style={styles.disclaimerModalSection}>Privacy Notice</Text>
-              <Text style={styles.disclaimerModalText}>
-                Conversations may be reviewed if safeguarding concerns are detected. 
-                We take your safety seriously and may contact you if we're worried.
-              </Text>
             </ScrollView>
 
             <View style={styles.disclaimerModalButtons}>
@@ -512,16 +531,20 @@ export default function AIChat() {
                 style={styles.disclaimerDeclineButton}
                 onPress={handleDeclineDisclaimer}
               >
-                <Text style={styles.disclaimerDeclineText}>Go Back</Text>
+                <Text style={styles.disclaimerDeclineText}>Not Now</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.disclaimerAcceptButton}
                 onPress={handleAcceptDisclaimer}
                 data-testid="accept-disclaimer-btn"
               >
+                <FontAwesome5 name="check" size={16} color="#fff" style={{marginRight: 8}} />
                 <Text style={styles.disclaimerAcceptText}>I Understand, Start Chat</Text>
               </TouchableOpacity>
             </View>
+            <Text style={styles.disclaimerFooter}>
+              By continuing, you acknowledge you have read and understood this information.
+            </Text>
           </View>
         </View>
       </Modal>
