@@ -5,7 +5,7 @@ This package contains modularized API routers extracted from the monolithic serv
 Each router handles a specific domain of functionality.
 
 Routers:
-- auth: User authentication, login, registration, password management
+- auth: User authentication, login, registration, password management, push tokens
 - cms: Content Management System - pages, sections, cards
 - shifts: Staff scheduling and rota management with push notifications
 - buddy_finder: Peer matching and messaging for veterans
@@ -17,6 +17,9 @@ Routers:
 - live_chat: Real-time chat rooms for staff-veteran communication
 - notes: Staff notes and case notes management
 - concerns: Family/Friends concerns about veterans
+- message_queue: Offline message queuing and delivery
+- ai_feedback: User feedback system for AI responses
+- knowledge_base: RAG system for AI characters
 
 Usage:
     from routers import auth, cms, shifts, buddy_finder
@@ -37,7 +40,10 @@ from . import (
     callbacks,
     live_chat,
     notes,
-    concerns
+    concerns,
+    message_queue,
+    ai_feedback,
+    knowledge_base
 )
 
 __all__ = [
@@ -52,5 +58,8 @@ __all__ = [
     "callbacks",
     "live_chat",
     "notes",
-    "concerns"
+    "concerns",
+    "message_queue",
+    "ai_feedback",
+    "knowledge_base"
 ]
