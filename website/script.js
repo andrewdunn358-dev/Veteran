@@ -146,3 +146,53 @@ if (contactForm) {
 // Console welcome message
 console.log('%cRadio Check', 'font-size: 24px; font-weight: bold; color: #0d9488;');
 console.log('%cSupporting UK veterans and serving personnel', 'font-size: 14px; color: #94a3b8;');
+
+// Cookie Consent Functions
+function checkCookieConsent() {
+    const consent = localStorage.getItem('rc_cookie_consent');
+    if (!consent) {
+        const banner = document.getElementById('cookie-banner');
+        if (banner) {
+            banner.style.display = 'block';
+        }
+    }
+}
+
+function acceptCookies() {
+    const consent = {
+        essential: true,
+        analytics: true,
+        marketing: false,
+        timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('rc_cookie_consent', JSON.stringify(consent));
+    hideCookieBanner();
+}
+
+function manageCookies() {
+    // For now, just accept essential only
+    const consent = {
+        essential: true,
+        analytics: false,
+        marketing: false,
+        timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('rc_cookie_consent', JSON.stringify(consent));
+    hideCookieBanner();
+    alert('Cookie preferences saved. Only essential cookies will be used.');
+}
+
+function hideCookieBanner() {
+    const banner = document.getElementById('cookie-banner');
+    if (banner) {
+        banner.style.animation = 'slideDownBanner 0.3s ease forwards';
+        setTimeout(() => {
+            banner.style.display = 'none';
+        }, 300);
+    }
+}
+
+// Check on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(checkCookieConsent, 500);
+});
