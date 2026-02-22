@@ -42,6 +42,38 @@ export default function Settings() {
     Linking.openURL('mailto:support@radiocheck.me?subject=App Feedback');
   };
 
+  const handleReportIssue = () => {
+    Alert.alert(
+      'Report an Issue',
+      'What would you like to report?',
+      [
+        {
+          text: 'Technical Problem',
+          onPress: () => Linking.openURL('mailto:support@radiocheck.me?subject=Technical Issue Report&body=Please describe the issue:%0A%0ADevice:%0AApp Version: 1.0.0%0A%0ASteps to reproduce:%0A1.%0A2.%0A3.'),
+        },
+        {
+          text: 'Service Complaint',
+          onPress: () => Linking.openURL('mailto:complaints@radiocheck.me?subject=Service Complaint&body=Please describe your complaint. All complaints are taken seriously and will be reviewed within 48 hours.%0A%0A'),
+        },
+        {
+          text: 'Safety Concern',
+          onPress: () => {
+            Alert.alert(
+              'Safety Concern',
+              'If you or someone else is in immediate danger, please call 999.\n\nFor non-emergency safeguarding concerns:',
+              [
+                { text: 'Call Samaritans (116 123)', onPress: () => Linking.openURL('tel:116123') },
+                { text: 'Email Safeguarding Team', onPress: () => Linking.openURL('mailto:safeguarding@radiocheck.me?subject=Safeguarding Concern') },
+                { text: 'Cancel', style: 'cancel' },
+              ]
+            );
+          },
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
   const styles = createStyles(colors);
 
   return (
