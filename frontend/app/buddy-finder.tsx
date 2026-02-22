@@ -146,6 +146,58 @@ export default function BuddyFinderPage() {
     }
   };
 
+  const openMessageModal = (buddy: BuddyProfile) => {
+    setSelectedBuddy(buddy);
+    setMessageText('');
+    setShowMessageModal(true);
+  };
+
+  const sendMessage = async () => {
+    if (!selectedBuddy || !messageText.trim()) {
+      Alert.alert('Message Required', 'Please enter a message.');
+      return;
+    }
+
+    // Get user token
+    const token = await AsyncStorage.getItem('auth_token');
+    if (!token) {
+      Alert.alert('Login Required', 'You need to be logged in to send messages.', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Login', onPress: () => router.push('/login') }
+      ]);
+      return;
+    }
+
+    setSendingMessage(true);
+    try {
+      const res = await fetch(`${API_URL}/api/buddy-finder/message`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          to_profile_id: selectedBuddy.id,
+          message: messageText.trim(),
+        }),
+      });
+
+      if (res.ok) {
+        Alert.alert('Message Sent', `Your message has been sent to ${selectedBuddy.display_name}.`);
+        setShowMessageModal(false);
+        setMessageText('');
+        setSelectedBuddy(null);
+      } else {
+        const error = await res.json();
+        Alert.alert('Error', error.detail || 'Failed to send message');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to send message. Please try again.');
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
   const renderBrowse = () => (
     <>
       {/* Filters */}
