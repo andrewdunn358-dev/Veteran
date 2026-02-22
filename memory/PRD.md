@@ -1,170 +1,139 @@
-# Radio Check - UK Armed Forces Support App
+# Radio Check - Product Requirements Document
 
-## Original Problem Statement
-Build and enhance a mobile-first web application for UK serving personnel and veterans with role-based portals, AI chatbots, safeguarding, and peer support features.
+## Project Overview
+**Radio Check** is a mental health and peer support application for veterans, featuring:
+- React Native mobile app (Expo)
+- Python FastAPI backend
+- MongoDB database
+- Static HTML admin and staff portals
 
-## PRODUCTION vs PREVIEW - IMPORTANT
+## Core Features
 
-**Your production work is completely separate from this preview environment.**
+### User-Facing (Mobile App)
+- User authentication (JWT)
+- 7 AI chat personas with crisis detection (Tommy, Sarah, Marcus, Hugo, Donna, Amy, Rita)
+- Staff availability calendar
+- Buddy Finder with peer matching and messaging
+- Message inbox
+- Educational resources
+- Crisis/panic button (SOS)
 
-| Environment | URL | Purpose |
-|-------------|-----|---------|
-| Preview (here) | `veteran-support-app.preview.emergentagent.com` | Testing sandbox |
-| Production | `veterans-support-api.onrender.com` | Live deployment |
+### Admin Portal
+- Visual CMS Editor (WYSIWYG) - edit app content via phone preview
+- Logs & Analytics dashboard with Chart.js visualizations
+- Staff management (unified view)
+- Safeguarding alerts management
+- Prompt improvement workflow
 
-**When you deploy:**
-1. Push this code to YOUR GitHub repo
-2. Render pulls from YOUR GitHub
-3. Your production MongoDB data stays intact
-4. Preview URL is never involved
+### Staff Portal
+- Shift calendar and rota management
+- Callback queue
+- Live chat rooms
+- Case notes
 
-**Config files already point to production:**
-- `/app/admin-site/config.js` → production URL
-- `/app/staff-portal/config.js` → production URL
+## Technical Architecture
 
----
-
-## What's Been Implemented
-
-### Session 22 Feb 2026
-
-#### 1. Hugo AI Wellbeing Coach (Updated)
-- Comprehensive new prompt as 35-year-old wellbeing coach
-- Friendly, non-judgmental, "hippy guru" style
-- Active listening approach - validates feelings before advice
-- UK crisis resources integrated
-- Medical advice boundaries clearly defined
-- Added to `/api/ai-buddies/characters` endpoint
-
-#### NEW: Rita - Family Support Companion
-- **Inspired by Rita Restorick** (mother of Stephen Restorick, peace advocate)
-- 60-year-old woman, short black hair
-- Designed for the **Friends & Family page**
-- Supports partners, spouses, parents, and loved ones of military personnel
-- Understands deployments, emotional distance, transition stress
-- Bio: "I've been around the military for a long time. My son served, and I've experienced more than most people have."
-- Avatar generated and added to system
-
-#### 2. Backend Modularization (Complete)
+### Backend Structure (Modularized)
 ```
 /app/backend/
-├── server.py              # Main app (still working)
-├── models/schemas.py      # All Pydantic models
-├── routers/
-│   ├── auth.py           # Authentication router
-│   ├── cms.py            # CMS router
-│   ├── buddy_finder.py   # Buddy finder router
-│   └── shifts.py         # Shifts with push notifications
-├── services/
-│   └── database.py       # Database utilities
-└── ARCHITECTURE.md       # Migration documentation
+├── server.py                    # Main entry + AI chat logic
+├── routers/                     # 15 modular API routers
+│   ├── auth.py                  # Authentication + push tokens
+│   ├── cms.py                   # Content Management System
+│   ├── shifts.py                # Staff scheduling
+│   ├── buddy_finder.py          # Peer matching
+│   ├── staff.py                 # Counsellors/Peers
+│   ├── organizations.py         # Support orgs
+│   ├── resources.py             # Educational materials
+│   ├── safeguarding.py          # Alerts management
+│   ├── callbacks.py             # Callback requests
+│   ├── live_chat.py             # Chat rooms
+│   ├── notes.py                 # Staff notes
+│   ├── concerns.py              # Family concerns
+│   ├── message_queue.py         # NEW: Offline messaging
+│   ├── ai_feedback.py           # NEW: AI feedback system
+│   └── knowledge_base.py        # NEW: RAG for AI
+├── models/schemas.py            # Centralized Pydantic models
+└── services/database.py         # DB utilities
 ```
 
-#### 3. Push Notifications for Shifts
-- Expo Push Notification integration in `/app/backend/routers/shifts.py`
-- Sends notifications on shift create/update/delete
-- Users can register push tokens via `/api/shifts/register-push-token`
-- Email notifications continue via Resend
+### Key Integrations
+- **OpenAI GPT-4**: AI chat personas (user-provided key)
+- **Resend**: Email notifications (user-provided key)
+- **Expo Push**: Mobile notifications (implemented)
+- **Metered.ca**: WebRTC TURN servers (not yet implemented)
 
-#### 4. Extended CMS Page Types
-New page types supported:
-- `standard` - Cards-based (default)
-- `article` - Blog/article style
-- `landing` - Hero + features
-- `contact` - Contact form
-- `resources` - Resource list
-- `gallery` - Media gallery
+## Completed Work (Feb 22, 2026)
 
-New section types:
-- `cards`, `hero`, `text`, `resources`, `accordion`, `testimonial`, `stats`, `cta`
+### P0 - Backend Modularization ✅
+- Created 15 modular routers in `/app/backend/routers/`
+- All endpoints properly integrated in server.py
+- Architecture documentation at `/app/backend/ARCHITECTURE.md`
 
-#### 5. Drag-and-Drop CMS
-- HTML5 drag-and-drop for section reordering
-- Visual drag handles and drop indicators
-- "Drop here" feedback during drag
+### P1 - Push Notifications ✅
+- Token registration: `POST /api/auth/push-token`
+- Token removal: `DELETE /api/auth/push-token`
+- Integrated with Expo Push Notifications API
+- Connected to shift notifications
 
-#### 6. Message Inbox (Buddy Finder)
-- New Inbox tab with unread badge
-- Reply modal functionality
-- Auto-refresh every 30 seconds
+### P1 - Offline Message Queue ✅
+- Message queuing: `POST /api/message-queue/queue`
+- Pending retrieval: `GET /api/message-queue/pending/{user_id}`
+- Online/offline status tracking
+- Push notification delivery attempts
 
-#### 7. Dashboard Analytics Charts
-- Chart.js integration
-- Activity trends line chart (7 days)
-- Contact types doughnut chart
+### P1 - AI Feedback System ✅
+- Thumbs up/down: `POST /api/ai-feedback/thumbs`
+- Detailed feedback: `POST /api/ai-feedback/submit`
+- Report issues: `POST /api/ai-feedback/report`
+- Character analytics: `GET /api/ai-feedback/character/{name}`
+- Improvement suggestions: `GET /api/ai-feedback/improvements/{name}`
 
-#### 8. Safeguarding Fix
-- Added "hurt myself", "want to hurt myself" to RED_INDICATORS
-- Now properly detects self-harm intent
+### P1 - Knowledge Base (RAG) ✅
+- Entry management: CRUD at `/api/knowledge-base/entries`
+- Semantic search: `POST /api/knowledge-base/search`
+- AI context retrieval: `GET /api/knowledge-base/context/{query}`
+- Seeded with 11 UK veteran-specific entries
 
----
+### Admin Portal Enhancements (Previous Session)
+- WYSIWYG CMS editor with phone preview
+- Analytics dashboard with Chart.js
+- Deployment guides created
 
-## Test Results
+## Production Deployment
 
-**Backend: 22/22 tests passed (100%)**
-- Auth: Login, JWT generation
-- CMS: Pages, sections, cards CRUD
-- Buddy Finder: Profiles, inbox, messaging
-- Shifts: CRUD with notifications
-- AI Characters: All 6 characters listed
-- Safeguarding: Detects crisis phrases
+### Backend
+- Hosted on Render
+- URL: `https://veterans-support-api.onrender.com`
+- OpenAI and Resend keys configured as env vars
 
----
+### Admin Portal (Static)
+- User-deployed
+- Must be manually updated with new files
+- See `/app/admin-site/DEPLOYMENT_GUIDE.md`
 
-## Test Credentials
-- Admin: `admin@veteran.dbty.co.uk` / `ChangeThisPassword123!`
-- Staff: `sarahm.counsellor@radiocheck.me` / `RadioCheck2026!`
+### Staff Portal (Static)
+- User-deployed
+- Same deployment process as admin portal
 
----
+## Remaining/Future Tasks
 
-## Deployment Checklist
+### Not Started
+- [ ] WebRTC peer-to-peer audio calls (Metered.ca)
+- [ ] Reusable AI chat component in mobile app
+- [ ] Production admin portal deployment (user responsibility)
 
-Before deploying to production:
+### Technical Debt
+- [ ] Remove duplicate auth endpoints (modular vs server.py)
+- [ ] Add comprehensive test coverage
 
-1. **OpenAI API Key** - Ensure `OPENAI_API_KEY` is set in production `.env`
-2. **Resend API Key** - For email notifications
-3. **Push to GitHub** - Use "Save to GitHub" feature
-4. **Render deploys automatically** from your GitHub
+## Key Credentials
+- **Admin Login**: admin@veteran.dbty.co.uk / ChangeThisPassword123!
+- **MongoDB**: Local via MONGO_URL env var
+- **OpenAI/Resend**: User-provided production keys
 
----
-
-## Files Changed This Session
-
-### Hugo AI
-- `/app/backend/server.py` lines 632-720 - New comprehensive prompt
-
-### Backend Modularization
-- `/app/backend/models/schemas.py` - All Pydantic models
-- `/app/backend/routers/auth.py` - Auth router
-- `/app/backend/routers/cms.py` - CMS router
-- `/app/backend/routers/buddy_finder.py` - Buddy finder router
-- `/app/backend/routers/shifts.py` - Shifts with push notifications
-- `/app/backend/services/database.py` - DB utilities
-- `/app/backend/ARCHITECTURE.md` - Migration docs
-
-### CMS & Admin
-- `/app/admin-site/app.js` - Drag-drop, charts
-- `/app/admin-site/styles.css` - Drag states
-- `/app/admin-site/index.html` - Chart.js CDN
-
-### Safeguarding
-- `/app/backend/server.py` line 1315-1316 - Added "hurt myself" indicators
-
----
-
-## P0 - Next Up
-
-### Offline Message Queue
-Discussion needed:
-1. Who sends messages? (users with buddy profile)
-2. Queue behavior when offline
-3. Push notifications for new messages
-
-## P1 - Future
-- Complete router migration (integrate routers into server.py)
-- More CMS page templates
-- Analytics export to PDF
-
-## P2 - Nice to Have
-- Dark/light theme toggle
-- Multi-language support
+## Important Notes
+1. Admin portal changes require manual deployment by user
+2. OpenAI key is user-managed - check billing if AI fails
+3. Knowledge base can be expanded via admin portal or API
+4. All 15 backend routers are now active and tested
