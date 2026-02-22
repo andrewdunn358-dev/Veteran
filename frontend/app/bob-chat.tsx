@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AIConsentModal from '../src/components/AIConsentModal';
 
 interface AvailableStaff {
   counsellors: any[];
