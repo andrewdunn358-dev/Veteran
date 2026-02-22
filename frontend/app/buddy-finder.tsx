@@ -30,9 +30,21 @@ interface BuddyProfile {
   last_active: string;
 }
 
+interface InboxMessage {
+  id: string;
+  from_profile_id: string;
+  to_profile_id: string;
+  from_name: string;
+  to_name: string;
+  message: string;
+  is_read: boolean;
+  is_sent: boolean;
+  created_at: string;
+}
+
 export default function BuddyFinderPage() {
   const router = useRouter();
-  const [view, setView] = useState<'browse' | 'signup' | 'profile'>('browse');
+  const [view, setView] = useState<'browse' | 'signup' | 'inbox'>('browse');
   const [profiles, setProfiles] = useState<BuddyProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [regions, setRegions] = useState<string[]>([]);
@@ -43,6 +55,15 @@ export default function BuddyFinderPage() {
   const [selectedBuddy, setSelectedBuddy] = useState<BuddyProfile | null>(null);
   const [messageText, setMessageText] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
+  
+  // Inbox state
+  const [inboxMessages, setInboxMessages] = useState<InboxMessage[]>([]);
+  const [inboxLoading, setInboxLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [hasProfile, setHasProfile] = useState(false);
+  const [replyToMessage, setReplyToMessage] = useState<InboxMessage | null>(null);
+  const [showReplyModal, setShowReplyModal] = useState(false);
+  const [replyText, setReplyText] = useState('');
   
   // Filter state
   const [filterRegion, setFilterRegion] = useState('');
@@ -65,7 +86,65 @@ export default function BuddyFinderPage() {
 
   useEffect(() => {
     loadData();
+    checkInboxCount();
   }, []);
+  
+  // Check for unread messages periodically
+  useEffect(() => {
+    const interval = setInterval(checkInboxCount, 30000); // Every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+  
+  const checkInboxCount = async () => {
+    try {
+      const token = await AsyncStorage.getItem('auth_token');
+      if (!token) return;
+      
+      const res = await fetch(`${API_URL}/api/buddy-finder/inbox`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadCount(data.unread_count || 0);
+        setHasProfile(data.has_profile || false);
+      }
+    } catch (error) {
+      console.error('Error checking inbox:', error);
+    }
+  };
+  
+  const loadInbox = async () => {
+    setInboxLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('auth_token');
+      if (!token) {
+        Alert.alert('Login Required', 'Please log in to view your messages.', [
+          { text: 'Cancel', style: 'cancel', onPress: () => setView('browse') },
+          { text: 'Login', onPress: () => router.push('/login') }
+        ]);
+        return;
+      }
+      
+      const res = await fetch(`${API_URL}/api/buddy-finder/inbox`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setInboxMessages(data.messages || []);
+        setHasProfile(data.has_profile || false);
+        setUnreadCount(0); // Reset as they're now read
+      } else {
+        Alert.alert('Error', 'Failed to load messages');
+      }
+    } catch (error) {
+      console.error('Error loading inbox:', error);
+      Alert.alert('Error', 'Failed to load messages');
+    } finally {
+      setInboxLoading(false);
+    }
+  };
 
   const loadData = async () => {
     try {
