@@ -182,8 +182,9 @@ async def check_and_send_reminders():
         today = now.date()
         tomorrow = (now + timedelta(days=1)).date()
         
+        # Query with string dates only (MongoDB stores as strings)
         shifts_cursor = db.shifts.find({
-            'date': {'$in': [str(today), str(tomorrow), today, tomorrow]}
+            'date': {'$in': [str(today), str(tomorrow)]}
         })
         
         shifts = await shifts_cursor.to_list(length=100)
