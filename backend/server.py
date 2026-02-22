@@ -5167,6 +5167,14 @@ async def create_shift(
     )
     
     await db.shifts.insert_one(new_shift.dict())
+    
+    # Send email notification (async, non-blocking)
+    asyncio.create_task(send_shift_notification_email(
+        new_shift.dict(), 
+        current_user.email, 
+        "created"
+    ))
+    
     return {"success": True, "shift": new_shift.dict()}
 
 @api_router.put("/shifts/{shift_id}")
