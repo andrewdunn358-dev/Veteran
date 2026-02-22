@@ -25,6 +25,19 @@
 9. ✅ **Removed 1187 lines of duplicate code from server.py** - File reduced from 6374 to 5187 lines (19% reduction)
 10. ✅ **Fixed CMS router ObjectId serialization** - Proper MongoDB _id handling
 
+**🟢 Podcasts Section (New):**
+11. ✅ **Added Podcasts card to home page** - Above "Request a Callback"
+12. ✅ **Created podcasts.tsx** - New page with 8 curated veteran podcasts:
+    - Frankie's Pod: Uncorking the Unforgettable
+    - Tom Petch: Speed. Aggression. Surprise.
+    - The Old Paratrooper Podcast
+    - Beyond the Barracks
+    - Combat Stress 100 Podcast
+    - Military Veterans Podcast
+    - Talking with the Wounded
+    - Stray Voltage
+13. ✅ **Platform links** - Spotify, Apple Podcasts, YouTube links for each podcast
+
 ### 🔄 Requires User Action
 
 | Task | Action Required |
