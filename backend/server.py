@@ -1314,6 +1314,7 @@ RED_INDICATORS = {
     # Ongoing self-harm (+90)
     "cutting myself": 90, "cut myself": 90, "hurting myself": 90, "self harm": 90,
     "self-harm": 90, "burning myself": 90, "hitting myself": 90,
+    "hurt myself": 90, "want to hurt myself": 90, "going to hurt myself": 90,
     
     # Loss of control / risk to others (+90)
     "going to hurt someone": 90, "might hurt someone": 90, "losing control": 90,
