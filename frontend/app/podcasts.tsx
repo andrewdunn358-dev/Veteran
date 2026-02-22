@@ -137,6 +137,8 @@ export default function PodcastsScreen() {
   const styles = createStyles(colors);
   const [latestEpisodes, setLatestEpisodes] = useState<Record<string, LatestEpisode>>({});
   const [loadingEpisodes, setLoadingEpisodes] = useState(true);
+  const [playingVideo, setPlayingVideo] = useState<{videoId: string, title: string} | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     fetchLatestEpisodes();
@@ -169,6 +171,22 @@ export default function PodcastsScreen() {
 
   const getPrimaryLink = (podcast: Podcast): string | undefined => {
     return podcast.spotifyUrl || podcast.appleUrl || podcast.youtubeUrl || podcast.websiteUrl;
+  };
+
+  const onStateChange = useCallback((state: string) => {
+    if (state === 'ended') {
+      setIsPlaying(false);
+    }
+  }, []);
+
+  const playVideo = (videoId: string, title: string) => {
+    setPlayingVideo({ videoId, title });
+    setIsPlaying(true);
+  };
+
+  const closeVideo = () => {
+    setPlayingVideo(null);
+    setIsPlaying(false);
   };
 
   const formatDate = (dateStr: string): string => {
