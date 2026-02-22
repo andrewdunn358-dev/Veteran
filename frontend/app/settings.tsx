@@ -223,12 +223,25 @@ export default function Settings() {
         {/* Support Section */}
         <Text style={styles.sectionTitle}>Support</Text>
         <View style={styles.settingsCard}>
+          <TouchableOpacity style={styles.settingRow} onPress={handleReportIssue}>
+            <View style={styles.settingInfo}>
+              <Ionicons name="flag-outline" size={22} color="#f59e0b" />
+              <View>
+                <Text style={styles.settingLabel}>Report an Issue</Text>
+                <Text style={styles.settingDescription}>Report problems, complaints, or safety concerns</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
           <TouchableOpacity style={styles.settingRow} onPress={handleContact}>
             <View style={styles.settingInfo}>
               <Ionicons name="mail-outline" size={22} color={colors.textSecondary} />
               <View>
                 <Text style={styles.settingLabel}>Contact Us</Text>
-                <Text style={styles.settingDescription}>Send feedback or report issues</Text>
+                <Text style={styles.settingDescription}>Send feedback or general enquiries</Text>
               </View>
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
