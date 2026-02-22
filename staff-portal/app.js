@@ -1803,3 +1803,124 @@ initPortal = async function() {
     // Load shifts after other data
     loadShifts();
 };
+
+// ===========================================
+// Team On Duty Functions
+// ===========================================
+
+let teamCache = {
+    shifts: [],
+    staff: [],
+    currentTab: 'today'
+};
+
+async function loadTeamOnDuty() {
+    const container = document.getElementById('team-on-duty');
+    container.innerHTML = '<p class="loading-text">Loading team...</p>';
+    
+    try {
+        // Load shifts and staff
+        const [shiftsRes, counsellorsRes, peersRes] = await Promise.all([
+            fetch(`${API_URL}/api/shifts/`, { headers: getAuthHeaders() }),
+            fetch(`${API_URL}/api/staff/counsellors`, { headers: getAuthHeaders() }),
+            fetch(`${API_URL}/api/staff/peers`, { headers: getAuthHeaders() })
+        ]);
+        
+        const shifts = await shiftsRes.json();
+        const counsellors = await counsellorsRes.json();
+        const peers = await peersRes.json();
+        
+        // Combine staff
+        teamCache.staff = [
+            ...counsellors.map(c => ({ ...c, role: 'counsellor' })),
+            ...peers.map(p => ({ ...p, role: 'peer' }))
+        ];
+        teamCache.shifts = shifts || [];
+        
+        renderTeamOnDuty(teamCache.currentTab);
+        
+    } catch (error) {
+        console.error('Error loading team:', error);
+        container.innerHTML = '<p class="no-team-text">Failed to load team data</p>';
+    }
+}
+
+function switchTeamTab(tab) {
+    teamCache.currentTab = tab;
+    
+    // Update tab buttons
+    document.querySelectorAll('.team-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    
+    renderTeamOnDuty(tab);
+}
+
+function renderTeamOnDuty(tab) {
+    const container = document.getElementById('team-on-duty');
+    const currentUserId = getCurrentUserId();
+    
+    // Get date based on tab
+    const targetDate = new Date();
+    if (tab === 'tomorrow') {
+        targetDate.setDate(targetDate.getDate() + 1);
+    }
+    const dateStr = targetDate.toISOString().split('T')[0];
+    
+    // Filter shifts for the target date
+    const dayShifts = teamCache.shifts.filter(s => s.date === dateStr);
+    
+    if (dayShifts.length === 0) {
+        container.innerHTML = `<p class="no-team-text"><i class="fas fa-calendar-times"></i> No shifts scheduled for ${tab === 'today' ? 'today' : 'tomorrow'}</p>`;
+        return;
+    }
+    
+    // Render team members
+    container.innerHTML = dayShifts.map(shift => {
+        const staff = teamCache.staff.find(s => s.id === shift.user_id);
+        const name = staff?.name || shift.user_name || 'Unknown';
+        const role = staff?.role || 'staff';
+        const isMe = shift.user_id === currentUserId;
+        const initials = getInitials(name);
+        
+        return `
+            <div class="team-member ${role} ${isMe ? 'is-me' : ''}">
+                <div class="team-avatar ${role}">${initials}</div>
+                <div class="team-info">
+                    <div class="team-name">${escapeHtml(name)}${isMe ? ' (You)' : ''}</div>
+                    <div class="team-role">${role === 'counsellor' ? 'Counsellor' : 'Peer Supporter'}</div>
+                </div>
+                <div class="team-time">
+                    <i class="fas fa-clock"></i>
+                    ${shift.start_time} - ${shift.end_time}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function getInitials(name) {
+    if (!name) return '?';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+}
+
+function getCurrentUserId() {
+    // Get from stored user data
+    const userData = JSON.parse(localStorage.getItem('staff_user') || '{}');
+    return userData.id || null;
+}
+
+// Load team data on portal load
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait for authentication before loading
+    setTimeout(() => {
+        if (document.getElementById('portal-screen').classList.contains('active') || 
+            !document.getElementById('login-screen').classList.contains('active')) {
+            loadTeamOnDuty();
+        }
+    }, 1500);
+});
