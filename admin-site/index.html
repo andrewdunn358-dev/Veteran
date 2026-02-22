@@ -326,6 +326,50 @@
         <span id="notification-message"></span>
     </div>
 
+    <!-- CMS Preview Modal -->
+    <div id="cms-preview-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="width: 95%; max-width: 1200px; height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                <h3 style="margin: 0;"><i class="fas fa-mobile-alt"></i> App Preview</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <select id="preview-page-select" onchange="changePreviewPage()" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-primary);">
+                        <option value="home">Home Page</option>
+                        <option value="self-care">Self-Care Tools</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="refreshPreview()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeCMSPreview()">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+            <div style="flex: 1; display: flex; gap: 24px; padding-top: 16px; overflow: hidden;">
+                <!-- Phone Preview -->
+                <div style="flex: 0 0 400px; display: flex; flex-direction: column; align-items: center;">
+                    <div style="background: #1a1a1a; border-radius: 36px; padding: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+                        <div style="background: #000; border-radius: 28px; width: 375px; height: 650px; overflow: hidden; position: relative;">
+                            <!-- Phone notch -->
+                            <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #000; border-bottom-left-radius: 14px; border-bottom-right-radius: 14px; z-index: 10;"></div>
+                            <!-- App iframe -->
+                            <iframe id="preview-iframe" style="width: 100%; height: 100%; border: none; background: #0f172a;"></iframe>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 12px; margin-top: 12px;">
+                        <i class="fas fa-info-circle"></i> Preview shows how content appears in the mobile app
+                    </p>
+                </div>
+                <!-- CMS Content Panel -->
+                <div style="flex: 1; overflow-y: auto; background: var(--card-bg); border-radius: 12px; padding: 20px;">
+                    <h4 style="margin-top: 0; color: var(--text-primary);"><i class="fas fa-cog"></i> Page Content</h4>
+                    <div id="preview-content-panel">
+                        <p style="color: var(--text-secondary);">Loading content...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Delete Confirmation Modal -->
     <div id="delete-modal" class="modal-overlay hidden">
         <div class="modal-content modal-small">
