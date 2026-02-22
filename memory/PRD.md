@@ -123,7 +123,7 @@
 - [ ] Cookie consent banner on website
 
 ### Future
-- [ ] WebRTC audio calls (Metered.ca)
+- [ ] WebRTC audio calls (already working with P2P)
 - [ ] Welsh language support
 
 ## Key Files Changed This Session
