@@ -668,6 +668,93 @@ const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
   introTitle: { fontSize: 22, fontWeight: '700', color: colors.text, marginTop: 16 },
   introText: { fontSize: 15, color: colors.textSecondary, textAlign: 'center', marginTop: 8, lineHeight: 22 },
   
+  // Rita AI Card
+  ritaCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#2563eb',
+    ...Platform.select({
+      ios: { shadowColor: '#2563eb', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 8 },
+      android: { elevation: 4 },
+    }),
+  },
+  ritaContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  ritaAvatar: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 3,
+    borderColor: '#2563eb',
+  },
+  ritaAvatarPlaceholder: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#2563eb',
+  },
+  ritaInfo: {
+    flex: 1,
+    marginLeft: 14,
+  },
+  ritaHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  ritaName: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  ritaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#2563eb',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  ritaBadgeText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  ritaDesc: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+  ritaBio: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    lineHeight: 16,
+  },
+  ritaAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 6,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: isDark ? '#334155' : '#e2e8f0',
+  },
+  ritaActionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2563eb',
+  },
+  
   // Action Cards
   actionCard: {
     backgroundColor: colors.surface,
