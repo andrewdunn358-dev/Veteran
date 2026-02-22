@@ -37,6 +37,29 @@
     - Talking with the Wounded
     - Stray Voltage
 13. ✅ **Platform links** - Spotify, Apple Podcasts, YouTube links for each podcast
+14. ✅ **YouTube RSS feeds** - Auto-fetching latest episodes with thumbnails
+15. ✅ **In-app YouTube player** - Watch episodes without leaving the app
+16. ✅ **Shorts filtering** - Only shows full podcast episodes, not YouTube Shorts
+
+**🟣 Legal & Permissions (New):**
+17. ✅ **Settings page updated** - Added Legal & Your Rights section with links to:
+    - Privacy Policy
+    - Terms of Service
+    - Your Data Rights (GDPR)
+    - Safeguarding Policy
+18. ✅ **Created your-data-rights.tsx** - GDPR rights page with:
+    - Explanation of data rights (access, portability, rectification, erasure)
+    - Export My Data button
+    - Delete My Account button
+    - Clear Local Data button
+    - Data retention information
+19. ✅ **Created safeguarding.tsx** - Safeguarding policy page with:
+    - Emergency contact (999)
+    - Helpline numbers (Samaritans, Combat Stress, Veterans Gateway)
+    - AI limitations disclosure
+    - Confidentiality limits
+    - Report concerns information
+20. ✅ **First-launch microphone permission modal** - Requests mic access for P2P calls
 
 ### 🔄 Requires User Action
 
