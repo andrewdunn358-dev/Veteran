@@ -36,6 +36,15 @@ Build and enhance a mobile-first web application for UK serving personnel and ve
 - Medical advice boundaries clearly defined
 - Added to `/api/ai-buddies/characters` endpoint
 
+#### NEW: Rita - Family Support Companion
+- **Inspired by Rita Restorick** (mother of Stephen Restorick, peace advocate)
+- 60-year-old woman, short black hair
+- Designed for the **Friends & Family page**
+- Supports partners, spouses, parents, and loved ones of military personnel
+- Understands deployments, emotional distance, transition stress
+- Bio: "I've been around the military for a long time. My son served, and I've experienced more than most people have."
+- Avatar generated and added to system
+
 #### 2. Backend Modularization (Complete)
 ```
 /app/backend/
