@@ -19,6 +19,8 @@ import resend
 import asyncio
 from openai import OpenAI
 import httpx  # For IP geolocation lookup
+from collections import defaultdict
+import time
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -34,6 +36,98 @@ from safety import (
     get_veteran_helplines,
     get_emergency_number,
 )
+
+# ============ RATE LIMITING & BOT PROTECTION ============
+
+# Rate limit configuration
+RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "20"))  # Max requests per window
+RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))  # Window in seconds
+RATE_LIMIT_BURST = int(os.getenv("RATE_LIMIT_BURST", "5"))  # Max burst requests
+SESSION_RATE_LIMIT = int(os.getenv("SESSION_RATE_LIMIT", "50"))  # Max messages per session
+
+# In-memory rate limiting stores
+ip_request_counts: Dict[str, List[float]] = defaultdict(list)
+session_message_counts: Dict[str, int] = defaultdict(int)
+blocked_ips: Dict[str, float] = {}  # IP -> block expiry time
+
+def get_client_ip(request: Request) -> str:
+    """Extract client IP from request, handling proxies"""
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+def is_ip_blocked(ip: str) -> bool:
+    """Check if IP is temporarily blocked"""
+    if ip in blocked_ips:
+        if time.time() < blocked_ips[ip]:
+            return True
+        else:
+            del blocked_ips[ip]
+    return False
+
+def block_ip(ip: str, duration_seconds: int = 300):
+    """Block an IP for specified duration (default 5 minutes)"""
+    blocked_ips[ip] = time.time() + duration_seconds
+    logging.warning(f"RATE LIMIT: Blocked IP {ip} for {duration_seconds}s")
+
+def check_rate_limit(ip: str) -> tuple[bool, str]:
+    """
+    Check if request should be rate limited
+    Returns: (is_allowed, reason)
+    """
+    now = time.time()
+    
+    # Check if IP is blocked
+    if is_ip_blocked(ip):
+        return False, "Too many requests. Please wait a few minutes."
+    
+    # Clean old requests outside window
+    ip_request_counts[ip] = [t for t in ip_request_counts[ip] if now - t < RATE_LIMIT_WINDOW]
+    
+    # Check burst limit (requests in last 5 seconds)
+    recent_requests = [t for t in ip_request_counts[ip] if now - t < 5]
+    if len(recent_requests) >= RATE_LIMIT_BURST:
+        block_ip(ip, 60)  # Block for 1 minute on burst
+        return False, "Slow down. Too many requests too quickly."
+    
+    # Check window limit
+    if len(ip_request_counts[ip]) >= RATE_LIMIT_REQUESTS:
+        block_ip(ip, 300)  # Block for 5 minutes
+        return False, "Rate limit exceeded. Please try again later."
+    
+    # Record this request
+    ip_request_counts[ip].append(now)
+    return True, "OK"
+
+def check_session_limit(session_id: str) -> tuple[bool, str]:
+    """
+    Check if session has exceeded message limit
+    Prevents single session from burning through API credits
+    """
+    session_message_counts[session_id] += 1
+    
+    if session_message_counts[session_id] > SESSION_RATE_LIMIT:
+        return False, "Session limit reached. Please start a new conversation."
+    
+    return True, "OK"
+
+def cleanup_rate_limits():
+    """Periodic cleanup of old rate limit data"""
+    now = time.time()
+    
+    # Clean IP counts older than 2x window
+    for ip in list(ip_request_counts.keys()):
+        ip_request_counts[ip] = [t for t in ip_request_counts[ip] if now - t < RATE_LIMIT_WINDOW * 2]
+        if not ip_request_counts[ip]:
+            del ip_request_counts[ip]
+    
+    # Clean expired blocks
+    for ip in list(blocked_ips.keys()):
+        if now >= blocked_ips[ip]:
+            del blocked_ips[ip]
+
+# ============ JWT CONFIGURATION ============
 
 # JWT Configuration
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
