@@ -277,6 +277,153 @@ export default function BuddyFinderPage() {
     }
   };
 
+  const openReplyModal = (msg: InboxMessage) => {
+    setReplyToMessage(msg);
+    setReplyText('');
+    setShowReplyModal(true);
+  };
+  
+  const sendReply = async () => {
+    if (!replyToMessage || !replyText.trim()) {
+      Alert.alert('Message Required', 'Please enter a message.');
+      return;
+    }
+    
+    const token = await AsyncStorage.getItem('auth_token');
+    if (!token) {
+      Alert.alert('Login Required', 'You need to be logged in to send messages.');
+      return;
+    }
+    
+    setSendingMessage(true);
+    try {
+      // Reply to the person who sent us the message
+      const recipientId = replyToMessage.is_sent 
+        ? replyToMessage.to_profile_id 
+        : replyToMessage.from_profile_id;
+        
+      const res = await fetch(`${API_URL}/api/buddy-finder/message`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          to_profile_id: recipientId,
+          message: replyText.trim(),
+        }),
+      });
+      
+      if (res.ok) {
+        Alert.alert('Reply Sent', 'Your reply has been sent.');
+        setShowReplyModal(false);
+        setReplyText('');
+        setReplyToMessage(null);
+        loadInbox(); // Refresh inbox
+      } else {
+        const error = await res.json();
+        Alert.alert('Error', error.detail || 'Failed to send reply');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to send reply. Please try again.');
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+  
+  const formatMessageDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return date.toLocaleDateString('en-GB', { weekday: 'short' });
+    } else {
+      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+  };
+  
+  const renderInbox = () => {
+    if (inboxLoading) {
+      return (
+        <View style={styles.emptyState}>
+          <ActivityIndicator size="large" color="#3b82f6" />
+          <Text style={styles.emptyText}>Loading messages...</Text>
+        </View>
+      );
+    }
+    
+    if (!hasProfile) {
+      return (
+        <View style={styles.emptyState}>
+          <Ionicons name="person-outline" size={64} color="#475569" />
+          <Text style={styles.emptyTitle}>No Buddy Profile</Text>
+          <Text style={styles.emptyText}>Create a Buddy Finder profile to send and receive messages.</Text>
+          <TouchableOpacity style={styles.signupPrompt} onPress={() => setView('signup')}>
+            <Text style={styles.signupPromptText}>Create Profile</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    
+    if (inboxMessages.length === 0) {
+      return (
+        <View style={styles.emptyState}>
+          <Ionicons name="mail-outline" size={64} color="#475569" />
+          <Text style={styles.emptyTitle}>No Messages Yet</Text>
+          <Text style={styles.emptyText}>When other veterans message you, they'll appear here.</Text>
+          <TouchableOpacity style={styles.signupPrompt} onPress={() => setView('browse')}>
+            <Text style={styles.signupPromptText}>Find Buddies</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    
+    return (
+      <ScrollView style={styles.inboxList} showsVerticalScrollIndicator={false}>
+        {inboxMessages.map((msg) => (
+          <TouchableOpacity 
+            key={msg.id} 
+            style={[styles.inboxItem, !msg.is_read && styles.inboxItemUnread]}
+            onPress={() => openReplyModal(msg)}
+            data-testid={`inbox-message-${msg.id}`}
+          >
+            <View style={styles.inboxHeader}>
+              <View style={[styles.inboxAvatar, msg.is_sent && styles.inboxAvatarSent]}>
+                <Text style={styles.inboxAvatarText}>
+                  {(msg.is_sent ? msg.to_name : msg.from_name).charAt(0).toUpperCase()}
+                </Text>
+              </View>
+              <View style={styles.inboxContent}>
+                <View style={styles.inboxTopRow}>
+                  <Text style={styles.inboxName}>
+                    {msg.is_sent ? `To: ${msg.to_name}` : msg.from_name}
+                  </Text>
+                  <Text style={styles.inboxTime}>{formatMessageDate(msg.created_at)}</Text>
+                </View>
+                <Text style={styles.inboxPreview} numberOfLines={2}>
+                  {msg.is_sent && <Text style={styles.sentLabel}>You: </Text>}
+                  {msg.message}
+                </Text>
+              </View>
+            </View>
+            {!msg.is_sent && (
+              <View style={styles.replyHint}>
+                <Ionicons name="arrow-undo-outline" size={14} color="#3b82f6" />
+                <Text style={styles.replyHintText}>Tap to reply</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    );
+  };
+
   const renderBrowse = () => (
     <>
       {/* Filters */}
