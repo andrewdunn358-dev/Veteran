@@ -1,0 +1,44 @@
+type,name,service,category,phone,email,website,address,description
+organization,Combat Stress,,Mental Health,0800 138 1619,,,,"Leading charity for veterans mental health. Offers support for trauma, anxiety, depression and more."
+organization,Samaritans,,Crisis Support,116 123,,,,Free 24/7 listening service for anyone who needs to talk. Confidential and non-judgmental support.
+organization,Veterans UK,,Government,0808 1914 218,,,,"Government support service offering advice on benefits, compensation, and welfare for veterans."
+organization,CALM,,Mental Health,0800 58 58 58,,,,"Campaign Against Living Miserably. Support for men experiencing difficult times, including veterans."
+organization,SSAFA,,Welfare,0800 731 4880,,,,"Lifelong support for serving personnel, veterans, and their families. Practical and emotional support."
+organization,Help for Heroes,,Welfare,0800 058 2121,,,,"Recovery and support for wounded, injured and sick veterans. Physical and mental health services."
+organization,Royal British Legion,,Welfare,0808 802 8080,,,,"Welfare support, guidance and advice for serving and ex-serving personnel and their families."
+organization,NHS Urgent Mental Health Helpline,,Crisis Support,111,,,,Call 111 and select option 2 for urgent mental health support 24/7.
+association,Royal Naval Association (RNA),navy,Navy,023 9272 3747,admin@royalnavalassoc.com,https://www.royal-naval-association.co.uk,"Building 1/87, Scott Road, HM Naval Base, Portsmouth, PO1 3LU",Supports RN veterans serving personnel & families. 400+ branches nationwide.
+association,Royal Marines Association,navy,Navy,023 9283 7100,,https://www.rma-trmc.org,"Central Office, Eastney Esplanade, Southsea, Hants PO4 9PX",Supporting Royal Marines veterans and their families.
+association,Submariners Association,navy,Navy,,,https://www.submarinersassociation.co.uk,,For all who have served in HM Submarines.
+association,Fleet Air Arm Association,navy,Navy,,,https://fleetairarmoa.org,,For those who served in the Fleet Air Arm.
+association,Royal Air Forces Association (RAFA),raf,RAF,0800 018 2361,enquiries@rafa.org.uk,https://www.rafa.org.uk,,Supporting serving & former RAF personnel and their families.
+association,RAF Regiment Association,raf,RAF,,,https://www.raf-regiment.org,,For current and former members of the RAF Regiment.
+association,Bomber Command Association,raf,RAF,,,https://www.bombercommandmuseum.com,,Preserving the memory of Bomber Command.
+association,Household Cavalry Association,army,Cavalry,020 7414 2392,,,"Horse Guards, Whitehall, London SW1A 2AX",For Life Guards and Blues and Royals veterans.
+association,Coldstream Guards Association,army,Guards,,,https://www.rhqcoldmgds.co.uk,,Supporting Coldstream Guards veterans.
+association,Irish Guards Association,army,Guards,,,https://www.iga-london.co.uk,,Supporting Irish Guards veterans and families.
+association,Grenadier Guards Association,army,Guards,,,https://www.grengds.com,,For Grenadier Guards past and present.
+association,Scots Guards Association,army,Guards,,,https://www.scotsguards.co.uk,,Supporting Scots Guards veterans.
+association,Welsh Guards Association,army,Guards,,,https://www.welshguardsassociation.com,,Supporting Welsh Guards veterans.
+association,Queen's Dragoon Guards Association,army,Cavalry,,,https://www.qdg.org.uk,,For QDG veterans and serving soldiers.
+association,Royal Scots Dragoon Guards Association,army,Cavalry,,,https://www.scotsdg.org.uk,,Supporting SCOTS DG veterans.
+association,King's Royal Hussars Association,army,Cavalry,,,https://www.krh.org.uk,,For KRH veterans and families.
+association,Royal Tank Regiment Association,army,Armoured,01929 403331,,https://www.royaltankregiment.com,"RHQ RTR, Bovington Camp, Wareham, Dorset, BH20 6JA",Supporting RTR veterans and families.
+association,Royal Anglian Regiment Association,army,Infantry,01603 628455,,https://www.royalanglianassociation.co.uk,"Britannia Barracks, Norwich, Norfolk, NR1 4HJ",For Royal Anglian Regiment veterans including former county regiments.
+association,Queen's Regimental Association,army,Infantry,07872 901 611,,,"RHQ PWRR, HM Fortress Tower of London, London EC3N 4AB","For veterans of The Queen's Regiment and antecedent regiments."
+association,Black Watch Association,army,Scottish,,,https://www.theblackwatch.co.uk,,Supporting Black Watch veterans.
+association,KOSB Association,army,Scottish,,,https://www.kosb.co.uk,,King's Own Scottish Borderers Association.
+association,Royal Irish Regiment Association,army,Infantry,028 9023 2086,,,"5 Waring Street, Belfast, BT1 2EW",For Royal Irish Regiment and predecessor regiment veterans.
+association,Duke of Lancaster's Regiment Association,army,Infantry,,,https://www.army.mod.uk/infantry/regiments/dukes-of-lancasters-regiment/,,Supporting LANCS Regiment veterans.
+association,Parachute Regimental Association,army,Airborne,,,https://www.pra.org.uk,,Supporting Airborne Forces veterans.
+association,Royal Engineers Association,army,Corps,,,https://www.reahq.org.uk,,For Royal Engineers past and present.
+association,Royal Signals Association,army,Corps,,,https://www.royalsignals.org/rsa,,Supporting Royal Signals veterans.
+association,REME Association,army,Corps,,,https://www.reme-association.org.uk,,Royal Electrical and Mechanical Engineers Association.
+association,Royal Logistic Corps Association,army,Corps,,,https://www.rlcassociation.org,,For RLC and predecessor corps veterans.
+association,Royal Military Police Association,army,Corps,,,https://www.rhqrmp.org,,Supporting RMP veterans.
+association,Army Medical Services Association,army,Medical,,,https://www.ams-association.co.uk,,"For RAMC, QARANC, RADC, RAVC veterans."
+association,Intelligence Corps Association,army,Corps,,,https://www.intelligencecorps.co.uk,,For Int Corps veterans.
+association,Army Air Corps Association,army,Aviation,,,https://www.armyaircorpassociation.co.uk,,Supporting AAC veterans.
+association,Veterans UK,all,Government,0808 1914 218,veterans-uk@mod.gov.uk,https://www.gov.uk/government/organisations/veterans-uk,"Ministry of Defence, Norcross, Thornton Cleveleys, FY5 3WP",Official MOD support for benefits pensions & welfare. All services.
+association,Cobseo (Confederation of Service Charities),all,Directory,,,https://www.cobseo.org.uk,,Directory of 100+ veteran associations and charities.
+association,Armed Forces Pension Enquiries,all,Government,0800 085 3600,,,"JPAC, Kentigern House, 65 Brown Street, Glasgow G2 8EX",For all Armed Forces pension queries.
