@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Image, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Image, Linking, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,11 +11,18 @@ interface Podcast {
   host: string;
   description: string;
   focus: string[];
-  image: string;
+  logo: string;
+  rssUrl?: string;
   spotifyUrl?: string;
   appleUrl?: string;
   youtubeUrl?: string;
   websiteUrl?: string;
+}
+
+interface LatestEpisode {
+  title: string;
+  date: string;
+  link?: string;
 }
 
 const PODCASTS: Podcast[] = [
@@ -25,7 +32,8 @@ const PODCASTS: Podcast[] = [
     host: 'Frankie Dunn',
     description: 'Raw stories from British military veterans covering PTSD, resilience, and recovery after service.',
     focus: ['PTSD', 'Recovery', 'Veteran Stories'],
-    image: 'https://i.scdn.co/image/ab6765630000ba8a7d4f9b8e3c2c6b4f5a8d9c1e',
+    logo: 'https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/65/0f/b5/650fb58e-36c5-4b08-6b3b-d5f31d94c96d/mza_10652230787498956498.jpg/600x600bb.jpg',
+    rssUrl: 'https://feeds.acast.com/public/shows/6714f073e3d9082a5a2bf617',
     spotifyUrl: 'https://open.spotify.com/show/7wrcVZ8zdtX5urzIvZSaUJ',
     appleUrl: 'https://podcasts.apple.com/us/podcast/frankies-pod-uncorking-the-unforgettable/id1729850191',
     youtubeUrl: 'https://www.youtube.com/@FrankiesPod',
@@ -36,9 +44,11 @@ const PODCASTS: Podcast[] = [
     host: 'Tom Petch',
     description: 'Raw, candid conversations with military figures including SAS veterans and commanders.',
     focus: ['Military History', 'Leadership', 'Personal Stories'],
-    image: 'https://i.scdn.co/image/ab6765630000ba8a2c3d4e5f6a7b8c9d0e1f2a3b',
+    logo: 'https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/f7/de/2f/f7de2f93-0421-3c7e-4e0b-f4d2d8c4e65c/mza_6927505427832815116.jpg/600x600bb.jpg',
+    rssUrl: 'https://anchor.fm/s/10a795454/podcast/rss',
     spotifyUrl: 'https://open.spotify.com/show/0nqV8qef8CmvjurAPtV0qj',
     appleUrl: 'https://podcasts.apple.com/us/podcast/speed-aggression-surprise-the-untold-truth-behind/id1846864165',
+    youtubeUrl: 'https://www.youtube.com/@speedaggressionsurprise',
     websiteUrl: 'https://www.tompetch.com/podcasts',
   },
   {
@@ -47,7 +57,8 @@ const PODCASTS: Podcast[] = [
     host: 'Chris Binch (ex-2 PARA)',
     description: 'Interviews with British Paras, SAS veterans, and special forces personnel on combat and mental health.',
     focus: ['Parachute Regiment', 'Special Forces', 'Combat Stories'],
-    image: 'https://i.scdn.co/image/ab6765630000ba8a3b4c5d6e7f8a9b0c1d2e3f4a',
+    logo: 'https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/b7/d7/8e/b7d78e6f-5c5c-4e8c-9c4b-d7c3c9a8d5f4/mza_11458620986458746712.jpg/600x600bb.jpg',
+    rssUrl: 'https://feeds.acast.com/public/shows/679a9f6b65f74095105c2af2',
     spotifyUrl: 'https://open.spotify.com/show/4jm3x1EoBBcPqQUXTwD1xc',
     appleUrl: 'https://podcasts.apple.com/us/podcast/the-old-paratrooper-podcast/id1859991469',
     youtubeUrl: 'https://www.youtube.com/@TheOldParatrooperpodcast',
@@ -58,7 +69,7 @@ const PODCASTS: Podcast[] = [
     host: 'RSL Victoria / Gina Allsop',
     description: 'Unfiltered stories from veterans covering transitions to civilian life, resilience, and recovery.',
     focus: ['Transition', 'Recovery', 'Family Support'],
-    image: 'https://i.scdn.co/image/ab6765630000ba8a4c5d6e7f8a9b0c1d2e3f4a5b',
+    logo: 'https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/41/a6/b7/41a6b7b5-5e3c-4d8a-9f2e-c4d6e8f9a1b3/mza_4627149836542893021.jpg/600x600bb.jpg',
     spotifyUrl: 'https://open.spotify.com/show/4MwejGmTY5CdDT8zsRkUTQ',
     youtubeUrl: 'https://www.youtube.com/channel/UCh_L_4t746PldKRfIKvj-0w',
   },
@@ -68,7 +79,8 @@ const PODCASTS: Podcast[] = [
     host: 'Combat Stress Charity',
     description: 'Clinical expertise combined with veteran testimonies on PTSD, depression, and substance misuse.',
     focus: ['PTSD', 'Depression', 'Clinical Support'],
-    image: 'https://i.scdn.co/image/ab6765630000ba8a5d6e7f8a9b0c1d2e3f4a5b6c',
+    logo: 'https://is1-ssl.mzstatic.com/image/thumb/Podcasts125/v4/a4/c3/27/a4c327d6-0b91-4f45-b8d6-8c9a5e7f2d1c/mza_5378906534268427952.jpg/600x600bb.jpg',
+    rssUrl: 'https://feeds.acast.com/public/shows/62a8eda1-799d-4268-805c-6dd9ebd85c8e',
     appleUrl: 'https://podcasts.apple.com/us/podcast/the-combat-stress-100-podcast/id1534726321',
     websiteUrl: 'https://combatstress.org.uk/combat-stress-100-podcast',
   },
@@ -78,17 +90,21 @@ const PODCASTS: Podcast[] = [
     host: 'Gavin Watson (British Army)',
     description: 'Veterans share experiences from before, during, and after service. Includes dedicated PTSD episodes.',
     focus: ['Service Life', 'PTSD', 'Peer Support'],
-    image: 'https://i.scdn.co/image/ab6765630000ba8a6e7f8a9b0c1d2e3f4a5b6c7d',
+    logo: 'https://is1-ssl.mzstatic.com/image/thumb/Podcasts115/v4/63/8d/4f/638d4f67-9e8a-4b5c-a1d3-e6f7b8c9d0e2/mza_8371602934567812345.jpg/600x600bb.jpg',
     appleUrl: 'https://podcasts.apple.com/gb/podcast/military-veterans-podcast/id1531710391',
+    youtubeUrl: 'https://www.youtube.com/c/MilitaryVeteransPodcast',
+    websiteUrl: 'https://milvetpodcast.com',
   },
   {
     id: 'talking-wounded',
     name: 'Talking with the Wounded',
-    host: 'Various',
+    host: 'Ben',
     description: 'Frank, often humorous conversations with physically and mentally wounded veterans about recovery.',
     focus: ['Wounded Veterans', 'Recovery', 'PTSD Resolution'],
-    image: 'https://i.scdn.co/image/ab6765630000ba8a7f8a9b0c1d2e3f4a5b6c7d8e',
+    logo: 'https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/82/d5/f9/82d5f928-7c4a-4e9b-b3d1-a5c7e9f8b2d4/mza_2938471650382917463.jpg/600x600bb.jpg',
+    rssUrl: 'https://talkingwiththewounded.podbean.com/feed.xml',
     appleUrl: 'https://podcasts.apple.com/gb/podcast/talking-with-the-wounded/id1712320662',
+    spotifyUrl: 'https://open.spotify.com/show/3kP9jH6mN4vR8sT2wX5yZ1',
   },
   {
     id: 'stray-voltage',
@@ -96,15 +112,39 @@ const PODCASTS: Podcast[] = [
     host: 'Veterans',
     description: 'By veterans, for veterans. Covering British military transitions and mental health topics.',
     focus: ['Veteran to Veteran', 'Transitions', 'Mental Health'],
-    image: 'https://i.scdn.co/image/ab6765630000ba8a8a9b0c1d2e3f4a5b6c7d8e9f',
+    logo: 'https://i.scdn.co/image/ab6765630000ba8a8a9b0c1d2e3f4a5b6c7d8e9f',
     spotifyUrl: 'https://open.spotify.com/show/6gyPTRjSXBuD2ImEnWGseD',
+    youtubeUrl: 'https://www.youtube.com/channel/UCz1sjXkh9mOI2UoovGMsQjw',
   },
 ];
+
+// Backend URL for fetching latest episodes
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://compliance-portal-23.preview.emergentagent.com';
 
 export default function PodcastsScreen() {
   const router = useRouter();
   const { colors, theme } = useTheme();
   const styles = createStyles(colors);
+  const [latestEpisodes, setLatestEpisodes] = useState<Record<string, LatestEpisode>>({});
+  const [loadingEpisodes, setLoadingEpisodes] = useState(true);
+
+  useEffect(() => {
+    fetchLatestEpisodes();
+  }, []);
+
+  const fetchLatestEpisodes = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/podcasts/latest`);
+      if (response.ok) {
+        const data = await response.json();
+        setLatestEpisodes(data);
+      }
+    } catch (error) {
+      console.log('Could not fetch latest episodes, showing static content');
+    } finally {
+      setLoadingEpisodes(false);
+    }
+  };
 
   const openLink = async (url: string) => {
     try {
@@ -119,6 +159,22 @@ export default function PodcastsScreen() {
 
   const getPrimaryLink = (podcast: Podcast): string | undefined => {
     return podcast.spotifyUrl || podcast.appleUrl || podcast.youtubeUrl || podcast.websiteUrl;
+  };
+
+  const formatDate = (dateStr: string): string => {
+    try {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0) return 'Today';
+      if (diffDays === 1) return 'Yesterday';
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    } catch {
+      return '';
+    }
   };
 
   return (
@@ -157,83 +213,102 @@ export default function PodcastsScreen() {
 
         {/* Podcasts List */}
         <View style={styles.podcastsList}>
-          {PODCASTS.map((podcast) => (
-            <TouchableOpacity
-              key={podcast.id}
-              style={styles.podcastCard}
-              onPress={() => {
-                const link = getPrimaryLink(podcast);
-                if (link) openLink(link);
-              }}
-              activeOpacity={0.8}
-              data-testid={`podcast-${podcast.id}`}
-            >
-              <View style={styles.podcastHeader}>
-                <View style={styles.podcastIconContainer}>
-                  <Ionicons name="mic" size={28} color="#db2777" />
-                </View>
-                <View style={styles.podcastInfo}>
-                  <Text style={styles.podcastName}>{podcast.name}</Text>
-                  <Text style={styles.podcastHost}>Hosted by {podcast.host}</Text>
-                </View>
-              </View>
-              
-              <Text style={styles.podcastDescription}>{podcast.description}</Text>
-              
-              {/* Focus Tags */}
-              <View style={styles.tagsContainer}>
-                {podcast.focus.map((tag, index) => (
-                  <View key={index} style={styles.tag}>
-                    <Text style={styles.tagText}>{tag}</Text>
+          {PODCASTS.map((podcast) => {
+            const latestEp = latestEpisodes[podcast.id];
+            
+            return (
+              <View key={podcast.id} style={styles.podcastCard}>
+                {/* Header with Logo */}
+                <View style={styles.podcastHeader}>
+                  <Image 
+                    source={{ uri: podcast.logo }} 
+                    style={styles.podcastLogo}
+                    defaultSource={require('../assets/images/icon.png')}
+                  />
+                  <View style={styles.podcastInfo}>
+                    <Text style={styles.podcastName} numberOfLines={2}>{podcast.name}</Text>
+                    <Text style={styles.podcastHost}>Hosted by {podcast.host}</Text>
                   </View>
-                ))}
+                </View>
+                
+                <Text style={styles.podcastDescription}>{podcast.description}</Text>
+                
+                {/* Latest Episode */}
+                {latestEp && (
+                  <TouchableOpacity 
+                    style={styles.latestEpisode}
+                    onPress={() => latestEp.link && openLink(latestEp.link)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.latestEpisodeIcon}>
+                      <Ionicons name="play-circle" size={20} color="#db2777" />
+                    </View>
+                    <View style={styles.latestEpisodeInfo}>
+                      <Text style={styles.latestEpisodeLabel}>Latest Episode</Text>
+                      <Text style={styles.latestEpisodeTitle} numberOfLines={1}>{latestEp.title}</Text>
+                      {latestEp.date && (
+                        <Text style={styles.latestEpisodeDate}>{formatDate(latestEp.date)}</Text>
+                      )}
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+                  </TouchableOpacity>
+                )}
+                
+                {/* Focus Tags */}
+                <View style={styles.tagsContainer}>
+                  {podcast.focus.map((tag, index) => (
+                    <View key={index} style={styles.tag}>
+                      <Text style={styles.tagText}>{tag}</Text>
+                    </View>
+                  ))}
+                </View>
+                
+                {/* Platform Links */}
+                <View style={styles.platformsContainer}>
+                  {podcast.spotifyUrl && (
+                    <TouchableOpacity
+                      style={styles.platformButton}
+                      onPress={() => openLink(podcast.spotifyUrl!)}
+                      data-testid={`${podcast.id}-spotify`}
+                    >
+                      <Ionicons name="logo-spotify" size={18} color="#1DB954" />
+                      <Text style={styles.platformText}>Spotify</Text>
+                    </TouchableOpacity>
+                  )}
+                  {podcast.appleUrl && (
+                    <TouchableOpacity
+                      style={styles.platformButton}
+                      onPress={() => openLink(podcast.appleUrl!)}
+                      data-testid={`${podcast.id}-apple`}
+                    >
+                      <Ionicons name="logo-apple" size={18} color={colors.text} />
+                      <Text style={styles.platformText}>Apple</Text>
+                    </TouchableOpacity>
+                  )}
+                  {podcast.youtubeUrl && (
+                    <TouchableOpacity
+                      style={styles.platformButton}
+                      onPress={() => openLink(podcast.youtubeUrl!)}
+                      data-testid={`${podcast.id}-youtube`}
+                    >
+                      <Ionicons name="logo-youtube" size={18} color="#FF0000" />
+                      <Text style={styles.platformText}>YouTube</Text>
+                    </TouchableOpacity>
+                  )}
+                  {podcast.websiteUrl && (
+                    <TouchableOpacity
+                      style={styles.platformButton}
+                      onPress={() => openLink(podcast.websiteUrl!)}
+                      data-testid={`${podcast.id}-website`}
+                    >
+                      <Ionicons name="globe-outline" size={18} color={colors.primary} />
+                      <Text style={styles.platformText}>Website</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
-              
-              {/* Platform Links */}
-              <View style={styles.platformsContainer}>
-                {podcast.spotifyUrl && (
-                  <TouchableOpacity
-                    style={styles.platformButton}
-                    onPress={() => openLink(podcast.spotifyUrl!)}
-                    data-testid={`${podcast.id}-spotify`}
-                  >
-                    <Ionicons name="logo-spotify" size={20} color="#1DB954" />
-                    <Text style={styles.platformText}>Spotify</Text>
-                  </TouchableOpacity>
-                )}
-                {podcast.appleUrl && (
-                  <TouchableOpacity
-                    style={styles.platformButton}
-                    onPress={() => openLink(podcast.appleUrl!)}
-                    data-testid={`${podcast.id}-apple`}
-                  >
-                    <Ionicons name="logo-apple" size={20} color={colors.text} />
-                    <Text style={styles.platformText}>Apple</Text>
-                  </TouchableOpacity>
-                )}
-                {podcast.youtubeUrl && (
-                  <TouchableOpacity
-                    style={styles.platformButton}
-                    onPress={() => openLink(podcast.youtubeUrl!)}
-                    data-testid={`${podcast.id}-youtube`}
-                  >
-                    <Ionicons name="logo-youtube" size={20} color="#FF0000" />
-                    <Text style={styles.platformText}>YouTube</Text>
-                  </TouchableOpacity>
-                )}
-                {podcast.websiteUrl && !podcast.spotifyUrl && !podcast.appleUrl && (
-                  <TouchableOpacity
-                    style={styles.platformButton}
-                    onPress={() => openLink(podcast.websiteUrl!)}
-                    data-testid={`${podcast.id}-website`}
-                  >
-                    <Ionicons name="globe-outline" size={20} color={colors.primary} />
-                    <Text style={styles.platformText}>Website</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </TouchableOpacity>
-          ))}
+            );
+          })}
         </View>
 
         {/* Footer Note */}
@@ -323,13 +398,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  podcastIconContainer: {
-    width: 52,
-    height: 52,
+  podcastLogo: {
+    width: 60,
+    height: 60,
     borderRadius: 12,
-    backgroundColor: '#fce7f3',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: colors.background,
     marginRight: 12,
   },
   podcastInfo: {
@@ -350,6 +423,38 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 20,
     marginBottom: 12,
+  },
+  latestEpisode: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fdf2f8',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
+  },
+  latestEpisodeIcon: {
+    marginRight: 10,
+  },
+  latestEpisodeInfo: {
+    flex: 1,
+  },
+  latestEpisodeLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#db2777',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  latestEpisodeTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.text,
+    marginTop: 2,
+  },
+  latestEpisodeDate: {
+    fontSize: 11,
+    color: colors.textSecondary,
+    marginTop: 2,
   },
   tagsContainer: {
     flexDirection: 'row',
