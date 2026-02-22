@@ -65,19 +65,7 @@ export default function SelfCarePage() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Intro Card */}
-        <View style={[styles.introCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <View style={styles.introIconContainer}>
-            <Ionicons name="heart" size={28} color="#ec4899" />
-          </View>
-          <Text style={[styles.introTitle, { color: colors.text }]}>Take Care of Yourself</Text>
-          <Text style={[styles.introText, { color: colors.textSecondary }]}>
-            Small steps every day make a big difference. These tools are here to help you 
-            manage stress, track your wellbeing, and find support when you need it.
-          </Text>
-        </View>
-
-        {/* Hugo AI Card */}
+        {/* Hugo AI Card - at the very top */}
         <TouchableOpacity 
           style={[styles.hugoCard, { backgroundColor: colors.surface, borderColor: '#10b981' }]}
           onPress={() => router.push('/hugo-chat')}
@@ -94,6 +82,18 @@ export default function SelfCarePage() {
           </View>
           <Ionicons name="chevron-forward" size={24} color="#10b981" />
         </TouchableOpacity>
+
+        {/* Intro Card */}
+        <View style={[styles.introCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={styles.introIconContainer}>
+            <Ionicons name="heart" size={28} color="#ec4899" />
+          </View>
+          <Text style={[styles.introTitle, { color: colors.text }]}>Take Care of Yourself</Text>
+          <Text style={[styles.introText, { color: colors.textSecondary }]}>
+            Small steps every day make a big difference. These tools are here to help you 
+            manage stress, track your wellbeing, and find support when you need it.
+          </Text>
+        </View>
 
         {/* Loading State */}
         {isLoading && (
