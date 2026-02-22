@@ -11,7 +11,8 @@
 
 ### User-Facing (Mobile App)
 - User authentication (JWT)
-- 7 AI chat personas with crisis detection (Tommy, Sarah, Marcus, Hugo, Donna, Amy, Rita)
+- 7 AI chat personas with crisis detection (Tommy, Doris, Bob, Finch, Margie, Hugo, Rita)
+- **Knowledge Base Integration** - AI characters now use verified UK veteran information
 - Staff availability calendar
 - Buddy Finder with peer matching and messaging
 - Message inbox
@@ -24,6 +25,7 @@
 - Staff management (unified view)
 - Safeguarding alerts management
 - Prompt improvement workflow
+- **Test data cleanup endpoint** - Remove test counsellors/peer supporters
 
 ### Staff Portal
 - Shift calendar and rota management
@@ -33,10 +35,10 @@
 
 ## Technical Architecture
 
-### Backend Structure (Modularized)
+### Backend Structure (Fully Modularized)
 ```
 /app/backend/
-├── server.py                    # Main entry + AI chat logic
+├── server.py                    # Main entry + AI chat with Knowledge Base
 ├── routers/                     # 15 modular API routers
 │   ├── auth.py                  # Authentication + push tokens
 │   ├── cms.py                   # Content Management System
@@ -50,90 +52,100 @@
 │   ├── live_chat.py             # Chat rooms
 │   ├── notes.py                 # Staff notes
 │   ├── concerns.py              # Family concerns
-│   ├── message_queue.py         # NEW: Offline messaging
-│   ├── ai_feedback.py           # NEW: AI feedback system
-│   └── knowledge_base.py        # NEW: RAG for AI
+│   ├── message_queue.py         # Offline messaging
+│   ├── ai_feedback.py           # AI feedback system
+│   └── knowledge_base.py        # RAG for AI
 ├── models/schemas.py            # Centralized Pydantic models
 └── services/database.py         # DB utilities
 ```
 
-### Key Integrations
-- **OpenAI GPT-4**: AI chat personas (user-provided key)
-- **Resend**: Email notifications (user-provided key)
-- **Expo Push**: Mobile notifications (implemented)
-- **Metered.ca**: WebRTC TURN servers (not yet implemented)
+## Session Work Summary (Feb 22, 2026)
 
-## Completed Work (Feb 22, 2026)
+### Completed This Session:
 
-### P0 - Backend Modularization ✅
-- Created 15 modular routers in `/app/backend/routers/`
-- All endpoints properly integrated in server.py
-- Architecture documentation at `/app/backend/ARCHITECTURE.md`
+1. **AI Knowledge Base Integration** ✅
+   - AI characters now pull verified UK veteran info from knowledge base
+   - Seeded with 11 entries (benefits, mental health, housing, etc.)
+   - Endpoints: `/api/knowledge-base/*`
 
-### P1 - Push Notifications ✅
-- Token registration: `POST /api/auth/push-token`
-- Token removal: `DELETE /api/auth/push-token`
-- Integrated with Expo Push Notifications API
-- Connected to shift notifications
+2. **Logo Bug Fixed** ✅
+   - Fixed `source={{ uri: NEW_LOGO_URL }}` → `source={NEW_LOGO_URL}` in home.tsx
 
-### P1 - Offline Message Queue ✅
-- Message queuing: `POST /api/message-queue/queue`
-- Pending retrieval: `GET /api/message-queue/pending/{user_id}`
-- Online/offline status tracking
-- Push notification delivery attempts
+3. **CMS Editor Improvements** ✅
+   - Fixed syntax error (extra `}`)
+   - Added dynamic page loading from API
+   - **Note:** Admin portal needs redeployment to production
 
-### P1 - AI Feedback System ✅
-- Thumbs up/down: `POST /api/ai-feedback/thumbs`
-- Detailed feedback: `POST /api/ai-feedback/submit`
-- Report issues: `POST /api/ai-feedback/report`
-- Character analytics: `GET /api/ai-feedback/character/{name}`
-- Improvement suggestions: `GET /api/ai-feedback/improvements/{name}`
+4. **Test Data Cleanup Endpoint** ✅
+   - `DELETE /api/admin/cleanup-test-data` - finds and removes test users
+   - Preview mode (default) shows what will be deleted
+   - Add `?confirm=true` to actually delete
 
-### P1 - Knowledge Base (RAG) ✅
-- Entry management: CRUD at `/api/knowledge-base/entries`
-- Semantic search: `POST /api/knowledge-base/search`
-- AI context retrieval: `GET /api/knowledge-base/context/{query}`
-- Seeded with 11 UK veteran-specific entries
+5. **GDPR/BACP Compliance Documentation** ✅
+   - Created `/app/docs/ROPA.md` - Record of Processing Activities
+   - Created `/app/docs/BACP_ETHICAL_FRAMEWORK_COMPLIANCE.md`
+   - Implementation checklists included
 
-### Admin Portal Enhancements (Previous Session)
-- WYSIWYG CMS editor with phone preview
-- Analytics dashboard with Chart.js
-- Deployment guides created
+6. **AI Testing Strategy** ✅
+   - Created `/app/docs/AI_TESTING_STRATEGY.md`
+   - Automated test scripts
+   - Load testing approach
+   - Regression test suite
 
-## Production Deployment
+### Production Actions Required:
 
-### Backend
-- Hosted on Render
-- URL: `https://veterans-support-api.onrender.com`
-- OpenAI and Resend keys configured as env vars
+1. **Redeploy Admin Portal**
+   - Copy `/app/admin-site/*` files to production
+   - CMS editor won't work until this is done
+   - See `/app/admin-site/DEPLOYMENT_GUIDE.md`
 
-### Admin Portal (Static)
-- User-deployed
-- Must be manually updated with new files
-- See `/app/admin-site/DEPLOYMENT_GUIDE.md`
+2. **Clean Up Test Users**
+   ```bash
+   # Preview what will be deleted
+   curl -X DELETE "https://veterans-support-api.onrender.com/api/admin/cleanup-test-data" \
+     -H "Authorization: Bearer YOUR_TOKEN"
+   
+   # Actually delete (add ?confirm=true)
+   curl -X DELETE "https://veterans-support-api.onrender.com/api/admin/cleanup-test-data?confirm=true" \
+     -H "Authorization: Bearer YOUR_TOKEN"
+   ```
 
-### Staff Portal (Static)
-- User-deployed
-- Same deployment process as admin portal
+## Remaining Tasks
 
-## Remaining/Future Tasks
+### High Priority
+- [ ] Add AI chat consent screen (BACP/GDPR requirement)
+- [ ] Implement audit logging for data access
+- [ ] Staff wellbeing features in Staff Portal
 
-### Not Started
-- [ ] WebRTC peer-to-peer audio calls (Metered.ca)
-- [ ] Reusable AI chat component in mobile app
-- [ ] Production admin portal deployment (user responsibility)
+### Medium Priority
+- [ ] Accessibility review (screen readers, contrast)
+- [ ] Staff supervision request system
+- [ ] Cookie consent banner on website
 
-### Technical Debt
-- [ ] Remove duplicate auth endpoints (modular vs server.py)
-- [ ] Add comprehensive test coverage
+### Future
+- [ ] WebRTC audio calls (Metered.ca)
+- [ ] Welsh language support
 
-## Key Credentials
-- **Admin Login**: admin@veteran.dbty.co.uk / ChangeThisPassword123!
-- **MongoDB**: Local via MONGO_URL env var
-- **OpenAI/Resend**: User-provided production keys
+## Key Files Changed This Session
+- `/app/backend/server.py` - Added knowledge base integration, cleanup endpoint
+- `/app/frontend/app/home.tsx` - Fixed logo source
+- `/app/admin-site/app.js` - Fixed syntax error, dynamic page loading
+- `/app/backend/routers/` - All 15 routers created
+- `/app/docs/` - New compliance and testing documentation
 
-## Important Notes
-1. Admin portal changes require manual deployment by user
-2. OpenAI key is user-managed - check billing if AI fails
-3. Knowledge base can be expanded via admin portal or API
-4. All 15 backend routers are now active and tested
+## API Endpoints Summary
+
+### New Endpoints
+- `GET /api/knowledge-base/categories` - KB categories
+- `POST /api/knowledge-base/search` - Search KB
+- `GET /api/knowledge-base/context/{query}` - AI context
+- `POST /api/ai-feedback/thumbs` - Quick feedback
+- `GET /api/ai-feedback/summary` - Analytics
+- `GET /api/message-queue/stats` - Queue stats
+- `DELETE /api/admin/cleanup-test-data` - Remove test data
+
+### Existing Key Endpoints
+- `POST /api/auth/login` - User login
+- `GET /api/auth/my-data/export` - GDPR data export
+- `DELETE /api/auth/me` - Account deletion
+- `POST /api/ai-buddies/chat` - AI chat (now with KB)
