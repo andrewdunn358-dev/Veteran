@@ -67,6 +67,31 @@ export default function FamilyFriends() {
   const [view, setView] = useState<'main' | 'concern' | 'resources' | 'signs' | 'addiction' | 'prison'>('main');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Rita AI character state
+  const [ritaCharacter, setRitaCharacter] = useState<{avatar: string; bio: string} | null>(null);
+  const [loadingRita, setLoadingRita] = useState(true);
+  
+  // Fetch Rita's character info
+  useEffect(() => {
+    const fetchRita = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/ai-buddies/characters`);
+        if (res.ok) {
+          const data = await res.json();
+          const rita = data.characters?.find((c: any) => c.id === 'rita');
+          if (rita) {
+            setRitaCharacter({ avatar: rita.avatar, bio: rita.bio || '' });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching Rita:', error);
+      } finally {
+        setLoadingRita(false);
+      }
+    };
+    fetchRita();
+  }, []);
+  
   // CMS Content - fetch support resources, addiction resources, and warning signs
   const { sections } = useCMSContent('family-friends');
   
