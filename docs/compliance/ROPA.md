@@ -159,8 +159,8 @@
 ### Organizational Measures
 - ✅ Role-based access control (admin, staff, user)
 - ✅ Staff training on safeguarding protocols
-- ⚠️ Regular security reviews (to implement)
-- ⚠️ Incident response plan (to document)
+- ✅ Regular security reviews (See: [SECURITY_REVIEW_SCHEDULE.md](./SECURITY_REVIEW_SCHEDULE.md))
+- ✅ Incident response plan (See: [INCIDENT_RESPONSE_PLAN.md](./INCIDENT_RESPONSE_PLAN.md))
 
 ---
 
