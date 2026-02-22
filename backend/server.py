@@ -5921,6 +5921,218 @@ async def get_service_branches():
         ]
     }
 
+# ============ PROMPT IMPROVEMENT WORKFLOW ============
+
+from prompt_improvement import (
+    categorize_message,
+    assess_response_quality,
+    extract_improvement_insights,
+    format_prompt_update_report,
+    TOPIC_CATEGORIES
+)
+
+@api_router.get("/admin/chat-analytics")
+async def get_chat_analytics(
+    days: int = 7,
+    current_user: User = Depends(require_role("admin"))
+):
+    """
+    Get chat analytics for prompt improvement
+    Analyzes recent chat sessions to provide insights
+    """
+    cutoff = datetime.utcnow() - timedelta(days=days)
+    
+    # Get recent chat sessions
+    sessions = await db.chat_sessions.find({
+        "created_at": {"$gte": cutoff}
+    }).to_list(1000)
+    
+    if not sessions:
+        return {
+            "message": "No chat sessions found in the specified period",
+            "period_days": days,
+            "total_sessions": 0
+        }
+    
+    # Extract insights
+    insights = extract_improvement_insights(sessions)
+    
+    return {
+        "period_days": days,
+        "analysis_date": datetime.utcnow().isoformat(),
+        **insights
+    }
+
+@api_router.get("/admin/chat-analytics/report")
+async def get_chat_analytics_report(
+    days: int = 7,
+    current_user: User = Depends(require_role("admin"))
+):
+    """
+    Get formatted report for prompt improvements
+    Returns a human-readable report
+    """
+    cutoff = datetime.utcnow() - timedelta(days=days)
+    
+    sessions = await db.chat_sessions.find({
+        "created_at": {"$gte": cutoff}
+    }).to_list(1000)
+    
+    if not sessions:
+        return {"report": "No chat sessions found for analysis."}
+    
+    insights = extract_improvement_insights(sessions)
+    report = format_prompt_update_report(insights)
+    
+    return {
+        "report": report,
+        "generated_at": datetime.utcnow().isoformat()
+    }
+
+@api_router.get("/admin/prompt-suggestions")
+async def get_prompt_suggestions(
+    days: int = 30,
+    current_user: User = Depends(require_role("admin"))
+):
+    """
+    Get specific suggestions for improving AI prompts
+    Based on analysis of recent conversations
+    """
+    cutoff = datetime.utcnow() - timedelta(days=days)
+    
+    sessions = await db.chat_sessions.find({
+        "created_at": {"$gte": cutoff}
+    }).to_list(2000)
+    
+    if not sessions:
+        return {"suggestions": [], "message": "Not enough data for suggestions"}
+    
+    insights = extract_improvement_insights(sessions)
+    
+    return {
+        "suggestions": insights.get("improvement_suggestions", []),
+        "common_questions": insights.get("common_questions", []),
+        "topic_distribution": dict(insights.get("topic_distribution", {})),
+        "character_performance": insights.get("character_performance", {}),
+        "based_on_sessions": len(sessions),
+        "period_days": days
+    }
+
+@api_router.get("/admin/topic-breakdown")
+async def get_topic_breakdown(
+    days: int = 7,
+    current_user: User = Depends(require_role("admin"))
+):
+    """
+    Get breakdown of conversation topics
+    Helps identify what users are talking about most
+    """
+    cutoff = datetime.utcnow() - timedelta(days=days)
+    
+    sessions = await db.chat_sessions.find({
+        "created_at": {"$gte": cutoff}
+    }).to_list(1000)
+    
+    topic_counts = {}
+    for topic in TOPIC_CATEGORIES.keys():
+        topic_counts[topic] = 0
+    
+    for session in sessions:
+        messages = session.get("messages", [])
+        for msg in messages:
+            if msg.get("role") == "user":
+                categories = categorize_message(msg.get("content", ""))
+                for cat in categories:
+                    if cat in topic_counts:
+                        topic_counts[cat] += 1
+    
+    # Sort by count
+    sorted_topics = sorted(topic_counts.items(), key=lambda x: x[1], reverse=True)
+    
+    return {
+        "period_days": days,
+        "total_sessions": len(sessions),
+        "topics": [{"topic": t, "count": c} for t, c in sorted_topics],
+        "topic_keywords": TOPIC_CATEGORIES
+    }
+
+@api_router.post("/admin/log-chat-feedback")
+async def log_chat_feedback(
+    session_id: str,
+    rating: int,  # 1-5 stars
+    feedback: str = "",
+    current_user: User = Depends(require_role("admin"))
+):
+    """
+    Log manual feedback on a chat session
+    Used to tag sessions as good/bad examples for prompt improvement
+    """
+    await db.chat_feedback.insert_one({
+        "id": str(uuid.uuid4()),
+        "session_id": session_id,
+        "rating": min(5, max(1, rating)),
+        "feedback": feedback,
+        "reviewed_by": current_user.id,
+        "created_at": datetime.utcnow()
+    })
+    
+    return {"success": True, "message": "Feedback logged"}
+
+@api_router.get("/admin/prompt-versions")
+async def get_prompt_versions(
+    current_user: User = Depends(require_role("admin"))
+):
+    """
+    Get history of prompt changes
+    Tracks when prompts were updated and why
+    """
+    versions = await db.prompt_versions.find({}).sort("created_at", -1).to_list(50)
+    
+    return {
+        "versions": [{
+            "id": v.get("id"),
+            "character": v.get("character"),
+            "version": v.get("version"),
+            "change_summary": v.get("change_summary"),
+            "created_at": v.get("created_at").isoformat() if v.get("created_at") else None,
+            "created_by": v.get("created_by")
+        } for v in versions]
+    }
+
+@api_router.post("/admin/prompt-versions")
+async def save_prompt_version(
+    character: str,
+    change_summary: str,
+    prompt_text: str,
+    current_user: User = Depends(require_role("admin"))
+):
+    """
+    Save a new version of a character's prompt
+    Creates an audit trail of prompt changes
+    """
+    # Get current version number
+    latest = await db.prompt_versions.find_one(
+        {"character": character},
+        sort=[("version", -1)]
+    )
+    version = (latest.get("version", 0) + 1) if latest else 1
+    
+    await db.prompt_versions.insert_one({
+        "id": str(uuid.uuid4()),
+        "character": character,
+        "version": version,
+        "change_summary": change_summary,
+        "prompt_text": prompt_text,
+        "created_by": current_user.id,
+        "created_at": datetime.utcnow()
+    })
+    
+    return {
+        "success": True,
+        "version": version,
+        "message": f"Prompt version {version} saved for {character}"
+    }
+
 
 # Include the router in the main app (MUST be after all routes are defined)
 app.include_router(api_router)
