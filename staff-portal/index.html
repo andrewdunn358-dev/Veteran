@@ -237,6 +237,23 @@
                         </div>
                     </div>
 
+                    <!-- Who's On Today Section -->
+                    <div class="section team-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-users"></i> Team On Duty</h2>
+                            <button class="btn btn-icon btn-secondary" onclick="loadTeamOnDuty()">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                        <div class="team-tabs">
+                            <button class="team-tab active" onclick="switchTeamTab('today')" data-tab="today">Today</button>
+                            <button class="team-tab" onclick="switchTeamTab('tomorrow')" data-tab="tomorrow">Tomorrow</button>
+                        </div>
+                        <div id="team-on-duty" class="team-list">
+                            <p class="loading-text">Loading team...</p>
+                        </div>
+                    </div>
+
                     <!-- Notes Section -->
                     <div class="section notes-section">
                         <div class="section-header">
