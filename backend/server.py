@@ -4170,6 +4170,13 @@ async def get_ai_characters():
                 "name": "Margie",
                 "description": "A wise, understanding presence with warmth and years of experience.",
                 "avatar": AI_CHARACTERS["margie"]["avatar"]
+            },
+            {
+                "id": "rita",
+                "name": "Rita",
+                "description": "A warm, grounded family-support companion for partners, spouses and loved ones of military personnel.",
+                "avatar": AI_CHARACTERS["rita"]["avatar"],
+                "bio": "I've been around the military for a long time. My son served, and I've experienced more than most people have. I understand what families go through because I've lived it."
             }
         ],
         "about": {
