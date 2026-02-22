@@ -150,7 +150,7 @@
 - [ ] Cookie consent banner on website
 
 ### Future
-- [ ] WebRTC audio calls (already working with P2P)
+- [x] WebRTC audio calls (P2P working)
 - [ ] Welsh language support
 
 ## Key Files Changed This Session
