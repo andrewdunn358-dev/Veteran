@@ -285,7 +285,8 @@ async function loadAllData() {
         renderUsers();
         renderResources();
         renderCMS();
-        renderCallsTab();
+        // Load logs data
+        loadLogsData();
         
     } catch (error) {
         showNotification('Failed to load data: ' + error.message, 'error');
