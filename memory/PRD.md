@@ -12,10 +12,18 @@
 ### ✅ Completed Today (Latest Session)
 
 **🔴 UI Changes for "Meet the AI Team" (All Done):**
-1. ✅ **Fixed Margie's avatar** - Was using Doris's image, now has unique avatar
-2. ✅ **Fixed Hugo's avatar** - Was using Tommy's image, now has unique avatar
+1. ✅ **Fixed Margie's avatar** - Generated new unique avatar (older woman with silver hair)
+2. ✅ **Fixed Hugo's avatar** - Generated new unique avatar (fit man in 30s)
 3. ✅ **Added Rita to "Meet the AI Team"** - 7th character now visible in the grid
 4. ✅ **Changed click behavior** - Clicking an AI team member now shows their bio in a modal instead of navigating directly to chat. User can then choose to start chatting from the modal.
+5. ✅ **Updated CMS database** - All 7 characters with correct avatars in MongoDB
+
+**🟠 Page Layout Changes (All Done):**
+6. ✅ **Peer Support page**: Bob's card moved to very top, "Talk to Another Veteran" in a card, icon removed
+7. ✅ **Self-Care page**: Hugo's card moved to very top (above intro card)
+8. ✅ **Home page**: Added Substance & Alcohol Support card, Added Criminal Justice Support card (both above Request a Callback)
+9. ✅ **Family-Friends page**: Rita's card moved to very top, removed Substance & Criminal Justice cards
+10. ✅ **Created Criminal Justice page**: New dedicated page with veteran support resources
 
 ### ✅ Completed Earlier This Session
 
