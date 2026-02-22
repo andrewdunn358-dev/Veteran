@@ -2925,6 +2925,101 @@ async def seed_organizations(current_user: User = Depends(require_role("admin"))
     
     return {"message": f"Organizations seeded successfully. Added {added_count} new organizations."}
 
+@api_router.get("/organizations/export/csv")
+async def export_organizations_csv(current_user: User = Depends(require_role("admin"))):
+    """Export all organizations as CSV (admin only)"""
+    import csv
+    import io
+    from fastapi.responses import StreamingResponse
+    
+    orgs = await db.organizations.find({}, {"_id": 0}).to_list(1000)
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['id', 'name', 'description', 'phone', 'sms', 'whatsapp', 'website', 'email', 'category', 'created_at'])
+    
+    for org in orgs:
+        writer.writerow([
+            org.get('id', ''),
+            org.get('name', ''),
+            org.get('description', ''),
+            org.get('phone', ''),
+            org.get('sms', ''),
+            org.get('whatsapp', ''),
+            org.get('website', ''),
+            org.get('email', ''),
+            org.get('category', ''),
+            org.get('created_at', '')
+        ])
+    
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=organizations_export.csv"}
+    )
+
+class OrganizationBulkImport(BaseModel):
+    organizations: List[dict]
+    replace_all: bool = False
+
+@api_router.post("/organizations/import")
+async def import_organizations(
+    data: OrganizationBulkImport,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Import organizations from JSON (admin only). Can update existing or replace all."""
+    updated = 0
+    created = 0
+    errors = []
+    
+    if data.replace_all:
+        # Delete all existing organizations
+        await db.organizations.delete_many({})
+    
+    for org_data in data.organizations:
+        try:
+            name = org_data.get('name')
+            if not name:
+                errors.append(f"Missing name in entry: {org_data}")
+                continue
+            
+            # Check if exists
+            existing = await db.organizations.find_one({"name": name})
+            
+            if existing:
+                # Update existing
+                update_data = {k: v for k, v in org_data.items() if v is not None and k != 'id'}
+                update_data['updated_at'] = datetime.utcnow()
+                await db.organizations.update_one(
+                    {"name": name},
+                    {"$set": update_data}
+                )
+                updated += 1
+            else:
+                # Create new
+                org_obj = Organization(
+                    name=name,
+                    description=org_data.get('description', ''),
+                    phone=org_data.get('phone'),
+                    sms=org_data.get('sms'),
+                    whatsapp=org_data.get('whatsapp'),
+                    website=org_data.get('website'),
+                    email=org_data.get('email'),
+                    category=org_data.get('category')
+                )
+                await db.organizations.insert_one(org_obj.dict())
+                created += 1
+        except Exception as e:
+            errors.append(f"Error processing {org_data.get('name', 'unknown')}: {str(e)}")
+    
+    return {
+        "message": f"Import complete. Created: {created}, Updated: {updated}",
+        "created": created,
+        "updated": updated,
+        "errors": errors if errors else None
+    }
+
 # ============ RESOURCES LIBRARY ============
 
 @api_router.get("/resources")
