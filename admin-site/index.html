@@ -210,23 +210,76 @@
             <!-- CMS Tab -->
             <div id="cms-tab" class="tab-content">
                 <div class="tab-header">
-                    <h2>Content Management</h2>
+                    <h2>Visual App Editor</h2>
                     <div class="tab-actions">
-                        <button class="btn btn-success" onclick="openCMSPreview()">
-                            <i class="fas fa-eye"></i> Preview App
+                        <button class="btn btn-secondary" onclick="toggleCMSView('list')">
+                            <i class="fas fa-list"></i> List View
                         </button>
-                        <button class="btn btn-primary" onclick="openAddContentModal()">
-                            <i class="fas fa-plus"></i> Add Content
+                        <button class="btn btn-success active" onclick="toggleCMSView('visual')" id="visual-view-btn">
+                            <i class="fas fa-mobile-alt"></i> Visual Editor
                         </button>
-                        <button class="btn btn-secondary" onclick="seedContent()">
-                            <i class="fas fa-database"></i> Load Defaults
+                        <button class="btn btn-primary" onclick="saveCMSChanges()">
+                            <i class="fas fa-save"></i> Save Changes
                         </button>
                     </div>
                 </div>
                 <p style="color: var(--text-secondary); margin-bottom: 20px;">
-                    Manage app content from here. Changes update immediately - use Preview to see how they'll look in the app.
+                    Edit your app visually - click on any element to modify it. Changes are saved automatically when you click Save.
                 </p>
-                <div id="cms-list" class="cms-grid"></div>
+                
+                <!-- Visual Editor -->
+                <div id="cms-visual-editor" class="cms-visual-editor">
+                    <!-- Page Selector -->
+                    <div class="page-selector">
+                        <label style="color: var(--text-secondary); margin-right: 10px;">Editing Page:</label>
+                        <select id="cms-page-select" onchange="loadCMSPage(this.value)">
+                            <option value="home">Home</option>
+                            <option value="self-care">Self Care</option>
+                            <option value="family-friends">Family & Friends</option>
+                            <option value="organizations">Support Organizations</option>
+                            <option value="peer-support">Peer Support</option>
+                        </select>
+                        <button class="btn btn-secondary btn-small" onclick="addNewSection()" style="margin-left: 10px;">
+                            <i class="fas fa-plus"></i> Add Section
+                        </button>
+                    </div>
+                    
+                    <!-- Phone Preview Frame -->
+                    <div class="phone-preview-container">
+                        <div class="phone-frame">
+                            <div class="phone-notch"></div>
+                            <div class="phone-screen" id="cms-phone-screen">
+                                <!-- Dynamic content rendered here -->
+                                <div class="phone-header">
+                                    <span class="phone-back-btn"><i class="fas fa-arrow-left"></i></span>
+                                    <span id="phone-page-title">Home</span>
+                                    <span></span>
+                                </div>
+                                <div class="phone-content" id="cms-phone-content">
+                                    <p style="text-align: center; padding: 40px; color: #64748b;">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading preview...
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Edit Panel -->
+                        <div class="edit-panel" id="cms-edit-panel">
+                            <div class="edit-panel-header">
+                                <h3><i class="fas fa-edit"></i> Edit Element</h3>
+                                <button onclick="closeEditPanel()" class="close-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="edit-panel-content" id="cms-edit-content">
+                                <p style="color: var(--text-muted); text-align: center; padding: 40px;">
+                                    Click on any element in the preview to edit it
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- List View (hidden by default) -->
+                <div id="cms-list-view" class="cms-grid" style="display: none;"></div>
             </div>
 
             <!-- Calls Management Tab -->
