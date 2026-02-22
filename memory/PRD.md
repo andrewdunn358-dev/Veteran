@@ -55,11 +55,27 @@
 - ✅ Production Deployment Guide created
 - ✅ Metered.ca references removed (WebRTC working without it)
 
+**🔴 Compliance & Data Protection (All Done):**
+11. ✅ **GDPR Data Export** (`GET /api/compliance/gdpr/my-data/export`)
+12. ✅ **Chat History Deletion** (`DELETE /api/compliance/gdpr/my-data/chat-history`)
+13. ✅ **Consent Management** (`GET/PUT /api/compliance/consent/my-preferences`)
+14. ✅ **Audit Logging System** - All data access logged
+15. ✅ **Staff Wellbeing Check-ins** (`POST /api/compliance/staff/wellbeing-checkin`)
+16. ✅ **Supervision Requests** (`POST /api/compliance/staff/supervision-request`)
+17. ✅ **Complaints System** (`POST /api/compliance/complaints`)
+18. ✅ **Security Incidents** (`POST/GET /api/compliance/incidents`)
+19. ✅ **Automated Security Reviews** (`GET /api/compliance/security/automated-review`)
+20. ✅ **Data Retention Cleanup** (`POST /api/compliance/data-retention/run-cleanup`)
+21. ✅ **Compliance Dashboard** (`GET /api/compliance/dashboard`) - Added to Admin Portal
+22. ✅ **Incident Response Plan** - Created at `/app/docs/compliance/INCIDENT_RESPONSE_PLAN.md`
+23. ✅ **Security Review Schedule** - Created at `/app/docs/compliance/SECURITY_REVIEW_SCHEDULE.md`
+24. ✅ **ROPA Updated** - Security reviews and incident response marked as implemented
+
 ### 🔄 Requires User Action
 
 | Task | Action Required |
 |------|-----------------|
-| **Admin Portal** | Redeploy `/app/admin-site/` files to your production server |
+| **Admin Portal** | Redeploy `/app/admin-site/` files to your production server (includes new Compliance tab) |
 | **Staff Portal** | Redeploy `/app/staff-portal/` files to your production server |
 | **Mobile App** | Rebuild with Expo EAS and test on device |
 | **Website** | Deploy `/app/website/` with new privacy.html and terms.html |
