@@ -3,39 +3,43 @@
 ## Original Problem Statement
 Build and enhance a mobile-first web application for UK serving personnel and veterans with role-based portals, AI chatbots, safeguarding, and peer support features.
 
-## What's Been Implemented (Session 22 Feb 2026)
+## What's Been Implemented
 
-### 1. CMS Connected to More Pages
-- **Family & Friends page** now fetches from CMS:
-  - Support Resources section (Op Courage, Combat Stress, SSAFA, etc.)
-  - Addiction Resources section (Tom Harrison House, AA, FRANK, etc.)
-  - Warning Signs section (8 behavioral indicators)
-- CMS seeded with 19 new cards across 3 sections
+### Session 22 Feb 2026 (Latest)
 
-### 2. Email Notifications for Rota Shifts
-- Added `send_shift_notification_email()` function
-- Sends styled HTML email when shift created
-- Includes date, time, staff name
-- Uses Resend for email delivery
-- Non-blocking async execution
+#### 1. Message Inbox Feature (Buddy Finder)
+- **New "Inbox" tab** in Buddy Finder page
+- Backend endpoint `/api/buddy-finder/inbox` fetches user's messages
+- Displays sent and received messages with timestamps
+- Reply modal for responding to messages
+- Unread count badge on inbox tab
+- Auto-refresh every 30 seconds
+- Enriched messages with sender/receiver display names
 
-### 3. Buddy Finder Messaging
-- Added message modal with text input
-- "Send Message" button now functional
-- Requires login to send messages
-- Posts to `/api/buddy-finder/message` endpoint
-- Styled bottom-sheet modal UI
+#### 2. Dashboard Analytics Charts (Admin Portal)
+- Added **Chart.js** for visual analytics
+- **Activity Trends Chart** - Line chart showing calls, chats, and alerts over 7 days
+- **Contact Types Chart** - Doughnut chart showing distribution by counsellor, peer, organization, crisis line
+- Charts update when time period filter changes
+- Located in the Logs & Analytics tab
 
-### 4. Logs & Analytics Dashboard (Admin Portal)
-- Stats overview (Calls, Chats, Escalations, Panic)
-- 5 log types with tables and CSV export
-- Time period filter (7/30/90/365 days)
-- Chat history viewer modal
+#### 3. WYSIWYG Visual CMS Editor (Admin Portal)
+- **Phone Preview Frame** - Shows content as it appears in the mobile app
+- **Visual editing** - Click any element to edit directly
+- **Edit Panel** - Form fields for title, description, colors, icons, routes
+- **Section Management** - Add, delete, reorder sections
+- **Card Management** - Add, delete cards within sections
+- **Color pickers** for icon and background colors
+- **Toggle between List View and Visual Editor**
+- Page selector dropdown for different app pages
 
-### 5. Contact CSV Export
-- `/app/contacts_full_export.csv` - 44 contacts
-- API: `GET /api/organizations/export/csv`
-- API: `POST /api/organizations/import`
+#### Previous Sessions
+- CMS connected to Family & Friends, Self-Care, Home pages
+- Email notifications for rota shifts via Resend
+- Buddy Finder messaging between veterans
+- Logs & Analytics dashboard with 5 log types
+- Contact CSV export/import functionality
+- Staff portal calendar/availability feature
 
 ---
 
@@ -51,23 +55,49 @@ Build and enhance a mobile-first web application for UK serving personnel and ve
 
 ## Key Files Changed This Session
 
-### CMS Integration
-- `/app/frontend/app/family-friends.tsx` - CMS connected
-- `/app/backend/server.py` - CMS seed with family-friends content
+### Message Inbox
+- `/app/frontend/app/buddy-finder.tsx` - Full inbox implementation with tabs, message list, reply modal
+- `/app/backend/server.py` - `/api/buddy-finder/inbox` endpoint (lines 5428-5485)
 
-### Email Notifications
-- `/app/backend/server.py` - `send_shift_notification_email()` function
+### Analytics Charts
+- `/app/admin-site/index.html` - Chart.js CDN, chart containers
+- `/app/admin-site/app.js` - `renderActivityTrendChart()`, `renderContactTypeChart()` functions
 
-### Buddy Finder Messaging
-- `/app/frontend/app/buddy-finder.tsx` - Message modal + sendMessage function
+### WYSIWYG CMS Editor
+- `/app/admin-site/index.html` - Visual editor HTML structure
+- `/app/admin-site/app.js` - WYSIWYG functions (loadCMSPage, renderPhonePreview, selectSection, etc.)
+- `/app/admin-site/styles.css` - Phone frame, edit panel, card styles
 
-### Admin Portal
-- `/app/admin-site/index.html` - Logs tab
-- `/app/admin-site/app.js` - Log functions
-- `/app/admin-site/styles.css` - Table styles
+## Backend Test Results
+- **17/17 tests passed (100%)**
+- Inbox endpoint returns proper structure
+- CMS CRUD endpoints working
+- Call logs endpoint returns chart-ready data
 
 ## Deployment Required
 Push to Git and redeploy on Render:
 - app.radiocheck.me
 - radiocheck.me/admin-site  
 - radiocheck.me/staff-portal
+
+---
+
+## P0 - Priority Backlog
+
+### Admin Portal Improvements
+- [ ] Push notifications for shift assignments
+- [ ] More CMS page types (custom layouts)
+
+### Mobile App
+- [ ] Push notifications integration (Expo Push / Firebase)
+- [ ] Offline message queue
+
+## P1 - Future Tasks
+- [ ] Modularize `server.py` into routers/models/services
+- [ ] Create reusable AI chat component
+- [ ] Add WebRTC TURN server integration (Metered.ca credentials pending)
+
+## P2 - Nice to Have
+- [ ] Dark/light theme toggle
+- [ ] Multi-language support
+- [ ] Analytics export to PDF
