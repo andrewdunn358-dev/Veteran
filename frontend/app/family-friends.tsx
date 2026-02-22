@@ -281,28 +281,6 @@ export default function FamilyFriends() {
               <FontAwesome5 name="chevron-right" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.actionCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]} onPress={() => setView('addiction')}>
-              <View style={[styles.actionIcon, { backgroundColor: colors.background }]}>
-                <FontAwesome5 name="wine-bottle" size={24} color="#d97706" />
-              </View>
-              <View style={styles.actionContent}>
-                <Text style={[styles.actionTitle, { color: colors.text }]}>Substance & Alcohol Support</Text>
-                <Text style={[styles.actionDesc, { color: colors.textSecondary }]}>Help for addiction, alcoholism & recovery</Text>
-              </View>
-              <FontAwesome5 name="chevron-right" size={16} color={colors.textSecondary} />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={[styles.actionCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]} onPress={() => setView('prison')}>
-              <View style={[styles.actionIcon, { backgroundColor: '#e0e7ff' }]}>
-                <FontAwesome5 name="balance-scale" size={24} color="#4f46e5" />
-              </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Criminal Justice Support</Text>
-                <Text style={styles.actionDesc}>Help for veterans in or leaving prison</Text>
-              </View>
-              <FontAwesome5 name="chevron-right" size={16} color="#94a3b8" />
-            </TouchableOpacity>
-
             <View style={styles.tipCard}>
               <FontAwesome5 name="lightbulb" size={20} color="#f59e0b" />
               <Text style={styles.tipText}>
