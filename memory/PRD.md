@@ -7,69 +7,62 @@ Build and enhance a mobile-first web application for UK serving personnel and ve
 
 ### Session - 22 Feb 2026
 
-#### Contact CSV Export Feature
-Added endpoints for managing organizations/contacts via CSV:
+#### Logs & Analytics Dashboard (Admin Portal)
+Rebuilt the Calls tab into a comprehensive Logs & Analytics dashboard:
 
-**New API Endpoints**:
-- `GET /api/organizations/export/csv` - Download all organizations as CSV (admin only)
-- `POST /api/organizations/import` - Bulk import/update organizations from JSON (admin only)
+**Features**:
+- **Stats Overview Cards**: Total Calls, Live Chats, Escalations, Panic Alerts
+- **Time Period Filter**: 7/30/90/365 days
+- **Log Tabs**:
+  - Call Logs: Date, contact name, type (peer/counsellor), method (webrtc/phone)
+  - Chat History: Status, user, staff, message count + view messages modal
+  - Safeguarding: Risk level, type, assigned staff, status
+  - Callbacks: Type (urgent/normal), phone, handled by, status
+  - Panic Alerts: Location, responded by, status (urgent rows highlighted)
+- **CSV Export**: Export any log type to CSV
 
-**CSV Files Created**:
-- `/app/contacts_full_export.csv` - 44 contacts including:
-  - 8 support organizations (Combat Stress, Samaritans, SSAFA, etc.)
-  - 36 regimental associations (Navy, RAF, Army)
+**Files Changed**:
+- `/app/admin-site/index.html` - New Logs tab HTML
+- `/app/admin-site/app.js` - Log functions (loadLogsData, renderLogTab, exportLogsCSV, etc.)
+- `/app/admin-site/styles.css` - Table and badge styles
 
-**How to use**:
-1. Export current contacts: `GET /api/organizations/export/csv` with admin token
-2. Edit CSV, convert to JSON, import via: `POST /api/organizations/import`
+#### Contact CSV Export
+- Created `/app/contacts_full_export.csv` with 44 contacts
+- API endpoints: `GET /api/organizations/export/csv`, `POST /api/organizations/import`
 
 #### Production URL Documentation
-Created `/app/PRODUCTION_CONFIG.md` to prevent future agents from changing production URLs to preview URLs. Added comments in config.js files.
-
-#### CMS Preview Feature
-Added live preview in Admin Portal CMS tab.
-
-#### Buddy Finder
-Verified working - browse/signup functional.
+- `/app/PRODUCTION_CONFIG.md` - Prevents future URL mix-ups
 
 ---
 
 ## CRITICAL: Production URLs
 **See `/app/PRODUCTION_CONFIG.md`**
-- Staff Portal config: `https://veterans-support-api.onrender.com`
-- Admin Portal config: `https://veterans-support-api.onrender.com`
-- NEVER change these to preview URLs
+- Staff Portal: `https://veterans-support-api.onrender.com`
+- Admin Portal: `https://veterans-support-api.onrender.com`
 
 ## Test Credentials
 - Staff: `sarahm.counsellor@radiocheck.me` / `RadioCheck2026!`
 - Admin: `admin@veteran.dbty.co.uk` / `ChangeThisPassword123!`
 
-## Key Files Reference
+## Key Files
 
-### Contact Management
-- `/app/contacts_full_export.csv` - Full export with all contacts
-- `/app/backend/server.py` - API endpoints for import/export
+### Admin Portal
+- `/app/admin-site/index.html` - Main HTML
+- `/app/admin-site/app.js` - JavaScript logic
+- `/app/admin-site/styles.css` - Styling
+- `/app/admin-site/config.js` - PRODUCTION API URL
 
-### CMS Integration
-- `/app/frontend/src/hooks/useCMSContent.ts` - CMS data fetching hook
-- `/app/frontend/app/home.tsx` - Home page with CMS AI team
-- `/app/frontend/app/self-care.tsx` - Self-care page with CMS tools
-
-### Admin/Staff Portals
-- `/app/staff-portal/` - Staff dashboard with calendar
-- `/app/admin-site/` - Admin dashboard with CMS preview
-- `/app/PRODUCTION_CONFIG.md` - Production URL documentation
+### Staff Portal
+- `/app/staff-portal/` - Files with calendar feature
+- `/app/staff-portal/config.js` - PRODUCTION API URL
 
 ### Backend
 - `/app/backend/server.py` - FastAPI server
 
 ## Remaining Tasks
+1. **Connect more pages to CMS** - organizations, family-friends
+2. **Email notifications for rota**
+3. **Buddy Finder messaging**
 
-1. **CMS Rewrite** - Better admin interface for content management
-2. **Logs & Analytics Dashboard** - Call logs, chat logs, escalations
-3. **Connect more pages to CMS** - organizations, family-friends
-4. **Email notifications for rota**
-5. **Buddy Finder messaging**
-
-## Deployment Notes
-Push to Git and redeploy all services on production (Render).
+## Deployment
+Push to Git and redeploy admin-site, staff-portal on production (Render).
