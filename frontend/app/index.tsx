@@ -29,10 +29,49 @@ export default function SplashScreen() {
       setShowCookieNotice(true);
     }
   };
+
+  const checkPermissions = async () => {
+    try {
+      // Check if we've already asked for permissions
+      const permissionAsked = await AsyncStorage.getItem('permission_asked');
+      if (!permissionAsked) {
+        // Show permission modal on first launch
+        setShowPermissionModal(true);
+      }
+    } catch (error) {
+      console.log('Error checking permissions:', error);
+    }
+  };
   
   useEffect(() => {
     checkCookieConsent();
+    checkPermissions();
   }, []);
+
+  const handleAllowPermissions = async () => {
+    try {
+      // Request microphone permission
+      const { status } = await Audio.requestPermissionsAsync();
+      console.log('Microphone permission:', status);
+      
+      // Save that we've asked for permissions
+      await AsyncStorage.setItem('permission_asked', 'true');
+      setShowPermissionModal(false);
+    } catch (error) {
+      console.error('Error requesting permissions:', error);
+      await AsyncStorage.setItem('permission_asked', 'true');
+      setShowPermissionModal(false);
+    }
+  };
+
+  const handleSkipPermissions = async () => {
+    try {
+      await AsyncStorage.setItem('permission_asked', 'true');
+      setShowPermissionModal(false);
+    } catch (error) {
+      setShowPermissionModal(false);
+    }
+  };
 
   const acceptCookies = async () => {
     try {
