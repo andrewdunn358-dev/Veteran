@@ -129,7 +129,7 @@ const PODCASTS: Podcast[] = [
 ];
 
 // Backend URL for fetching latest episodes
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://compliance-portal-23.preview.emergentagent.com';
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://radio-check-dev.preview.emergentagent.com';
 
 export default function PodcastsScreen() {
   const router = useRouter();
