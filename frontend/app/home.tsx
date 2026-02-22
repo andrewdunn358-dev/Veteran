@@ -206,6 +206,40 @@ export default function Index() {
             <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
 
+          {/* Substance & Alcohol Support */}
+          <TouchableOpacity 
+            style={styles.menuCard}
+            onPress={() => router.push('/substance-support')}
+            activeOpacity={0.9}
+            data-testid="substance-support-btn"
+          >
+            <View style={[styles.cardIconContainer, { backgroundColor: '#fef3c7' }]}>
+              <Ionicons name="wine" size={28} color="#d97706" />
+            </View>
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>Substance & Alcohol Support</Text>
+              <Text style={styles.cardDescription}>Help for addiction & recovery</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          {/* Criminal Justice Support */}
+          <TouchableOpacity 
+            style={styles.menuCard}
+            onPress={() => router.push('/criminal-justice')}
+            activeOpacity={0.9}
+            data-testid="criminal-justice-btn"
+          >
+            <View style={[styles.cardIconContainer, { backgroundColor: '#e0e7ff' }]}>
+              <Ionicons name="shield-checkmark" size={28} color="#4f46e5" />
+            </View>
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>Criminal Justice Support</Text>
+              <Text style={styles.cardDescription}>Help for veterans in or leaving prison</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
+          </TouchableOpacity>
+
           {/* Request a Callback - now below Friends & Family */}
           <TouchableOpacity 
             style={[styles.menuCard, styles.callbackCard]}
