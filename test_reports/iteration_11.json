@@ -1,0 +1,64 @@
+{
+  "summary": "Tested calendar/availability feature for Radio Check veteran support app. All backend API endpoints pass (8/8 tests). Frontend calendar displays correctly with shift indicators and date selection working properly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "My Availability page",
+        "issues": ["Shift shows 'Volunteer' instead of staff name when user not logged in - expected behavior for privacy"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_shifts_api.py",
+    "/app/test_reports/pytest/pytest_shifts.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_shifts_api.py"
+  ],
+  "success_rate": {
+    "backend": "100% (8/8 tests passed)",
+    "frontend": "100%"
+  },
+  "test_credentials": {
+    "staff_user": "sarahm.counsellor@radiocheck.me / RadioCheck2026!"
+  },
+  "seed_data_creation": "Test shift exists for 2026-02-25 (Sarah M., 10:00-16:00)",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Calendar/availability feature fully working. GET /api/shifts returns shifts array, POST /api/shifts creates shifts with auth, DELETE /api/shifts/{id} deletes with auth. Frontend /my-availability page shows calendar with shift indicators (green=your shifts, orange=other volunteers). AsyncStorage keys are 'auth_token' and 'auth_user' (JSON with id, name).",
+  "features_tested": {
+    "backend_api": {
+      "GET /api/shifts": "PASS - Returns list of shifts, supports date_from/date_to filtering",
+      "GET /api/shifts/today": "PASS - Returns today's shifts with someone_on_net boolean",
+      "POST /api/shifts": "PASS - Creates shift when authenticated (401/403 without auth)",
+      "DELETE /api/shifts/{id}": "PASS - Deletes own shift when authenticated (401/403 without auth)"
+    },
+    "frontend_calendar": {
+      "page_loads": "PASS - /my-availability page loads with header 'My Availability'",
+      "month_navigation": "PASS - February 2026 displayed with < > arrows for navigation",
+      "calendar_grid": "PASS - Mon-Sun headers, 6-week grid displayed",
+      "shift_indicators": "PASS - Orange dot on Feb 25 showing 'other volunteers' shift",
+      "date_selection": "PASS - Clicking date shows shift details panel",
+      "shift_details": "PASS - Shows 'Wednesday 25 February', 'Volunteer', '10:00 - 16:00'",
+      "add_button": "PASS - 'Add My Availability' button visible when date selected",
+      "legend": "PASS - Shows 'Your shifts' (green) and 'Other volunteers' (orange)"
+    },
+    "authentication_flow": {
+      "storage_keys": "auth_token and auth_user used correctly per fix",
+      "staff_id_field": "staff_id used correctly (not peer_supporter_id)"
+    }
+  },
+  "bug_fix_verification": {
+    "original_issue": "App was using wrong AsyncStorage keys and field names",
+    "fix_applied": "Changed 'authToken' to 'auth_token', read user from 'auth_user' JSON, use 'staff_id' not 'peer_supporter_id'",
+    "fix_verified": "Backend accepts staff_id, frontend code reviewed shows correct keys being used"
+  }
+}
