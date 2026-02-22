@@ -614,6 +614,13 @@ export default function HugoChatScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* AI Consent Modal */}
+      <AIConsentModal
+        visible={showAIConsent}
+        onAccept={handleAcceptConsent}
+        characterName="Hugo"
+      />
     </SafeAreaView>
   );
 }

@@ -853,6 +853,13 @@ export default function BobChatScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* AI Consent Modal */}
+      <AIConsentModal
+        visible={showAIConsent}
+        onAccept={handleAcceptConsent}
+        characterName="Bob"
+      />
     </SafeAreaView>
   );
 }

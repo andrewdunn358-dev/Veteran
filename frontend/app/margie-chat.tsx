@@ -650,6 +650,13 @@ export default function MargieChatScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* AI Consent Modal */}
+      <AIConsentModal
+        visible={showAIConsent}
+        onAccept={handleAcceptConsent}
+        characterName="Margie"
+      />
     </SafeAreaView>
   );
 }
