@@ -4061,11 +4061,35 @@ async def get_ai_characters():
                 "name": "Doris",
                 "description": "A nurturing, compassionate presence who creates a safe space to talk.",
                 "avatar": AI_CHARACTERS["doris"]["avatar"]
+            },
+            {
+                "id": "hugo",
+                "name": "Hugo",
+                "description": "A 35-year-old wellbeing coach focused on mental health, resilience and daily habits.",
+                "avatar": AI_CHARACTERS["hugo"]["avatar"]
+            },
+            {
+                "id": "sentry",
+                "name": "Finch",
+                "description": "A watchful companion who provides steady support and practical guidance.",
+                "avatar": AI_CHARACTERS["sentry"]["avatar"]
+            },
+            {
+                "id": "bob",
+                "name": "Bob",
+                "description": "A down-to-earth mate who keeps things real and offers honest support.",
+                "avatar": AI_CHARACTERS["bob"]["avatar"]
+            },
+            {
+                "id": "margie",
+                "name": "Margie",
+                "description": "A wise, understanding presence with warmth and years of experience.",
+                "avatar": AI_CHARACTERS["margie"]["avatar"]
             }
         ],
         "about": {
-            "title": "Meet Tommy & Doris – Your AI Battle Buddies",
-            "description": "Tommy and Doris are dedicated AI companions built to support UK veterans and serving personnel—whenever and wherever they need it most.\n\nDesigned with an understanding of military culture, transition challenges, and the weight many carry long after service, they exist for one simple reason: no veteran should feel alone.\n\nWhether it's a late-night \"radio check,\" signposting to trusted support, or simply a steady presence in difficult moments, Tommy and Doris provide immediate, confidential connection—bridging the gap between struggle and support.\n\nThey don't replace human contact.\nThey help you reach it.\n\nBecause service doesn't end when the uniform comes off—and neither should support."
+            "title": "Meet Your AI Battle Buddies",
+            "description": "Our AI Battle Buddies are dedicated companions built to support UK veterans and serving personnel—whenever and wherever they need it most.\n\nDesigned with an understanding of military culture, transition challenges, and the weight many carry long after service, they exist for one simple reason: no veteran should feel alone.\n\nWhether it's a late-night \"radio check,\" signposting to trusted support, or simply a steady presence in difficult moments, they provide immediate, confidential connection—bridging the gap between struggle and support.\n\nThey don't replace human contact.\nThey help you reach it.\n\nBecause service doesn't end when the uniform comes off—and neither should support."
         }
     }
 
