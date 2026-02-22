@@ -70,7 +70,7 @@ export default function Index() {
         <View style={styles.header}>
           <View style={styles.logoWrapper}>
             <Image 
-              source={{ uri: NEW_LOGO_URL }}
+              source={NEW_LOGO_URL}
               style={styles.badgeImage}
               resizeMode="contain"
             />
