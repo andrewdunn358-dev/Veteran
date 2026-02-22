@@ -7,35 +7,38 @@ Build and enhance a mobile-first web application for UK serving personnel and ve
 
 ### Session - 22 Feb 2026
 
-#### CMS Preview Feature Added to Admin Portal
-Added live preview functionality to the Admin Portal's CMS tab:
+#### Contact CSV Export Feature
+Added endpoints for managing organizations/contacts via CSV:
 
-**New Features**:
-- **Preview App Button**: Opens a modal showing the app in a phone frame
-- **Live Preview**: Embedded iframe showing the actual React Native app
-- **Page Selector**: Switch between Home and Self-Care pages
-- **Content Panel**: View all CMS sections and cards for the selected page
-- **Inline Editing**: Click edit button on any card to modify title, description, icon, image, color, route
-- **Auto-Refresh**: Preview updates immediately after saving changes
+**New API Endpoints**:
+- `GET /api/organizations/export/csv` - Download all organizations as CSV (admin only)
+- `POST /api/organizations/import` - Bulk import/update organizations from JSON (admin only)
 
-**Files Changed**:
-- `/app/admin-site/index.html` - Added preview modal HTML
-- `/app/admin-site/app.js` - Added preview functions (openCMSPreview, loadPreviewData, editPreviewCard, etc.)
+**CSV Files Created**:
+- `/app/contacts_full_export.csv` - 44 contacts including:
+  - 8 support organizations (Combat Stress, Samaritans, SSAFA, etc.)
+  - 36 regimental associations (Navy, RAF, Army)
 
-#### Buddy Finder Verified Working
-Confirmed Buddy Finder frontend is fully integrated with backend:
-- Browse profiles with filters (region, service branch)
-- Sign up with GDPR-compliant form
-- Profile cards display name, bio, interests, regiment
-- "Send Message" button ready for messaging feature
+**How to use**:
+1. Export current contacts: `GET /api/organizations/export/csv` with admin token
+2. Edit CSV, convert to JSON, import via: `POST /api/organizations/import`
 
-#### CMS Integration Complete
-Connected key app pages to CMS APIs:
-- `home.tsx` - AI Team section CMS-driven
-- `self-care.tsx` - Tools grid CMS-driven
-- Fallback to hardcoded content if CMS unavailable
+#### Production URL Documentation
+Created `/app/PRODUCTION_CONFIG.md` to prevent future agents from changing production URLs to preview URLs. Added comments in config.js files.
+
+#### CMS Preview Feature
+Added live preview in Admin Portal CMS tab.
+
+#### Buddy Finder
+Verified working - browse/signup functional.
 
 ---
+
+## CRITICAL: Production URLs
+**See `/app/PRODUCTION_CONFIG.md`**
+- Staff Portal config: `https://veterans-support-api.onrender.com`
+- Admin Portal config: `https://veterans-support-api.onrender.com`
+- NEVER change these to preview URLs
 
 ## Test Credentials
 - Staff: `sarahm.counsellor@radiocheck.me` / `RadioCheck2026!`
@@ -43,38 +46,30 @@ Connected key app pages to CMS APIs:
 
 ## Key Files Reference
 
+### Contact Management
+- `/app/contacts_full_export.csv` - Full export with all contacts
+- `/app/backend/server.py` - API endpoints for import/export
+
 ### CMS Integration
 - `/app/frontend/src/hooks/useCMSContent.ts` - CMS data fetching hook
 - `/app/frontend/app/home.tsx` - Home page with CMS AI team
 - `/app/frontend/app/self-care.tsx` - Self-care page with CMS tools
 
-### Admin Portal (with CMS Preview)
-- `/app/admin-site/index.html` - Admin portal with preview modal
-- `/app/admin-site/app.js` - JS including preview functions
-
-### Mobile App (React Native/Expo)
-- `/app/frontend/app/buddy-finder.tsx` - Buddy Finder with browse/signup
-- `/app/frontend/app/my-availability.tsx` - Availability calendar screen
-
-### Web Portals (Static HTML/JS)  
+### Admin/Staff Portals
 - `/app/staff-portal/` - Staff dashboard with calendar
 - `/app/admin-site/` - Admin dashboard with CMS preview
+- `/app/PRODUCTION_CONFIG.md` - Production URL documentation
 
 ### Backend
 - `/app/backend/server.py` - FastAPI server
-- CMS API: `/api/cms/pages`, `/api/cms/sections`, `/api/cms/cards`
-- Buddy Finder API: `/api/buddy-finder/profiles`, `/api/buddy-finder/signup`
 
-## Upcoming Tasks
+## Remaining Tasks
 
-1. **P2 - Connect more pages to CMS**: organizations, family-friends, etc.
-2. **P2 - Generate Contact CSV**: Run script for export
-3. **P2 - Email Notifications**: Set up for rota shifts
-4. **P2 - Buddy Finder Messaging**: Enable "Send Message" functionality
+1. **CMS Rewrite** - Better admin interface for content management
+2. **Logs & Analytics Dashboard** - Call logs, chat logs, escalations
+3. **Connect more pages to CMS** - organizations, family-friends
+4. **Email notifications for rota**
+5. **Buddy Finder messaging**
 
 ## Deployment Notes
-Changes made in preview environment. User needs to:
-1. Push code to Git
-2. Redeploy app.radiocheck.me
-3. Redeploy radiocheck.me/admin-site
-4. Redeploy radiocheck.me/staff-portal
+Push to Git and redeploy all services on production (Render).
