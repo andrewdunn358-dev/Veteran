@@ -20,6 +20,7 @@ Routers:
 - message_queue: Offline message queuing and delivery
 - ai_feedback: User feedback system for AI responses
 - knowledge_base: RAG system for AI characters
+- compliance: GDPR, BACP, data protection and audit logging
 
 Usage:
     from routers import auth, cms, shifts, buddy_finder
@@ -43,7 +44,8 @@ from . import (
     concerns,
     message_queue,
     ai_feedback,
-    knowledge_base
+    knowledge_base,
+    compliance
 )
 
 __all__ = [
@@ -61,5 +63,6 @@ __all__ = [
     "concerns",
     "message_queue",
     "ai_feedback",
-    "knowledge_base"
+    "knowledge_base",
+    "compliance"
 ]
