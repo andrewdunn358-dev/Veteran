@@ -22,15 +22,17 @@ The British Association for Counselling and Psychotherapy (BACP) Ethical Framewo
 - ✅ All AI prompts include statements like "I'm not a trained counsellor"
 - ✅ Encryption of sensitive data (AES-256)
 - ✅ Privacy policy clearly stating data handling
-- ⚠️ **Action Required:** Add explicit "AI Disclosure" banner before chat sessions
+- ✅ **AI Disclosure modal shown before all AI chat sessions** (implemented via consent modal)
 
 **Code Implementation:**
 ```javascript
-// Before AI chat begins, show notice:
-"You're about to chat with [Character Name], an AI companion. 
-While they can offer support and a listening ear, they are not 
-a trained counsellor. For professional help, use our 'Talk to 
-a Real Person' feature."
+// AI Chat Consent Modal (implemented in ai-chat.tsx, bob-chat.tsx, etc.)
+// Shows before first message with:
+// - Clear AI disclosure
+// - What AI can and cannot do
+// - Privacy & safeguarding notice
+// - Crisis contact numbers
+// - Explicit consent button
 ```
 
 ---
@@ -44,13 +46,16 @@ a Real Person' feature."
 - ✅ Users can end conversations at any time
 - ✅ Clear buttons to access human support
 - ✅ Self-service account deletion (`DELETE /api/auth/me`)
-- ✅ Data export available (`GET /api/auth/my-data/export`)
+- ✅ Data export available (`GET /api/compliance/gdpr/my-data/export`)
 - ✅ Buddy Finder requires explicit opt-in consent
+- ✅ **Chat history deletion** (`DELETE /api/compliance/gdpr/my-data/chat-history`)
+- ✅ **Consent preferences management** (`PUT /api/compliance/consent/my-preferences`)
 
-**Recommendations:**
-- Add conversation history download option
-- Allow users to clear AI chat history independently
-- Provide "pause" option for ongoing safeguarding monitoring
+**API Endpoints for User Rights:**
+- `GET /api/compliance/gdpr/my-data/export` - Download all personal data
+- `DELETE /api/compliance/gdpr/my-data/chat-history` - Clear chat history
+- `GET /api/compliance/consent/my-preferences` - View consent settings
+- `PUT /api/compliance/consent/my-preferences` - Update consent settings
 
 ---
 
