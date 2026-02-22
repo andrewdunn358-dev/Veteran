@@ -142,14 +142,26 @@ All AI characters are instructed to:
 **Radio Check Implementation (for Human Staff):**
 - ✅ Staff shift management system
 - ✅ Clear boundaries on working hours
-- ⚠️ **Action Required:** Add staff wellbeing resources
-- ⚠️ **Action Required:** Implement debrief system after difficult cases
+- ✅ **Staff wellbeing check-in system** (`POST /api/compliance/staff/wellbeing-checkin`)
+- ✅ **Supervision request feature** (`POST /api/compliance/staff/supervision-request`)
+- ✅ **Admin dashboard tracks staff needing support**
+- ✅ **Automatic alerts when staff report "struggling" or "need support"**
 
-**Recommendations for Staff Portal:**
-- Add "How are you feeling?" check-in for staff
-- Provide supervision request feature
-- Track exposure to difficult content
-- Mandatory breaks after safeguarding alerts
+**Staff Wellbeing API Endpoints:**
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/compliance/staff/wellbeing-checkin` | Daily mood and workload check-in |
+| `GET /api/compliance/staff/wellbeing-checkins` | View check-in history |
+| `POST /api/compliance/staff/supervision-request` | Request supervision session |
+
+**Check-in Fields:**
+- Mood rating (great/good/okay/struggling/need_support)
+- Difficult cases today
+- Safeguarding alerts handled
+- Break taken
+- Supervision requested
+
+**Automatic Admin Alerts:** When staff report "struggling" or "need_support", an alert is created in the admin dashboard for follow-up.
 
 ---
 
