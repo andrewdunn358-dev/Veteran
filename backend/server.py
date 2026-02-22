@@ -4654,8 +4654,16 @@ async def buddy_chat(request: BuddyChatRequest, req: Request):
         
         logging.info(f"Safeguarding check - Session: {request.sessionId[:12]}, Score: {risk_data['score']}, Level: {risk_level}")
         
+        # === Knowledge Base Integration ===
+        # Fetch relevant verified information to enhance the response
+        knowledge_context = await get_knowledge_context(request.message)
+        
         # Build messages with character-specific system prompt
-        messages = [{"role": "system", "content": char_config["prompt"]}]
+        system_prompt = char_config["prompt"]
+        if knowledge_context:
+            system_prompt += knowledge_context
+        
+        messages = [{"role": "system", "content": system_prompt}]
         
         # Add conversation history (last 20 messages for context)
         for msg in session["history"][-20:]:
