@@ -5,6 +5,10 @@
 ```
 docs/
 ├── README.md                           # This file
+├── ATTRIBUTION.md                      # Credits and licenses
+├── CLIENT_SUMMARY.md                   # Non-technical overview
+├── MVP_READINESS.md                    # MVP status checklist
+├── PROJECT_SUMMARY_REPORT.md          # Comprehensive project report
 ├── deployment/                         # Server and hosting guides
 │   ├── DEPLOYMENT_20I.md              # 20i hosting setup
 │   ├── DEPLOYMENT_INSTRUCTIONS.md     # General deployment
@@ -18,16 +22,12 @@ docs/
 │   ├── ROPA.md                        # Record of Processing Activities
 │   ├── BACP_ETHICAL_FRAMEWORK_COMPLIANCE.md # Counselling ethics
 │   └── SAFEGUARDING_DISCLAIMER.md    # Crisis response protocols
-├── guides/                             # How-to guides
-│   ├── AI_COMPANIONS_GUIDE.md        # AI character documentation
-│   ├── AI_TESTING_STRATEGY.md        # Automated testing for AI
-│   ├── DEVELOPER_GUIDE.md            # Development setup
-│   ├── FEATURE_LIST.md               # Feature inventory
-│   └── PROMPT_IMPROVEMENT_WORKFLOW.md # Improving AI prompts
-├── ATTRIBUTION.md                      # Credits and licenses
-├── CLIENT_SUMMARY.md                   # Non-technical overview
-├── MVP_READINESS.md                    # MVP status checklist
-└── PROJECT_SUMMARY_REPORT.md          # Comprehensive project report
+└── guides/                             # How-to guides
+    ├── AI_COMPANIONS_GUIDE.md        # AI character documentation
+    ├── AI_TESTING_STRATEGY.md        # Automated testing for AI
+    ├── DEVELOPER_GUIDE.md            # Development setup
+    ├── FEATURE_LIST.md               # Feature inventory
+    └── PROMPT_IMPROVEMENT_WORKFLOW.md # Improving AI prompts
 ```
 
 ## Quick Reference
