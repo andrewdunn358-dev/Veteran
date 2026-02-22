@@ -4464,13 +4464,40 @@ async def get_ai_characters():
 
 @api_router.post("/ai-buddies/chat", response_model=BuddyChatResponse)
 async def buddy_chat(request: BuddyChatRequest, req: Request):
-    """Chat with Tommy or Doris AI Battle Buddy - no authentication required"""
+    """Chat with AI Battle Buddy - with rate limiting protection"""
     
-    # Capture client info for safeguarding
-    client_ip = req.headers.get("x-forwarded-for", req.client.host if req.client else "unknown")
-    if client_ip and "," in client_ip:
-        client_ip = client_ip.split(",")[0].strip()  # Get first IP if multiple
+    # Capture client info for safeguarding and rate limiting
+    client_ip = get_client_ip(req)
     user_agent = req.headers.get("user-agent", "unknown")
+    
+    # === BOT PROTECTION: Rate Limiting ===
+    # Check IP-based rate limit
+    is_allowed, reason = check_rate_limit(client_ip)
+    if not is_allowed:
+        logging.warning(f"RATE LIMITED: IP {client_ip} - {reason}")
+        raise HTTPException(status_code=429, detail=reason)
+    
+    # Check session message limit
+    is_allowed, reason = check_session_limit(request.sessionId)
+    if not is_allowed:
+        char = AI_CHARACTERS.get(request.character, AI_CHARACTERS["tommy"])
+        return BuddyChatResponse(
+            reply=f"We've been chatting for a while. If you'd like to continue talking, a real person is available. Use the 'Talk to a real person' button to connect with someone.",
+            sessionId=request.sessionId,
+            character=request.character,
+            characterName=char["name"],
+            characterAvatar=char["avatar"]
+        )
+    
+    # === Suspicious pattern detection ===
+    # Block obviously automated requests
+    if len(request.message) > 2000:
+        logging.warning(f"BLOCKED: Oversized message from {client_ip}")
+        raise HTTPException(status_code=400, detail="Message too long")
+    
+    if not user_agent or user_agent == "unknown" or "bot" in user_agent.lower() or "crawler" in user_agent.lower():
+        logging.warning(f"BLOCKED: Suspicious user-agent from {client_ip}: {user_agent}")
+        raise HTTPException(status_code=403, detail="Access denied")
     
     # Kill switch check
     if AI_BUDDIES_DISABLED:
