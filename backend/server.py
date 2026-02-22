@@ -2175,6 +2175,45 @@ async def get_all_users(current_user: User = Depends(require_role("admin"))):
     users = await db.users.find().to_list(1000)
     return [User(**u) for u in users]
 
+
+# ==================================
+# Push Notification Token Management
+# ==================================
+
+class PushTokenUpdate(BaseModel):
+    push_token: str
+    device_type: str = "expo"  # expo, fcm, apns
+
+
+@api_router.post("/auth/push-token")
+async def register_push_token(token_data: PushTokenUpdate, current_user: User = Depends(get_current_user)):
+    """Register or update push notification token for current user"""
+    result = await db.users.update_one(
+        {"id": current_user.id},
+        {"$set": {
+            "push_token": token_data.push_token,
+            "device_type": token_data.device_type,
+            "push_token_updated_at": datetime.utcnow()
+        }}
+    )
+    
+    if result.modified_count == 0 and result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "Push token registered successfully"}
+
+
+@api_router.delete("/auth/push-token")
+async def remove_push_token(current_user: User = Depends(get_current_user)):
+    """Remove push notification token (e.g., on logout)"""
+    await db.users.update_one(
+        {"id": current_user.id},
+        {"$unset": {"push_token": "", "device_type": ""}}
+    )
+    
+    return {"message": "Push token removed"}
+
+
 @api_router.get("/admin/unified-staff")
 async def get_unified_staff(current_user: User = Depends(require_role("admin"))):
     """Get all staff (counsellors and peers) with their user accounts in unified view"""
