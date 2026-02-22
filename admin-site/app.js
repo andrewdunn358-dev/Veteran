@@ -4022,6 +4022,112 @@ async function reorderSection(sectionId, direction) {
     }
 }
 
+// ==========================================
+// Drag and Drop Handlers
+// ==========================================
+
+let draggedSectionId = null;
+
+function handleDragStart(event, sectionId) {
+    draggedSectionId = sectionId;
+    event.target.classList.add('dragging');
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', sectionId);
+    
+    // Add dragging class to phone content for visual feedback
+    document.getElementById('cms-phone-content').classList.add('has-dragging');
+}
+
+function handleDragEnd(event) {
+    event.target.classList.remove('dragging');
+    draggedSectionId = null;
+    
+    // Remove all drag-related classes
+    document.querySelectorAll('.phone-section').forEach(el => {
+        el.classList.remove('drag-over', 'dragging');
+    });
+    document.getElementById('cms-phone-content')?.classList.remove('has-dragging');
+}
+
+function handleDragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    
+    const target = event.target.closest('.phone-section');
+    if (target && target.dataset.sectionId !== draggedSectionId) {
+        // Remove drag-over from all sections first
+        document.querySelectorAll('.phone-section').forEach(el => {
+            el.classList.remove('drag-over');
+        });
+        target.classList.add('drag-over');
+    }
+}
+
+function handleDragLeave(event) {
+    const target = event.target.closest('.phone-section');
+    if (target) {
+        target.classList.remove('drag-over');
+    }
+}
+
+async function handleDrop(event, targetSectionId) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const sourceSectionId = draggedSectionId;
+    
+    // Clean up visual states
+    document.querySelectorAll('.phone-section').forEach(el => {
+        el.classList.remove('drag-over', 'dragging');
+    });
+    document.getElementById('cms-phone-content')?.classList.remove('has-dragging');
+    
+    if (!sourceSectionId || sourceSectionId === targetSectionId) return;
+    
+    const sections = cmsPageData.sections;
+    const sourceIdx = sections.findIndex(s => s.id === sourceSectionId);
+    const targetIdx = sections.findIndex(s => s.id === targetSectionId);
+    
+    if (sourceIdx === -1 || targetIdx === -1) return;
+    
+    // Build reorder updates - all sections between source and target need updating
+    const updates = {};
+    
+    if (sourceIdx < targetIdx) {
+        // Moving down
+        for (let i = sourceIdx; i <= targetIdx; i++) {
+            if (i === sourceIdx) {
+                updates[sections[i].id] = targetIdx;
+            } else {
+                updates[sections[i].id] = i - 1;
+            }
+        }
+    } else {
+        // Moving up
+        for (let i = targetIdx; i <= sourceIdx; i++) {
+            if (i === sourceIdx) {
+                updates[sections[i].id] = targetIdx;
+            } else {
+                updates[sections[i].id] = i + 1;
+            }
+        }
+    }
+    
+    try {
+        await apiCall('/cms/sections/reorder', {
+            method: 'PUT',
+            body: JSON.stringify(updates)
+        });
+        
+        showNotification('Section reordered', 'success');
+        loadCMSPage(currentCMSPage);
+    } catch (error) {
+        showNotification('Failed to reorder: ' + error.message, 'error');
+    }
+    
+    draggedSectionId = null;
+}
+
 // Save all CMS changes
 async function saveCMSChanges() {
     if (Object.keys(cmsPendingChanges).length === 0) {
