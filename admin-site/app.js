@@ -778,6 +778,338 @@ async function savePreviewCard(event, cardId) {
     }
 }
 
+// ============ LOGS & ANALYTICS ============
+
+let currentLogTab = 'calls';
+let logsData = {
+    calls: [],
+    chats: [],
+    safeguarding: [],
+    callbacks: [],
+    panic: []
+};
+
+async function loadLogsData() {
+    const period = document.getElementById('logs-period')?.value || 30;
+    
+    try {
+        // Load all data in parallel
+        const [callsRes, chatsRes, safeguardingRes, callbacksRes, panicRes] = await Promise.all([
+            apiCall(`/call-logs?days=${period}`).catch(() => ({ total_calls: 0, recent_logs: [] })),
+            apiCall('/live-chat/rooms').catch(() => []),
+            apiCall('/safeguarding-alerts').catch(() => []),
+            apiCall('/callbacks').catch(() => []),
+            apiCall('/panic-alerts').catch(() => [])
+        ]);
+        
+        // Store data
+        logsData.calls = callsRes.recent_logs || [];
+        logsData.chats = chatsRes || [];
+        logsData.safeguarding = safeguardingRes || [];
+        logsData.callbacks = callbacksRes || [];
+        logsData.panic = panicRes || [];
+        
+        // Update stats
+        document.getElementById('stat-calls').textContent = callsRes.total_calls || 0;
+        document.getElementById('stat-chats').textContent = logsData.chats.length;
+        document.getElementById('stat-escalations').textContent = logsData.safeguarding.length;
+        document.getElementById('stat-panic').textContent = logsData.panic.length;
+        
+        // Render current tab
+        renderLogTab(currentLogTab);
+    } catch (error) {
+        console.error('Error loading logs:', error);
+        showNotification('Failed to load logs', 'error');
+    }
+}
+
+function switchLogTab(tab) {
+    currentLogTab = tab;
+    
+    // Update tab buttons
+    document.querySelectorAll('.logs-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.logtab === tab);
+    });
+    
+    renderLogTab(tab);
+}
+
+function renderLogTab(tab) {
+    const container = document.getElementById('logs-content');
+    const data = logsData[tab] || [];
+    
+    if (data.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>No ${tab} records found for this period</p>
+            </div>
+        `;
+        return;
+    }
+    
+    switch (tab) {
+        case 'calls':
+            container.innerHTML = renderCallLogs(data);
+            break;
+        case 'chats':
+            container.innerHTML = renderChatLogs(data);
+            break;
+        case 'safeguarding':
+            container.innerHTML = renderSafeguardingLogs(data);
+            break;
+        case 'callbacks':
+            container.innerHTML = renderCallbackLogs(data);
+            break;
+        case 'panic':
+            container.innerHTML = renderPanicLogs(data);
+            break;
+    }
+}
+
+function renderCallLogs(logs) {
+    return `
+        <table class="logs-table">
+            <thead>
+                <tr>
+                    <th>Date/Time</th>
+                    <th>Contact Name</th>
+                    <th>Type</th>
+                    <th>Method</th>
+                    <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${logs.map(log => `
+                    <tr>
+                        <td>${formatDateTime(log.timestamp)}</td>
+                        <td><strong>${log.contact_name || 'Unknown'}</strong></td>
+                        <td><span class="badge ${log.contact_type === 'peer' ? 'badge-success' : 'badge-primary'}">${log.contact_type}</span></td>
+                        <td><span class="badge ${log.call_method === 'webrtc' ? 'badge-info' : 'badge-secondary'}">${log.call_method}</span></td>
+                        <td>${log.contact_phone || '-'}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function renderChatLogs(chats) {
+    return `
+        <table class="logs-table">
+            <thead>
+                <tr>
+                    <th>Date/Time</th>
+                    <th>Status</th>
+                    <th>User</th>
+                    <th>Staff</th>
+                    <th>Messages</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${chats.map(chat => `
+                    <tr>
+                        <td>${formatDateTime(chat.created_at)}</td>
+                        <td><span class="badge badge-${chat.status === 'active' ? 'success' : chat.status === 'closed' ? 'secondary' : 'warning'}">${chat.status}</span></td>
+                        <td>${chat.user_name || 'Anonymous'}</td>
+                        <td>${chat.staff_name || '-'}</td>
+                        <td>${chat.message_count || 0}</td>
+                        <td>
+                            <button class="btn btn-small btn-secondary" onclick="viewChatHistory('${chat.id}')">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function renderSafeguardingLogs(alerts) {
+    return `
+        <table class="logs-table">
+            <thead>
+                <tr>
+                    <th>Date/Time</th>
+                    <th>Risk Level</th>
+                    <th>Type</th>
+                    <th>User</th>
+                    <th>Staff</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${alerts.map(alert => `
+                    <tr>
+                        <td>${formatDateTime(alert.created_at)}</td>
+                        <td><span class="badge badge-${alert.risk_level === 'high' ? 'danger' : alert.risk_level === 'medium' ? 'warning' : 'info'}">${alert.risk_level || 'Unknown'}</span></td>
+                        <td>${alert.alert_type || '-'}</td>
+                        <td>${alert.user_name || 'Anonymous'}</td>
+                        <td>${alert.assigned_to_name || '-'}</td>
+                        <td><span class="badge badge-${alert.status === 'resolved' ? 'success' : alert.status === 'pending' ? 'warning' : 'secondary'}">${alert.status}</span></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function renderCallbackLogs(callbacks) {
+    return `
+        <table class="logs-table">
+            <thead>
+                <tr>
+                    <th>Date/Time</th>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Handled By</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${callbacks.map(cb => `
+                    <tr>
+                        <td>${formatDateTime(cb.created_at)}</td>
+                        <td><span class="badge badge-${cb.request_type === 'urgent' ? 'danger' : 'primary'}">${cb.request_type}</span></td>
+                        <td><strong>${cb.name || 'Anonymous'}</strong></td>
+                        <td>${cb.phone || '-'}</td>
+                        <td>${cb.handled_by_name || '-'}</td>
+                        <td><span class="badge badge-${cb.status === 'completed' ? 'success' : cb.status === 'pending' ? 'warning' : 'secondary'}">${cb.status}</span></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function renderPanicLogs(alerts) {
+    return `
+        <table class="logs-table">
+            <thead>
+                <tr>
+                    <th>Date/Time</th>
+                    <th>User</th>
+                    <th>Location</th>
+                    <th>Responded By</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${alerts.map(alert => `
+                    <tr class="${alert.status === 'active' ? 'row-urgent' : ''}">
+                        <td>${formatDateTime(alert.created_at)}</td>
+                        <td><strong>${alert.user_name || 'Anonymous'}</strong></td>
+                        <td>${alert.location || '-'}</td>
+                        <td>${alert.responded_by_name || '-'}</td>
+                        <td><span class="badge badge-${alert.status === 'resolved' ? 'success' : alert.status === 'active' ? 'danger' : 'warning'}">${alert.status}</span></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function formatDateTime(dateStr) {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-GB', { 
+        day: '2-digit', 
+        month: 'short', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+async function viewChatHistory(chatId) {
+    try {
+        const messages = await apiCall(`/live-chat/rooms/${chatId}/messages`);
+        
+        const content = `
+            <h3><i class="fas fa-comments"></i> Chat History</h3>
+            <div style="max-height: 400px; overflow-y: auto; background: var(--bg-secondary); border-radius: 8px; padding: 16px;">
+                ${messages.length === 0 ? '<p style="color: var(--text-muted);">No messages</p>' : 
+                    messages.map(msg => `
+                        <div style="margin-bottom: 12px; padding: 10px; background: ${msg.is_staff ? 'var(--primary)' : 'var(--card-bg)'}; border-radius: 8px; ${msg.is_staff ? 'margin-left: 40px;' : 'margin-right: 40px;'}">
+                            <div style="font-size: 11px; color: ${msg.is_staff ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)'}; margin-bottom: 4px;">
+                                ${msg.sender_name || 'User'} - ${formatDateTime(msg.timestamp)}
+                            </div>
+                            <div style="color: ${msg.is_staff ? '#fff' : 'var(--text-primary)'};">${msg.content}</div>
+                        </div>
+                    `).join('')
+                }
+            </div>
+            <div class="modal-actions" style="margin-top: 16px;">
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            </div>
+        `;
+        
+        openModal(content);
+    } catch (error) {
+        showNotification('Failed to load chat history', 'error');
+    }
+}
+
+async function exportLogsCSV() {
+    const tab = currentLogTab;
+    const data = logsData[tab] || [];
+    
+    if (data.length === 0) {
+        showNotification('No data to export', 'error');
+        return;
+    }
+    
+    // Create CSV
+    let csv = '';
+    
+    switch (tab) {
+        case 'calls':
+            csv = 'Date,Contact Name,Type,Method,Phone\n';
+            data.forEach(log => {
+                csv += `"${formatDateTime(log.timestamp)}","${log.contact_name || ''}","${log.contact_type}","${log.call_method}","${log.contact_phone || ''}"\n`;
+            });
+            break;
+        case 'chats':
+            csv = 'Date,Status,User,Staff,Messages\n';
+            data.forEach(chat => {
+                csv += `"${formatDateTime(chat.created_at)}","${chat.status}","${chat.user_name || ''}","${chat.staff_name || ''}","${chat.message_count || 0}"\n`;
+            });
+            break;
+        case 'safeguarding':
+            csv = 'Date,Risk Level,Type,User,Staff,Status\n';
+            data.forEach(alert => {
+                csv += `"${formatDateTime(alert.created_at)}","${alert.risk_level || ''}","${alert.alert_type || ''}","${alert.user_name || ''}","${alert.assigned_to_name || ''}","${alert.status}"\n`;
+            });
+            break;
+        case 'callbacks':
+            csv = 'Date,Type,Name,Phone,Handled By,Status\n';
+            data.forEach(cb => {
+                csv += `"${formatDateTime(cb.created_at)}","${cb.request_type}","${cb.name || ''}","${cb.phone || ''}","${cb.handled_by_name || ''}","${cb.status}"\n`;
+            });
+            break;
+        case 'panic':
+            csv = 'Date,User,Location,Responded By,Status\n';
+            data.forEach(alert => {
+                csv += `"${formatDateTime(alert.created_at)}","${alert.user_name || ''}","${alert.location || ''}","${alert.responded_by_name || ''}","${alert.status}"\n`;
+            });
+            break;
+    }
+    
+    // Download
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${tab}_export_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showNotification('CSV exported successfully');
+}
+
 // Status Updates
 async function updateCounsellorStatus(id, status) {
     try {
