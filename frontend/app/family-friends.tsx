@@ -65,6 +65,27 @@ export default function FamilyFriends() {
   const [view, setView] = useState<'main' | 'concern' | 'resources' | 'signs' | 'addiction' | 'prison'>('main');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // CMS Content - fetch support resources, addiction resources, and warning signs
+  const { sections } = useCMSContent('family-friends');
+  
+  // Get CMS data or fall back to hardcoded
+  const supportSection = getSection(sections, 'support_resources');
+  const addictionSection = getSection(sections, 'addiction_resources');
+  const signsSection = getSection(sections, 'warning_signs');
+  
+  // Map CMS cards to the format used in the component
+  const SUPPORT_RESOURCES = supportSection?.cards?.length 
+    ? supportSection.cards.map(c => ({ name: c.title, desc: c.description || '', phone: c.phone || '', url: c.external_url || '' }))
+    : FALLBACK_SUPPORT_RESOURCES;
+    
+  const ADDICTION_RESOURCES = addictionSection?.cards?.length
+    ? addictionSection.cards.map(c => ({ name: c.title, desc: c.description || '', phone: c.phone || '', url: c.external_url || '' }))
+    : FALLBACK_ADDICTION_RESOURCES;
+    
+  const SIGNS_OF_CHANGE = signsSection?.cards?.length
+    ? signsSection.cards.map((c, i) => ({ id: c.id || `sign-${i}`, label: c.title, icon: c.icon || 'alert' }))
+    : FALLBACK_SIGNS_OF_CHANGE;
+  
   // Form state
   const [yourName, setYourName] = useState('');
   const [yourEmail, setYourEmail] = useState('');
