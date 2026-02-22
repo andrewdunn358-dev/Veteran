@@ -17,6 +17,16 @@ from models.schemas import (
 router = APIRouter(prefix="/cms", tags=["cms"])
 
 
+def clean_mongo_doc(doc: dict) -> dict:
+    """Remove MongoDB _id and ensure id field exists"""
+    if doc is None:
+        return None
+    result = {k: v for k, v in doc.items() if k != "_id"}
+    if "id" not in result and "_id" in doc:
+        result["id"] = str(doc["_id"])
+    return result
+
+
 # ==========================================
 # Pages
 # ==========================================
@@ -25,7 +35,7 @@ router = APIRouter(prefix="/cms", tags=["cms"])
 async def get_cms_pages():
     """Get list of all CMS pages (basic info only)"""
     db = get_database()
-    pages = await db.cms_pages.find({}, {"_id": 0, "sections": 0}).sort("order", 1).to_list(100)
+    pages = await db.cms_pages.find({}, {"_id": 0, "sections": 0}).sort("nav_order", 1).to_list(100)
     return pages
 
 
@@ -33,7 +43,7 @@ async def get_cms_pages():
 async def get_all_cms_pages():
     """Get all CMS pages with full details"""
     db = get_database()
-    pages = await db.cms_pages.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    pages = await db.cms_pages.find({}, {"_id": 0}).sort("nav_order", 1).to_list(100)
     return pages
 
 
@@ -41,21 +51,20 @@ async def get_all_cms_pages():
 async def get_cms_page(slug: str):
     """Get a single CMS page with all sections and cards"""
     db = get_database()
-    page = await db.cms_pages.find_one({"slug": slug})
+    page = await db.cms_pages.find_one({"slug": slug}, {"_id": 0})
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
     
     # Get sections for this page
-    sections = await db.cms_sections.find({"page_slug": slug}).sort("order", 1).to_list(100)
+    sections = await db.cms_sections.find({"page_slug": slug}, {"_id": 0}).sort("order", 1).to_list(100)
     
     # Get cards for each section
     for section in sections:
-        section["id"] = str(section.get("_id", section.get("id", "")))
-        cards = await db.cms_cards.find({"section_id": section["id"]}).sort("order", 1).to_list(100)
-        section["cards"] = [{**card, "id": str(card.get("_id", card.get("id", "")))} for card in cards]
+        section_id = section.get("id", "")
+        cards = await db.cms_cards.find({"section_id": section_id}, {"_id": 0}).sort("order", 1).to_list(100)
+        section["cards"] = cards
     
     page["sections"] = sections
-    page["id"] = str(page.get("_id", page.get("id", "")))
     return page
 
 
@@ -69,7 +78,7 @@ async def create_cms_page(page: CMSPageCreate):
     page_data["updated_at"] = datetime.utcnow()
     
     await db.cms_pages.insert_one(page_data)
-    return page_data
+    return clean_mongo_doc(page_data)
 
 
 @router.put("/pages/{slug}")
@@ -77,8 +86,10 @@ async def update_cms_page(slug: str, updates: dict):
     """Update a CMS page"""
     db = get_database()
     updates["updated_at"] = datetime.utcnow()
+    # Remove _id if present in updates
+    updates.pop("_id", None)
     result = await db.cms_pages.update_one({"slug": slug}, {"$set": updates})
-    if result.modified_count == 0:
+    if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Page not found")
     return {"success": True}
 
@@ -92,7 +103,8 @@ async def delete_cms_page(slug: str):
     
     # Delete all cards in those sections
     for section in sections:
-        await db.cms_cards.delete_many({"section_id": section.get("id", str(section.get("_id", "")))})
+        section_id = section.get("id", str(section.get("_id", "")))
+        await db.cms_cards.delete_many({"section_id": section_id})
     
     # Delete all sections
     await db.cms_sections.delete_many({"page_slug": slug})
@@ -108,10 +120,17 @@ async def delete_cms_page(slug: str):
 
 @router.get("/sections/{page_slug}")
 async def get_cms_sections(page_slug: str):
-    """Get all sections for a page"""
+    """Get all sections for a page with their cards"""
     db = get_database()
-    sections = await db.cms_sections.find({"page_slug": page_slug}).sort("order", 1).to_list(100)
-    return [{**s, "id": str(s.get("_id", s.get("id", "")))} for s in sections]
+    sections = await db.cms_sections.find({"page_slug": page_slug}, {"_id": 0}).sort("order", 1).to_list(100)
+    
+    # Get cards for each section
+    for section in sections:
+        section_id = section.get("id", "")
+        cards = await db.cms_cards.find({"section_id": section_id}, {"_id": 0}).sort("order", 1).to_list(100)
+        section["cards"] = cards
+    
+    return sections
 
 
 @router.post("/sections")
@@ -121,20 +140,23 @@ async def create_cms_section(section: CMSSectionCreate):
     section_data = section.dict()
     section_data["id"] = str(uuid.uuid4())
     section_data["created_at"] = datetime.utcnow()
+    section_data["updated_at"] = datetime.utcnow()
     
     await db.cms_sections.insert_one(section_data)
-    return section_data
+    return clean_mongo_doc(section_data)
 
 
 @router.put("/sections/{section_id}")
 async def update_cms_section(section_id: str, updates: dict):
     """Update a CMS section"""
     db = get_database()
+    updates["updated_at"] = datetime.utcnow()
+    updates.pop("_id", None)
     result = await db.cms_sections.update_one(
-        {"$or": [{"id": section_id}, {"_id": section_id}]},
+        {"id": section_id},
         {"$set": updates}
     )
-    if result.modified_count == 0:
+    if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Section not found")
     return {"success": True}
 
@@ -147,9 +169,7 @@ async def delete_cms_section(section_id: str):
     await db.cms_cards.delete_many({"section_id": section_id})
     
     # Delete the section
-    result = await db.cms_sections.delete_one(
-        {"$or": [{"id": section_id}, {"_id": section_id}]}
-    )
+    result = await db.cms_sections.delete_one({"id": section_id})
     return {"deleted": result.deleted_count}
 
 
@@ -159,7 +179,7 @@ async def reorder_cms_sections(updates: dict):
     db = get_database()
     for section_id, new_order in updates.items():
         await db.cms_sections.update_one(
-            {"$or": [{"id": section_id}, {"_id": section_id}]},
+            {"id": section_id},
             {"$set": {"order": new_order}}
         )
     return {"success": True}
@@ -173,8 +193,8 @@ async def reorder_cms_sections(updates: dict):
 async def get_cms_cards(section_id: str):
     """Get all cards for a section"""
     db = get_database()
-    cards = await db.cms_cards.find({"section_id": section_id}).sort("order", 1).to_list(100)
-    return [{**c, "id": str(c.get("_id", c.get("id", "")))} for c in cards]
+    cards = await db.cms_cards.find({"section_id": section_id}, {"_id": 0}).sort("order", 1).to_list(100)
+    return cards
 
 
 @router.post("/cards")
@@ -184,20 +204,23 @@ async def create_cms_card(card: CMSCardCreate):
     card_data = card.dict()
     card_data["id"] = str(uuid.uuid4())
     card_data["created_at"] = datetime.utcnow()
+    card_data["updated_at"] = datetime.utcnow()
     
     await db.cms_cards.insert_one(card_data)
-    return card_data
+    return clean_mongo_doc(card_data)
 
 
 @router.put("/cards/{card_id}")
 async def update_cms_card(card_id: str, updates: dict):
     """Update a CMS card"""
     db = get_database()
+    updates["updated_at"] = datetime.utcnow()
+    updates.pop("_id", None)
     result = await db.cms_cards.update_one(
-        {"$or": [{"id": card_id}, {"_id": card_id}]},
+        {"id": card_id},
         {"$set": updates}
     )
-    if result.modified_count == 0:
+    if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Card not found")
     return {"success": True}
 
@@ -206,9 +229,7 @@ async def update_cms_card(card_id: str, updates: dict):
 async def delete_cms_card(card_id: str):
     """Delete a CMS card"""
     db = get_database()
-    result = await db.cms_cards.delete_one(
-        {"$or": [{"id": card_id}, {"_id": card_id}]}
-    )
+    result = await db.cms_cards.delete_one({"id": card_id})
     return {"deleted": result.deleted_count}
 
 
@@ -218,7 +239,7 @@ async def reorder_cms_cards(updates: dict):
     db = get_database()
     for card_id, new_order in updates.items():
         await db.cms_cards.update_one(
-            {"$or": [{"id": card_id}, {"_id": card_id}]},
+            {"id": card_id},
             {"$set": {"order": new_order}}
         )
     return {"success": True}
