@@ -1,90 +1,51 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Image, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
+import { useCMSContent, getSection, CMSCard } from '../src/hooks/useCMSContent';
 
 const HUGO_AVATAR = 'https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/c442477c08a58f435e73415dff4c7f2949a6bb2f7cd718e02e540951182dc14b.png';
 
-const SELF_CARE_TOOLS = [
-  {
-    id: 'journal',
-    title: 'My Journal',
-    description: 'Write down your thoughts',
-    icon: 'book',
-    color: '#3b82f6',
-    bgColor: '#dbeafe',
-    route: '/journal',
-  },
-  {
-    id: 'mood',
-    title: 'Daily Check-in',
-    description: "Track how you're feeling",
-    icon: 'happy',
-    color: '#f59e0b',
-    bgColor: '#fef3c7',
-    route: '/mood',
-  },
-  {
-    id: 'grounding',
-    title: 'Grounding Tools',
-    description: '5-4-3-2-1 and more techniques',
-    icon: 'hand-left',
-    color: '#22c55e',
-    bgColor: '#dcfce7',
-    route: '/grounding',
-  },
-  {
-    id: 'breathing',
-    title: 'Breathing Exercises',
-    description: 'Box breathing & relaxation',
-    icon: 'cloud',
-    color: '#06b6d4',
-    bgColor: '#cffafe',
-    route: '/breathing-game',
-  },
-  {
-    id: 'buddy-finder',
-    title: 'Buddy Finder',
-    description: 'Connect with serving personnel and veterans near you',
-    icon: 'people',
-    color: '#10b981',
-    bgColor: '#d1fae5',
-    route: '/buddy-finder',
-  },
-  {
-    id: 'regimental',
-    title: 'Regimental Associations',
-    description: 'Find your regiment network',
-    icon: 'flag',
-    color: '#ef4444',
-    bgColor: '#fee2e2',
-    route: '/regimental-associations',
-  },
-  {
-    id: 'local-services',
-    title: 'Find Local Support',
-    description: 'Services near you',
-    icon: 'location',
-    color: '#8b5cf6',
-    bgColor: '#ede9fe',
-    route: '/local-services',
-  },
-  {
-    id: 'resources',
-    title: 'Resources Library',
-    description: 'Helpful information',
-    icon: 'library',
-    color: '#ec4899',
-    bgColor: '#fce7f3',
-    route: '/resources',
-  },
+// Fallback hardcoded tools (used when CMS is empty or unavailable)
+const FALLBACK_TOOLS = [
+  { id: 'journal', title: 'My Journal', description: 'Write down your thoughts', icon: 'book', color: '#3b82f6', bgColor: '#dbeafe', route: '/journal' },
+  { id: 'mood', title: 'Daily Check-in', description: "Track how you're feeling", icon: 'happy', color: '#f59e0b', bgColor: '#fef3c7', route: '/mood' },
+  { id: 'grounding', title: 'Grounding Tools', description: '5-4-3-2-1 and more techniques', icon: 'hand-left', color: '#22c55e', bgColor: '#dcfce7', route: '/grounding' },
+  { id: 'breathing', title: 'Breathing Exercises', description: 'Box breathing & relaxation', icon: 'cloud', color: '#06b6d4', bgColor: '#cffafe', route: '/breathing-game' },
+  { id: 'buddy-finder', title: 'Buddy Finder', description: 'Connect with serving personnel and veterans near you', icon: 'people', color: '#10b981', bgColor: '#d1fae5', route: '/buddy-finder' },
+  { id: 'regimental', title: 'Regimental Associations', description: 'Find your regiment network', icon: 'flag', color: '#ef4444', bgColor: '#fee2e2', route: '/regimental-associations' },
+  { id: 'local-services', title: 'Find Local Support', description: 'Services near you', icon: 'location', color: '#8b5cf6', bgColor: '#ede9fe', route: '/local-services' },
+  { id: 'resources', title: 'Resources Library', description: 'Helpful information', icon: 'library', color: '#ec4899', bgColor: '#fce7f3', route: '/resources' },
 ];
+
+// Helper to get background color for a card
+function getBackgroundColor(color: string | null): string {
+  if (!color) return '#e2e8f0';
+  // Create a lighter version of the color
+  const hex = color.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  // Lighten the color
+  const lighten = (c: number) => Math.round(c + (255 - c) * 0.8);
+  return `rgb(${lighten(r)}, ${lighten(g)}, ${lighten(b)})`;
+}
 
 export default function SelfCarePage() {
   const router = useRouter();
   const { colors, theme } = useTheme();
+  const { sections, isLoading, error } = useCMSContent('self-care');
+
+  // Get CMS cards or fall back to hardcoded
+  const cardsSection = getSection(sections, 'cards');
+  const cmsCards = cardsSection?.cards || [];
+  
+  // Use CMS cards if available, otherwise fallback
+  const tools = cmsCards.length > 0 
+    ? cmsCards.filter(c => c.is_visible).sort((a, b) => a.order - b.order)
+    : FALLBACK_TOOLS;
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top']}>
@@ -92,7 +53,7 @@ export default function SelfCarePage() {
       
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton} data-testid="back-button">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Self-Care Tools</Text>
@@ -134,23 +95,40 @@ export default function SelfCarePage() {
           <Ionicons name="chevron-forward" size={24} color="#10b981" />
         </TouchableOpacity>
 
-        {/* Tools Grid */}
+        {/* Loading State */}
+        {isLoading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color={colors.primary} />
+          </View>
+        )}
+
+        {/* Tools Grid - CMS-driven or fallback */}
         <View style={styles.toolsGrid}>
-          {SELF_CARE_TOOLS.map((tool) => (
-            <TouchableOpacity
-              key={tool.id}
-              style={[styles.toolCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              onPress={() => router.push(tool.route as any)}
-              activeOpacity={0.8}
-              data-testid={`${tool.id}-tool-btn`}
-            >
-              <View style={[styles.toolIconContainer, { backgroundColor: tool.bgColor }]}>
-                <Ionicons name={tool.icon as any} size={28} color={tool.color} />
-              </View>
-              <Text style={[styles.toolTitle, { color: colors.text }]}>{tool.title}</Text>
-              <Text style={[styles.toolDescription, { color: colors.textSecondary }]}>{tool.description}</Text>
-            </TouchableOpacity>
-          ))}
+          {tools.map((tool: any) => {
+            // Handle both CMS format and fallback format
+            const isCMS = 'section_id' in tool;
+            const toolIcon = isCMS ? tool.icon : tool.icon;
+            const toolColor = isCMS ? (tool.color || '#3b82f6') : tool.color;
+            const toolBgColor = isCMS ? getBackgroundColor(tool.color) : tool.bgColor;
+            const toolRoute = isCMS ? tool.route : tool.route;
+            const toolId = isCMS ? tool.id : tool.id;
+            
+            return (
+              <TouchableOpacity
+                key={toolId}
+                style={[styles.toolCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                onPress={() => toolRoute && router.push(toolRoute as any)}
+                activeOpacity={0.8}
+                data-testid={`tool-card-${toolId}`}
+              >
+                <View style={[styles.toolIconContainer, { backgroundColor: toolBgColor }]}>
+                  <Ionicons name={(toolIcon || 'apps') as any} size={28} color={toolColor} />
+                </View>
+                <Text style={[styles.toolTitle, { color: colors.text }]}>{tool.title}</Text>
+                <Text style={[styles.toolDescription, { color: colors.textSecondary }]}>{tool.description}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* Bottom Note */}
@@ -221,7 +199,10 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: 'center',
   },
-  // Hugo AI Card
+  loadingContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
   hugoCard: {
     flexDirection: 'row',
     alignItems: 'center',
