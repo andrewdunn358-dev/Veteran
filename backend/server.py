@@ -2994,8 +2994,9 @@ async def seed_cms_data(current_user: User = Depends(require_role("admin"))):
             {"title": "Doris", "description": "Warm support", "image_url": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png", "route": "/ai-chat?character=doris"},
             {"title": "Bob", "description": "Ex-Para peer support", "image_url": "https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png", "route": "/bob-chat"},
             {"title": "Finch", "description": "Crisis & PTSD support", "image_url": "https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png", "route": "/sentry-chat"},
-            {"title": "Margie", "description": "Alcohol & substance help", "image_url": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png", "route": "/margie-chat"},
-            {"title": "Hugo", "description": "Self-help & wellness", "image_url": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png", "route": "/hugo-chat"},
+            {"title": "Margie", "description": "Alcohol & substance help", "image_url": "https://static.prod-images.emergentagent.com/jobs/fba61e42-5a99-4622-a43b-84a14c5bcf87/images/313a20c933febb69cc523b6b3647ba814a5b9123a3ea7f674f7a87695a8a4789.png", "route": "/margie-chat"},
+            {"title": "Hugo", "description": "Self-help & wellness", "image_url": "https://static.prod-images.emergentagent.com/jobs/fba61e42-5a99-4622-a43b-84a14c5bcf87/images/7187a483ea030457c378a4933dc5d476b04b16d8ae15f0ff01e45912ba13042d.png", "route": "/hugo-chat"},
+            {"title": "Rita", "description": "Family support", "image_url": "https://static.prod-images.emergentagent.com/jobs/bf7a0a9a-b52d-4db3-b85e-aedfe9959d59/images/fd3c1add3b95c627676f7848bc963c3e1afe0b7c3e1187304df81ea307705318.png", "route": "/ai-chat?character=rita"},
         ]
         
         for i, char in enumerate(ai_characters):
