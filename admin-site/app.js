@@ -3493,6 +3493,7 @@ async function updateStaffStatus(profileId, role, newStatus) {
     } catch (error) {
         showNotification('Failed to update status: ' + error.message, 'error');
     }
+}
 
 
 // ==========================================
