@@ -28,6 +28,21 @@ export default function Index() {
   const { colors, theme } = useTheme();
   const styles = createStyles(colors);
   const [showAITeam, setShowAITeam] = useState(false);
+  
+  // Fetch CMS content for the home page (AI team section)
+  const { sections, isLoading } = useCMSContent('home');
+  const aiTeamSection = getSection(sections, 'ai_team');
+  const cmsAICards = aiTeamSection?.cards || [];
+  
+  // Use CMS data if available, otherwise fall back to hardcoded
+  const aiTeam = cmsAICards.length > 0 
+    ? cmsAICards.filter(c => c.is_visible).sort((a, b) => a.order - b.order).map(c => ({
+        name: c.title,
+        avatar: c.image_url || '',
+        description: c.description || '',
+        route: c.route || ''
+      }))
+    : FALLBACK_AI_TEAM;
 
   const toggleAITeam = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
