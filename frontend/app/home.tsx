@@ -13,14 +13,24 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 const NEW_LOGO_URL = require('../assets/images/logo.png');
 
+// AI Team member type
+interface AITeamMember {
+  name: string;
+  avatar: string;
+  description: string;
+  bio: string;
+  route: string;
+}
+
 // Fallback AI Team (used when CMS is empty or unavailable)
-const FALLBACK_AI_TEAM = [
-  { name: 'Tommy', avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png', description: 'Your battle buddy', route: '/ai-chat?character=tommy' },
-  { name: 'Doris', avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png', description: 'Warm support', route: '/ai-chat?character=doris' },
-  { name: 'Bob', avatar: 'https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png', description: 'Ex-Para peer support', route: '/bob-chat' },
-  { name: 'Finch', avatar: 'https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png', description: 'Crisis & PTSD support', route: '/sentry-chat' },
-  { name: 'Margie', avatar: 'https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/66c1d16c16a2b48675d2dd547d7c478f851091bca64411967ec1e1e493beb0ce.png', description: 'Alcohol & substance help', route: '/margie-chat' },
-  { name: 'Hugo', avatar: 'https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/c442477c08a58f435e73415dff4c7f2949a6bb2f7cd718e02e540951182dc14b.png', description: 'Self-help & wellness', route: '/hugo-chat' },
+const FALLBACK_AI_TEAM: AITeamMember[] = [
+  { name: 'Tommy', avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png', description: 'Your battle buddy', bio: 'Tommy is your straightforward battle buddy. A no-nonsense mate who tells it like it is, but always has your back. He understands military life inside out and provides honest, direct support.', route: '/ai-chat?character=tommy' },
+  { name: 'Doris', avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png', description: 'Warm support', bio: 'Doris is a nurturing, compassionate presence who creates a safe space to talk. She offers warmth and understanding, like a caring grandmother figure who listens without judgement.', route: '/ai-chat?character=doris' },
+  { name: 'Bob', avatar: 'https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png', description: 'Ex-Para peer support', bio: 'Bob is a down-to-earth ex-Para who keeps things real. He\'s been there, done that, and offers honest peer support from someone who truly understands the military experience.', route: '/bob-chat' },
+  { name: 'Finch', avatar: 'https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png', description: 'Crisis & PTSD support', bio: 'Finch is a watchful companion who provides steady support and practical guidance. He specialises in crisis support and understanding PTSD, offering a calm presence in difficult moments.', route: '/sentry-chat' },
+  { name: 'Margie', avatar: 'https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/66c1d16c16a2b48675d2dd547d7c478f851091bca64411967ec1e1e493beb0ce.png', description: 'Alcohol & substance help', bio: 'Margie is a wise, understanding presence with warmth and years of experience. She specialises in supporting those dealing with alcohol and substance challenges, offering non-judgemental guidance.', route: '/margie-chat' },
+  { name: 'Hugo', avatar: 'https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/c442477c08a58f435e73415dff4c7f2949a6bb2f7cd718e02e540951182dc14b.png', description: 'Self-help & wellness', bio: 'Hugo is a 35-year-old wellbeing coach focused on mental health, resilience and daily habits. He helps you build positive routines and manage stress through practical, actionable advice.', route: '/hugo-chat' },
+  { name: 'Rita', avatar: 'https://static.prod-images.emergentagent.com/jobs/bf7a0a9a-b52d-4db3-b85e-aedfe9959d59/images/fd3c1add3b95c627676f7848bc963c3e1afe0b7c3e1187304df81ea307705318.png', description: 'Family support', bio: 'Rita is a warm, grounded family-support companion for partners, spouses, parents and loved ones of military personnel. She\'s been around the military for a long time and understands what families go through.', route: '/ai-chat?character=rita' },
 ];
 
 export default function Index() {
@@ -28,6 +38,7 @@ export default function Index() {
   const { colors, theme } = useTheme();
   const styles = createStyles(colors);
   const [showAITeam, setShowAITeam] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<AITeamMember | null>(null);
   
   // Fetch CMS content for the home page (AI team section)
   const { sections, isLoading } = useCMSContent('home');
@@ -35,11 +46,12 @@ export default function Index() {
   const cmsAICards = aiTeamSection?.cards || [];
   
   // Use CMS data if available, otherwise fall back to hardcoded
-  const aiTeam = cmsAICards.length > 0 
+  const aiTeam: AITeamMember[] = cmsAICards.length > 0 
     ? cmsAICards.filter(c => c.is_visible).sort((a, b) => a.order - b.order).map(c => ({
         name: c.title,
         avatar: c.image_url || '',
         description: c.description || '',
+        bio: c.description || '',
         route: c.route || ''
       }))
     : FALLBACK_AI_TEAM;
@@ -47,6 +59,17 @@ export default function Index() {
   const toggleAITeam = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setShowAITeam(!showAITeam);
+  };
+
+  const handleMemberPress = (member: AITeamMember) => {
+    setSelectedMember(member);
+  };
+
+  const handleChatWithMember = () => {
+    if (selectedMember) {
+      router.push(selectedMember.route as any);
+      setSelectedMember(null);
+    }
   };
 
   return (
