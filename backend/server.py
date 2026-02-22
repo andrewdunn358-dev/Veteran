@@ -6137,6 +6137,25 @@ async def save_prompt_version(
 # Include the router in the main app (MUST be after all routes are defined)
 app.include_router(api_router)
 
+# Include modular routers from /routers directory
+from routers import (
+    staff, organizations, resources, safeguarding, 
+    callbacks, live_chat, notes, concerns,
+    message_queue, ai_feedback, knowledge_base
+)
+
+app.include_router(staff.router, prefix="/api")
+app.include_router(organizations.router, prefix="/api")
+app.include_router(resources.router, prefix="/api")
+app.include_router(safeguarding.router, prefix="/api")
+app.include_router(callbacks.router, prefix="/api")
+app.include_router(live_chat.router, prefix="/api")
+app.include_router(notes.router, prefix="/api")
+app.include_router(concerns.router, prefix="/api")
+app.include_router(message_queue.router, prefix="/api")
+app.include_router(ai_feedback.router, prefix="/api")
+app.include_router(knowledge_base.router, prefix="/api")
+
 # Serve static files for Staff Portal and Admin Site
 # This allows testing the portals from the preview environment
 PORTAL_PATH = Path(__file__).parent.parent / "staff-portal"
