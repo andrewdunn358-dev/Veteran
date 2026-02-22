@@ -303,6 +303,106 @@ export default function MoodTracker() {
               </View>
             </View>
 
+            {/* Mood Timeline Graph */}
+            <View style={styles.timelineSection}>
+              <Text style={styles.sectionTitle}>Mood Over Time</Text>
+              <View style={styles.graphContainer}>
+                {/* Y-axis labels */}
+                <View style={styles.yAxisLabels}>
+                  {moods.map((mood) => (
+                    <Text key={mood.value} style={styles.yAxisLabel}>{mood.emoji}</Text>
+                  ))}
+                </View>
+                
+                {/* Graph area */}
+                <View style={styles.graphArea}>
+                  {/* Grid lines */}
+                  <View style={styles.gridLines}>
+                    {[1, 2, 3, 4, 5].map((line) => (
+                      <View key={line} style={styles.gridLine} />
+                    ))}
+                  </View>
+                  
+                  {/* Data points */}
+                  <View style={styles.dataPoints}>
+                    {(() => {
+                      // Get last 7 entries for the graph
+                      const recentEntries = [...filteredEntries].slice(0, 7).reverse();
+                      const graphHeight = 120; // pixels
+                      
+                      return recentEntries.map((entry, index) => {
+                        const mood = moods.find(m => m.emoji === entry.mood);
+                        const value = mood?.value || 3;
+                        // Calculate position (1-5 scale, 5 is top)
+                        const bottomPosition = ((value - 1) / 4) * graphHeight;
+                        
+                        return (
+                          <View 
+                            key={entry.id} 
+                            style={[
+                              styles.dataPoint,
+                              { 
+                                bottom: bottomPosition,
+                                left: `${(index / Math.max(recentEntries.length - 1, 1)) * 100}%`,
+                                backgroundColor: mood?.color || '#64748b'
+                              }
+                            ]}
+                          >
+                            <Text style={styles.dataPointEmoji}>{entry.mood}</Text>
+                          </View>
+                        );
+                      });
+                    })()}
+                    
+                    {/* Connecting line */}
+                    {filteredEntries.length >= 2 && (
+                      <View style={styles.trendIndicator}>
+                        {(() => {
+                          const recent = filteredEntries.slice(0, 3);
+                          const avgRecent = recent.reduce((sum, e) => {
+                            const m = moods.find(mood => mood.emoji === e.mood);
+                            return sum + (m?.value || 3);
+                          }, 0) / recent.length;
+                          
+                          const older = filteredEntries.slice(3, 7);
+                          if (older.length === 0) return null;
+                          
+                          const avgOlder = older.reduce((sum, e) => {
+                            const m = moods.find(mood => mood.emoji === e.mood);
+                            return sum + (m?.value || 3);
+                          }, 0) / older.length;
+                          
+                          const trend = avgRecent - avgOlder;
+                          const trendIcon = trend > 0.3 ? '📈' : trend < -0.3 ? '📉' : '➡️';
+                          const trendText = trend > 0.3 ? 'Improving' : trend < -0.3 ? 'Declining' : 'Stable';
+                          const trendColor = trend > 0.3 ? '#22c55e' : trend < -0.3 ? '#ef4444' : '#64748b';
+                          
+                          return (
+                            <View style={styles.trendBadge}>
+                              <Text style={styles.trendEmoji}>{trendIcon}</Text>
+                              <Text style={[styles.trendText, { color: trendColor }]}>{trendText}</Text>
+                            </View>
+                          );
+                        })()}
+                      </View>
+                    )}
+                  </View>
+                </View>
+              </View>
+              
+              {/* X-axis date labels */}
+              <View style={styles.xAxisLabels}>
+                {(() => {
+                  const recentEntries = [...filteredEntries].slice(0, 7).reverse();
+                  return recentEntries.map((entry, index) => (
+                    <Text key={entry.id} style={styles.xAxisLabel}>
+                      {new Date(entry.timestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).split(' ')[0]}
+                    </Text>
+                  ));
+                })()}
+              </View>
+            </View>
+
             {/* History Toggle */}
             <TouchableOpacity
               style={styles.historyToggle}
