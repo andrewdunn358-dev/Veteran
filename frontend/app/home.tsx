@@ -224,12 +224,13 @@ export default function Index() {
           
           {showAITeam && (
             <View style={styles.aiTeamGrid}>
-              {AI_TEAM.map((member) => (
+              {aiTeam.map((member) => (
                 <TouchableOpacity 
                   key={member.name}
                   style={styles.aiTeamMember}
                   onPress={() => router.push(member.route as any)}
                   activeOpacity={0.8}
+                  data-testid={`ai-team-${member.name.toLowerCase()}`}
                 >
                   <Image source={{ uri: member.avatar }} style={styles.aiTeamAvatar} />
                   <Text style={styles.aiTeamName}>{member.name}</Text>
