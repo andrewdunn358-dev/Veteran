@@ -18,7 +18,14 @@ async def get_resources():
     """Get all resources"""
     db = get_database()
     resources = await db.resources.find({}).sort("order", 1).to_list(200)
-    return [{**r, "id": str(r.get("_id", r.get("id", "")))} for r in resources]
+    # Exclude MongoDB _id to avoid serialization issues
+    result = []
+    for r in resources:
+        item = {k: v for k, v in r.items() if k != "_id"}
+        if "id" not in item:
+            item["id"] = str(r.get("_id", ""))
+        result.append(item)
+    return result
 
 
 @router.post("/", response_model=Resource)
