@@ -897,12 +897,12 @@ AI_CHARACTERS = {
     "margie": {
         "name": "Margie",
         "prompt": MARGIE_SYSTEM_PROMPT,
-        "avatar": "https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/66c1d16c16a2b48675d2dd547d7c478f851091bca64411967ec1e1e493beb0ce.png"
+        "avatar": "https://static.prod-images.emergentagent.com/jobs/fba61e42-5a99-4622-a43b-84a14c5bcf87/images/313a20c933febb69cc523b6b3647ba814a5b9123a3ea7f674f7a87695a8a4789.png"
     },
     "hugo": {
         "name": "Hugo",
         "prompt": HUGO_SYSTEM_PROMPT,
-        "avatar": "https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/c442477c08a58f435e73415dff4c7f2949a6bb2f7cd718e02e540951182dc14b.png"
+        "avatar": "https://static.prod-images.emergentagent.com/jobs/fba61e42-5a99-4622-a43b-84a14c5bcf87/images/7187a483ea030457c378a4933dc5d476b04b16d8ae15f0ff01e45912ba13042d.png"
     },
     "rita": {
         "name": "Rita",
