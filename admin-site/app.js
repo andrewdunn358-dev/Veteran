@@ -590,6 +590,194 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// ============ CMS PREVIEW FUNCTIONALITY ============
+
+let currentPreviewPage = 'home';
+let previewCMSData = null;
+
+async function openCMSPreview() {
+    document.getElementById('cms-preview-modal').classList.remove('hidden');
+    await loadPreviewData();
+    refreshPreview();
+}
+
+function closeCMSPreview() {
+    document.getElementById('cms-preview-modal').classList.add('hidden');
+    const iframe = document.getElementById('preview-iframe');
+    iframe.src = '';
+}
+
+function changePreviewPage() {
+    currentPreviewPage = document.getElementById('preview-page-select').value;
+    loadPreviewData();
+    refreshPreview();
+}
+
+function refreshPreview() {
+    const iframe = document.getElementById('preview-iframe');
+    // Use the app URL with the selected page - add timestamp to force refresh
+    const appUrl = CONFIG.API_URL.replace('/api', '').replace(':8001', ':3000');
+    const pageRoute = currentPreviewPage === 'home' ? '/home' : '/' + currentPreviewPage;
+    iframe.src = appUrl + pageRoute + '?preview=' + Date.now();
+}
+
+async function loadPreviewData() {
+    const panel = document.getElementById('preview-content-panel');
+    panel.innerHTML = '<p style="color: var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+    
+    try {
+        const response = await apiCall(`/cms/pages/${currentPreviewPage}`);
+        previewCMSData = response;
+        renderPreviewContentPanel();
+    } catch (error) {
+        panel.innerHTML = `
+            <div style="padding: 20px; text-align: center; color: var(--text-secondary);">
+                <i class="fas fa-exclamation-circle" style="font-size: 32px; margin-bottom: 12px; color: #f59e0b;"></i>
+                <p>No CMS content found for this page.</p>
+                <p style="font-size: 13px;">Click "Load Defaults" in the CMS tab to seed content.</p>
+            </div>
+        `;
+    }
+}
+
+function renderPreviewContentPanel() {
+    const panel = document.getElementById('preview-content-panel');
+    
+    if (!previewCMSData || !previewCMSData.sections || previewCMSData.sections.length === 0) {
+        panel.innerHTML = '<p style="color: var(--text-secondary);">No sections found for this page.</p>';
+        return;
+    }
+    
+    let html = '';
+    
+    previewCMSData.sections.forEach(section => {
+        html += `
+            <div style="margin-bottom: 20px; background: var(--bg-secondary); border-radius: 8px; padding: 16px; border: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h5 style="margin: 0; color: var(--primary);">
+                        <i class="fas fa-layer-group"></i> ${formatSectionName(section.section_type)}
+                    </h5>
+                    <span style="font-size: 11px; background: var(--primary); color: white; padding: 2px 8px; border-radius: 10px;">
+                        ${section.cards ? section.cards.length : 0} cards
+                    </span>
+                </div>
+                ${section.title ? `<p style="margin: 0 0 8px 0; font-weight: 600; color: var(--text-primary);">${section.title}</p>` : ''}
+                ${section.subtitle ? `<p style="margin: 0 0 8px 0; font-size: 13px; color: var(--text-secondary);">${section.subtitle}</p>` : ''}
+                
+                ${section.cards && section.cards.length > 0 ? `
+                    <div style="display: grid; gap: 8px; margin-top: 12px;">
+                        ${section.cards.map(card => `
+                            <div style="background: var(--card-bg); padding: 12px; border-radius: 6px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--border-color);">
+                                ${card.icon ? `<i class="fas fa-${card.icon}" style="color: ${card.color || '#3b82f6'}; width: 24px; text-align: center;"></i>` : ''}
+                                ${card.image_url ? `<img src="${card.image_url}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">` : ''}
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-weight: 600; color: var(--text-primary); font-size: 13px;">${card.title}</div>
+                                    ${card.description ? `<div style="font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${card.description}</div>` : ''}
+                                </div>
+                                <button class="btn btn-small btn-secondary" onclick="editPreviewCard('${section.id}', '${card.id}')" title="Edit">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : '<p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">No cards in this section</p>'}
+            </div>
+        `;
+    });
+    
+    panel.innerHTML = html;
+}
+
+async function editPreviewCard(sectionId, cardId) {
+    // Find the card
+    let targetCard = null;
+    let targetSection = null;
+    
+    for (const section of previewCMSData.sections) {
+        if (section.id === sectionId) {
+            targetSection = section;
+            for (const card of section.cards || []) {
+                if (card.id === cardId) {
+                    targetCard = card;
+                    break;
+                }
+            }
+        }
+    }
+    
+    if (!targetCard) {
+        showNotification('Card not found', 'error');
+        return;
+    }
+    
+    // Create edit modal content
+    const modalContent = document.getElementById('modal-content');
+    modalContent.innerHTML = `
+        <h3><i class="fas fa-edit"></i> Edit Card</h3>
+        <form id="edit-card-form" onsubmit="savePreviewCard(event, '${cardId}')">
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="card-title" value="${escapeHtml(targetCard.title || '')}" required>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="card-description" rows="2">${escapeHtml(targetCard.description || '')}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Icon (FontAwesome name, e.g., "heart", "book")</label>
+                <input type="text" id="card-icon" value="${escapeHtml(targetCard.icon || '')}">
+            </div>
+            <div class="form-group">
+                <label>Image URL</label>
+                <input type="url" id="card-image" value="${escapeHtml(targetCard.image_url || '')}">
+            </div>
+            <div class="form-group">
+                <label>Color (hex, e.g., #3b82f6)</label>
+                <input type="text" id="card-color" value="${escapeHtml(targetCard.color || '')}" pattern="^#[0-9A-Fa-f]{6}$">
+            </div>
+            <div class="form-group">
+                <label>Route (e.g., /self-care)</label>
+                <input type="text" id="card-route" value="${escapeHtml(targetCard.route || '')}">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+            </div>
+        </form>
+    `;
+    
+    document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+async function savePreviewCard(event, cardId) {
+    event.preventDefault();
+    
+    const updateData = {
+        title: document.getElementById('card-title').value,
+        description: document.getElementById('card-description').value || null,
+        icon: document.getElementById('card-icon').value || null,
+        image_url: document.getElementById('card-image').value || null,
+        color: document.getElementById('card-color').value || null,
+        route: document.getElementById('card-route').value || null,
+    };
+    
+    try {
+        await apiCall(`/cms/cards/${cardId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updateData)
+        });
+        
+        showNotification('Card updated successfully');
+        closeModal();
+        
+        // Refresh both the preview and content panel
+        await loadPreviewData();
+        refreshPreview();
+    } catch (error) {
+        showNotification('Failed to update card: ' + error.message, 'error');
+    }
+}
+
 // Status Updates
 async function updateCounsellorStatus(id, status) {
     try {
