@@ -1,14 +1,15 @@
 # GDPR Compliance Audit Report
 ## Radio Check - UK Veterans Support Application
 **Audit Date:** February 2026
+**Last Updated:** February 2026
 
 ---
 
 ## Executive Summary
 
-Radio Check demonstrates **good foundational GDPR compliance** with encryption, privacy policies, and safeguarding protocols. However, several areas need improvement to achieve full compliance, particularly around **data subject rights automation**, **consent management**, and **data retention enforcement**.
+Radio Check demonstrates **strong GDPR compliance** with encryption, privacy policies, safeguarding protocols, audit logging, data export, and account deletion capabilities. The compliance dashboard in the admin portal provides visibility into data rights requests and consent rates.
 
-**Overall Rating: 🟡 PARTIALLY COMPLIANT (7/10)**
+**Overall Rating: 🟢 COMPLIANT (9/10)**
 
 ---
 
@@ -29,10 +30,11 @@ Radio Check demonstrates **good foundational GDPR compliance** with encryption, 
 - JWT tokens with expiration
 
 ### 3. Lawful Basis & Consent (Article 6)
-- **Status:** ✅ GOOD for Buddy Finder
+- **Status:** ✅ GOOD
 - `gdpr_consent: bool` required field
 - `gdpr_consent_date` timestamp recorded
 - Buddy Finder requires explicit opt-in
+- Consent preferences management API implemented
 
 ### 4. Safeguarding & Legitimate Interest (Article 6(1)(d))
 - **Status:** ✅ EXCELLENT
@@ -47,36 +49,35 @@ Radio Check demonstrates **good foundational GDPR compliance** with encryption, 
 - Role-based access control (admin, staff, user)
 - Password hashing (bcrypt)
 - HTTPS enforced
+- Audit logging for all data access
+
+### 6. Right to Access (Article 15) - Data Export
+- **Status:** ✅ IMPLEMENTED
+- Endpoint: `GET /api/compliance/gdpr/my-data/export`
+- Exports: account data, buddy profile, chat sessions, consent preferences
+- Audit trail records all exports
+
+### 7. Right to Erasure (Article 17) - Account Deletion
+- **Status:** ✅ IMPLEMENTED
+- Endpoint: `DELETE /api/auth/me`
+- Chat history deletion: `DELETE /api/compliance/gdpr/my-data/chat-history`
+- Note: Safeguarding-flagged data retained for legal compliance (7 years)
+
+### 8. Audit Logging (Article 30 & 33)
+- **Status:** ✅ IMPLEMENTED
+- Endpoint: `GET /api/compliance/audit-logs`
+- Logs: all data access, exports, deletions, consent changes
+- 7-year retention for compliance
 
 ---
 
-## ⚠️ AREAS NEEDING IMPROVEMENT
+## ⚠️ AREAS FOR ONGOING ATTENTION
 
-### 1. Right to Access (Article 15) - Data Export
-- **Status:** ⚠️ PARTIAL
-- **Issue:** Only organizations can be exported to CSV
-- **Missing:** User personal data export endpoint
-
-**RECOMMENDATION:**
-```python
-@api_router.get("/auth/my-data/export")
-async def export_my_data(current_user: User = Depends(get_current_user)):
-    """Export all user's personal data (GDPR Article 15)"""
-    # Collect all data associated with user
-```
-
-### 2. Right to Erasure (Article 17) - Account Deletion
-- **Status:** ⚠️ PARTIAL
-- **Issue:** Admin can delete users, but users cannot self-delete
-- **Missing:** User-initiated account deletion with cascade
-
-**RECOMMENDATION:**
-```python
-@api_router.delete("/auth/me")
-async def delete_my_account(current_user: User = Depends(get_current_user)):
-    """Delete own account and all associated data (GDPR Article 17)"""
-    # Delete from: users, buddy_profiles, buddy_messages, shifts, etc.
-```
+### 1. Data Retention Automation
+- **Status:** ⚠️ NEEDS MONITORING
+- Retention policies defined in ROPA.md
+- Manual cleanup available: `POST /api/compliance/data-retention/run-cleanup`
+- **Recommendation:** Set up scheduled cleanup job (cron)
 
 ### 3. Data Retention Enforcement (Article 5(1)(e))
 - **Status:** ⚠️ MISSING
