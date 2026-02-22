@@ -7,7 +7,46 @@
 - MongoDB database
 - Static HTML admin and staff portals
 
-## Core Features
+## Session Summary - February 22, 2026
+
+### ✅ Completed Today
+
+**🔴 Critical Items (All Done):**
+1. ✅ **Knowledge base seeded in production** - 11 UK veteran entries added
+2. ✅ **Test data cleaned from production** - 1 test counsellor removed
+3. ✅ **AI Chat Consent Screen (BACP)** - Enhanced consent modal with:
+   - Clear AI disclosure
+   - What AI can/cannot do
+   - Privacy & safeguarding notice
+   - Crisis contact numbers
+4. ✅ **Admin portal syntax fix** - Missing brace fixed (needs redeploy)
+
+**🟠 Important Items (All Done):**
+5. ✅ **Privacy Policy** - Created for mobile app (`/app/frontend/app/privacy-policy.tsx`) and website (`/app/website/privacy.html`)
+6. ✅ **Terms of Service** - Created for mobile app (`/app/frontend/app/terms-of-service.tsx`) and website (`/app/website/terms.html`)
+7. ✅ **App Store Assets** - Documentation created at `/app/docs/APP_STORE_ASSETS.md` with:
+   - App descriptions
+   - Screenshot requirements
+   - Keywords
+   - Review notes for Apple
+
+**Other Completed:**
+- ✅ Splash screen made responsive for small screens
+- ✅ Logo bug fixed on home page
+- ✅ Favicons added to admin and staff portals
+- ✅ GitHub docs reorganised into `/app/docs/`
+- ✅ MVP Assessment document created
+- ✅ Production Deployment Guide created
+- ✅ Metered.ca references removed (WebRTC working without it)
+
+### 🔄 Requires User Action
+
+| Task | Action Required |
+|------|-----------------|
+| **Admin Portal** | Redeploy `/app/admin-site/` files to your production server |
+| **Staff Portal** | Redeploy `/app/staff-portal/` files to your production server |
+| **Mobile App** | Rebuild with Expo EAS and test on device |
+| **Website** | Deploy `/app/website/` with new privacy.html and terms.html |
 
 ### User-Facing (Mobile App)
 - User authentication (JWT)
