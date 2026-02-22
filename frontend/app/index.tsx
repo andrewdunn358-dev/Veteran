@@ -149,7 +149,7 @@ export default function SplashScreen() {
                 />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => Linking.openURL('https://www.standingtall.co.uk/')}
+                onPress={() => Linking.openURL('https://www.standingtallfoundation.org.uk/')}
                 activeOpacity={0.8}
                 style={styles.supporterLogoWrapper}
               >
