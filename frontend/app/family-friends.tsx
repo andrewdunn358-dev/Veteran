@@ -205,6 +205,49 @@ export default function FamilyFriends() {
               </Text>
             </View>
 
+            {/* Rita AI Chat Card */}
+            <TouchableOpacity 
+              style={[styles.ritaCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              onPress={() => router.push({ pathname: '/ai-chat', params: { character: 'rita' } })}
+              data-testid="rita-chat-card"
+            >
+              <View style={styles.ritaContent}>
+                {ritaCharacter?.avatar ? (
+                  <Image 
+                    source={{ uri: ritaCharacter.avatar }} 
+                    style={styles.ritaAvatar}
+                  />
+                ) : (
+                  <View style={[styles.ritaAvatarPlaceholder, { backgroundColor: isDark ? '#334155' : '#e2e8f0' }]}>
+                    {loadingRita ? (
+                      <ActivityIndicator size="small" color="#2563eb" />
+                    ) : (
+                      <FontAwesome5 name="user" size={24} color="#64748b" />
+                    )}
+                  </View>
+                )}
+                <View style={styles.ritaInfo}>
+                  <View style={styles.ritaHeader}>
+                    <Text style={[styles.ritaName, { color: colors.text }]}>Talk to Rita</Text>
+                    <View style={styles.ritaBadge}>
+                      <FontAwesome5 name="comment-dots" size={10} color="#fff" />
+                      <Text style={styles.ritaBadgeText}>AI Support</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.ritaDesc, { color: colors.textSecondary }]}>
+                    Family support companion for partners, spouses & loved ones of military personnel
+                  </Text>
+                  <Text style={[styles.ritaBio, { color: colors.textMuted || '#64748b' }]} numberOfLines={2}>
+                    {ritaCharacter?.bio || "I've been around the military for a long time. I understand what families go through."}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.ritaAction}>
+                <Text style={styles.ritaActionText}>Chat Now</Text>
+                <FontAwesome5 name="arrow-right" size={12} color="#2563eb" />
+              </View>
+            </TouchableOpacity>
+
             <TouchableOpacity style={[styles.actionCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]} onPress={() => setView('concern')}>
               <View style={[styles.actionIcon, { backgroundColor: colors.background }]}>
                 <FontAwesome5 name="exclamation-circle" size={24} color="#dc2626" />
