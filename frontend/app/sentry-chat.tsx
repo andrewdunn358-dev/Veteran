@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AIConsentModal from '../src/components/AIConsentModal';
 
 const FINCH_AVATAR = 'https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png';
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
@@ -46,6 +47,8 @@ export default function FinchChatScreen() {
   const [pin, setPin] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
+  const [showAIConsent, setShowAIConsent] = useState(false);
+  const [hasAcceptedConsent, setHasAcceptedConsent] = useState(false);
   
   // Safeguarding state
   const [showSafeguardingModal, setShowSafeguardingModal] = useState(false);
@@ -71,8 +74,34 @@ export default function FinchChatScreen() {
   const [hasLoadedSession, setHasLoadedSession] = useState(false);
 
   useEffect(() => {
+    checkAIConsent();
     loadSavedSession();
   }, []);
+
+  const checkAIConsent = async () => {
+    try {
+      const consent = await AsyncStorage.getItem('ai_chat_consent_finch');
+      if (consent === 'true') {
+        setHasAcceptedConsent(true);
+      } else {
+        setShowAIConsent(true);
+      }
+    } catch (error) {
+      setShowAIConsent(true);
+    }
+  };
+
+  const handleAcceptConsent = async () => {
+    try {
+      await AsyncStorage.setItem('ai_chat_consent_finch', 'true');
+      await AsyncStorage.setItem('ai_chat_consent_date', new Date().toISOString());
+      setHasAcceptedConsent(true);
+      setShowAIConsent(false);
+    } catch (error) {
+      console.error('Error saving consent:', error);
+      setShowAIConsent(false);
+    }
+  };
   
   useEffect(() => {
     // Only show welcome message if no saved session or after verification
