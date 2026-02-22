@@ -265,25 +265,67 @@ export default function PodcastsScreen() {
                 
                 <Text style={styles.podcastDescription}>{podcast.description}</Text>
                 
-                {/* Latest Episode */}
+                {/* Latest Episode with Thumbnail */}
                 {latestEp && (
-                  <TouchableOpacity 
-                    style={styles.latestEpisode}
-                    onPress={() => latestEp.link && openLink(latestEp.link)}
-                    activeOpacity={0.7}
-                  >
-                    <View style={styles.latestEpisodeIcon}>
-                      <Ionicons name="play-circle" size={20} color="#db2777" />
-                    </View>
-                    <View style={styles.latestEpisodeInfo}>
-                      <Text style={styles.latestEpisodeLabel}>Latest Episode</Text>
-                      <Text style={styles.latestEpisodeTitle} numberOfLines={1}>{latestEp.title}</Text>
-                      {latestEp.date && (
-                        <Text style={styles.latestEpisodeDate}>{formatDate(latestEp.date)}</Text>
-                      )}
-                    </View>
-                    <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
-                  </TouchableOpacity>
+                  <View style={styles.latestEpisodeContainer}>
+                    <Text style={styles.latestEpisodeHeader}>Latest Episode</Text>
+                    
+                    {/* Video Thumbnail with Play Button */}
+                    {latestEp.video_id && latestEp.thumbnail ? (
+                      <TouchableOpacity 
+                        style={styles.videoThumbnailContainer}
+                        onPress={() => playVideo(latestEp.video_id!, latestEp.title)}
+                        activeOpacity={0.8}
+                        data-testid={`play-${podcast.id}`}
+                      >
+                        <Image 
+                          source={{ uri: latestEp.thumbnail }}
+                          style={styles.videoThumbnail}
+                          resizeMode="cover"
+                        />
+                        <View style={styles.playButtonOverlay}>
+                          <View style={styles.playButton}>
+                            <Ionicons name="play" size={32} color="#fff" />
+                          </View>
+                        </View>
+                        <View style={styles.videoDuration}>
+                          <Text style={styles.videoDurationText}>
+                            {latestEp.type === 'youtube' ? 'YouTube' : 'Podcast'}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity 
+                        style={styles.latestEpisodeFallback}
+                        onPress={() => latestEp.link && openLink(latestEp.link)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={styles.latestEpisodeIcon}>
+                          <Ionicons name="play-circle" size={24} color="#db2777" />
+                        </View>
+                        <View style={styles.latestEpisodeInfo}>
+                          <Text style={styles.latestEpisodeTitle} numberOfLines={2}>{latestEp.title}</Text>
+                          {latestEp.date && (
+                            <Text style={styles.latestEpisodeDate}>{formatDate(latestEp.date)}</Text>
+                          )}
+                        </View>
+                        <Ionicons name="open-outline" size={18} color={colors.textSecondary} />
+                      </TouchableOpacity>
+                    )}
+                    
+                    {/* Episode Title and Date */}
+                    {latestEp.video_id && (
+                      <View style={styles.episodeMetadata}>
+                        <Text style={styles.episodeTitle} numberOfLines={2}>{latestEp.title}</Text>
+                        {latestEp.date && (
+                          <Text style={styles.episodeDate}>{formatDate(latestEp.date)}</Text>
+                        )}
+                        {latestEp.description && (
+                          <Text style={styles.episodeDescription} numberOfLines={2}>{latestEp.description}</Text>
+                        )}
+                      </View>
+                    )}
+                  </View>
                 )}
                 
                 {/* Focus Tags */}
