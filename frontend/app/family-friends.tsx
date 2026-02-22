@@ -14,10 +14,12 @@ import { useRouter } from 'expo-router';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
+import { useCMSContent, getSection, CMSCard } from '../src/hooks/useCMSContent';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
-const SIGNS_OF_CHANGE = [
+// Fallback data (used when CMS is unavailable)
+const FALLBACK_SIGNS_OF_CHANGE = [
   { id: 'isolation', label: 'Withdrawing from friends/family', icon: 'user-times' },
   { id: 'sleep', label: 'Sleeping more or less than usual', icon: 'bed' },
   { id: 'drinking', label: 'Drinking more than usual', icon: 'wine-bottle' },
@@ -28,7 +30,7 @@ const SIGNS_OF_CHANGE = [
   { id: 'reckless', label: 'Reckless behaviour', icon: 'exclamation-triangle' },
 ];
 
-const SUPPORT_RESOURCES = [
+const FALLBACK_SUPPORT_RESOURCES = [
   { name: 'Op Courage', desc: 'NHS mental health service for serving personnel and veterans', phone: '0300 323 0137', url: 'https://www.nhs.uk/nhs-services/armed-forces-community/mental-health/veterans-reservists/' },
   { name: 'Combat Stress', desc: '24hr helpline for the armed forces community', phone: '0800 138 1619', url: 'https://combatstress.org.uk' },
   { name: 'SSAFA', desc: 'Armed Forces charity support', phone: '0800 260 6767', url: 'https://www.ssafa.org.uk' },
@@ -37,7 +39,7 @@ const SUPPORT_RESOURCES = [
   { name: 'Samaritans', desc: '24/7 emotional support', phone: '116 123', url: 'https://www.samaritans.org' },
 ];
 
-const ADDICTION_RESOURCES = [
+const FALLBACK_ADDICTION_RESOURCES = [
   { name: 'Tom Harrison House', desc: 'Residential rehab for armed forces personnel with addiction', phone: '0151 526 2109', url: 'https://www.tomharrisonhouse.org.uk' },
   { name: 'Change Grow Live', desc: 'Free drug & alcohol support', phone: '0808 802 9000', url: 'https://www.changegrowlive.org' },
   { name: 'Alcoholics Anonymous', desc: '24hr helpline for alcohol addiction', phone: '0800 917 7650', url: 'https://www.alcoholics-anonymous.org.uk' },
