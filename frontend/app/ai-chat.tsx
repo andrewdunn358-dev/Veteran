@@ -233,9 +233,20 @@ export default function AIChat() {
       }
     } catch (error) {
       console.error('Error getting greeting:', error);
+      // Character-specific fallback greetings
+      const greetings: Record<string, string> = {
+        tommy: "Hello, I'm Tommy. I'm here to listen whenever you need to talk.",
+        doris: "Hello love, I'm Doris. I'm here for you, whenever you need to chat.",
+        hugo: "Hey, Hugo here. How are you doing today?",
+        rita: "Hello love, I'm Rita. How are you doing today?",
+        bob: "Alright mate, Bob here. What's on your mind?",
+        margie: "Hello dear, I'm Margie. I'm here to listen.",
+        sentry: "Hello, Finch here. I'm here to help however I can.",
+      };
+      const fallbackGreeting = greetings[character] || `Hello, I'm here to listen whenever you need to talk.`;
       setMessages([{
         id: 'greeting',
-        text: `Hello, I'm ${character === 'doris' ? 'Doris' : 'Tommy'}. I'm here to listen whenever you need to talk.`,
+        text: fallbackGreeting,
         sender: 'buddy',
         timestamp: new Date(),
       }]);
