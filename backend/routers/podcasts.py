@@ -13,7 +13,16 @@ import logging
 router = APIRouter(prefix="/podcasts", tags=["podcasts"])
 logger = logging.getLogger(__name__)
 
-# Podcast RSS feed URLs
+# YouTube RSS feed URLs (preferred - more up to date)
+YOUTUBE_FEEDS = {
+    "frankies-pod": "https://www.youtube.com/feeds/videos.xml?channel_id=UCANN4qRGM5yyBUH27TWLbQQ",
+    "tom-petch": "https://www.youtube.com/feeds/videos.xml?channel_id=UCOadyBud5o3iK7YTkpYRBCQ",
+    "old-paratrooper": "https://www.youtube.com/feeds/videos.xml?channel_id=UC4oHlVmxAjog1Dz6BDByNfQ",
+    "beyond-barracks": "https://www.youtube.com/feeds/videos.xml?channel_id=UCh_L_4t746PldKRfIKvj-0w",
+    "military-veterans": "https://www.youtube.com/feeds/videos.xml?channel_id=UCchZkQj1bA3m21o_cLv8DuA",
+}
+
+# Fallback podcast RSS feed URLs
 PODCAST_FEEDS = {
     "frankies-pod": "https://feeds.acast.com/public/shows/6714f073e3d9082a5a2bf617",
     "tom-petch": "https://anchor.fm/s/10a795454/podcast/rss",
