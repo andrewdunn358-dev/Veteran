@@ -6173,6 +6173,72 @@ async def save_prompt_version(
     }
 
 
+@api_router.delete("/admin/cleanup-test-data")
+async def cleanup_test_data(
+    confirm: bool = False,
+    current_user: User = Depends(require_role("admin"))
+):
+    """
+    Clean up test data (counsellors, peer supporters) from the database.
+    Pass confirm=true to actually delete.
+    
+    This looks for:
+    - Names containing 'Test' or 'test'
+    - Emails containing 'test@' or '@test.com'
+    - Demo/fake entries
+    """
+    import re
+    
+    # Pattern to match test data
+    test_pattern = re.compile(r'test|demo|fake|example|sample', re.IGNORECASE)
+    
+    # Find test counsellors
+    all_counsellors = await db.counsellors.find({}).to_list(500)
+    test_counsellors = [c for c in all_counsellors 
+                       if test_pattern.search(c.get('name', '')) 
+                       or test_pattern.search(c.get('email', ''))]
+    
+    # Find test peer supporters
+    all_peers = await db.peer_supporters.find({}).to_list(500)
+    test_peers = [p for p in all_peers 
+                  if test_pattern.search(p.get('name', '')) 
+                  or test_pattern.search(p.get('email', ''))]
+    
+    if not confirm:
+        return {
+            "preview": True,
+            "message": "Add ?confirm=true to actually delete",
+            "counsellors_to_delete": [{
+                "id": c.get("id", str(c.get("_id", ""))),
+                "name": c.get("name"),
+                "email": c.get("email")
+            } for c in test_counsellors],
+            "peer_supporters_to_delete": [{
+                "id": p.get("id", str(p.get("_id", ""))),
+                "name": p.get("name"),
+                "email": p.get("email")
+            } for p in test_peers]
+        }
+    
+    # Actually delete
+    deleted_counsellors = 0
+    deleted_peers = 0
+    
+    for c in test_counsellors:
+        result = await db.counsellors.delete_one({"_id": c.get("_id")})
+        deleted_counsellors += result.deleted_count
+    
+    for p in test_peers:
+        result = await db.peer_supporters.delete_one({"_id": p.get("_id")})
+        deleted_peers += result.deleted_count
+    
+    return {
+        "success": True,
+        "deleted_counsellors": deleted_counsellors,
+        "deleted_peer_supporters": deleted_peers
+    }
+
+
 # Include the router in the main app (MUST be after all routes are defined)
 app.include_router(api_router)
 
