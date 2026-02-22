@@ -1716,6 +1716,83 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against a hash"""
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
+async def send_shift_notification_email(shift_data: dict, staff_email: str, notification_type: str = "created"):
+    """Send email notification when shift is created/updated/deleted"""
+    if not RESEND_API_KEY or not staff_email:
+        logging.info(f"Skipping shift email notification (API key: {bool(RESEND_API_KEY)}, email: {bool(staff_email)})")
+        return False
+    
+    try:
+        date_formatted = shift_data.get('date', '')
+        start_time = shift_data.get('start_time', '')
+        end_time = shift_data.get('end_time', '')
+        staff_name = shift_data.get('staff_name', 'Staff member')
+        
+        if notification_type == "created":
+            subject = f"Shift Confirmed - {date_formatted}"
+            action_text = "Your shift has been confirmed"
+            color = "#22c55e"  # Green
+        elif notification_type == "updated":
+            subject = f"Shift Updated - {date_formatted}"
+            action_text = "Your shift has been updated"
+            color = "#f59e0b"  # Amber
+        else:
+            subject = f"Shift Cancelled - {date_formatted}"
+            action_text = "Your shift has been cancelled"
+            color = "#ef4444"  # Red
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
+            <div style="background-color: white; border-radius: 12px; padding: 32px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="background-color: {color}; color: white; display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 14px;">
+                        Radio Check Rota
+                    </div>
+                </div>
+                
+                <h2 style="color: #1e293b; margin: 0 0 8px 0; text-align: center;">{action_text}</h2>
+                <p style="color: #64748b; text-align: center; margin: 0 0 24px 0;">Hi {staff_name}</p>
+                
+                <div style="background-color: #f1f5f9; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 8px 0; color: #64748b; width: 100px;">Date:</td>
+                            <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">{date_formatted}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #64748b;">Time:</td>
+                            <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">{start_time} - {end_time}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <p style="color: #64748b; font-size: 14px; text-align: center; margin: 0;">
+                    Please ensure you're available to support our veterans during this time.
+                </p>
+            </div>
+            
+            <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 24px;">
+                Radio Check Veterans Support • Peer Support Network
+            </p>
+        </body>
+        </html>
+        """
+        
+        params = {
+            "from": SENDER_EMAIL,
+            "to": [staff_email],
+            "subject": subject,
+            "html": html_content,
+        }
+        
+        resend.Emails.send(params)
+        logging.info(f"Shift notification email sent to {staff_email}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to send shift notification email: {str(e)}")
+        return False
+
 def create_access_token(data: dict) -> str:
     """Create JWT access token"""
     to_encode = data.copy()
