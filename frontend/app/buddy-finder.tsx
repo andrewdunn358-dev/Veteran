@@ -766,6 +766,73 @@ export default function BuddyFinderPage() {
           </View>
         </View>
       </Modal>
+
+      {/* Reply Modal */}
+      <Modal
+        visible={showReplyModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowReplyModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                Reply to {replyToMessage?.is_sent ? replyToMessage.to_name : replyToMessage?.from_name}
+              </Text>
+              <TouchableOpacity onPress={() => setShowReplyModal(false)}>
+                <Ionicons name="close" size={24} color="#94a3b8" />
+              </TouchableOpacity>
+            </View>
+            
+            {/* Original message preview */}
+            {replyToMessage && (
+              <View style={styles.originalMessage}>
+                <Text style={styles.originalLabel}>
+                  {replyToMessage.is_sent ? 'You wrote:' : 'They wrote:'}
+                </Text>
+                <Text style={styles.originalText} numberOfLines={3}>
+                  {replyToMessage.message}
+                </Text>
+              </View>
+            )}
+            
+            <TextInput
+              style={styles.messageInput}
+              placeholder="Write your reply..."
+              placeholderTextColor="#64748b"
+              multiline
+              numberOfLines={4}
+              value={replyText}
+              onChangeText={setReplyText}
+              textAlignVertical="top"
+            />
+            
+            <View style={styles.modalActions}>
+              <TouchableOpacity 
+                style={styles.cancelButton}
+                onPress={() => setShowReplyModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.sendButton, sendingMessage && styles.sendButtonDisabled]}
+                onPress={sendReply}
+                disabled={sendingMessage}
+              >
+                {sendingMessage ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="send" size={16} color="#fff" />
+                    <Text style={styles.sendButtonText}>Reply</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
