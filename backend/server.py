@@ -4501,6 +4501,77 @@ async def get_ai_characters():
         }
     }
 
+
+# ==========================================
+# Knowledge Base Integration for AI Chat
+# ==========================================
+
+async def get_knowledge_context(user_message: str, limit: int = 3) -> str:
+    """
+    Retrieve relevant information from the Knowledge Base to enhance AI responses.
+    Returns formatted context that can be injected into the system prompt.
+    """
+    try:
+        # Search for relevant knowledge entries
+        search_terms = user_message.lower().split()
+        
+        # Create regex patterns for flexible matching
+        regex_patterns = [{"search_text": {"$regex": term, "$options": "i"}} 
+                         for term in search_terms if len(term) > 3]
+        
+        if not regex_patterns:
+            return ""
+        
+        mongo_query = {"$or": regex_patterns}
+        
+        # Get matching entries, prefer verified ones
+        entries = await db.knowledge_base.find(mongo_query).sort("is_verified", -1).to_list(limit * 2)
+        
+        if not entries:
+            return ""
+        
+        # Score and rank entries
+        scored_entries = []
+        for entry in entries:
+            score = 0
+            search_text = entry.get("search_text", "")
+            
+            for term in search_terms:
+                if term in search_text:
+                    score += 1
+                if term in entry.get("title", "").lower():
+                    score += 2
+            
+            if entry.get("is_verified"):
+                score *= 1.2
+            
+            if score > 0:
+                scored_entries.append((entry, score))
+        
+        scored_entries.sort(key=lambda x: x[1], reverse=True)
+        top_entries = scored_entries[:limit]
+        
+        if not top_entries:
+            return ""
+        
+        # Format context for AI
+        context_parts = []
+        for entry, _ in top_entries:
+            title = entry.get("title", "")
+            content = entry.get("content", "")
+            if title and content:
+                context_parts.append(f"• {title}: {content}")
+        
+        if context_parts:
+            return "\n\n[VERIFIED UK VETERAN INFORMATION - Use this to help answer the user's question accurately:]\n" + "\n".join(context_parts)
+        
+        return ""
+        
+    except Exception as e:
+        logging.error(f"Error fetching knowledge context: {e}")
+        return ""
+
+
 @api_router.post("/ai-buddies/chat", response_model=BuddyChatResponse)
 async def buddy_chat(request: BuddyChatRequest, req: Request):
     """Chat with AI Battle Buddy - with rate limiting protection"""
