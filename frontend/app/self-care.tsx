@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 import { useCMSContent, getSection, CMSCard } from '../src/hooks/useCMSContent';
 
-const HUGO_AVATAR = 'https://static.prod-images.emergentagent.com/jobs/fba61e42-5a99-4622-a43b-84a14c5bcf87/images/7187a483ea030457c378a4933dc5d476b04b16d8ae15f0ff01e45912ba13042d.png';
+const HUGO_AVATAR = 'https://static.prod-images.emergentagent.com/jobs/56155002-fa62-4b53-8fda-4baf701ab83f/images/6be1ae886e76d7b380a66ef3eb98c183e26882fe8e9897aab7e8a8ad4320acb9.png';
 
 // Fallback hardcoded tools (used when CMS is empty or unavailable)
 const FALLBACK_TOOLS = [
