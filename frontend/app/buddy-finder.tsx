@@ -9,10 +9,12 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
@@ -35,6 +37,12 @@ export default function BuddyFinderPage() {
   const [loading, setLoading] = useState(true);
   const [regions, setRegions] = useState<string[]>([]);
   const [branches, setBranches] = useState<string[]>([]);
+  
+  // Message modal state
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [selectedBuddy, setSelectedBuddy] = useState<BuddyProfile | null>(null);
+  const [messageText, setMessageText] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
   
   // Filter state
   const [filterRegion, setFilterRegion] = useState('');
