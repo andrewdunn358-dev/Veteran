@@ -240,6 +240,23 @@ export default function Index() {
             <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
 
+          {/* Recommended Podcasts */}
+          <TouchableOpacity 
+            style={styles.menuCard}
+            onPress={() => router.push('/podcasts')}
+            activeOpacity={0.9}
+            data-testid="podcasts-btn"
+          >
+            <View style={[styles.cardIconContainer, { backgroundColor: '#fce7f3' }]}>
+              <Ionicons name="headset" size={28} color="#db2777" />
+            </View>
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>Recommended Podcasts</Text>
+              <Text style={styles.cardDescription}>Veteran stories & mental health support</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
+          </TouchableOpacity>
+
           {/* Request a Callback - now below Friends & Family */}
           <TouchableOpacity 
             style={[styles.menuCard, styles.callbackCard]}
