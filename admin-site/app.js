@@ -4209,3 +4209,317 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// ==========================================
+// COMPLIANCE TAB FUNCTIONS
+// ==========================================
+
+// Load compliance dashboard data
+async function loadComplianceDashboard() {
+    try {
+        const data = await apiCall('/compliance/dashboard');
+        
+        // Update GDPR metrics
+        document.getElementById('compliance-consent-rate').textContent = data.gdpr.consent_rate + '%';
+        document.getElementById('gdpr-exports').textContent = data.gdpr.data_exports_this_month;
+        document.getElementById('gdpr-deletions').textContent = data.gdpr.account_deletions_this_month;
+        document.getElementById('gdpr-ai-consent').textContent = data.gdpr.users_with_ai_consent + ' / ' + data.gdpr.total_users;
+        
+        // Update complaints
+        document.getElementById('compliance-complaints').textContent = data.complaints.open_complaints;
+        
+        // Update staff wellbeing
+        document.getElementById('staff-checkins').textContent = data.staff_wellbeing.checkins_this_week;
+        document.getElementById('staff-support-needed').textContent = data.staff_wellbeing.staff_needing_support;
+        document.getElementById('staff-supervision').textContent = data.staff_wellbeing.pending_supervision_requests;
+        
+        // Update security
+        document.getElementById('compliance-security-status').textContent = 
+            data.security.last_review_status ? data.security.last_review_status.replace('_', ' ') : 'No review';
+        document.getElementById('compliance-incidents').textContent = data.security.open_incidents;
+        
+        // Update audit
+        document.getElementById('audit-week-count').textContent = data.audit.entries_this_week;
+        
+        // Load incidents list
+        await loadIncidentsList();
+        
+        // Load complaints list
+        await loadComplaintsList();
+        
+    } catch (error) {
+        console.error('Failed to load compliance dashboard:', error);
+        showNotification('Failed to load compliance data: ' + error.message, 'error');
+    }
+}
+
+// Load security incidents list
+async function loadIncidentsList() {
+    try {
+        const data = await apiCall('/compliance/incidents?status=detected&status=investigating&status=contained');
+        const container = document.getElementById('incidents-list');
+        
+        if (data.incidents && data.incidents.length > 0) {
+            container.innerHTML = data.incidents.map(incident => `
+                <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px; background: var(--card-bg);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span class="badge ${getSeverityBadgeClass(incident.severity)}">${incident.severity.toUpperCase()}</span>
+                        <span style="color: var(--text-secondary); font-size: 12px;">${new Date(incident.detected_at).toLocaleDateString()}</span>
+                    </div>
+                    <h4 style="margin: 0 0 4px 0;">${escapeHtml(incident.title)}</h4>
+                    <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">${escapeHtml(incident.description).substring(0, 100)}...</p>
+                    <div style="margin-top: 8px;">
+                        <span class="badge badge-outline">${incident.status}</span>
+                        <button class="btn btn-outline btn-small" onclick="viewIncident('${incident.id}')" style="margin-left: 8px;">View</button>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = `
+                <p style="color: var(--text-secondary); text-align: center; padding: 20px;">
+                    <i class="fas fa-check-circle" style="color: #16a34a;"></i> No open incidents
+                </p>
+            `;
+        }
+    } catch (error) {
+        console.error('Failed to load incidents:', error);
+    }
+}
+
+// Load complaints list
+async function loadComplaintsList() {
+    try {
+        const data = await apiCall('/compliance/complaints?status=received&status=under_review&status=investigating');
+        const container = document.getElementById('complaints-list');
+        
+        if (data.complaints && data.complaints.length > 0) {
+            container.innerHTML = data.complaints.map(complaint => `
+                <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px; background: var(--card-bg);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span class="badge ${getPriorityBadgeClass(complaint.priority)}">${complaint.priority.toUpperCase()}</span>
+                        <span style="color: var(--text-secondary); font-size: 12px;">RC-${complaint.id.substring(0, 8).toUpperCase()}</span>
+                    </div>
+                    <h4 style="margin: 0 0 4px 0;">${escapeHtml(complaint.subject)}</h4>
+                    <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">Category: ${complaint.category}</p>
+                    <div style="margin-top: 8px;">
+                        <span class="badge badge-outline">${complaint.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = `
+                <p style="color: var(--text-secondary); text-align: center; padding: 20px;">
+                    <i class="fas fa-check-circle" style="color: #16a34a;"></i> No open complaints
+                </p>
+            `;
+        }
+    } catch (error) {
+        console.error('Failed to load complaints:', error);
+    }
+}
+
+// Get badge class for incident severity
+function getSeverityBadgeClass(severity) {
+    switch (severity) {
+        case 'critical': return 'badge-danger';
+        case 'high': return 'badge-warning';
+        case 'medium': return 'badge-info';
+        case 'low': return 'badge-secondary';
+        default: return 'badge-secondary';
+    }
+}
+
+// Get badge class for complaint priority
+function getPriorityBadgeClass(priority) {
+    switch (priority) {
+        case 'critical': return 'badge-danger';
+        case 'high': return 'badge-warning';
+        case 'normal': return 'badge-info';
+        case 'low': return 'badge-secondary';
+        default: return 'badge-secondary';
+    }
+}
+
+// Run automated security review
+async function runSecurityReview() {
+    try {
+        showNotification('Running security review...', 'info');
+        const review = await apiCall('/compliance/security/automated-review');
+        showNotification(`Security review complete: ${review.overall_status}`, 'success');
+        await loadComplianceDashboard();
+    } catch (error) {
+        showNotification('Security review failed: ' + error.message, 'error');
+    }
+}
+
+// Run data retention cleanup
+async function runDataRetentionCleanup() {
+    if (!confirm('This will permanently delete data older than retention periods. Continue?')) {
+        return;
+    }
+    
+    try {
+        showNotification('Running data cleanup...', 'info');
+        await apiCall('/compliance/data-retention/run-cleanup', { method: 'POST' });
+        showNotification('Data cleanup started', 'success');
+    } catch (error) {
+        showNotification('Data cleanup failed: ' + error.message, 'error');
+    }
+}
+
+// View audit logs
+async function viewAuditLogs() {
+    try {
+        const data = await apiCall('/compliance/audit-logs?limit=50');
+        
+        // Create modal content
+        const content = `
+            <div style="max-height: 60vh; overflow-y: auto;">
+                <table class="data-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Action</th>
+                            <th>Resource</th>
+                            <th>User</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.logs.map(log => `
+                            <tr>
+                                <td style="white-space: nowrap;">${new Date(log.timestamp).toLocaleString()}</td>
+                                <td><span class="badge badge-outline">${log.action}</span></td>
+                                <td>${log.resource_type}</td>
+                                <td>${log.user_email || 'System'}</td>
+                                <td>${escapeHtml(log.description).substring(0, 50)}...</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        // Show in modal
+        openGenericModal('Audit Logs', content);
+        
+    } catch (error) {
+        showNotification('Failed to load audit logs: ' + error.message, 'error');
+    }
+}
+
+// Open incident report modal
+function openNewIncidentModal() {
+    const content = `
+        <form id="incident-form" onsubmit="submitIncident(event)">
+            <div class="form-group">
+                <label>Incident Type</label>
+                <select id="incident-type" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                    <option value="">Select type...</option>
+                    <option value="data_breach">Data Breach</option>
+                    <option value="unauthorized_access">Unauthorized Access</option>
+                    <option value="service_outage">Service Outage</option>
+                    <option value="safeguarding_failure">Safeguarding Failure</option>
+                    <option value="privacy_violation">Privacy Violation</option>
+                    <option value="security_vulnerability">Security Vulnerability</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Severity</label>
+                <select id="incident-severity" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="incident-title" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="incident-description" rows="4" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Affected Systems (comma separated)</label>
+                <input type="text" id="incident-systems" placeholder="e.g., backend, database, mobile app" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+            </div>
+            <button type="submit" class="btn btn-danger" style="width: 100%;">
+                <i class="fas fa-exclamation-triangle"></i> Report Incident
+            </button>
+        </form>
+    `;
+    
+    openGenericModal('Report Security Incident', content);
+}
+
+// Submit incident report
+async function submitIncident(event) {
+    event.preventDefault();
+    
+    const incident = {
+        incident_type: document.getElementById('incident-type').value,
+        severity: document.getElementById('incident-severity').value,
+        title: document.getElementById('incident-title').value,
+        description: document.getElementById('incident-description').value,
+        detected_by: currentUser.email,
+        affected_systems: document.getElementById('incident-systems').value.split(',').map(s => s.trim()).filter(s => s)
+    };
+    
+    try {
+        await apiCall('/compliance/incidents', {
+            method: 'POST',
+            body: JSON.stringify(incident)
+        });
+        showNotification('Incident reported successfully', 'success');
+        closeModal();
+        await loadComplianceDashboard();
+    } catch (error) {
+        showNotification('Failed to report incident: ' + error.message, 'error');
+    }
+}
+
+// Generic modal helper
+function openGenericModal(title, content) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.id = 'generic-modal';
+    modal.innerHTML = `
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>${title}</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                ${content}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+// Download compliance document
+function downloadDocument(filename) {
+    showNotification(`Document ${filename} would be downloaded. In production, these are stored in /app/docs/compliance/`, 'info');
+}
+
+// Escape HTML for security
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Initialize compliance tab when clicked
+document.addEventListener('DOMContentLoaded', function() {
+    const complianceTab = document.querySelector('[data-tab="compliance"]');
+    if (complianceTab) {
+        complianceTab.addEventListener('click', function() {
+            setTimeout(loadComplianceDashboard, 100);
+        });
+    }
+});
