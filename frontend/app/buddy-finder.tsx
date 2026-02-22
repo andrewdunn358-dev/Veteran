@@ -276,7 +276,11 @@ export default function BuddyFinderPage() {
                   ))}
                 </View>
               )}
-              <TouchableOpacity style={styles.connectButton}>
+              <TouchableOpacity 
+                style={styles.connectButton}
+                onPress={() => openMessageModal(profile)}
+                data-testid={`send-message-${profile.id}`}
+              >
                 <Ionicons name="chatbubble-outline" size={16} color="#3b82f6" />
                 <Text style={styles.connectText}>Send Message</Text>
               </TouchableOpacity>
