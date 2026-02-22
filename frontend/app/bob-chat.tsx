@@ -70,10 +70,40 @@ export default function BobChatScreen() {
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [pendingPin, setPendingPin] = useState<string | null>(null);
   const [hasLoadedSession, setHasLoadedSession] = useState(false);
+  const [showAIConsent, setShowAIConsent] = useState(false);
+  const [hasAcceptedConsent, setHasAcceptedConsent] = useState(false);
 
   useEffect(() => {
-    loadSavedSession();
+    checkAIConsent();
   }, []);
+
+  const checkAIConsent = async () => {
+    try {
+      const consent = await AsyncStorage.getItem('ai_chat_consent_bob');
+      if (consent === 'true') {
+        setHasAcceptedConsent(true);
+        loadSavedSession();
+      } else {
+        setShowAIConsent(true);
+      }
+    } catch (error) {
+      setShowAIConsent(true);
+    }
+  };
+
+  const handleAcceptConsent = async () => {
+    try {
+      await AsyncStorage.setItem('ai_chat_consent_bob', 'true');
+      await AsyncStorage.setItem('ai_chat_consent_date', new Date().toISOString());
+      setHasAcceptedConsent(true);
+      setShowAIConsent(false);
+      loadSavedSession();
+    } catch (error) {
+      console.error('Error saving consent:', error);
+      setShowAIConsent(false);
+      loadSavedSession();
+    }
+  };
   
   useEffect(() => {
     // Only show welcome message if no saved session or after verification

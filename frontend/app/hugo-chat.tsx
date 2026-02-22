@@ -61,10 +61,40 @@ export default function HugoChatScreen() {
   const [sessionId] = useState(() => `hugo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   
   const [hasLoadedSession, setHasLoadedSession] = useState(false);
+  const [showAIConsent, setShowAIConsent] = useState(false);
+  const [hasAcceptedConsent, setHasAcceptedConsent] = useState(false);
 
   useEffect(() => {
-    setHasLoadedSession(true);
+    checkAIConsent();
   }, []);
+
+  const checkAIConsent = async () => {
+    try {
+      const consent = await AsyncStorage.getItem('ai_chat_consent_hugo');
+      if (consent === 'true') {
+        setHasAcceptedConsent(true);
+        setHasLoadedSession(true);
+      } else {
+        setShowAIConsent(true);
+      }
+    } catch (error) {
+      setShowAIConsent(true);
+    }
+  };
+
+  const handleAcceptConsent = async () => {
+    try {
+      await AsyncStorage.setItem('ai_chat_consent_hugo', 'true');
+      await AsyncStorage.setItem('ai_chat_consent_date', new Date().toISOString());
+      setHasAcceptedConsent(true);
+      setShowAIConsent(false);
+      setHasLoadedSession(true);
+    } catch (error) {
+      console.error('Error saving consent:', error);
+      setShowAIConsent(false);
+      setHasLoadedSession(true);
+    }
+  };
   
   useEffect(() => {
     if (hasLoadedSession && messages.length === 0) {
