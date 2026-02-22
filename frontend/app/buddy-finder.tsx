@@ -462,6 +462,65 @@ export default function BuddyFinderPage() {
       <View style={styles.container}>
         {view === 'browse' ? renderBrowse() : renderSignup()}
       </View>
+
+      {/* Message Modal */}
+      <Modal
+        visible={showMessageModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowMessageModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                Send Message to {selectedBuddy?.display_name}
+              </Text>
+              <TouchableOpacity onPress={() => setShowMessageModal(false)}>
+                <Ionicons name="close" size={24} color="#94a3b8" />
+              </TouchableOpacity>
+            </View>
+            
+            <Text style={styles.modalSubtitle}>
+              Your message will be sent securely. They can reply to continue the conversation.
+            </Text>
+            
+            <TextInput
+              style={styles.messageInput}
+              placeholder="Write your message here..."
+              placeholderTextColor="#64748b"
+              multiline
+              numberOfLines={4}
+              value={messageText}
+              onChangeText={setMessageText}
+              textAlignVertical="top"
+            />
+            
+            <View style={styles.modalActions}>
+              <TouchableOpacity 
+                style={styles.cancelButton}
+                onPress={() => setShowMessageModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.sendButton, sendingMessage && styles.sendButtonDisabled]}
+                onPress={sendMessage}
+                disabled={sendingMessage}
+              >
+                {sendingMessage ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="send" size={16} color="#fff" />
+                    <Text style={styles.sendButtonText}>Send</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
