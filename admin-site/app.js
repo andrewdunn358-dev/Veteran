@@ -542,38 +542,8 @@ function renderResources() {
 
 // Render CMS
 function renderCMS() {
-    const container = document.getElementById('cms-list');
-    
-    const pages = Object.keys(content);
-    if (pages.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-file-alt"></i>
-                <p>No content configured. Click "Load Defaults" to initialize or "Add Content" to create custom content.</p>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = pages.map(page => `
-        <div class="cms-card">
-            <h3 class="cms-page-title">${formatPageName(page)}</h3>
-            ${Object.entries(content[page]).map(([section, value]) => `
-                <div class="cms-section">
-                    <div class="cms-section-header">
-                        <div class="cms-section-title">${formatSectionName(section)}</div>
-                        <button class="btn btn-danger btn-small" onclick="deleteContent('${page}', '${section}')" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                    <div class="cms-section-value" onclick="openEditContentModal('${page}', '${section}', \`${escapeHtml(value)}\`)">
-                        ${value.length > 100 ? escapeHtml(value.substring(0, 100)) + '...' : escapeHtml(value)}
-                        <i class="fas fa-pencil-alt" style="float: right; opacity: 0.5;"></i>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `).join('');
+    // Initialize the WYSIWYG visual editor
+    initCMSEditor();
 }
 
 // Helper functions
