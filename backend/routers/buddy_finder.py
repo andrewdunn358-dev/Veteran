@@ -38,7 +38,7 @@ async def get_current_user_from_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         return payload.get("sub")
-    except:
+    except Exception:
         return None
 
 

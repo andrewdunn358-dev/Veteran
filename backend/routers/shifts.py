@@ -272,7 +272,7 @@ async def get_shift_coverage(start_date: str, end_date: str):
             end = datetime.strptime(shift.get("end_time", "17:00"), "%H:%M")
             hours = (end - start).seconds / 3600
             coverage[date_key]["total_hours"] += hours
-        except:
+        except (ValueError, KeyError):
             pass
     
     return coverage
