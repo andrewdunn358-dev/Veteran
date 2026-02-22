@@ -251,7 +251,7 @@ export default function Index() {
                 <TouchableOpacity 
                   key={member.name}
                   style={styles.aiTeamMember}
-                  onPress={() => router.push(member.route as any)}
+                  onPress={() => handleMemberPress(member)}
                   activeOpacity={0.8}
                   data-testid={`ai-team-${member.name.toLowerCase()}`}
                 >
@@ -263,6 +263,46 @@ export default function Index() {
             </View>
           )}
         </View>
+
+        {/* AI Team Member Bio Modal */}
+        <Modal
+          visible={selectedMember !== null}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setSelectedMember(null)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setSelectedMember(null)}
+          >
+            <View style={styles.modalContent}>
+              {selectedMember && (
+                <>
+                  <Image source={{ uri: selectedMember.avatar }} style={styles.modalAvatar} />
+                  <Text style={styles.modalName}>{selectedMember.name}</Text>
+                  <Text style={styles.modalDescription}>{selectedMember.description}</Text>
+                  <View style={styles.modalDivider} />
+                  <Text style={styles.modalBio}>{selectedMember.bio}</Text>
+                  <TouchableOpacity 
+                    style={styles.chatButton}
+                    onPress={handleChatWithMember}
+                    data-testid="chat-with-member-btn"
+                  >
+                    <Ionicons name="chatbubbles" size={20} color="#fff" />
+                    <Text style={styles.chatButtonText}>Chat with {selectedMember.name}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.closeButton}
+                    onPress={() => setSelectedMember(null)}
+                  >
+                    <Text style={styles.closeButtonText}>Close</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          </TouchableOpacity>
+        </Modal>
 
         {/* Disclaimer */}
         <View style={styles.disclaimer}>
