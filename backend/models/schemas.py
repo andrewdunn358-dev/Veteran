@@ -188,8 +188,26 @@ class CallIntent(BaseModel):
 
 
 # ==================================
-# CMS Models
+# CMS Models - Extended for Multiple Page Types
 # ==================================
+
+# Page Types:
+# - "standard" - Cards-based layout (default)
+# - "article" - Blog/article style with rich text
+# - "landing" - Hero + features layout
+# - "contact" - Contact form page
+# - "resources" - Resource list with categories
+# - "gallery" - Image/media gallery
+
+# Section Types:
+# - "cards" - Grid of clickable cards
+# - "hero" - Large banner with title/subtitle
+# - "text" - Rich text content
+# - "resources" - List of resources/links
+# - "accordion" - Collapsible FAQ style
+# - "testimonial" - Quotes/testimonials
+# - "stats" - Statistics/numbers display
+# - "cta" - Call-to-action banner
 
 class PageContent(BaseModel):
     page_name: str
@@ -211,37 +229,57 @@ class CMSPage(BaseModel):
     title: str
     description: str = ""
     meta_keywords: str = ""
+    page_type: str = "standard"  # standard, article, landing, contact, resources, gallery
+    layout: str = "default"  # default, sidebar, full-width
+    hero_image: str = ""
+    hero_overlay: bool = True
     is_visible: bool = True
+    show_in_nav: bool = True
+    nav_order: int = 0
+    icon: str = ""  # Navigation icon
+    parent_slug: str = ""  # For nested pages
     order: int = 0
     sections: List[Any] = []
+    custom_css: str = ""  # Custom styling per page
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 class CMSSection(BaseModel):
     id: str = ""
     page_slug: str
-    section_type: str = "cards"
+    section_type: str = "cards"  # cards, hero, text, resources, accordion, testimonial, stats, cta
     title: str = ""
     subtitle: str = ""
-    content: str = ""
+    content: str = ""  # Rich text/HTML content
+    background_color: str = ""
+    background_image: str = ""
+    text_color: str = ""
+    layout: str = "default"  # default, centered, left-aligned, alternating
+    columns: int = 2  # For card grids
     order: int = 0
     is_visible: bool = True
     cards: List[Any] = []
+    items: List[Dict[str, Any]] = []  # For accordion/resources
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class CMSCard(BaseModel):
     id: str = ""
     section_id: str
-    card_type: str = "link"
+    card_type: str = "link"  # link, phone, resource, image, video, stat
     title: str
     description: str = ""
     icon: str = ""
     color: str = "#3b82f6"
     bg_color: str = "#1e3a5f"
-    route: str = ""
-    external_url: str = ""
+    image_url: str = ""
+    video_url: str = ""
+    route: str = ""  # Internal link
+    external_url: str = ""  # External link
     phone: str = ""
+    stat_value: str = ""  # For stat cards
+    stat_label: str = ""
     order: int = 0
+    size: str = "default"  # default, small, large, featured
     is_visible: bool = True
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
