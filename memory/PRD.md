@@ -5,41 +5,35 @@ Build and enhance a mobile-first web application for UK serving personnel and ve
 
 ## What's Been Implemented
 
-### Session - 22 Feb 2026: CMS Integration Complete
+### Session - 22 Feb 2026
 
-**CMS Integration for Dynamic Content**
+#### CMS Preview Feature Added to Admin Portal
+Added live preview functionality to the Admin Portal's CMS tab:
 
-Created reusable CMS hook and connected key app pages:
+**New Features**:
+- **Preview App Button**: Opens a modal showing the app in a phone frame
+- **Live Preview**: Embedded iframe showing the actual React Native app
+- **Page Selector**: Switch between Home and Self-Care pages
+- **Content Panel**: View all CMS sections and cards for the selected page
+- **Inline Editing**: Click edit button on any card to modify title, description, icon, image, color, route
+- **Auto-Refresh**: Preview updates immediately after saving changes
 
-1. **New Hook**: `/app/frontend/src/hooks/useCMSContent.ts`
-   - `useCMSContent(pageSlug)` - Fetches CMS page with sections and cards
-   - `getSection(sections, sectionType)` - Helper to find specific section
-   - Handles loading states, errors, and graceful fallback
+**Files Changed**:
+- `/app/admin-site/index.html` - Added preview modal HTML
+- `/app/admin-site/app.js` - Added preview functions (openCMSPreview, loadPreviewData, editPreviewCard, etc.)
 
-2. **Updated Pages**:
-   - `home.tsx` - AI Team section now fetches from CMS (`ai_team` section)
-   - `self-care.tsx` - Tools grid now fetches from CMS (`cards` section)
+#### Buddy Finder Verified Working
+Confirmed Buddy Finder frontend is fully integrated with backend:
+- Browse profiles with filters (region, service branch)
+- Sign up with GDPR-compliant form
+- Profile cards display name, bio, interests, regiment
+- "Send Message" button ready for messaging feature
 
-3. **CMS Seeded** with default content via `/api/cms/seed`:
-   - Home page: 6 AI character cards
-   - Self-care page: 6 tool cards
-
-4. **Fallback System**: All pages have hardcoded fallback data so the app works even if CMS is empty or API fails
-
-**API Endpoints Used**:
-- `GET /api/cms/pages` - List all CMS pages
-- `GET /api/cms/pages/{slug}` - Get page with sections and cards
-- `POST /api/cms/seed` - Seed default content (admin only)
-
-### Session - 21 Feb 2026: Calendar/Availability Bug Fixed
-
-**Bug Fixed: Calendar not saving shifts in mobile app**
-- Changed `authToken` → `auth_token` (matching AuthContext)
-- Changed `userId`/`userName` → reading from `auth_user` JSON
-- Changed `peer_supporter_id` → `staff_id` (matching backend)
-
-**New Feature: Calendar in Staff Portal**
-- Added calendar/availability management to `/app/staff-portal/`
+#### CMS Integration Complete
+Connected key app pages to CMS APIs:
+- `home.tsx` - AI Team section CMS-driven
+- `self-care.tsx` - Tools grid CMS-driven
+- Fallback to hardcoded content if CMS unavailable
 
 ---
 
@@ -54,29 +48,33 @@ Created reusable CMS hook and connected key app pages:
 - `/app/frontend/app/home.tsx` - Home page with CMS AI team
 - `/app/frontend/app/self-care.tsx` - Self-care page with CMS tools
 
+### Admin Portal (with CMS Preview)
+- `/app/admin-site/index.html` - Admin portal with preview modal
+- `/app/admin-site/app.js` - JS including preview functions
+
 ### Mobile App (React Native/Expo)
+- `/app/frontend/app/buddy-finder.tsx` - Buddy Finder with browse/signup
 - `/app/frontend/app/my-availability.tsx` - Availability calendar screen
-- `/app/frontend/app/peer-portal.tsx` - Peer supporter portal
-- `/app/frontend/src/context/AuthContext.tsx` - Auth storage
 
 ### Web Portals (Static HTML/JS)  
 - `/app/staff-portal/` - Staff dashboard with calendar
-- `/app/admin-site/` - Admin dashboard
+- `/app/admin-site/` - Admin dashboard with CMS preview
 
 ### Backend
 - `/app/backend/server.py` - FastAPI server
 - CMS API: `/api/cms/pages`, `/api/cms/sections`, `/api/cms/cards`
-- Shifts API: `/api/shifts`
+- Buddy Finder API: `/api/buddy-finder/profiles`, `/api/buddy-finder/signup`
 
 ## Upcoming Tasks
 
-1. **P1 - Buddy Finder Frontend**: Wire up form to backend APIs
+1. **P2 - Connect more pages to CMS**: organizations, family-friends, etc.
 2. **P2 - Generate Contact CSV**: Run script for export
 3. **P2 - Email Notifications**: Set up for rota shifts
-4. **P2 - Connect more pages to CMS**: organizations, family-friends, etc.
+4. **P2 - Buddy Finder Messaging**: Enable "Send Message" functionality
 
 ## Deployment Notes
 Changes made in preview environment. User needs to:
 1. Push code to Git
 2. Redeploy app.radiocheck.me
-3. Redeploy radiocheck.me/staff-portal
+3. Redeploy radiocheck.me/admin-site
+4. Redeploy radiocheck.me/staff-portal
