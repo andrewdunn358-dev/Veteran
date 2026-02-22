@@ -816,12 +816,160 @@ async function loadLogsData() {
         document.getElementById('stat-escalations').textContent = logsData.safeguarding.length;
         document.getElementById('stat-panic').textContent = logsData.panic.length;
         
+        // Render charts
+        renderActivityTrendChart(logsData.calls, logsData.chats, logsData.safeguarding);
+        renderContactTypeChart(logsData.calls);
+        
         // Render current tab
         renderLogTab(currentLogTab);
     } catch (error) {
         console.error('Error loading logs:', error);
         showNotification('Failed to load logs', 'error');
     }
+}
+
+// Chart instances for cleanup
+let activityTrendChart = null;
+let contactTypeChart = null;
+
+function renderActivityTrendChart(calls, chats, safeguarding) {
+    const ctx = document.getElementById('activity-trend-chart');
+    if (!ctx) return;
+    
+    // Destroy existing chart
+    if (activityTrendChart) {
+        activityTrendChart.destroy();
+    }
+    
+    // Group data by date
+    const today = new Date();
+    const labels = [];
+    const callData = [];
+    const chatData = [];
+    const alertData = [];
+    
+    // Generate last 7 days
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        labels.push(date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' }));
+        
+        // Count items for this date
+        callData.push(calls.filter(c => c.timestamp && c.timestamp.startsWith(dateStr)).length);
+        chatData.push(chats.filter(c => c.created_at && c.created_at.startsWith(dateStr)).length);
+        alertData.push(safeguarding.filter(s => s.created_at && s.created_at.startsWith(dateStr)).length);
+    }
+    
+    activityTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Calls',
+                    data: callData,
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Chats',
+                    data: chatData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Alerts',
+                    data: alertData,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#94a3b8', padding: 20 }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                    ticks: { color: '#94a3b8' }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                    ticks: { color: '#94a3b8', stepSize: 1 }
+                }
+            }
+        }
+    });
+}
+
+function renderContactTypeChart(calls) {
+    const ctx = document.getElementById('contact-type-chart');
+    if (!ctx) return;
+    
+    // Destroy existing chart
+    if (contactTypeChart) {
+        contactTypeChart.destroy();
+    }
+    
+    // Count by contact type
+    const typeCounts = {
+        counsellor: 0,
+        peer: 0,
+        organization: 0,
+        crisis_line: 0
+    };
+    
+    calls.forEach(call => {
+        const type = call.contact_type || 'other';
+        if (typeCounts[type] !== undefined) {
+            typeCounts[type]++;
+        }
+    });
+    
+    const labels = ['Counsellors', 'Peer Support', 'Organizations', 'Crisis Lines'];
+    const data = [typeCounts.counsellor, typeCounts.peer, typeCounts.organization, typeCounts.crisis_line];
+    const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444'];
+    
+    contactTypeChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderColor: '#1e293b',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { 
+                        color: '#94a3b8',
+                        padding: 12,
+                        font: { size: 12 }
+                    }
+                }
+            }
+        }
+    });
 }
 
 function switchLogTab(tab) {
