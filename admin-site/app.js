@@ -4183,5 +4183,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
-}
