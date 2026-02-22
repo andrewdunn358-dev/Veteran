@@ -25,16 +25,16 @@ router = APIRouter(prefix="/cms", tags=["cms"])
 async def get_cms_pages():
     """Get list of all CMS pages (basic info only)"""
     db = get_database()
-    pages = await db.cms_pages.find({}, {"sections": 0}).sort("order", 1).to_list(100)
-    return [{**page, "id": str(page.get("_id", page.get("id", "")))} for page in pages]
+    pages = await db.cms_pages.find({}, {"_id": 0, "sections": 0}).sort("order", 1).to_list(100)
+    return pages
 
 
 @router.get("/pages/all")
 async def get_all_cms_pages():
     """Get all CMS pages with full details"""
     db = get_database()
-    pages = await db.cms_pages.find({}).sort("order", 1).to_list(100)
-    return [{**page, "id": str(page.get("_id", page.get("id", "")))} for page in pages]
+    pages = await db.cms_pages.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    return pages
 
 
 @router.get("/pages/{slug}")
