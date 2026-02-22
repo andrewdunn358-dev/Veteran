@@ -105,8 +105,10 @@ async def get_knowledge_entry(entry_id: str):
         raise HTTPException(status_code=404, detail="Entry not found")
     
     entry["id"] = str(entry.get("_id", entry.get("id", "")))
-    del entry["_id"] if "_id" in entry else None
-    del entry["search_text"] if "search_text" in entry else None
+    if "_id" in entry:
+        del entry["_id"]
+    if "search_text" in entry:
+        del entry["search_text"]
     
     return entry
 
