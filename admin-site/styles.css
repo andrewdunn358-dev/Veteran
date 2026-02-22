@@ -1759,3 +1759,215 @@ body {
         justify-content: center;
     }
 }
+
+/* Rota Tab Styles */
+.rota-section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+}
+
+.rota-section-title {
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rota-section-title i {
+    color: var(--primary);
+}
+
+.rota-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.shift-card {
+    background: var(--background);
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+}
+
+.shift-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.shift-card.counsellor {
+    border-left: 4px solid #22c55e;
+}
+
+.shift-card.peer {
+    border-left: 4px solid #3b82f6;
+}
+
+.shift-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.shift-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.shift-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.shift-role {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.shift-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.shift-time i {
+    color: var(--primary);
+}
+
+/* Coverage Stats */
+.coverage-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+}
+
+.stat-card {
+    background: var(--background);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid var(--border);
+}
+
+.stat-card.warning {
+    border-color: var(--warning);
+    background: rgba(234, 179, 8, 0.1);
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+
+.stat-card.warning .stat-value {
+    color: var(--warning);
+}
+
+.stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* Week View */
+.rota-week-view {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.week-day {
+    background: var(--background);
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    min-height: 120px;
+}
+
+.week-day.today {
+    border-color: var(--primary);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.week-day-header {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 13px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.week-day-date {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.week-day-shifts {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.week-shift-pill {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: var(--primary);
+    color: white;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.week-shift-pill.counsellor {
+    background: #22c55e;
+}
+
+.week-shift-pill.peer {
+    background: #3b82f6;
+}
+
+.loading-text {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.no-shifts-text {
+    color: var(--text-muted);
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .rota-week-view {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .coverage-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
