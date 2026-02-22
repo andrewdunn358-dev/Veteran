@@ -5180,6 +5180,17 @@ async def get_service_branches():
 # Include the router in the main app (MUST be after all routes are defined)
 app.include_router(api_router)
 
+# Serve static files for Staff Portal and Admin Site
+# This allows testing the portals from the preview environment
+PORTAL_PATH = Path(__file__).parent.parent / "staff-portal"
+ADMIN_PATH = Path(__file__).parent.parent / "admin-site"
+
+if PORTAL_PATH.exists():
+    app.mount("/portal", StaticFiles(directory=str(PORTAL_PATH), html=True), name="staff-portal")
+    
+if ADMIN_PATH.exists():
+    app.mount("/admin", StaticFiles(directory=str(ADMIN_PATH), html=True), name="admin-site")
+
 # Create ASGI app that combines FastAPI and Socket.IO
 # Store original FastAPI app
 _fastapi_app = app
