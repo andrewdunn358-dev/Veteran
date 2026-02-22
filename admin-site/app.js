@@ -3523,4 +3523,584 @@ async function updateStaffStatus(profileId, role, newStatus) {
     } catch (error) {
         showNotification('Failed to update status: ' + error.message, 'error');
     }
+
+
+// ==========================================
+// WYSIWYG CMS Visual Editor
+// ==========================================
+
+let currentCMSPage = 'home';
+let cmsPageData = null;
+let cmsPendingChanges = {};
+let editingElement = null;
+
+// Initialize CMS Visual Editor when tab is opened
+function initCMSEditor() {
+    loadCMSPage('home');
+}
+
+// Toggle between list and visual views
+function toggleCMSView(view) {
+    const visualEditor = document.getElementById('cms-visual-editor');
+    const listView = document.getElementById('cms-list-view');
+    
+    document.querySelectorAll('.tab-actions .btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    if (view === 'visual') {
+        visualEditor.style.display = 'flex';
+        listView.style.display = 'none';
+        document.getElementById('visual-view-btn')?.classList.add('active');
+        loadCMSPage(currentCMSPage);
+    } else {
+        visualEditor.style.display = 'none';
+        listView.style.display = 'grid';
+        loadCMSListView();
+    }
+}
+
+// Load a CMS page for editing
+async function loadCMSPage(slug) {
+    currentCMSPage = slug;
+    document.getElementById('cms-page-select').value = slug;
+    
+    const phoneContent = document.getElementById('cms-phone-content');
+    phoneContent.innerHTML = `
+        <p style="text-align: center; padding: 40px; color: #64748b;">
+            <i class="fas fa-spinner fa-spin"></i> Loading page...
+        </p>
+    `;
+    
+    try {
+        const response = await apiCall(`/cms/pages/${slug}`);
+        cmsPageData = response;
+        
+        // Update page title in phone header
+        document.getElementById('phone-page-title').textContent = response.title || slug;
+        
+        // Render page sections
+        renderPhonePreview(response);
+    } catch (error) {
+        console.error('Error loading CMS page:', error);
+        // If page doesn't exist, show empty state
+        phoneContent.innerHTML = `
+            <div class="add-section-placeholder" onclick="addNewSection()">
+                <i class="fas fa-plus" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <p>This page has no content yet.<br>Click to add your first section.</p>
+            </div>
+        `;
+    }
+}
+
+// Render the phone preview with editable sections
+function renderPhonePreview(pageData) {
+    const phoneContent = document.getElementById('cms-phone-content');
+    
+    if (!pageData.sections || pageData.sections.length === 0) {
+        phoneContent.innerHTML = `
+            <div class="add-section-placeholder" onclick="addNewSection()">
+                <i class="fas fa-plus" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <p>No sections yet. Click to add content.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    pageData.sections.forEach((section, sIdx) => {
+        html += `
+            <div class="phone-section" 
+                 data-section-id="${section.id}" 
+                 data-section-idx="${sIdx}"
+                 onclick="selectSection('${section.id}', event)">
+                <div class="section-order-controls">
+                    ${sIdx > 0 ? `<button class="order-btn" onclick="moveSectionUp('${section.id}', event)" title="Move up"><i class="fas fa-chevron-up"></i></button>` : ''}
+                    ${sIdx < pageData.sections.length - 1 ? `<button class="order-btn" onclick="moveSectionDown('${section.id}', event)" title="Move down"><i class="fas fa-chevron-down"></i></button>` : ''}
+                </div>
+                <button class="delete-element-btn" onclick="deleteSection('${section.id}', event)" title="Delete section">
+                    <i class="fas fa-times"></i>
+                </button>
+                ${section.title ? `<div class="phone-section-title" data-field="title">${section.title}</div>` : ''}
+                ${section.subtitle ? `<div class="phone-section-subtitle" data-field="subtitle">${section.subtitle}</div>` : ''}
+        `;
+        
+        // Render cards if present
+        if (section.cards && section.cards.length > 0) {
+            html += '<div class="phone-cards-grid">';
+            section.cards.forEach((card, cIdx) => {
+                const iconColor = card.color || '#3b82f6';
+                const bgColor = card.bg_color || 'rgba(59, 130, 246, 0.15)';
+                html += `
+                    <div class="phone-card" 
+                         data-card-id="${card.id}"
+                         data-section-id="${section.id}"
+                         onclick="selectCard('${card.id}', '${section.id}', event)">
+                        <button class="delete-element-btn" onclick="deleteCard('${card.id}', '${section.id}', event)" title="Delete card">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="phone-card-icon" style="background: ${bgColor}; color: ${iconColor};">
+                            <i class="${getIconClass(card.icon)}"></i>
+                        </div>
+                        <div class="phone-card-title">${card.title || 'Untitled'}</div>
+                        ${card.description ? `<div class="phone-card-desc">${card.description}</div>` : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            // Add card button
+            html += `
+                <button class="btn btn-secondary btn-small" style="width: 100%; margin-top: 12px;" onclick="addNewCard('${section.id}', event)">
+                    <i class="fas fa-plus"></i> Add Card
+                </button>
+            `;
+        }
+        
+        html += '</div>';
+    });
+    
+    // Add section button at the bottom
+    html += `
+        <div class="add-section-placeholder" onclick="addNewSection()">
+            <i class="fas fa-plus"></i> Add New Section
+        </div>
+    `;
+    
+    phoneContent.innerHTML = html;
+}
+
+// Helper to convert icon names to FontAwesome classes
+function getIconClass(iconName) {
+    if (!iconName) return 'fas fa-circle';
+    
+    // Map Ionicons to FontAwesome equivalents
+    const iconMap = {
+        'heart': 'fas fa-heart',
+        'people': 'fas fa-users',
+        'chatbubbles': 'fas fa-comments',
+        'call': 'fas fa-phone',
+        'book': 'fas fa-book',
+        'fitness': 'fas fa-dumbbell',
+        'medical': 'fas fa-medkit',
+        'home': 'fas fa-home',
+        'shield': 'fas fa-shield-alt',
+        'warning': 'fas fa-exclamation-triangle',
+        'information-circle': 'fas fa-info-circle',
+        'help-circle': 'fas fa-question-circle',
+        'star': 'fas fa-star',
+        'calendar': 'fas fa-calendar',
+        'location': 'fas fa-map-marker-alt',
+        'mail': 'fas fa-envelope',
+        'person': 'fas fa-user',
+        'settings': 'fas fa-cog',
+        'document': 'fas fa-file',
+        'clipboard': 'fas fa-clipboard',
+        'wine': 'fas fa-wine-glass',
+        'leaf': 'fas fa-leaf',
+        'moon': 'fas fa-moon',
+        'sunny': 'fas fa-sun',
+        'water': 'fas fa-tint',
+        'body': 'fas fa-running',
+        'cafe': 'fas fa-coffee',
+        'restaurant': 'fas fa-utensils',
+        'bed': 'fas fa-bed'
+    };
+    
+    return iconMap[iconName] || `fas fa-${iconName}`;
+}
+
+// Select a section for editing
+function selectSection(sectionId, event) {
+    event.stopPropagation();
+    
+    // Remove editing class from all elements
+    document.querySelectorAll('.phone-section, .phone-card').forEach(el => {
+        el.classList.remove('editing');
+    });
+    
+    // Add editing class to selected section
+    const sectionEl = document.querySelector(`[data-section-id="${sectionId}"]`);
+    if (sectionEl) {
+        sectionEl.classList.add('editing');
+    }
+    
+    // Find section data
+    const section = cmsPageData.sections.find(s => s.id === sectionId);
+    if (!section) return;
+    
+    editingElement = { type: 'section', id: sectionId, data: section };
+    renderEditPanel('section', section);
+}
+
+// Select a card for editing
+function selectCard(cardId, sectionId, event) {
+    event.stopPropagation();
+    
+    // Remove editing class from all elements
+    document.querySelectorAll('.phone-section, .phone-card').forEach(el => {
+        el.classList.remove('editing');
+    });
+    
+    // Add editing class to selected card
+    const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
+    if (cardEl) {
+        cardEl.classList.add('editing');
+    }
+    
+    // Find card data
+    const section = cmsPageData.sections.find(s => s.id === sectionId);
+    const card = section?.cards?.find(c => c.id === cardId);
+    if (!card) return;
+    
+    editingElement = { type: 'card', id: cardId, sectionId: sectionId, data: card };
+    renderEditPanel('card', card);
+}
+
+// Render the edit panel based on element type
+function renderEditPanel(type, data) {
+    const panel = document.getElementById('cms-edit-content');
+    
+    if (type === 'section') {
+        panel.innerHTML = `
+            <div class="edit-field">
+                <label>Section Title</label>
+                <input type="text" id="edit-title" value="${data.title || ''}" onchange="updateField('title', this.value)">
+            </div>
+            <div class="edit-field">
+                <label>Subtitle</label>
+                <textarea id="edit-subtitle" onchange="updateField('subtitle', this.value)">${data.subtitle || ''}</textarea>
+            </div>
+            <div class="edit-field">
+                <label>Section Type</label>
+                <select id="edit-section-type" onchange="updateField('section_type', this.value)">
+                    <option value="cards" ${data.section_type === 'cards' ? 'selected' : ''}>Cards Grid</option>
+                    <option value="hero" ${data.section_type === 'hero' ? 'selected' : ''}>Hero Banner</option>
+                    <option value="text" ${data.section_type === 'text' ? 'selected' : ''}>Text Content</option>
+                    <option value="resources" ${data.section_type === 'resources' ? 'selected' : ''}>Resources List</option>
+                </select>
+            </div>
+            <div class="edit-field">
+                <label>Visibility</label>
+                <select id="edit-visible" onchange="updateField('is_visible', this.value === 'true')">
+                    <option value="true" ${data.is_visible !== false ? 'selected' : ''}>Visible</option>
+                    <option value="false" ${data.is_visible === false ? 'selected' : ''}>Hidden</option>
+                </select>
+            </div>
+            <div class="edit-actions">
+                <button class="btn btn-primary" onclick="applyChanges()">
+                    <i class="fas fa-check"></i> Apply
+                </button>
+            </div>
+        `;
+    } else if (type === 'card') {
+        panel.innerHTML = `
+            <div class="edit-field">
+                <label>Card Title</label>
+                <input type="text" id="edit-title" value="${data.title || ''}" onchange="updateField('title', this.value)">
+            </div>
+            <div class="edit-field">
+                <label>Description</label>
+                <textarea id="edit-description" onchange="updateField('description', this.value)">${data.description || ''}</textarea>
+            </div>
+            <div class="edit-field">
+                <label>Icon Color</label>
+                <div class="color-picker-wrapper">
+                    <input type="color" id="edit-color" value="${data.color || '#3b82f6'}" onchange="updateField('color', this.value)">
+                    <input type="text" value="${data.color || '#3b82f6'}" onchange="document.getElementById('edit-color').value = this.value; updateField('color', this.value)">
+                </div>
+            </div>
+            <div class="edit-field">
+                <label>Background Color</label>
+                <div class="color-picker-wrapper">
+                    <input type="color" id="edit-bg-color" value="${data.bg_color || '#1e3a5f'}" onchange="updateField('bg_color', this.value)">
+                    <input type="text" value="${data.bg_color || '#1e3a5f'}" onchange="document.getElementById('edit-bg-color').value = this.value; updateField('bg_color', this.value)">
+                </div>
+            </div>
+            <div class="edit-field">
+                <label>Route (Internal Link)</label>
+                <input type="text" id="edit-route" value="${data.route || ''}" placeholder="/page-name" onchange="updateField('route', this.value)">
+            </div>
+            <div class="edit-field">
+                <label>External URL (Optional)</label>
+                <input type="text" id="edit-external-url" value="${data.external_url || ''}" placeholder="https://..." onchange="updateField('external_url', this.value)">
+            </div>
+            <div class="edit-field">
+                <label>Phone Number (Optional)</label>
+                <input type="text" id="edit-phone" value="${data.phone || ''}" placeholder="0800 123 456" onchange="updateField('phone', this.value)">
+            </div>
+            <div class="edit-actions">
+                <button class="btn btn-primary" onclick="applyChanges()">
+                    <i class="fas fa-check"></i> Apply
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Update a field value
+function updateField(field, value) {
+    if (!editingElement) return;
+    
+    editingElement.data[field] = value;
+    cmsPendingChanges[editingElement.id] = editingElement.data;
+    
+    // Show unsaved indicator
+    showUnsavedIndicator();
+}
+
+// Apply changes to the preview
+function applyChanges() {
+    if (!editingElement) return;
+    
+    // Update the data in cmsPageData
+    if (editingElement.type === 'section') {
+        const idx = cmsPageData.sections.findIndex(s => s.id === editingElement.id);
+        if (idx !== -1) {
+            cmsPageData.sections[idx] = { ...cmsPageData.sections[idx], ...editingElement.data };
+        }
+    } else if (editingElement.type === 'card') {
+        const section = cmsPageData.sections.find(s => s.id === editingElement.sectionId);
+        if (section) {
+            const cardIdx = section.cards.findIndex(c => c.id === editingElement.id);
+            if (cardIdx !== -1) {
+                section.cards[cardIdx] = { ...section.cards[cardIdx], ...editingElement.data };
+            }
+        }
+    }
+    
+    // Re-render preview
+    renderPhonePreview(cmsPageData);
+    showNotification('Changes applied to preview', 'success');
+}
+
+// Show unsaved changes indicator
+function showUnsavedIndicator() {
+    const indicator = document.querySelector('.unsaved-indicator');
+    if (indicator) {
+        indicator.classList.add('visible');
+    }
+}
+
+// Close edit panel
+function closeEditPanel() {
+    document.getElementById('cms-edit-content').innerHTML = `
+        <p style="color: var(--text-muted); text-align: center; padding: 40px;">
+            Click on any element in the preview to edit it
+        </p>
+    `;
+    
+    document.querySelectorAll('.phone-section, .phone-card').forEach(el => {
+        el.classList.remove('editing');
+    });
+    
+    editingElement = null;
+}
+
+// Add a new section
+async function addNewSection() {
+    const newSection = {
+        page_slug: currentCMSPage,
+        section_type: 'cards',
+        title: 'New Section',
+        subtitle: 'Click to edit this section',
+        order: cmsPageData?.sections?.length || 0,
+        is_visible: true
+    };
+    
+    try {
+        const result = await apiCall('/cms/sections', {
+            method: 'POST',
+            body: JSON.stringify(newSection)
+        });
+        
+        showNotification('Section added', 'success');
+        loadCMSPage(currentCMSPage);
+    } catch (error) {
+        showNotification('Failed to add section: ' + error.message, 'error');
+    }
+}
+
+// Add a new card to a section
+async function addNewCard(sectionId, event) {
+    event.stopPropagation();
+    
+    const newCard = {
+        section_id: sectionId,
+        card_type: 'link',
+        title: 'New Card',
+        description: 'Click to edit',
+        icon: 'star',
+        color: '#3b82f6',
+        bg_color: 'rgba(59, 130, 246, 0.15)',
+        order: 99
+    };
+    
+    try {
+        await apiCall('/cms/cards', {
+            method: 'POST',
+            body: JSON.stringify(newCard)
+        });
+        
+        showNotification('Card added', 'success');
+        loadCMSPage(currentCMSPage);
+    } catch (error) {
+        showNotification('Failed to add card: ' + error.message, 'error');
+    }
+}
+
+// Delete a section
+async function deleteSection(sectionId, event) {
+    event.stopPropagation();
+    
+    if (!confirm('Delete this section and all its cards?')) return;
+    
+    try {
+        await apiCall(`/cms/sections/${sectionId}`, { method: 'DELETE' });
+        showNotification('Section deleted', 'success');
+        loadCMSPage(currentCMSPage);
+    } catch (error) {
+        showNotification('Failed to delete section: ' + error.message, 'error');
+    }
+}
+
+// Delete a card
+async function deleteCard(cardId, sectionId, event) {
+    event.stopPropagation();
+    
+    if (!confirm('Delete this card?')) return;
+    
+    try {
+        await apiCall(`/cms/cards/${cardId}`, { method: 'DELETE' });
+        showNotification('Card deleted', 'success');
+        loadCMSPage(currentCMSPage);
+    } catch (error) {
+        showNotification('Failed to delete card: ' + error.message, 'error');
+    }
+}
+
+// Move section up
+async function moveSectionUp(sectionId, event) {
+    event.stopPropagation();
+    await reorderSection(sectionId, -1);
+}
+
+// Move section down
+async function moveSectionDown(sectionId, event) {
+    event.stopPropagation();
+    await reorderSection(sectionId, 1);
+}
+
+// Reorder sections
+async function reorderSection(sectionId, direction) {
+    const sections = cmsPageData.sections;
+    const currentIdx = sections.findIndex(s => s.id === sectionId);
+    const newIdx = currentIdx + direction;
+    
+    if (newIdx < 0 || newIdx >= sections.length) return;
+    
+    // Swap orders
+    const updates = {};
+    updates[sections[currentIdx].id] = newIdx;
+    updates[sections[newIdx].id] = currentIdx;
+    
+    try {
+        await apiCall('/cms/sections/reorder', {
+            method: 'PUT',
+            body: JSON.stringify(updates)
+        });
+        
+        loadCMSPage(currentCMSPage);
+    } catch (error) {
+        showNotification('Failed to reorder: ' + error.message, 'error');
+    }
+}
+
+// Save all CMS changes
+async function saveCMSChanges() {
+    if (Object.keys(cmsPendingChanges).length === 0) {
+        showNotification('No changes to save', 'info');
+        return;
+    }
+    
+    try {
+        // Save each changed element
+        for (const [id, data] of Object.entries(cmsPendingChanges)) {
+            if (data.section_type !== undefined) {
+                // It's a section
+                await apiCall(`/cms/sections/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+            } else {
+                // It's a card
+                await apiCall(`/cms/cards/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+            }
+        }
+        
+        cmsPendingChanges = {};
+        document.querySelector('.unsaved-indicator')?.classList.remove('visible');
+        showNotification('All changes saved!', 'success');
+        loadCMSPage(currentCMSPage);
+    } catch (error) {
+        showNotification('Failed to save: ' + error.message, 'error');
+    }
+}
+
+// Load the traditional list view
+async function loadCMSListView() {
+    const container = document.getElementById('cms-list-view');
+    container.innerHTML = '<p style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+    
+    try {
+        const pages = await apiCall('/cms/pages/all');
+        
+        if (!pages || pages.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 60px; color: var(--text-muted);">
+                    <i class="fas fa-file-alt" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <p>No CMS pages found. Switch to Visual Editor to create content.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = pages.map(page => `
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3>${page.title}</h3>
+                        <p style="color: var(--text-muted); font-size: 13px;">/${page.slug}</p>
+                    </div>
+                    <span class="badge ${page.is_visible ? 'badge-success' : 'badge-secondary'}">
+                        ${page.is_visible ? 'Visible' : 'Hidden'}
+                    </span>
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn-primary btn-small" onclick="toggleCMSView('visual'); loadCMSPage('${page.slug}')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        container.innerHTML = `<p style="color: var(--danger); padding: 20px;">Error: ${error.message}</p>`;
+    }
+}
+
+// Initialize CMS editor when CMS tab is clicked
+document.addEventListener('DOMContentLoaded', function() {
+    // Listen for CMS tab activation
+    const cmsTab = document.querySelector('[data-tab="cms"]');
+    if (cmsTab) {
+        cmsTab.addEventListener('click', function() {
+            setTimeout(initCMSEditor, 100);
+        });
+    }
+});
+
 }
