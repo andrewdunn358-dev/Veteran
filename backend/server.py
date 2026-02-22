@@ -1737,7 +1737,8 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         return User(**user_data)
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
-    except jwt.JWTError:
+    except Exception as e:
+        # Catch all JWT-related errors
         raise HTTPException(status_code=401, detail="Could not validate credentials")
 
 def require_role(*required_roles: str):
