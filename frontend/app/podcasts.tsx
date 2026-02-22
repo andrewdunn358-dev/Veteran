@@ -394,6 +394,56 @@ export default function PodcastsScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* YouTube Video Player Modal */}
+      <Modal
+        visible={playingVideo !== null}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={closeVideo}
+      >
+        <SafeAreaView style={styles.videoModal}>
+          <View style={styles.videoModalHeader}>
+            <TouchableOpacity 
+              style={styles.closeVideoButton}
+              onPress={closeVideo}
+              data-testid="close-video"
+            >
+              <Ionicons name="close" size={28} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={styles.videoModalTitle} numberOfLines={2}>
+              {playingVideo?.title || 'Now Playing'}
+            </Text>
+            <View style={{ width: 40 }} />
+          </View>
+          
+          {playingVideo && (
+            <View style={styles.videoPlayerContainer}>
+              <YoutubePlayer
+                height={SCREEN_WIDTH * 0.5625} // 16:9 aspect ratio
+                width={SCREEN_WIDTH}
+                play={isPlaying}
+                videoId={playingVideo.videoId}
+                onChangeState={onStateChange}
+              />
+            </View>
+          )}
+          
+          <View style={styles.videoActions}>
+            <TouchableOpacity 
+              style={styles.watchOnYouTubeButton}
+              onPress={() => {
+                if (playingVideo) {
+                  openLink(`https://www.youtube.com/watch?v=${playingVideo.videoId}`);
+                }
+              }}
+            >
+              <Ionicons name="logo-youtube" size={20} color="#FF0000" />
+              <Text style={styles.watchOnYouTubeText}>Watch on YouTube</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
