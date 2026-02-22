@@ -3614,10 +3614,15 @@ function renderPhonePreview(pageData) {
             <div class="phone-section" 
                  data-section-id="${section.id}" 
                  data-section-idx="${sIdx}"
+                 draggable="true"
+                 ondragstart="handleDragStart(event, '${section.id}')"
+                 ondragend="handleDragEnd(event)"
+                 ondragover="handleDragOver(event)"
+                 ondragleave="handleDragLeave(event)"
+                 ondrop="handleDrop(event, '${section.id}')"
                  onclick="selectSection('${section.id}', event)">
-                <div class="section-order-controls">
-                    ${sIdx > 0 ? `<button class="order-btn" onclick="moveSectionUp('${section.id}', event)" title="Move up"><i class="fas fa-chevron-up"></i></button>` : ''}
-                    ${sIdx < pageData.sections.length - 1 ? `<button class="order-btn" onclick="moveSectionDown('${section.id}', event)" title="Move down"><i class="fas fa-chevron-down"></i></button>` : ''}
+                <div class="section-drag-handle" title="Drag to reorder">
+                    <i class="fas fa-grip-vertical"></i>
                 </div>
                 <button class="delete-element-btn" onclick="deleteSection('${section.id}', event)" title="Delete section">
                     <i class="fas fa-times"></i>
