@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
+import { useCMSContent, getSection, CMSCard } from '../src/hooks/useCMSContent';
 
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -12,44 +13,14 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 const NEW_LOGO_URL = require('../assets/images/logo.png');
 
-// AI Team Avatars
-const AI_TEAM = [
-  {
-    name: 'Tommy',
-    avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png',
-    description: 'Your battle buddy',
-    route: '/ai-chat?character=tommy',
-  },
-  {
-    name: 'Doris',
-    avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png',
-    description: 'Warm support',
-    route: '/ai-chat?character=doris',
-  },
-  {
-    name: 'Bob',
-    avatar: 'https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png',
-    description: 'Ex-Para peer support',
-    route: '/bob-chat',
-  },
-  {
-    name: 'Finch',
-    avatar: 'https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png',
-    description: 'Crisis & PTSD support',
-    route: '/sentry-chat',
-  },
-  {
-    name: 'Margie',
-    avatar: 'https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/66c1d16c16a2b48675d2dd547d7c478f851091bca64411967ec1e1e493beb0ce.png',
-    description: 'Alcohol & substance help',
-    route: '/margie-chat',
-  },
-  {
-    name: 'Hugo',
-    avatar: 'https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/c442477c08a58f435e73415dff4c7f2949a6bb2f7cd718e02e540951182dc14b.png',
-    description: 'Self-help & wellness',
-    route: '/hugo-chat',
-  },
+// Fallback AI Team (used when CMS is empty or unavailable)
+const FALLBACK_AI_TEAM = [
+  { name: 'Tommy', avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png', description: 'Your battle buddy', route: '/ai-chat?character=tommy' },
+  { name: 'Doris', avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png', description: 'Warm support', route: '/ai-chat?character=doris' },
+  { name: 'Bob', avatar: 'https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png', description: 'Ex-Para peer support', route: '/bob-chat' },
+  { name: 'Finch', avatar: 'https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png', description: 'Crisis & PTSD support', route: '/sentry-chat' },
+  { name: 'Margie', avatar: 'https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/66c1d16c16a2b48675d2dd547d7c478f851091bca64411967ec1e1e493beb0ce.png', description: 'Alcohol & substance help', route: '/margie-chat' },
+  { name: 'Hugo', avatar: 'https://static.prod-images.emergentagent.com/jobs/fd3c26bb-5341-49b7-bc1b-44756ad6423e/images/c442477c08a58f435e73415dff4c7f2949a6bb2f7cd718e02e540951182dc14b.png', description: 'Self-help & wellness', route: '/hugo-chat' },
 ];
 
 export default function Index() {
