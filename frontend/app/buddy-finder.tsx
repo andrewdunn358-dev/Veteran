@@ -1241,4 +1241,118 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
+  // Inbox styles
+  inboxTabIcon: {
+    position: 'relative',
+  },
+  unreadBadge: {
+    position: 'absolute',
+    top: -6,
+    right: -8,
+    backgroundColor: '#ef4444',
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  unreadBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  inboxList: {
+    flex: 1,
+  },
+  inboxItem: {
+    backgroundColor: '#1e293b',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+  },
+  inboxItemUnread: {
+    borderLeftWidth: 3,
+    borderLeftColor: '#3b82f6',
+  },
+  inboxHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  inboxAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#3b82f6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inboxAvatarSent: {
+    backgroundColor: '#475569',
+  },
+  inboxAvatarText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  inboxContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  inboxTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  inboxName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    flex: 1,
+  },
+  inboxTime: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  inboxPreview: {
+    fontSize: 14,
+    color: '#94a3b8',
+    lineHeight: 20,
+  },
+  sentLabel: {
+    color: '#64748b',
+    fontStyle: 'italic',
+  },
+  replyHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#334155',
+  },
+  replyHintText: {
+    fontSize: 13,
+    color: '#3b82f6',
+  },
+  originalMessage: {
+    backgroundColor: '#0f172a',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+    borderLeftWidth: 3,
+    borderLeftColor: '#475569',
+  },
+  originalLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    marginBottom: 4,
+  },
+  originalText: {
+    fontSize: 14,
+    color: '#94a3b8',
+    lineHeight: 20,
+  },
 });
