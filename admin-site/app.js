@@ -3506,7 +3506,32 @@ let editingElement = null;
 
 // Initialize CMS Visual Editor when tab is opened
 function initCMSEditor() {
-    loadCMSPage('home');
+    loadCMSPageDropdown().then(() => {
+        loadCMSPage('home');
+    });
+}
+
+// Load page options dynamically from API
+async function loadCMSPageDropdown() {
+    const select = document.getElementById('cms-page-select');
+    if (!select) return;
+    
+    try {
+        const pages = await apiCall('/cms/pages');
+        select.innerHTML = pages.map(page => 
+            `<option value="${page.slug}">${page.title}</option>`
+        ).join('');
+    } catch (error) {
+        console.error('Failed to load CMS pages:', error);
+        // Fallback to default pages
+        select.innerHTML = `
+            <option value="home">Home</option>
+            <option value="self-care">Self Care</option>
+            <option value="family-friends">Family & Friends</option>
+            <option value="organizations">Support Organizations</option>
+            <option value="peer-support">Peer Support</option>
+        `;
+    }
 }
 
 // Toggle between list and visual views
