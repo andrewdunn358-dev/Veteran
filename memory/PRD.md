@@ -110,10 +110,12 @@
 ```
 /app/backend/
 ├── server.py                    # Main entry + AI chat with Knowledge Base
-├── routers/                     # 15 modular API routers
+├── compliance.py                # Compliance models and helpers
+├── routers/                     # 16 modular API routers
 │   ├── auth.py                  # Authentication + push tokens
 │   ├── cms.py                   # Content Management System
 │   ├── shifts.py                # Staff scheduling
+│   ├── compliance.py            # GDPR, BACP, audit logging, data protection
 │   ├── buddy_finder.py          # Peer matching
 │   ├── staff.py                 # Counsellors/Peers
 │   ├── organizations.py         # Support orgs
