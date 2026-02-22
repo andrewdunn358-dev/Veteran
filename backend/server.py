@@ -5425,6 +5425,65 @@ async def get_buddy_messages(
     
     return messages
 
+@api_router.get("/buddy-finder/inbox")
+async def get_buddy_inbox(
+    current_user: User = Depends(get_current_user)
+):
+    """Get messages for the current logged-in user"""
+    # Find the user's buddy profile by email
+    profile = await db.buddy_profiles.find_one({"email": current_user.email})
+    
+    if not profile:
+        return {"messages": [], "profile_id": None, "has_profile": False}
+    
+    profile_id = profile["id"]
+    
+    # Get all messages (sent and received)
+    messages = await db.buddy_messages.find({
+        "$or": [
+            {"from_profile_id": profile_id},
+            {"to_profile_id": profile_id}
+        ]
+    }, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Get unread count
+    unread_count = await db.buddy_messages.count_documents({
+        "to_profile_id": profile_id, 
+        "is_read": False
+    })
+    
+    # Mark received messages as read
+    await db.buddy_messages.update_many(
+        {"to_profile_id": profile_id, "is_read": False},
+        {"$set": {"is_read": True}}
+    )
+    
+    # Get sender/receiver profiles for display names
+    profile_ids = set()
+    for msg in messages:
+        profile_ids.add(msg.get("from_profile_id"))
+        profile_ids.add(msg.get("to_profile_id"))
+    
+    profiles = await db.buddy_profiles.find(
+        {"id": {"$in": list(profile_ids)}},
+        {"_id": 0, "id": 1, "display_name": 1}
+    ).to_list(100)
+    
+    profile_map = {p["id"]: p["display_name"] for p in profiles}
+    
+    # Enrich messages with display names
+    for msg in messages:
+        msg["from_name"] = profile_map.get(msg.get("from_profile_id"), "Unknown")
+        msg["to_name"] = profile_map.get(msg.get("to_profile_id"), "Unknown")
+        msg["is_sent"] = msg.get("from_profile_id") == profile_id
+    
+    return {
+        "messages": messages,
+        "profile_id": profile_id,
+        "has_profile": True,
+        "unread_count": unread_count
+    }
+
 @api_router.get("/buddy-finder/regions")
 async def get_buddy_regions():
     """Get list of UK regions for dropdown"""
