@@ -44,7 +44,19 @@ export default function AIChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [characterInfo, setCharacterInfo] = useState<CharacterInfo>({ name: 'Tommy', avatar: '' });
+  const [characterInfo, setCharacterInfo] = useState<CharacterInfo>(() => {
+    // Set initial name based on character parameter
+    const names: Record<string, string> = {
+      tommy: 'Tommy',
+      doris: 'Doris',
+      hugo: 'Hugo',
+      rita: 'Rita',
+      bob: 'Bob',
+      margie: 'Margie',
+      sentry: 'Finch',
+    };
+    return { name: names[character] || 'Tommy', avatar: '' };
+  });
   const [sessionId] = useState(() => `${character}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   const [showSafeguardingModal, setShowSafeguardingModal] = useState(false);
   const [safeguardingView, setSafeguardingView] = useState<'main' | 'callback' | 'connecting' | 'callback_success'>('main');
