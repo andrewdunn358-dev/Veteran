@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar, Linking, ScrollView, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,6 +9,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const NEW_LOGO = require('../assets/images/logo.png');
 const FRANKIES_POD_LOGO = require('../assets/images/frankies-pod.png');
 const STANDING_TALL_LOGO = require('../assets/images/standing-tall.png');
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const isSmallScreen = SCREEN_HEIGHT < 700;
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -53,7 +56,12 @@ export default function SplashScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <StatusBar barStyle="light-content" backgroundColor="#1a2e44" />
-      <View style={styles.container}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
         <View style={styles.content}>
           {/* Logo - New transparent version */}
           <View style={styles.logoContainer}>
@@ -154,26 +162,26 @@ export default function SplashScreen() {
             </View>
           </View>
         </View>
+      </ScrollView>
 
-        {/* Cookie Notice */}
-        {showCookieNotice && (
-          <View style={styles.cookieNotice}>
-            <View style={styles.cookieContent}>
-              <View style={styles.cookieIcon}>
-                <Ionicons name="shield-checkmark" size={24} color="#3b82f6" />
-              </View>
-              <Text style={styles.cookieTitle}>Your Privacy</Text>
-              <Text style={styles.cookieText}>
-                We use local storage to save your preferences and journal entries on your device. 
-                No personal data is sent to external servers without your consent.
-              </Text>
-              <TouchableOpacity style={styles.cookieAcceptButton} onPress={acceptCookies}>
-                <Text style={styles.cookieAcceptText}>Accept & Continue</Text>
-              </TouchableOpacity>
+      {/* Cookie Notice */}
+      {showCookieNotice && (
+        <View style={styles.cookieNotice}>
+          <View style={styles.cookieContent}>
+            <View style={styles.cookieIcon}>
+              <Ionicons name="shield-checkmark" size={24} color="#3b82f6" />
             </View>
+            <Text style={styles.cookieTitle}>Your Privacy</Text>
+            <Text style={styles.cookieText}>
+              We use local storage to save your preferences and journal entries on your device. 
+              No personal data is sent to external servers without your consent.
+            </Text>
+            <TouchableOpacity style={styles.cookieAcceptButton} onPress={acceptCookies}>
+              <Text style={styles.cookieAcceptText}>Accept & Continue</Text>
+            </TouchableOpacity>
           </View>
-        )}
-      </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -181,91 +189,95 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1a2e44', // Calming navy blue - fixed, no theme switching
+    backgroundColor: '#1a2e44',
   },
-  container: {
+  scrollView: {
     flex: 1,
     backgroundColor: '#1a2e44',
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: isSmallScreen ? 16 : 24,
   },
   content: {
     alignItems: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: 24,
     maxWidth: 400,
+    width: '100%',
   },
   logoContainer: {
-    marginBottom: 16,
+    marginBottom: isSmallScreen ? 8 : 16,
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: isSmallScreen ? 80 : 100,
+    height: isSmallScreen ? 80 : 100,
   },
   title: {
-    fontSize: 32,
+    fontSize: isSmallScreen ? 26 : 32,
     fontWeight: '700',
     color: '#ffffff',
-    marginBottom: 4,
+    marginBottom: 2,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: isSmallScreen ? 14 : 16,
     color: '#8ba4c4',
-    marginBottom: 16,
+    marginBottom: isSmallScreen ? 10 : 16,
     textAlign: 'center',
   },
   missionContainer: {
     backgroundColor: 'rgba(59, 130, 246, 0.1)',
     borderRadius: 14,
-    padding: 16,
-    marginBottom: 12,
+    padding: isSmallScreen ? 12 : 16,
+    marginBottom: isSmallScreen ? 8 : 12,
     borderWidth: 1,
     borderColor: 'rgba(59, 130, 246, 0.2)',
   },
   missionText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 12 : 14,
     fontStyle: 'italic',
     color: '#93c5fd',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: isSmallScreen ? 18 : 22,
   },
   learnMoreButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
+    paddingVertical: isSmallScreen ? 6 : 10,
     paddingHorizontal: 16,
-    marginBottom: 24,
+    marginBottom: isSmallScreen ? 16 : 24,
     gap: 6,
   },
   learnMoreText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 12 : 14,
     color: '#93c5fd',
     textDecorationLine: 'underline',
   },
   questionContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: isSmallScreen ? 14 : 20,
   },
   questionText: {
-    fontSize: 20,
+    fontSize: isSmallScreen ? 17 : 20,
     fontWeight: '600',
     color: '#ffffff',
     textAlign: 'center',
-    lineHeight: 28,
+    lineHeight: isSmallScreen ? 24 : 28,
   },
   buttonContainer: {
     width: '100%',
-    gap: 14,
-    marginBottom: 28,
+    gap: isSmallScreen ? 10 : 14,
+    marginBottom: isSmallScreen ? 18 : 28,
   },
-  // Primary button - Calming teal that stands out
   yesButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#0d9488', // Teal - calming but obvious
-    paddingVertical: 18,
+    backgroundColor: '#0d9488',
+    paddingVertical: isSmallScreen ? 14 : 18,
     paddingHorizontal: 32,
     borderRadius: 14,
     gap: 10,
@@ -276,17 +288,16 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   yesButtonText: {
-    fontSize: 17,
+    fontSize: isSmallScreen ? 15 : 17,
     fontWeight: '700',
     color: '#ffffff',
   },
-  // Secondary button - Clear white outline, visible
   noButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.08)',
-    paddingVertical: 16,
+    paddingVertical: isSmallScreen ? 12 : 16,
     paddingHorizontal: 24,
     borderRadius: 14,
     borderWidth: 2,
@@ -294,7 +305,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   noButtonText: {
-    fontSize: 16,
+    fontSize: isSmallScreen ? 14 : 16,
     fontWeight: '600',
     color: '#ffffff',
   },
@@ -305,18 +316,18 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   emergencyText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 12 : 14,
     color: '#ffffff',
     fontWeight: '500',
   },
   supportersSection: {
-    marginTop: 28,
+    marginTop: isSmallScreen ? 18 : 28,
     alignItems: 'center',
   },
   supportersLabel: {
-    fontSize: 12,
+    fontSize: isSmallScreen ? 10 : 12,
     color: '#cbd5e1',
-    marginBottom: 12,
+    marginBottom: isSmallScreen ? 8 : 12,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
@@ -324,22 +335,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 20,
+    gap: isSmallScreen ? 12 : 20,
   },
   supporterLogoWrapper: {
     padding: 4,
   },
   supporterLogo: {
-    width: 100,
-    height: 50,
+    width: isSmallScreen ? 70 : 100,
+    height: isSmallScreen ? 35 : 50,
   },
   supporterLogoStandingTall: {
-    width: 80,
-    height: 60,
+    width: isSmallScreen ? 56 : 80,
+    height: isSmallScreen ? 42 : 60,
     backgroundColor: '#fff',
     borderRadius: 6,
   },
-  // Cookie Notice
   cookieNotice: {
     position: 'absolute',
     bottom: 0,
@@ -348,7 +358,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: 24,
+    padding: isSmallScreen ? 16 : 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.1,
@@ -359,37 +369,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cookieIcon: {
-    width: 48,
-    height: 48,
+    width: isSmallScreen ? 40 : 48,
+    height: isSmallScreen ? 40 : 48,
     borderRadius: 24,
     backgroundColor: '#eff6ff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: isSmallScreen ? 8 : 12,
   },
   cookieTitle: {
-    fontSize: 18,
+    fontSize: isSmallScreen ? 16 : 18,
     fontWeight: '700',
     color: '#1e293b',
     marginBottom: 8,
   },
   cookieText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 12 : 14,
     color: '#64748b',
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 20,
+    lineHeight: isSmallScreen ? 18 : 20,
+    marginBottom: isSmallScreen ? 14 : 20,
   },
   cookieAcceptButton: {
     backgroundColor: '#0d9488',
-    paddingVertical: 14,
+    paddingVertical: isSmallScreen ? 12 : 14,
     paddingHorizontal: 32,
     borderRadius: 12,
     width: '100%',
     alignItems: 'center',
   },
   cookieAcceptText: {
-    fontSize: 16,
+    fontSize: isSmallScreen ? 14 : 16,
     fontWeight: '600',
     color: '#ffffff',
   },
