@@ -429,17 +429,9 @@ export default function PeerSupport() {
             <Text style={[styles.headerTitle, { color: colors.text }]}>Peer Support</Text>
           </View>
 
-          {/* Icon */}
-          <View style={styles.iconContainer}>
-            <Ionicons name="people-circle" size={80} color={colors.textSecondary} />
-          </View>
-
           {/* Main Content */}
           <View style={styles.content}>
-            <Text style={[styles.title, { color: colors.text }]}>Talk to Another Veteran</Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Peer support from those who understand</Text>
-
-            {/* Chat with Bob - AI Peer Support (moved to top) */}
+            {/* Chat with Bob - AI Peer Support (at the very top) */}
             <TouchableOpacity 
               style={[styles.bobCard, { backgroundColor: colors.card, borderColor: colors.border }]}
               onPress={() => router.push('/bob-chat')}
@@ -455,6 +447,12 @@ export default function PeerSupport() {
               </View>
               <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
             </TouchableOpacity>
+
+            {/* Talk to Another Veteran card */}
+            <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.title, { color: colors.text }]}>Talk to Another Veteran</Text>
+              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Peer support from those who understand</Text>
+            </View>
 
             {/* View Available Veterans Button */}
             <TouchableOpacity 
