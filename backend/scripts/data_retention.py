@@ -163,10 +163,8 @@ async def cleanup_orphaned_sessions(db, dry_run: bool = False):
     """
     Remove orphaned chat sessions with no messages.
     """
-    # Find sessions older than 24 hours with no activity
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
-    
     # This is a placeholder - adjust based on actual session tracking
+    # Implementation would use: cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
     logger.info("Orphaned session cleanup skipped - no session collection found")
     return 0
 
