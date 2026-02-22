@@ -2582,6 +2582,109 @@ async def seed_cms_data(current_user: User = Depends(require_role("admin"))):
             )
             await db.cms_cards.insert_one(card.dict())
     
+    # Family & Friends support resources section
+    ff_section = await db.cms_sections.find_one({"page_slug": "family-friends", "section_type": "support_resources"})
+    if not ff_section:
+        section = CMSSection(
+            page_slug="family-friends",
+            section_type="support_resources",
+            title="Support Resources",
+            subtitle="Help for families and friends of veterans",
+            order=1
+        )
+        await db.cms_sections.insert_one(section.dict())
+        
+        resources = [
+            {"title": "Op Courage", "description": "NHS mental health service for serving personnel and veterans", "phone": "0300 323 0137", "external_url": "https://www.nhs.uk/nhs-services/armed-forces-community/mental-health/veterans-reservists/", "icon": "medkit", "color": "#3b82f6"},
+            {"title": "Combat Stress", "description": "24hr helpline for the armed forces community", "phone": "0800 138 1619", "external_url": "https://combatstress.org.uk", "icon": "heart", "color": "#ef4444"},
+            {"title": "SSAFA", "description": "Armed Forces charity support", "phone": "0800 260 6767", "external_url": "https://www.ssafa.org.uk", "icon": "people", "color": "#22c55e"},
+            {"title": "Royal British Legion", "description": "Support for serving and ex-serving", "phone": "0808 802 8080", "external_url": "https://www.britishlegion.org.uk", "icon": "flag", "color": "#ef4444"},
+            {"title": "Men's Sheds", "description": "Community spaces for men", "external_url": "https://menssheds.org.uk", "icon": "home", "color": "#f59e0b"},
+            {"title": "Samaritans", "description": "24/7 emotional support", "phone": "116 123", "external_url": "https://www.samaritans.org", "icon": "call", "color": "#22c55e"},
+        ]
+        
+        for i, res in enumerate(resources):
+            card = CMSCard(
+                section_id=section.id,
+                card_type="resource",
+                title=res["title"],
+                description=res["description"],
+                phone=res.get("phone"),
+                external_url=res.get("external_url"),
+                icon=res.get("icon"),
+                color=res.get("color"),
+                order=i
+            )
+            await db.cms_cards.insert_one(card.dict())
+    
+    # Family & Friends addiction resources section
+    addiction_section = await db.cms_sections.find_one({"page_slug": "family-friends", "section_type": "addiction_resources"})
+    if not addiction_section:
+        section = CMSSection(
+            page_slug="family-friends",
+            section_type="addiction_resources",
+            title="Addiction Support",
+            subtitle="Specialist services for substance issues",
+            order=2
+        )
+        await db.cms_sections.insert_one(section.dict())
+        
+        addiction_res = [
+            {"title": "Tom Harrison House", "description": "Residential rehab for armed forces personnel", "phone": "0151 526 2109", "external_url": "https://www.tomharrisonhouse.org.uk", "icon": "home", "color": "#8b5cf6"},
+            {"title": "Change Grow Live", "description": "Free drug & alcohol support", "phone": "0808 802 9000", "external_url": "https://www.changegrowlive.org", "icon": "trending-up", "color": "#22c55e"},
+            {"title": "Alcoholics Anonymous", "description": "24hr helpline for alcohol addiction", "phone": "0800 917 7650", "external_url": "https://www.alcoholics-anonymous.org.uk", "icon": "people", "color": "#3b82f6"},
+            {"title": "FRANK", "description": "Friendly drug advice service", "phone": "0300 123 6600", "external_url": "https://www.talktofrank.com", "icon": "chatbubbles", "color": "#f59e0b"},
+            {"title": "Drinkline", "description": "National alcohol helpline", "phone": "0300 123 1110", "external_url": "https://www.nhs.uk/live-well/alcohol-advice/alcohol-support/", "icon": "call", "color": "#ef4444"},
+        ]
+        
+        for i, res in enumerate(addiction_res):
+            card = CMSCard(
+                section_id=section.id,
+                card_type="resource",
+                title=res["title"],
+                description=res["description"],
+                phone=res.get("phone"),
+                external_url=res.get("external_url"),
+                icon=res.get("icon"),
+                color=res.get("color"),
+                order=i
+            )
+            await db.cms_cards.insert_one(card.dict())
+    
+    # Signs of change section
+    signs_section = await db.cms_sections.find_one({"page_slug": "family-friends", "section_type": "warning_signs"})
+    if not signs_section:
+        section = CMSSection(
+            page_slug="family-friends",
+            section_type="warning_signs",
+            title="Signs to Watch For",
+            subtitle="Changes that might indicate someone needs support",
+            order=3
+        )
+        await db.cms_sections.insert_one(section.dict())
+        
+        signs = [
+            {"title": "Withdrawing from friends/family", "icon": "person-remove", "color": "#ef4444"},
+            {"title": "Sleeping more or less than usual", "icon": "moon", "color": "#8b5cf6"},
+            {"title": "Drinking more than usual", "icon": "wine", "color": "#f59e0b"},
+            {"title": "Increased anger or irritability", "icon": "flash", "color": "#ef4444"},
+            {"title": "Neglecting self-care", "icon": "water", "color": "#3b82f6"},
+            {"title": "Low mood or seeming hopeless", "icon": "rainy", "color": "#64748b"},
+            {"title": "Talking about being a burden", "icon": "chatbubble-ellipses", "color": "#8b5cf6"},
+            {"title": "Reckless behaviour", "icon": "warning", "color": "#f59e0b"},
+        ]
+        
+        for i, sign in enumerate(signs):
+            card = CMSCard(
+                section_id=section.id,
+                card_type="sign",
+                title=sign["title"],
+                icon=sign.get("icon"),
+                color=sign.get("color"),
+                order=i
+            )
+            await db.cms_cards.insert_one(card.dict())
+    
     return {"message": "CMS data seeded successfully"}
 
 # ============ COUNSELLOR ENDPOINTS ============
