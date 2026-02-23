@@ -2050,3 +2050,88 @@ body {
     text-align: center;
     padding: 10px;
 }
+
+/* Swap Request Section */
+.swap-section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.swap-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.swap-item {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--warning);
+}
+
+.swap-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.swap-item-info h4 {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.swap-item-info p {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.swap-item-details {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.swap-item-details i {
+    width: 16px;
+    margin-right: 4px;
+    color: var(--primary);
+}
+
+.swap-item-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.swap-item-actions .btn {
+    flex: 1;
+    padding: 8px;
+    font-size: 13px;
+}
+
+.request-cover-btn {
+    background: var(--warning);
+    color: #000;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.request-cover-btn:hover {
+    opacity: 0.9;
+}
+
+.no-swaps-text {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 16px;
+    font-size: 14px;
+}
