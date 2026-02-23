@@ -125,6 +125,39 @@ async def reset_admin_password():
     return {"message": "Admin password reset", "email": "admin@veteran.dbty.co.uk", "password": "ChangeThisPassword123!"}
 
 
+@router.post("/seed-staff")
+async def seed_staff():
+    """Create initial staff users - ONE TIME USE"""
+    db = get_database()
+    
+    staff_to_create = [
+        {"name": "Anthony Donnelly", "email": "Anthony@radiocheck.me", "role": "admin", "password": "ChangeThisPassword123!"},
+        {"name": "Rachel Webster", "email": "Rachel@radiocheck.me", "role": "admin", "password": "ChangeThisPassword123!"},
+    ]
+    
+    created = []
+    for staff in staff_to_create:
+        # Check if exists
+        existing = await db.users.find_one({"email": staff["email"].lower()})
+        if existing:
+            created.append({"email": staff["email"], "status": "already exists"})
+            continue
+        
+        user_id = str(uuid.uuid4())
+        user_data = {
+            "id": user_id,
+            "email": staff["email"].lower(),
+            "hashed_password": hash_password(staff["password"]),
+            "role": staff["role"],
+            "name": staff["name"],
+            "created_at": datetime.utcnow()
+        }
+        await db.users.insert_one(user_data)
+        created.append({"email": staff["email"], "name": staff["name"], "role": staff["role"], "status": "created"})
+    
+    return {"created": created, "default_password": "ChangeThisPassword123!"}
+
+
 @router.post("/register", response_model=User)
 async def register_user(user_input: UserCreate, current_user: User = Depends(require_role("admin"))):
     """Register a new user (admin only)"""
