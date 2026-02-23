@@ -1136,6 +1136,102 @@ function renderPanicLogs(alerts) {
     `;
 }
 
+function renderScreeningLogs(submissions) {
+    return `
+        <table class="logs-table">
+            <thead>
+                <tr>
+                    <th>Date/Time</th>
+                    <th>User</th>
+                    <th>Severity</th>
+                    <th>Score</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${submissions.map(sub => {
+                    // Parse the details to extract score info
+                    const detailsLines = sub.details ? sub.details.split('\\n') : [];
+                    const scoreInfo = detailsLines.find(l => l.includes('Score:')) || '-';
+                    
+                    const severityBadge = sub.severity === 'high' ? 'badge-danger' : 
+                        (sub.severity === 'medium' ? 'badge-warning' : 'badge-success');
+                    const statusBadge = sub.status === 'pending' ? 'badge-warning' : 
+                        (sub.status === 'resolved' ? 'badge-success' : 'badge-info');
+                    
+                    return `
+                        <tr class="${sub.severity === 'high' && sub.status === 'pending' ? 'row-urgent' : ''}">
+                            <td>${formatDateTime(sub.created_at)}</td>
+                            <td><strong>${sub.user_name || 'Anonymous'}</strong></td>
+                            <td><span class="badge ${severityBadge}">${sub.severity.toUpperCase()}</span></td>
+                            <td>${scoreInfo}</td>
+                            <td><span class="badge ${statusBadge}">${sub.status}</span></td>
+                            <td>${sub.assigned_to_name || '-'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-secondary" onclick="viewScreeningDetails('${sub.id}')">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                ${sub.status === 'pending' ? `
+                                    <button class="btn btn-sm btn-primary" onclick="updateScreeningStatus('${sub.id}', 'reviewed')">
+                                        <i class="fas fa-check"></i> Review
+                                    </button>
+                                ` : ''}
+                                ${sub.status !== 'resolved' ? `
+                                    <button class="btn btn-sm btn-success" onclick="updateScreeningStatus('${sub.id}', 'resolved')">
+                                        <i class="fas fa-check-circle"></i> Resolve
+                                    </button>
+                                ` : ''}
+                            </td>
+                        </tr>
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+async function viewScreeningDetails(id) {
+    const submission = logsData.screening.find(s => s.id === id);
+    if (!submission) return;
+    
+    const content = `
+        <h3><i class="fas fa-clipboard-check"></i> Screening Details</h3>
+        <div style="background: var(--bg-secondary); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+            <p><strong>User:</strong> ${submission.user_name || 'Anonymous'}</p>
+            <p><strong>Severity:</strong> <span class="badge badge-${submission.severity === 'high' ? 'danger' : submission.severity === 'medium' ? 'warning' : 'success'}">${submission.severity.toUpperCase()}</span></p>
+            <p><strong>Submitted:</strong> ${formatDateTime(submission.created_at)}</p>
+            <p><strong>Status:</strong> ${submission.status}</p>
+            ${submission.assigned_to_name ? `<p><strong>Assigned To:</strong> ${submission.assigned_to_name}</p>` : ''}
+            ${submission.staff_notes ? `<p><strong>Staff Notes:</strong> ${submission.staff_notes}</p>` : ''}
+        </div>
+        <div style="background: #f1f5f9; border-radius: 8px; padding: 16px; white-space: pre-wrap; font-family: monospace; font-size: 13px;">
+            ${submission.details.replace(/\\n/g, '<br>')}
+        </div>
+        <div class="modal-actions" style="margin-top: 16px;">
+            <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            ${submission.status !== 'resolved' ? `
+                <button class="btn btn-success" onclick="updateScreeningStatus('${id}', 'resolved'); closeModal();">
+                    <i class="fas fa-check-circle"></i> Mark Resolved
+                </button>
+            ` : ''}
+        </div>
+    `;
+    
+    openModal(content);
+}
+
+async function updateScreeningStatus(id, status) {
+    try {
+        await apiCall(`/safeguarding/screening-submissions/${id}/status?status=${status}`, { method: 'PATCH' });
+        showNotification(`Screening marked as ${status}`);
+        loadLogsData();
+    } catch (error) {
+        showNotification('Failed to update status', 'error');
+    }
+}
+
 function formatDateTime(dateStr) {
     if (!dateStr) return '-';
     const date = new Date(dateStr);
