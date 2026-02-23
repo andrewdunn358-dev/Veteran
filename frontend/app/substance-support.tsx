@@ -32,7 +32,7 @@ const VETERAN_RESOURCES = [
   },
   { 
     name: 'Op Courage', 
-    desc: 'NHS specialist service for serving personnel and veterans - includes substance misuse support', 
+    desc: 'NHS specialist service for serving personnel and veterans - includes addiction support', 
     phone: '0300 323 0137', 
     url: 'https://www.nhs.uk/nhs-services/armed-forces-community/mental-health/veterans-reservists/' 
   },
@@ -44,7 +44,7 @@ const VETERAN_RESOURCES = [
   },
 ];
 
-const GENERAL_RESOURCES = [
+const ALCOHOL_DRUG_RESOURCES = [
   { 
     name: 'Alcoholics Anonymous UK', 
     desc: '24-hour helpline for anyone with a drinking problem', 
@@ -64,6 +64,12 @@ const GENERAL_RESOURCES = [
     url: 'https://www.talktofrank.com' 
   },
   { 
+    name: 'Narcotics Anonymous UK', 
+    desc: 'Support for drug addiction recovery', 
+    phone: '0300 999 1212', 
+    url: 'https://ukna.org' 
+  },
+  { 
     name: 'Change Grow Live', 
     desc: 'Free drug and alcohol support across the UK', 
     phone: '0808 802 9000', 
@@ -74,10 +80,37 @@ const GENERAL_RESOURCES = [
     desc: 'Free, confidential support for drugs and alcohol', 
     url: 'https://www.wearewithyou.org.uk' 
   },
+];
+
+const GAMBLING_RESOURCES = [
   { 
-    name: 'Turning Point', 
-    desc: 'Health and social care services across England', 
-    url: 'https://www.turning-point.co.uk' 
+    name: 'GamCare', 
+    desc: 'Free support, advice and counselling for gambling problems', 
+    phone: '0808 802 0133', 
+    url: 'https://www.gamcare.org.uk',
+    highlight: true
+  },
+  { 
+    name: 'GamStop', 
+    desc: 'Free self-exclusion from all UK licensed gambling sites', 
+    url: 'https://www.gamstop.co.uk' 
+  },
+  { 
+    name: 'Gamblers Anonymous UK', 
+    desc: 'Peer support groups for gambling addiction', 
+    url: 'https://www.gamblersanonymous.org.uk' 
+  },
+  { 
+    name: 'BeGambleAware', 
+    desc: 'Information and support for safer gambling', 
+    phone: '0808 802 0133', 
+    url: 'https://www.begambleaware.org' 
+  },
+  { 
+    name: 'Armed Forces Gambling Support', 
+    desc: 'GamCare specialist support for military community', 
+    phone: '0808 802 0133', 
+    url: 'https://www.gamcare.org.uk/get-support/who-does-gamcare-help/armed-forces/' 
   },
 ];
 
