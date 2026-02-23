@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Switch, Linking, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Switch, Linking, Alert, Modal, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +9,16 @@ import { useTheme } from '../src/context/ThemeContext';
 export default function Settings() {
   const router = useRouter();
   const { theme, colors, toggleTheme } = useTheme();
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+
+  const openEmail = (url: string) => {
+    if (Platform.OS === 'web') {
+      window.open(url, '_blank');
+    } else {
+      Linking.openURL(url);
+    }
+  };
 
   const handleClearData = () => {
     Alert.alert(
