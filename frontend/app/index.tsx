@@ -18,6 +18,7 @@ export default function SplashScreen() {
   const router = useRouter();
   const [showCookieNotice, setShowCookieNotice] = useState(false);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [permissionStatus, requestPermission] = useAudioPermissions();
 
   const checkCookieConsent = async () => {
     try {
@@ -50,9 +51,9 @@ export default function SplashScreen() {
 
   const handleAllowPermissions = async () => {
     try {
-      // Request microphone permission
-      const { status } = await Audio.requestPermissionsAsync();
-      console.log('Microphone permission:', status);
+      // Request microphone permission using expo-audio
+      const result = await requestPermission();
+      console.log('Microphone permission:', result?.status);
       
       // Save that we've asked for permissions
       await AsyncStorage.setItem('permission_asked', 'true');
