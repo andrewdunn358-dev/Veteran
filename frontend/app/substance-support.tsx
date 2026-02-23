@@ -532,7 +532,7 @@ export default function SubstanceSupport() {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
-          {activeSection === 'overview' ? 'Substance Support' : 
+          {activeSection === 'overview' ? 'Addictions Support' : 
            activeSection === 'resources' ? 'Resources' :
            activeSection === 'selfhelp' ? 'Self-Help' : 'Warning Signs'}
         </Text>
