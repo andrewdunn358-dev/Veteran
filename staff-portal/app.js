@@ -227,7 +227,7 @@ async function handleLogin(e) {
         }
         
         // Save auth
-        token = data.access_token;
+        token = data.token;
         currentUser = data.user;
         localStorage.setItem('staff_token', token);
         localStorage.setItem('staff_user', JSON.stringify(currentUser));
