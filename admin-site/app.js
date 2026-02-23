@@ -4931,8 +4931,8 @@ let swapCache = {
 async function loadSwapRequests() {
     try {
         const [allRes, pendingRes] = await Promise.all([
-            fetch(`${API_URL}/api/shift-swaps/`, { headers: getAuthHeaders() }),
-            fetch(`${API_URL}/api/shift-swaps/needs-approval`, { headers: getAuthHeaders() })
+            fetch(`${CONFIG.API_URL}/api/shift-swaps/`, { headers: getAuthHeaders() }),
+            fetch(`${CONFIG.API_URL}/api/shift-swaps/needs-approval`, { headers: getAuthHeaders() })
         ]);
         
         swapCache.all = await allRes.json();
