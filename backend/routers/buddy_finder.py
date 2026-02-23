@@ -34,9 +34,11 @@ async def get_current_user_from_token(token: str):
     import jwt
     import os
     
-    SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+    def get_secret():
+        return os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+    
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(token, get_secret(), algorithms=["HS256"])
         return payload.get("sub")
     except Exception:
         return None
