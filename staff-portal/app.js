@@ -1977,9 +1977,9 @@ async function loadTeamOnDuty() {
     try {
         // Load shifts and staff
         const [shiftsRes, counsellorsRes, peersRes] = await Promise.all([
-            fetch(`${API_URL}/api/shifts/`, { headers: getAuthHeaders() }),
-            fetch(`${API_URL}/api/counsellors`, { headers: getAuthHeaders() }),
-            fetch(`${API_URL}/api/peer-supporters`, { headers: getAuthHeaders() })
+            fetch(`${CONFIG.API_URL}/api/shifts/`, { headers: getAuthHeaders ? getAuthHeaders() : {} }),
+            fetch(`${CONFIG.API_URL}/api/counsellors`, { headers: getAuthHeaders ? getAuthHeaders() : {} }),
+            fetch(`${CONFIG.API_URL}/api/peer-supporters`, { headers: getAuthHeaders ? getAuthHeaders() : {} })
         ]);
         
         const shifts = await shiftsRes.json();
@@ -2097,8 +2097,8 @@ async function loadSwapRequests() {
     try {
         const currentUser = JSON.parse(localStorage.getItem('staff_user') || '{}');
         
-        const response = await fetch(`${API_URL}/api/shift-swaps/pending`, {
-            headers: getAuthHeaders()
+        const response = await fetch(`${CONFIG.API_URL}/api/shift-swaps/pending`, {
+            headers: getAuthHeaders ? getAuthHeaders() : {}
         });
         
         const swaps = await response.json();
@@ -2152,10 +2152,10 @@ async function acceptSwapRequest(swapId) {
     }
     
     try {
-        const response = await fetch(`${API_URL}/api/shift-swaps/${swapId}/accept`, {
+        const response = await fetch(`${CONFIG.API_URL}/api/shift-swaps/${swapId}/accept`, {
             method: 'POST',
             headers: {
-                ...getAuthHeaders(),
+                ...getAuthHeaders ? getAuthHeaders() : {},
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -2185,10 +2185,10 @@ async function requestCover(shiftId) {
     if (reason === null) return; // Cancelled
     
     try {
-        const response = await fetch(`${API_URL}/api/shift-swaps/request`, {
+        const response = await fetch(`${CONFIG.API_URL}/api/shift-swaps/request`, {
             method: 'POST',
             headers: {
-                ...getAuthHeaders(),
+                ...getAuthHeaders ? getAuthHeaders() : {},
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
