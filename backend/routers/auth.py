@@ -71,6 +71,31 @@ def require_role(*required_roles: str):
     return role_checker
 
 
+@router.post("/seed-admin")
+async def seed_admin():
+    """Create initial admin user if none exists - ONE TIME USE ONLY"""
+    db = get_database()
+    
+    # Check if any admin exists
+    existing_admin = await db.users.find_one({"role": "admin"})
+    if existing_admin:
+        raise HTTPException(status_code=400, detail="Admin already exists")
+    
+    # Create default admin
+    user_id = str(uuid.uuid4())
+    admin_data = {
+        "id": user_id,
+        "email": "admin@veteran.dbty.co.uk",
+        "hashed_password": hash_password("ChangeThisPassword123!"),
+        "role": "admin",
+        "name": "Admin",
+        "created_at": datetime.utcnow()
+    }
+    
+    await db.users.insert_one(admin_data)
+    return {"message": "Admin user created", "email": "admin@veteran.dbty.co.uk"}
+
+
 @router.post("/register", response_model=User)
 async def register_user(user_input: UserCreate, current_user: User = Depends(require_role("admin"))):
     """Register a new user (admin only)"""
