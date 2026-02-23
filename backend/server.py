@@ -2721,6 +2721,15 @@ async def delete_organization(
 @api_router.post("/organizations/seed")
 async def seed_organizations(current_user: User = Depends(require_role("admin"))):
     """Seed default UK veteran support organizations (admin only)"""
+    return await _seed_organizations_internal()
+
+@api_router.post("/organizations/seed-public")
+async def seed_organizations_public():
+    """Public endpoint to seed organizations - for initial setup only"""
+    return await _seed_organizations_internal()
+
+async def _seed_organizations_internal():
+    """Internal function to seed organizations"""
     default_organizations = [
         {
             "name": "Combat Stress",
