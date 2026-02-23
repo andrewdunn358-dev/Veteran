@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../config/api';
 
 interface User {
   id: string;
@@ -17,9 +18,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// PRODUCTION URL - hardcoded to ensure correct backend
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://veteran-buddy-hub.preview.emergentagent.com';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

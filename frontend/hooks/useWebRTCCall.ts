@@ -13,8 +13,7 @@ import {
   mediaDevices,
   MediaStream,
 } from 'react-native-webrtc';
-
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { API_URL } from '../src/config/api';
 
 // WebRTC configuration
 const RTC_CONFIG = {
