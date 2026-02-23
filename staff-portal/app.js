@@ -2144,12 +2144,8 @@ async function acceptSwapRequest(swapId) {
     }
     
     try {
-        const response = await fetch(`${CONFIG.API_URL}/api/shift-swaps/${swapId}/accept`, {
+        await apiCall(`/shift-swaps/${swapId}/accept`, {
             method: 'POST',
-            headers: {
-                ...getAuthHeaders ? getAuthHeaders() : {},
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
                 request_id: swapId,
                 responder_id: currentUser.id,
@@ -2157,13 +2153,8 @@ async function acceptSwapRequest(swapId) {
             })
         });
         
-        if (response.ok) {
-            showNotification('Cover accepted! Waiting for admin approval.', 'success');
-            loadSwapRequests();
-        } else {
-            const error = await response.json();
-            throw new Error(error.detail || 'Failed to accept');
-        }
+        showNotification('Cover accepted! Waiting for admin approval.', 'success');
+        loadSwapRequests();
     } catch (error) {
         console.error('Error accepting swap:', error);
         showNotification(error.message || 'Failed to accept cover request', 'error');
