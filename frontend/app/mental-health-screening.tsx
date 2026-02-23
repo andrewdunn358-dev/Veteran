@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../src/config/api';
 
 // PHQ-9 Questions (Depression Screening)
 const PHQ9_QUESTIONS = [
@@ -68,7 +69,7 @@ export default function MentalHealthScreening() {
   const [shareMessage, setShareMessage] = useState('');
   const [history, setHistory] = useState<AssessmentResult[]>([]);
 
-  const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:8001';
+  // API_URL is imported from config
 
   const questions = activeAssessment === 'phq9' ? PHQ9_QUESTIONS : GAD7_QUESTIONS;
 
