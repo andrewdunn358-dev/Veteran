@@ -158,6 +158,15 @@ async def seed_staff():
     return {"created": created, "default_password": "ChangeThisPassword123!"}
 
 
+@router.get("/list-all-users")
+async def list_all_users():
+    """List all users in database - TEMPORARY ADMIN ENDPOINT"""
+    db = get_database()
+    
+    users = await db.users.find({}, {"hashed_password": 0, "_id": 0}).to_list(100)
+    return {"total": len(users), "users": users}
+
+
 @router.post("/register", response_model=User)
 async def register_user(user_input: UserCreate, current_user: User = Depends(require_role("admin"))):
     """Register a new user (admin only)"""
