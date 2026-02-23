@@ -72,9 +72,9 @@ export function getApiUrl(): string {
 export const API_URL = getApiUrl();
 
 /**
- * Log configuration on import (for debugging)
+ * Log configuration on import (for debugging in development)
  */
-if (__DEV__) {
+if (typeof __DEV__ !== 'undefined' && __DEV__) {
   console.log('[API Config] Environment:', {
     raw: rawBackendUrl,
     safe: API_URL,
