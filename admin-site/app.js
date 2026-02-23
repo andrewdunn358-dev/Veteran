@@ -4809,3 +4809,134 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// ===========================================
+// Swap Request Functions
+// ===========================================
+
+let swapCache = {
+    all: [],
+    pending: [],
+    currentTab: 'pending'
+};
+
+async function loadSwapRequests() {
+    try {
+        const [allRes, pendingRes] = await Promise.all([
+            fetch(`${API_URL}/api/shift-swaps/`, { headers: getAuthHeaders() }),
+            fetch(`${API_URL}/api/shift-swaps/needs-approval`, { headers: getAuthHeaders() })
+        ]);
+        
+        swapCache.all = await allRes.json();
+        swapCache.pending = await pendingRes.json();
+        
+        // Update badge count
+        document.getElementById('pending-swap-count').textContent = swapCache.pending.length;
+        
+        renderSwapRequests(swapCache.currentTab);
+        
+    } catch (error) {
+        console.error('Error loading swap requests:', error);
+        document.getElementById('swap-requests-list').innerHTML = 
+            '<p class="no-swaps-text">Failed to load swap requests</p>';
+    }
+}
+
+function switchSwapTab(tab) {
+    swapCache.currentTab = tab;
+    
+    document.querySelectorAll('.swap-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    
+    renderSwapRequests(tab);
+}
+
+function renderSwapRequests(tab) {
+    const container = document.getElementById('swap-requests-list');
+    const swaps = tab === 'pending' ? swapCache.pending : swapCache.all;
+    
+    if (swaps.length === 0) {
+        container.innerHTML = `<p class="no-swaps-text">
+            <i class="fas fa-check-circle"></i> 
+            ${tab === 'pending' ? 'No swap requests need approval' : 'No swap requests yet'}
+        </p>`;
+        return;
+    }
+    
+    container.innerHTML = swaps.map(swap => {
+        const statusClass = swap.status;
+        const showActions = swap.status === 'accepted';
+        
+        return `
+            <div class="swap-card ${statusClass}">
+                <div class="swap-header">
+                    <div class="swap-info">
+                        <h4><i class="fas fa-exchange-alt"></i> Shift Swap Request</h4>
+                        <p>${escapeHtml(swap.requester_name)} needs cover</p>
+                    </div>
+                    <span class="swap-status ${statusClass}">${swap.status}</span>
+                </div>
+                <div class="swap-details">
+                    <span><i class="fas fa-calendar"></i> <strong>${swap.shift_date}</strong></span>
+                    <span><i class="fas fa-clock"></i> <strong>${swap.shift_start} - ${swap.shift_end}</strong></span>
+                    ${swap.responder_name ? `<span><i class="fas fa-user-check"></i> Cover: <strong>${escapeHtml(swap.responder_name)}</strong></span>` : ''}
+                    ${swap.reason ? `<span><i class="fas fa-comment"></i> ${escapeHtml(swap.reason)}</span>` : ''}
+                </div>
+                ${showActions ? `
+                    <div class="swap-actions">
+                        <button class="btn btn-success" onclick="approveSwap('${swap.id}', true)">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn btn-danger" onclick="approveSwap('${swap.id}', false)">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+async function approveSwap(swapId, approved) {
+    const action = approved ? 'approve' : 'reject';
+    const notes = approved ? '' : prompt('Reason for rejection (optional):');
+    
+    if (!approved && notes === null) return; // Cancelled
+    
+    try {
+        const adminUser = JSON.parse(localStorage.getItem('admin_user') || '{}');
+        
+        const response = await fetch(`${API_URL}/api/shift-swaps/${swapId}/approve`, {
+            method: 'POST',
+            headers: {
+                ...getAuthHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                admin_id: adminUser.id || 'admin',
+                admin_name: adminUser.name || 'Admin',
+                approved: approved,
+                notes: notes || null
+            })
+        });
+        
+        if (response.ok) {
+            showNotification(`Swap request ${action}d successfully`, 'success');
+            loadSwapRequests();
+            loadRotaData(); // Refresh rota as shift may have changed
+        } else {
+            throw new Error('Failed to process swap');
+        }
+    } catch (error) {
+        console.error('Error processing swap:', error);
+        showNotification(`Failed to ${action} swap request`, 'error');
+    }
+}
+
+// Load swap requests when rota tab loads
+const originalLoadRotaData = loadRotaData;
+loadRotaData = async function() {
+    await originalLoadRotaData();
+    await loadSwapRequests();
+};
