@@ -11,7 +11,7 @@ from datetime import datetime
 from services.database import get_database
 from models.schemas import PanicAlertCreate, PanicAlert, SafeguardingAlert
 
-router = APIRouter(tags=["safeguarding"])
+router = APIRouter(prefix="/safeguarding", tags=["safeguarding"])
 
 
 # ==========================================
