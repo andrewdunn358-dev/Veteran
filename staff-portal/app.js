@@ -1924,3 +1924,142 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 1500);
 });
+
+// ===========================================
+// Swap Request Functions (Staff Portal)
+// ===========================================
+
+let swapData = {
+    pending: [],
+    myRequests: []
+};
+
+async function loadSwapRequests() {
+    const container = document.getElementById('available-swaps');
+    const countBadge = document.getElementById('swap-count');
+    
+    try {
+        const currentUser = JSON.parse(localStorage.getItem('staff_user') || '{}');
+        
+        const response = await fetch(`${API_URL}/api/shift-swaps/pending`, {
+            headers: getAuthHeaders()
+        });
+        
+        const swaps = await response.json();
+        
+        // Filter out user's own requests
+        swapData.pending = swaps.filter(s => s.requester_id !== currentUser.id);
+        
+        countBadge.textContent = swapData.pending.length;
+        
+        if (swapData.pending.length === 0) {
+            container.innerHTML = '<p class="no-swaps-text"><i class="fas fa-check-circle"></i> No cover requests available</p>';
+            return;
+        }
+        
+        container.innerHTML = swapData.pending.map(swap => `
+            <div class="swap-item">
+                <div class="swap-item-header">
+                    <div class="swap-item-info">
+                        <h4>${escapeHtml(swap.requester_name)} needs cover</h4>
+                        <p>${swap.reason || 'No reason provided'}</p>
+                    </div>
+                </div>
+                <div class="swap-item-details">
+                    <span><i class="fas fa-calendar"></i>${swap.shift_date}</span>
+                    <span><i class="fas fa-clock"></i>${swap.shift_start} - ${swap.shift_end}</span>
+                </div>
+                <div class="swap-item-actions">
+                    <button class="btn btn-primary" onclick="acceptSwapRequest('${swap.id}')">
+                        <i class="fas fa-hand-paper"></i> I Can Cover
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading swap requests:', error);
+        container.innerHTML = '<p class="no-swaps-text">Failed to load cover requests</p>';
+    }
+}
+
+async function acceptSwapRequest(swapId) {
+    const currentUser = JSON.parse(localStorage.getItem('staff_user') || '{}');
+    
+    if (!currentUser.id || !currentUser.name) {
+        showNotification('Please log in to accept cover requests', 'error');
+        return;
+    }
+    
+    if (!confirm('Are you sure you want to cover this shift? This will be sent to admin for approval.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_URL}/api/shift-swaps/${swapId}/accept`, {
+            method: 'POST',
+            headers: {
+                ...getAuthHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                request_id: swapId,
+                responder_id: currentUser.id,
+                responder_name: currentUser.name
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('Cover accepted! Waiting for admin approval.', 'success');
+            loadSwapRequests();
+        } else {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to accept');
+        }
+    } catch (error) {
+        console.error('Error accepting swap:', error);
+        showNotification(error.message || 'Failed to accept cover request', 'error');
+    }
+}
+
+async function requestCover(shiftId) {
+    const currentUser = JSON.parse(localStorage.getItem('staff_user') || '{}');
+    const reason = prompt('Reason for requesting cover (optional):');
+    
+    if (reason === null) return; // Cancelled
+    
+    try {
+        const response = await fetch(`${API_URL}/api/shift-swaps/request`, {
+            method: 'POST',
+            headers: {
+                ...getAuthHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                shift_id: shiftId,
+                requester_id: currentUser.id,
+                requester_name: currentUser.name,
+                reason: reason || null
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('Cover request sent to all staff!', 'success');
+            loadSwapRequests();
+        } else {
+            throw new Error('Failed to create request');
+        }
+    } catch (error) {
+        console.error('Error requesting cover:', error);
+        showNotification('Failed to request cover', 'error');
+    }
+}
+
+// Load swap requests on portal load
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        if (!document.getElementById('login-screen').classList.contains('active')) {
+            loadSwapRequests();
+        }
+    }, 2000);
+});
