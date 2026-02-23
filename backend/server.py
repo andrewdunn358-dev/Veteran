@@ -4579,6 +4579,137 @@ async def initialize_system():
 async def root():
     return {"message": "UK Veterans Support API - Admin System Active"}
 
+
+# ============ SYSTEM MONITORING ENDPOINTS ============
+
+@api_router.get("/admin/system-stats")
+async def get_system_stats(current_user: User = Depends(require_role("admin"))):
+    """Get real-time system statistics for monitoring dashboard"""
+    import psutil
+    from datetime import datetime, timedelta
+    
+    # Get database stats
+    try:
+        # Count active users (logged in within last 24 hours)
+        yesterday = datetime.utcnow() - timedelta(hours=24)
+        
+        # User counts
+        total_users = await db.users.count_documents({})
+        staff_count = await db.users.count_documents({"role": {"$in": ["counsellor", "peer", "admin"]}})
+        
+        # Active sessions (approximation based on recent activity)
+        active_ai_sessions = await db.ai_sessions.count_documents({
+            "created_at": {"$gte": yesterday.isoformat()}
+        })
+        
+        # Count active live chats
+        active_live_chats = len([r for r in live_chat_rooms.values() if r.get("status") == "active"])
+        
+        # Count pending callbacks
+        pending_callbacks = await db.callbacks.count_documents({"status": "pending"})
+        
+        # Count today's shifts
+        today = datetime.utcnow().strftime("%Y-%m-%d")
+        today_shifts = await db.shifts.count_documents({"date": today})
+        
+        # Safeguarding alerts (last 7 days)
+        week_ago = datetime.utcnow() - timedelta(days=7)
+        recent_alerts = await db.safeguarding_alerts.count_documents({
+            "created_at": {"$gte": week_ago.isoformat()}
+        })
+        
+        # Get WebRTC stats from signaling
+        active_calls = len([u for u in connected_users.values() if u.get("in_call")])
+        connected_staff = len([u for u in connected_users.values() if u.get("user_type") in ["counsellor", "peer"]])
+        
+    except Exception as e:
+        print(f"Error getting DB stats: {e}")
+        total_users = 0
+        staff_count = 0
+        active_ai_sessions = 0
+        active_live_chats = 0
+        pending_callbacks = 0
+        today_shifts = 0
+        recent_alerts = 0
+        active_calls = 0
+        connected_staff = 0
+    
+    # Get server resource usage
+    try:
+        cpu_percent = psutil.cpu_percent(interval=0.1)
+        memory = psutil.virtual_memory()
+        memory_percent = memory.percent
+        memory_used_mb = memory.used / (1024 * 1024)
+        memory_total_mb = memory.total / (1024 * 1024)
+    except:
+        cpu_percent = 0
+        memory_percent = 0
+        memory_used_mb = 0
+        memory_total_mb = 0
+    
+    return {
+        "timestamp": datetime.utcnow().isoformat(),
+        "users": {
+            "total_registered": total_users,
+            "staff_count": staff_count,
+            "connected_staff": connected_staff
+        },
+        "activity": {
+            "active_ai_sessions_24h": active_ai_sessions,
+            "active_live_chats": active_live_chats,
+            "active_calls": active_calls,
+            "pending_callbacks": pending_callbacks,
+            "today_shifts": today_shifts,
+            "safeguarding_alerts_7d": recent_alerts
+        },
+        "server": {
+            "cpu_percent": round(cpu_percent, 1),
+            "memory_percent": round(memory_percent, 1),
+            "memory_used_mb": round(memory_used_mb, 1),
+            "memory_total_mb": round(memory_total_mb, 1)
+        },
+        "capacity": {
+            "estimated_max_concurrent_users": 75,
+            "estimated_max_calls": 25,
+            "current_load_percent": round((active_calls / 25) * 100 if active_calls else 0, 1)
+        }
+    }
+
+
+@api_router.get("/admin/usage-history")
+async def get_usage_history(
+    days: int = 7,
+    current_user: User = Depends(require_role("admin"))
+):
+    """Get usage history for charts"""
+    from datetime import datetime, timedelta
+    
+    history = []
+    for i in range(days, 0, -1):
+        date = (datetime.utcnow() - timedelta(days=i)).strftime("%Y-%m-%d")
+        
+        # Count AI sessions for that day
+        day_start = f"{date}T00:00:00"
+        day_end = f"{date}T23:59:59"
+        
+        ai_sessions = await db.ai_sessions.count_documents({
+            "created_at": {"$gte": day_start, "$lte": day_end}
+        })
+        
+        # Count callbacks
+        callbacks = await db.callbacks.count_documents({
+            "created_at": {"$gte": day_start, "$lte": day_end}
+        })
+        
+        history.append({
+            "date": date,
+            "ai_sessions": ai_sessions,
+            "callbacks": callbacks
+        })
+    
+    return {"history": history}
+
+
 # ============ LIVE CHAT ENDPOINTS ============
 # In-memory storage for live chat rooms (in production, use Redis or database)
 live_chat_rooms: Dict[str, Dict[str, Any]] = {}
