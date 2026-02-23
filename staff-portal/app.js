@@ -1975,16 +1975,12 @@ async function loadTeamOnDuty() {
     container.innerHTML = '<p class="loading-text">Loading team...</p>';
     
     try {
-        // Load shifts and staff
-        const [shiftsRes, counsellorsRes, peersRes] = await Promise.all([
-            fetch(`${CONFIG.API_URL}/api/shifts/`, { headers: getAuthHeaders ? getAuthHeaders() : {} }),
-            fetch(`${CONFIG.API_URL}/api/counsellors`, { headers: getAuthHeaders ? getAuthHeaders() : {} }),
-            fetch(`${CONFIG.API_URL}/api/peer-supporters`, { headers: getAuthHeaders ? getAuthHeaders() : {} })
+        // Load shifts and staff using apiCall
+        const [shifts, counsellors, peers] = await Promise.all([
+            apiCall('/shifts/'),
+            apiCall('/counsellors'),
+            apiCall('/peer-supporters')
         ]);
-        
-        const shifts = await shiftsRes.json();
-        const counsellors = await counsellorsRes.json();
-        const peers = await peersRes.json();
         
         // Combine staff
         teamCache.staff = [
