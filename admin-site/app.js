@@ -4926,13 +4926,13 @@ let swapCache = {
 
 async function loadSwapRequests() {
     try {
-        const [allRes, pendingRes] = await Promise.all([
-            fetch(`${CONFIG.API_URL}/api/shift-swaps/`, { headers: getAuthHeaders() }),
-            fetch(`${CONFIG.API_URL}/api/shift-swaps/needs-approval`, { headers: getAuthHeaders() })
+        const [all, pending] = await Promise.all([
+            apiCall('/shift-swaps/'),
+            apiCall('/shift-swaps/needs-approval')
         ]);
         
-        swapCache.all = await allRes.json();
-        swapCache.pending = await pendingRes.json();
+        swapCache.all = all;
+        swapCache.pending = pending;
         
         // Update badge count
         document.getElementById('pending-swap-count').textContent = swapCache.pending.length;
