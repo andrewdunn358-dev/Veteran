@@ -96,6 +96,35 @@ async def seed_admin():
     return {"message": "Admin user created", "email": "admin@veteran.dbty.co.uk"}
 
 
+@router.post("/reset-admin-password")
+async def reset_admin_password():
+    """Reset admin password - TEMPORARY ENDPOINT FOR RECOVERY"""
+    db = get_database()
+    
+    # Find admin user
+    admin = await db.users.find_one({"email": "admin@veteran.dbty.co.uk"})
+    if not admin:
+        # Create if doesn't exist
+        user_id = str(uuid.uuid4())
+        admin_data = {
+            "id": user_id,
+            "email": "admin@veteran.dbty.co.uk",
+            "hashed_password": hash_password("ChangeThisPassword123!"),
+            "role": "admin",
+            "name": "Admin",
+            "created_at": datetime.utcnow()
+        }
+        await db.users.insert_one(admin_data)
+        return {"message": "Admin user created", "email": "admin@veteran.dbty.co.uk", "password": "ChangeThisPassword123!"}
+    
+    # Reset password
+    await db.users.update_one(
+        {"email": "admin@veteran.dbty.co.uk"},
+        {"$set": {"hashed_password": hash_password("ChangeThisPassword123!"), "id": admin.get("id") or str(uuid.uuid4())}}
+    )
+    return {"message": "Admin password reset", "email": "admin@veteran.dbty.co.uk", "password": "ChangeThisPassword123!"}
+
+
 @router.post("/register", response_model=User)
 async def register_user(user_input: UserCreate, current_user: User = Depends(require_role("admin"))):
     """Register a new user (admin only)"""
