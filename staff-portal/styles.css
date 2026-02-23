@@ -879,6 +879,108 @@ body {
     text-transform: uppercase;
 }
 
+/* ============ SCREENING SECTION ============ */
+.screening-section {
+    border: 2px solid var(--warning);
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+}
+
+.screening-section.has-urgent {
+    animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(217, 119, 6, 0); }
+}
+
+.screening-section .section-header h2 {
+    color: var(--warning);
+}
+
+.screening-card {
+    border-left: 4px solid var(--warning);
+    background: var(--bg-card);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.screening-card.urgent {
+    border-left-color: var(--danger);
+    background: linear-gradient(90deg, #fee2e2 0%, var(--bg-card) 15%);
+}
+
+.screening-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.screening-card .card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.screening-card .card-body {
+    padding: 12px 16px;
+}
+
+.screening-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.screening-time {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.screening-details p {
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.user-message {
+    background: #f1f5f9;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    font-style: italic;
+}
+
+.assigned-to, .staff-notes {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: #f8fafc;
+    border-radius: 4px;
+}
+
+.screening-card .card-actions {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.screening-card .btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
 .safeguarding-card.risk-red {
     border-left-color: #dc2626;
     background: linear-gradient(90deg, #fee2e2 0%, var(--bg-card) 15%);
