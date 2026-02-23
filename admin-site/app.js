@@ -977,6 +977,9 @@ function renderLogTab(tab) {
         case 'safeguarding':
             container.innerHTML = renderSafeguardingLogs(data);
             break;
+        case 'screening':
+            container.innerHTML = renderScreeningLogs(data);
+            break;
         case 'callbacks':
             container.innerHTML = renderCallbackLogs(data);
             break;
