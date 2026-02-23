@@ -5165,6 +5165,7 @@ app.include_router(ai_feedback.router, prefix="/api")
 app.include_router(knowledge_base.router, prefix="/api")
 app.include_router(compliance.router, prefix="/api")
 app.include_router(data_retention.router)
+app.include_router(shift_swaps.router, prefix="/api")
 
 # Serve static files for Staff Portal and Admin Site
 # This allows testing the portals from the preview environment
