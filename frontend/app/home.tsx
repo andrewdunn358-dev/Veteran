@@ -208,19 +208,19 @@ export default function Index() {
             <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
 
-          {/* Substance & Alcohol Support */}
+          {/* Addictions Support */}
           <TouchableOpacity 
             style={styles.menuCard}
             onPress={() => router.push('/substance-support')}
             activeOpacity={0.9}
-            data-testid="substance-support-btn"
+            data-testid="addictions-support-btn"
           >
             <View style={[styles.cardIconContainer, { backgroundColor: '#fef3c7' }]}>
-              <Ionicons name="wine" size={28} color="#d97706" />
+              <Ionicons name="heart-dislike" size={28} color="#d97706" />
             </View>
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Substance & Alcohol Support</Text>
-              <Text style={styles.cardDescription}>Help for addiction & recovery</Text>
+              <Text style={styles.cardTitle}>Addictions</Text>
+              <Text style={styles.cardDescription}>Alcohol, drugs, gambling & more</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
