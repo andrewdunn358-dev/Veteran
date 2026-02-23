@@ -4,6 +4,7 @@ Safeguarding Router - Panic alerts and safeguarding alerts management
 
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional
+from pydantic import BaseModel
 import uuid
 from datetime import datetime
 
@@ -11,6 +12,133 @@ from services.database import get_database
 from models.schemas import PanicAlertCreate, PanicAlert, SafeguardingAlert
 
 router = APIRouter(tags=["safeguarding"])
+
+
+# ==========================================
+# Screening Submissions (PHQ-9, GAD-7)
+# ==========================================
+
+class ScreeningSubmission(BaseModel):
+    user_id: str
+    user_name: str = "Anonymous"
+    concern_type: str  # 'mental_health_screening'
+    severity: str  # 'low', 'medium', 'high'
+    details: str
+    source: str = "app_screening"
+
+@router.post("/concern")
+async def submit_screening_concern(submission: ScreeningSubmission):
+    """Submit a screening result for counsellor review"""
+    db = get_database()
+    
+    concern_data = {
+        "id": str(uuid.uuid4()),
+        "user_id": submission.user_id,
+        "user_name": submission.user_name,
+        "concern_type": submission.concern_type,
+        "severity": submission.severity,
+        "details": submission.details,
+        "source": submission.source,
+        "status": "pending",  # pending, reviewed, contacted, resolved
+        "created_at": datetime.utcnow(),
+        "updated_at": datetime.utcnow()
+    }
+    
+    await db.screening_submissions.insert_one(concern_data)
+    
+    return {"success": True, "id": concern_data["id"], "message": "Submission received"}
+
+
+@router.get("/screening-submissions")
+async def get_screening_submissions(status: Optional[str] = None, severity: Optional[str] = None):
+    """Get all screening submissions for staff review"""
+    db = get_database()
+    
+    query = {}
+    if status:
+        query["status"] = status
+    if severity:
+        query["severity"] = severity
+    
+    submissions = await db.screening_submissions.find(query).sort("created_at", -1).to_list(200)
+    return [{**s, "_id": None} for s in submissions]
+
+
+@router.get("/screening-submissions/{submission_id}")
+async def get_screening_submission(submission_id: str):
+    """Get a single screening submission"""
+    db = get_database()
+    
+    submission = await db.screening_submissions.find_one({"$or": [{"id": submission_id}, {"_id": submission_id}]})
+    if not submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    
+    submission["_id"] = None
+    return submission
+
+
+@router.patch("/screening-submissions/{submission_id}/status")
+async def update_screening_status(submission_id: str, status: str, notes: str = "", assigned_to: str = None, assigned_to_name: str = None):
+    """Update screening submission status"""
+    db = get_database()
+    
+    update_data = {
+        "status": status,
+        "updated_at": datetime.utcnow()
+    }
+    
+    if notes:
+        update_data["staff_notes"] = notes
+    if assigned_to:
+        update_data["assigned_to"] = assigned_to
+    if assigned_to_name:
+        update_data["assigned_to_name"] = assigned_to_name
+    if status == "resolved":
+        update_data["resolved_at"] = datetime.utcnow()
+    if status == "contacted":
+        update_data["contacted_at"] = datetime.utcnow()
+    
+    result = await db.screening_submissions.update_one(
+        {"$or": [{"id": submission_id}, {"_id": submission_id}]},
+        {"$set": update_data}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    
+    return {"success": True}
+
+
+@router.get("/screening-submissions/stats/summary")
+async def get_screening_stats():
+    """Get screening submission statistics"""
+    db = get_database()
+    
+    total = await db.screening_submissions.count_documents({})
+    pending = await db.screening_submissions.count_documents({"status": "pending"})
+    reviewed = await db.screening_submissions.count_documents({"status": "reviewed"})
+    contacted = await db.screening_submissions.count_documents({"status": "contacted"})
+    resolved = await db.screening_submissions.count_documents({"status": "resolved"})
+    
+    # By severity
+    high = await db.screening_submissions.count_documents({"severity": "high"})
+    medium = await db.screening_submissions.count_documents({"severity": "medium"})
+    low = await db.screening_submissions.count_documents({"severity": "low"})
+    
+    return {
+        "total": total,
+        "by_status": {
+            "pending": pending,
+            "reviewed": reviewed,
+            "contacted": contacted,
+            "resolved": resolved
+        },
+        "by_severity": {
+            "high": high,
+            "medium": medium,
+            "low": low
+        }
+    }
 
 
 # ==========================================
