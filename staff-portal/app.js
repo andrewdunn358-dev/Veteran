@@ -2168,12 +2168,8 @@ async function requestCover(shiftId) {
     if (reason === null) return; // Cancelled
     
     try {
-        const response = await fetch(`${CONFIG.API_URL}/api/shift-swaps/request`, {
+        await apiCall('/shift-swaps/request', {
             method: 'POST',
-            headers: {
-                ...getAuthHeaders ? getAuthHeaders() : {},
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
                 shift_id: shiftId,
                 requester_id: currentUser.id,
@@ -2182,12 +2178,8 @@ async function requestCover(shiftId) {
             })
         });
         
-        if (response.ok) {
-            showNotification('Cover request sent to all staff!', 'success');
-            loadSwapRequests();
-        } else {
-            throw new Error('Failed to create request');
-        }
+        showNotification('Cover request sent to all staff!', 'success');
+        loadSwapRequests();
     } catch (error) {
         console.error('Error requesting cover:', error);
         showNotification('Failed to request cover', 'error');
