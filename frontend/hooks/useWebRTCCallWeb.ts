@@ -7,8 +7,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Platform } from 'react-native';
 import { io, Socket } from 'socket.io-client';
-
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { API_URL } from '../src/config/api';
 
 // Web-compatible alert helper
 const showAlert = (title: string, message: string) => {
