@@ -5037,3 +5037,109 @@ loadRotaData = async function() {
     await originalLoadRotaData();
     await loadSwapRequests();
 };
+
+// ============ MONITORING DASHBOARD ============
+
+let monitoringInterval = null;
+
+async function loadMonitoringStats() {
+    try {
+        const stats = await apiCall('/admin/system-stats');
+        
+        // Update user stats
+        document.getElementById('stat-total-users').textContent = stats.users.total_registered;
+        document.getElementById('stat-connected-staff').textContent = stats.users.connected_staff;
+        
+        // Update activity stats
+        document.getElementById('stat-active-calls').textContent = stats.activity.active_calls;
+        document.getElementById('stat-ai-sessions').textContent = stats.activity.active_ai_sessions_24h;
+        document.getElementById('stat-live-chats').textContent = stats.activity.active_live_chats;
+        document.getElementById('stat-pending-callbacks').textContent = stats.activity.pending_callbacks;
+        
+        // Update server health
+        updateProgressBar('cpu', stats.server.cpu_percent);
+        updateProgressBar('memory', stats.server.memory_percent);
+        updateProgressBar('load', stats.capacity.current_load_percent);
+        
+        // Update timestamp
+        const now = new Date();
+        document.getElementById('monitoring-last-updated').textContent = 
+            `Last updated: ${now.toLocaleTimeString()}`;
+            
+    } catch (error) {
+        console.error('Error loading monitoring stats:', error);
+    }
+}
+
+function updateProgressBar(type, value) {
+    const progressEl = document.getElementById(`${type}-progress`);
+    const valueEl = document.getElementById(`${type}-value`);
+    
+    if (progressEl && valueEl) {
+        progressEl.style.width = `${Math.min(value, 100)}%`;
+        valueEl.textContent = `${value}%`;
+        
+        // Update color based on value
+        progressEl.classList.remove('warning', 'danger');
+        if (value >= 80) {
+            progressEl.classList.add('danger');
+        } else if (value >= 60) {
+            progressEl.classList.add('warning');
+        }
+    }
+}
+
+function refreshMonitoring() {
+    loadMonitoringStats();
+    showNotification('Monitoring data refreshed', 'success');
+}
+
+function startMonitoringAutoRefresh() {
+    // Clear any existing interval
+    if (monitoringInterval) {
+        clearInterval(monitoringInterval);
+    }
+    
+    // Load immediately
+    loadMonitoringStats();
+    
+    // Then refresh every 30 seconds
+    monitoringInterval = setInterval(loadMonitoringStats, 30000);
+}
+
+function stopMonitoringAutoRefresh() {
+    if (monitoringInterval) {
+        clearInterval(monitoringInterval);
+        monitoringInterval = null;
+    }
+}
+
+// Hook into tab switching to start/stop monitoring refresh
+const originalSwitchTab = window.switchTab || function() {};
+window.switchTab = function(tabName) {
+    // Call original if exists
+    if (typeof originalSwitchTab === 'function') {
+        originalSwitchTab(tabName);
+    }
+    
+    // Handle monitoring tab
+    if (tabName === 'monitoring') {
+        startMonitoringAutoRefresh();
+    } else {
+        stopMonitoringAutoRefresh();
+    }
+};
+
+// Add monitoring to tab click handlers
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            if (tabName === 'monitoring') {
+                startMonitoringAutoRefresh();
+            } else {
+                stopMonitoringAutoRefresh();
+            }
+        });
+    });
+});
