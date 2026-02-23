@@ -4719,16 +4719,12 @@ let rotaCache = {
 
 async function loadRotaData() {
     try {
-        // Load shifts and staff in parallel
-        const [shiftsRes, counsellorsRes, peersRes] = await Promise.all([
-            fetch(`${CONFIG.API_URL}/api/shifts/`, { headers: getAuthHeaders() }),
-            fetch(`${CONFIG.API_URL}/api/counsellors`, { headers: getAuthHeaders() }),
-            fetch(`${CONFIG.API_URL}/api/peer-supporters`, { headers: getAuthHeaders() })
+        // Load shifts and staff in parallel using apiCall
+        const [shifts, counsellors, peers] = await Promise.all([
+            apiCall('/shifts/'),
+            apiCall('/counsellors'),
+            apiCall('/peer-supporters')
         ]);
-        
-        const shifts = await shiftsRes.json();
-        const counsellors = await counsellorsRes.json();
-        const peers = await peersRes.json();
         
         // Combine staff with role info
         const staff = [
