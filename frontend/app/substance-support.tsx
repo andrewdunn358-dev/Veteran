@@ -160,14 +160,16 @@ const SELF_HELP_TIPS = [
 ];
 
 const WARNING_SIGNS = [
-  'Drinking more than you intended, more often than planned',
-  'Using substances to cope with memories, sleep, or emotions',
-  'Feeling defensive or irritable when someone mentions your drinking',
-  'Needing more to get the same effect (tolerance)',
-  'Experiencing withdrawal symptoms (shaking, sweating, anxiety)',
+  'Drinking, using, or gambling more than you intended, more often than planned',
+  'Using substances or gambling to cope with memories, sleep, or emotions',
+  'Feeling defensive or irritable when someone mentions your behaviour',
+  'Needing more to get the same effect (tolerance) or chasing losses',
+  'Experiencing withdrawal symptoms (shaking, sweating, anxiety, restlessness)',
   'Neglecting responsibilities - work, family, finances',
-  'Relationships suffering because of your drinking or drug use',
-  'Drinking alone or hiding how much you consume',
+  'Relationships suffering because of your addiction',
+  'Hiding how much you drink, use, or gamble',
+  'Borrowing money or getting into debt to fund your habit',
+  'Failed attempts to cut down or stop',
 ];
 
 export default function SubstanceSupport() {
