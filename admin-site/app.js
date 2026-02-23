@@ -5011,12 +5011,8 @@ async function approveSwap(swapId, approved) {
     try {
         const adminUser = JSON.parse(localStorage.getItem('admin_user') || '{}');
         
-        const response = await fetch(`${CONFIG.API_URL}/api/shift-swaps/${swapId}/approve`, {
+        await apiCall(`/shift-swaps/${swapId}/approve`, {
             method: 'POST',
-            headers: {
-                ...getAuthHeaders(),
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
                 admin_id: adminUser.id || 'admin',
                 admin_name: adminUser.name || 'Admin',
@@ -5025,13 +5021,10 @@ async function approveSwap(swapId, approved) {
             })
         });
         
-        if (response.ok) {
-            showNotification(`Swap request ${action}d successfully`, 'success');
-            loadSwapRequests();
-            loadRotaData(); // Refresh rota as shift may have changed
-        } else {
-            throw new Error('Failed to process swap');
-        }
+        showNotification(`Swap request ${action}d successfully`, 'success');
+        loadSwapRequests();
+        loadRotaData(); // Refresh rota as shift may have changed
+        
     } catch (error) {
         console.error('Error processing swap:', error);
         showNotification(`Failed to ${action} swap request`, 'error');
