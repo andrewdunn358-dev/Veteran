@@ -129,8 +129,11 @@ def cleanup_rate_limits():
 
 # ============ JWT CONFIGURATION ============
 
-# JWT Configuration
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+# JWT Configuration - Use function to read at runtime
+def get_jwt_secret():
+    """Get JWT secret at runtime to ensure env vars are loaded"""
+    return os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
