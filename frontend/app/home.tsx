@@ -454,58 +454,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderColor: '#22c55e',
     borderWidth: 2,
   },
-  staffOnDutyCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  staffOnDutyHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  staffOnDutyTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-    marginLeft: 12,
-  },
-  staffOnDutyStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 12,
-  },
-  staffStatItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  staffDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  staffStatLabel: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  staffStatValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  staffAvailableText: {
-    fontSize: 13,
-    color: '#22c55e',
-    textAlign: 'center',
-  },
-  staffUnavailableText: {
-    fontSize: 13,
-    color: '#f59e0b',
-    textAlign: 'center',
-  },
   cardIconContainer: {
     width: 52,
     height: 52,
