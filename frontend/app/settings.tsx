@@ -49,66 +49,128 @@ export default function Settings() {
   };
 
   const handleContact = () => {
-    // Open email for contact
-    if (typeof window !== 'undefined') {
-      window.open('mailto:support@radiocheck.me?subject=App Feedback', '_blank');
-    } else {
-      Linking.openURL('mailto:support@radiocheck.me?subject=App Feedback');
-    }
+    setShowContactModal(true);
   };
 
   const handleReportIssue = () => {
-    Alert.alert(
-      'Report an Issue',
-      'What would you like to report?',
-      [
-        {
-          text: 'Technical Problem',
-          onPress: () => {
-            const url = 'mailto:support@radiocheck.me?subject=Technical Issue Report&body=Please describe the issue:%0A%0ADevice:%0AApp Version: 1.0.0%0A%0ASteps to reproduce:%0A1.%0A2.%0A3.';
-            if (typeof window !== 'undefined') {
-              window.open(url, '_blank');
-            } else {
-              Linking.openURL(url);
-            }
-          },
-        },
-        {
-          text: 'Service Complaint',
-          onPress: () => {
-            const url = 'mailto:complaints@radiocheck.me?subject=Service Complaint&body=Please describe your complaint. All complaints are taken seriously and will be reviewed within 48 hours.%0A%0A';
-            if (typeof window !== 'undefined') {
-              window.open(url, '_blank');
-            } else {
-              Linking.openURL(url);
-            }
-          },
-        },
-        {
-          text: 'Safety Concern',
-          onPress: () => {
-            Alert.alert(
-              'Safety Concern',
-              'If you or someone else is in immediate danger, please call 999.\n\nFor non-emergency safeguarding concerns:',
-              [
-                { text: 'Call Samaritans (116 123)', onPress: () => Linking.openURL('tel:116123') },
-                { text: 'Email Safeguarding Team', onPress: () => {
-                  const url = 'mailto:safeguarding@radiocheck.me?subject=Safeguarding Concern';
-                  if (typeof window !== 'undefined') {
-                    window.open(url, '_blank');
-                  } else {
-                    Linking.openURL(url);
-                  }
-                }},
-                { text: 'Cancel', style: 'cancel' },
-              ]
-            );
-          },
-        },
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
+    setShowReportModal(true);
   };
+
+  const ReportIssueModal = () => (
+    <Modal
+      visible={showReportModal}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setShowReportModal(false)}
+    >
+      <View style={modalStyles.overlay}>
+        <View style={[modalStyles.container, { backgroundColor: colors.cardBg }]}>
+          <Text style={[modalStyles.title, { color: colors.text }]}>Report an Issue</Text>
+          <Text style={[modalStyles.subtitle, { color: colors.textSecondary }]}>What would you like to report?</Text>
+          
+          <TouchableOpacity 
+            style={[modalStyles.option, { borderColor: colors.border }]}
+            onPress={() => {
+              setShowReportModal(false);
+              openEmail('mailto:support@radiocheck.me?subject=Technical Issue Report&body=Please describe the issue:%0A%0ADevice:%0AApp Version: 1.0.0%0A%0ASteps to reproduce:%0A1.%0A2.%0A3.');
+            }}
+          >
+            <Ionicons name="bug-outline" size={24} color="#3b82f6" />
+            <View style={modalStyles.optionText}>
+              <Text style={[modalStyles.optionTitle, { color: colors.text }]}>Technical Problem</Text>
+              <Text style={[modalStyles.optionDesc, { color: colors.textSecondary }]}>App bugs, crashes, or errors</Text>
+            </View>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[modalStyles.option, { borderColor: colors.border }]}
+            onPress={() => {
+              setShowReportModal(false);
+              openEmail('mailto:complaints@radiocheck.me?subject=Service Complaint&body=Please describe your complaint. All complaints are taken seriously and will be reviewed within 48 hours.%0A%0A');
+            }}
+          >
+            <Ionicons name="chatbubble-ellipses-outline" size={24} color="#f59e0b" />
+            <View style={modalStyles.optionText}>
+              <Text style={[modalStyles.optionTitle, { color: colors.text }]}>Service Complaint</Text>
+              <Text style={[modalStyles.optionDesc, { color: colors.textSecondary }]}>Feedback about our service</Text>
+            </View>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[modalStyles.option, { borderColor: colors.border }]}
+            onPress={() => {
+              setShowReportModal(false);
+              openEmail('mailto:safeguarding@radiocheck.me?subject=Safeguarding Concern&body=Please describe your concern. If someone is in immediate danger, please call 999.%0A%0A');
+            }}
+          >
+            <Ionicons name="shield-outline" size={24} color="#ef4444" />
+            <View style={modalStyles.optionText}>
+              <Text style={[modalStyles.optionTitle, { color: colors.text }]}>Safety Concern</Text>
+              <Text style={[modalStyles.optionDesc, { color: colors.textSecondary }]}>Report a safeguarding issue</Text>
+            </View>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={modalStyles.cancelBtn}
+            onPress={() => setShowReportModal(false)}
+          >
+            <Text style={modalStyles.cancelText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const ContactModal = () => (
+    <Modal
+      visible={showContactModal}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setShowContactModal(false)}
+    >
+      <View style={modalStyles.overlay}>
+        <View style={[modalStyles.container, { backgroundColor: colors.cardBg }]}>
+          <Text style={[modalStyles.title, { color: colors.text }]}>Contact Us</Text>
+          <Text style={[modalStyles.subtitle, { color: colors.textSecondary }]}>How would you like to get in touch?</Text>
+          
+          <TouchableOpacity 
+            style={[modalStyles.option, { borderColor: colors.border }]}
+            onPress={() => {
+              setShowContactModal(false);
+              openEmail('mailto:support@radiocheck.me?subject=App Feedback');
+            }}
+          >
+            <Ionicons name="mail-outline" size={24} color="#3b82f6" />
+            <View style={modalStyles.optionText}>
+              <Text style={[modalStyles.optionTitle, { color: colors.text }]}>Email Us</Text>
+              <Text style={[modalStyles.optionDesc, { color: colors.textSecondary }]}>support@radiocheck.me</Text>
+            </View>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[modalStyles.option, { borderColor: colors.border }]}
+            onPress={() => {
+              setShowContactModal(false);
+              openEmail('mailto:feedback@radiocheck.me?subject=App Suggestion&body=I have a suggestion for the Radio Check app:%0A%0A');
+            }}
+          >
+            <Ionicons name="bulb-outline" size={24} color="#10b981" />
+            <View style={modalStyles.optionText}>
+              <Text style={[modalStyles.optionTitle, { color: colors.text }]}>Send Feedback</Text>
+              <Text style={[modalStyles.optionDesc, { color: colors.textSecondary }]}>Share ideas or suggestions</Text>
+            </View>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={modalStyles.cancelBtn}
+            onPress={() => setShowContactModal(false)}
+          >
+            <Text style={modalStyles.cancelText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
 
   const styles = createStyles(colors);
 
