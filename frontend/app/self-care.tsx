@@ -10,6 +10,7 @@ const HUGO_AVATAR = 'https://static.prod-images.emergentagent.com/jobs/56155002-
 
 // Fallback hardcoded tools (used when CMS is empty or unavailable)
 const FALLBACK_TOOLS = [
+  { id: 'screening', title: 'Mental Health Check', description: 'PHQ-9 & GAD-7 assessments', icon: 'clipboard', color: '#3b82f6', bgColor: '#dbeafe', route: '/mental-health-screening' },
   { id: 'journal', title: 'My Journal', description: 'Write down your thoughts', icon: 'book', color: '#3b82f6', bgColor: '#dbeafe', route: '/journal' },
   { id: 'mood', title: 'Daily Check-in', description: "Track how you're feeling", icon: 'happy', color: '#f59e0b', bgColor: '#fef3c7', route: '/mood' },
   { id: 'grounding', title: 'Grounding Tools', description: '5-4-3-2-1 and more techniques', icon: 'hand-left', color: '#22c55e', bgColor: '#dcfce7', route: '/grounding' },
