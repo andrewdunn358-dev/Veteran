@@ -74,11 +74,10 @@ export default function SelfCarePage() {
           activeOpacity={0.8}
           data-testid="hugo-card"
         >
-          <View style={styles.hugoImageContainer}>
-            <View style={styles.hugoImageWrapper}>
-              <Ionicons name="chatbubbles" size={32} color="#10b981" />
-            </View>
-          </View>
+          <Image 
+            source={{ uri: HUGO_AVATAR }} 
+            style={styles.hugoAvatar}
+          />
           <View style={styles.hugoContent}>
             <Text style={[styles.hugoTitle, { color: colors.text }]}>Chat with Hugo</Text>
             <Text style={[styles.hugoSubtitle, { color: '#10b981' }]}>Your Self-Help & Wellness Guide</Text>
