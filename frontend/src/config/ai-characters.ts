@@ -22,7 +22,7 @@ export const AI_CHARACTERS: Record<string, AICharacter> = {
   hugo: {
     id: 'hugo',
     name: 'Hugo',
-    avatar: 'https://static.prod-images.emergentagent.com/jobs/fba61e42-5a99-4622-a43b-84a14c5bcf87/images/7187a483ea030457c378a4933dc5d476b04b16d8ae15f0ff01e45912ba13042d.png',
+    avatar: 'https://static.prod-images.emergentagent.com/jobs/56155002-fa62-4b53-8fda-4baf701ab83f/images/6be1ae886e76d7b380a66ef3eb98c183e26882fe8e9897aab7e8a8ad4320acb9.png',
     role: 'Self-Help & Wellness Guide',
     description: 'Here to help with daily habits, grounding techniques, and finding your routine. Small steps make big differences.',
     welcomeMessage: "Hey, Hugo here! Ready to tackle today? Even if it's just one small thing, I'm here to help. What's on your mind?",
