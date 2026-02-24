@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,14 +9,18 @@ import {
   Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
 
 interface AIConsentModalProps {
   visible: boolean;
   onAccept: () => void;
+  onDecline?: () => void;
   characterName: string;
 }
 
-export default function AIConsentModal({ visible, onAccept, characterName }: AIConsentModalProps) {
+export default function AIConsentModal({ visible, onAccept, onDecline, characterName }: AIConsentModalProps) {
+  const { colors, isDark } = useTheme();
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const callSamaritans = () => {
     Linking.openURL('tel:116123');
   };
