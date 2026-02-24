@@ -309,50 +309,79 @@
                 
                 <!-- Visual Editor -->
                 <div id="cms-visual-editor" class="cms-visual-editor">
-                    <!-- Page Selector -->
-                    <div class="page-selector">
-                        <label style="color: var(--text-secondary); margin-right: 10px;">Editing Page:</label>
-                        <select id="cms-page-select" onchange="loadCMSPage(this.value)">
-                            <option value="home">Home</option>
-                            <option value="self-care">Self Care</option>
-                            <option value="family-friends">Family & Friends</option>
-                            <option value="organizations">Support Organizations</option>
-                            <option value="peer-support">Peer Support</option>
-                        </select>
-                        <button class="btn btn-secondary btn-small" onclick="addNewSection()" style="margin-left: 10px;">
-                            <i class="fas fa-plus"></i> Add Section
-                        </button>
+                    <!-- Top Controls Bar -->
+                    <div class="cms-controls-bar">
+                        <div class="cms-controls-left">
+                            <label>Page:</label>
+                            <select id="cms-page-select" onchange="loadCMSPage(this.value)">
+                                <option value="home">Home</option>
+                                <option value="self-care">Self-Care</option>
+                                <option value="family-friends">Family & Friends</option>
+                                <option value="organizations">Organizations</option>
+                                <option value="peer-support">Peer Support</option>
+                                <option value="substance-support">Substance Support</option>
+                            </select>
+                        </div>
+                        <div class="cms-controls-right">
+                            <button class="btn btn-secondary btn-small" onclick="addNewSection()">
+                                <i class="fas fa-layer-group"></i> Add Section
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="addNewCard()">
+                                <i class="fas fa-plus-square"></i> Add Card
+                            </button>
+                            <button class="btn btn-success" onclick="saveCMSChanges()">
+                                <i class="fas fa-save"></i> Save All
+                            </button>
+                        </div>
                     </div>
                     
-                    <!-- Phone Preview Frame -->
-                    <div class="phone-preview-container">
-                        <div class="phone-frame">
-                            <div class="phone-notch"></div>
-                            <div class="phone-screen" id="cms-phone-screen">
-                                <!-- Dynamic content rendered here -->
-                                <div class="phone-header">
-                                    <span class="phone-back-btn"><i class="fas fa-arrow-left"></i></span>
-                                    <span id="phone-page-title">Home</span>
-                                    <span></span>
+                    <!-- Split Screen Editor -->
+                    <div class="cms-split-editor">
+                        <!-- Left: Phone Preview -->
+                        <div class="cms-preview-panel">
+                            <div class="cms-preview-header">
+                                <span><i class="fas fa-mobile-alt"></i> Live Preview</span>
+                                <div class="preview-theme-toggle">
+                                    <button class="theme-btn active" onclick="setPreviewTheme('dark')" title="Dark Mode">
+                                        <i class="fas fa-moon"></i>
+                                    </button>
+                                    <button class="theme-btn" onclick="setPreviewTheme('light')" title="Light Mode">
+                                        <i class="fas fa-sun"></i>
+                                    </button>
                                 </div>
-                                <div class="phone-content" id="cms-phone-content">
-                                    <p style="text-align: center; padding: 40px; color: #64748b;">
-                                        <i class="fas fa-spinner fa-spin"></i> Loading preview...
-                                    </p>
+                            </div>
+                            <div class="phone-frame">
+                                <div class="phone-notch"></div>
+                                <div class="phone-screen" id="cms-phone-screen">
+                                    <div class="phone-header">
+                                        <span class="phone-back-btn"><i class="fas fa-arrow-left"></i></span>
+                                        <span id="phone-page-title">Home</span>
+                                        <span class="phone-settings-btn"><i class="fas fa-cog"></i></span>
+                                    </div>
+                                    <div class="phone-content" id="cms-phone-content">
+                                        <div class="phone-loading">
+                                            <i class="fas fa-spinner fa-spin"></i> Loading...
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Edit Panel -->
-                        <div class="edit-panel" id="cms-edit-panel">
-                            <div class="edit-panel-header">
-                                <h3><i class="fas fa-edit"></i> Edit Element</h3>
-                                <button onclick="closeEditPanel()" class="close-btn"><i class="fas fa-times"></i></button>
+                        <!-- Right: Edit Panel -->
+                        <div class="cms-edit-panel" id="cms-edit-panel">
+                            <div class="cms-edit-header">
+                                <h3 id="edit-panel-title"><i class="fas fa-hand-pointer"></i> Click to Edit</h3>
                             </div>
-                            <div class="edit-panel-content" id="cms-edit-content">
-                                <p style="color: var(--text-muted); text-align: center; padding: 40px;">
-                                    Click on any element in the preview to edit it
-                                </p>
+                            <div class="cms-edit-content" id="cms-edit-content">
+                                <div class="edit-placeholder">
+                                    <i class="fas fa-mouse-pointer"></i>
+                                    <p>Click on any element in the preview to edit it</p>
+                                    <ul>
+                                        <li>Click menu cards to edit text, icons, colors</li>
+                                        <li>Click AI characters to update avatars, names</li>
+                                        <li>Drag cards to reorder them</li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
