@@ -390,7 +390,7 @@ export default function HugoChatScreen() {
             value={inputText}
             onChangeText={setInputText}
             placeholder="Type a message..."
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={colors.textMuted}
             multiline
             maxLength={1000}
           />
