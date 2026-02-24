@@ -198,7 +198,24 @@ IMPORTANT: If someone mentions self-harm, suicide, or severe distress, gently ac
 
 // Helper to get a character by ID with fallback
 export const getCharacter = (id: string): AICharacter => {
-  return AI_CHARACTERS[id] || AI_CHARACTERS.hugo;
+  // Handle name-based lookup as well as ID-based
+  const normalizedId = id.toLowerCase();
+  
+  // Direct ID match
+  if (AI_CHARACTERS[normalizedId]) {
+    return AI_CHARACTERS[normalizedId];
+  }
+  
+  // Name-based lookup (for cases where URL uses character name instead of ID)
+  const byName = Object.values(AI_CHARACTERS).find(
+    char => char.name.toLowerCase() === normalizedId
+  );
+  if (byName) {
+    return byName;
+  }
+  
+  // Default fallback
+  return AI_CHARACTERS.hugo;
 };
 
 // Get all characters as an array
