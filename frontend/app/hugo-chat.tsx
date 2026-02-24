@@ -288,10 +288,12 @@ export default function HugoChatScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
+      
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Image source={{ uri: HUGO_AVATAR }} style={styles.headerAvatar} />
         <View style={styles.headerInfo}>
@@ -299,7 +301,7 @@ export default function HugoChatScreen() {
           <Text style={styles.headerSubtitle}>Self-Help & Wellness</Text>
         </View>
         <TouchableOpacity onPress={clearConversation} style={styles.refreshButton}>
-          <Ionicons name="refresh" size={22} color="#fff" />
+          <Ionicons name="refresh" size={22} color={colors.text} />
         </TouchableOpacity>
       </View>
 
