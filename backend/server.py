@@ -5405,6 +5405,7 @@ app.include_router(ai_feedback.router, prefix="/api")
 app.include_router(knowledge_base.router, prefix="/api")
 app.include_router(compliance.router, prefix="/api")
 app.include_router(documents.router, prefix="/api")
+app.include_router(surveys.router, prefix="/api")
 app.include_router(data_retention.router)
 app.include_router(shift_swaps.router, prefix="/api")
 
