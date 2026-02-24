@@ -1904,8 +1904,20 @@ async function saveShift() {
         return;
     }
     
+    if (!currentUser || !currentUser.id) {
+        showNotification('You must be logged in to add shifts', 'error');
+        return;
+    }
+    
     try {
-        var response = await apiCall('/shifts', {
+        // Include user_id, user_name, and user_email as query parameters
+        var queryParams = new URLSearchParams({
+            user_id: currentUser.id,
+            user_name: currentUser.name || '',
+            user_email: currentUser.email || ''
+        });
+        
+        var response = await apiCall('/shifts?' + queryParams.toString(), {
             method: 'POST',
             body: JSON.stringify({
                 date: date,
