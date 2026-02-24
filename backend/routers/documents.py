@@ -13,8 +13,8 @@ from weasyprint import HTML, CSS
 router = APIRouter(prefix="/documents", tags=["documents"])
 logger = logging.getLogger(__name__)
 
-# Path to compliance documents
-DOCS_PATH = Path("/app/docs/compliance")
+# Path to compliance documents - use relative path from backend folder
+DOCS_PATH = Path(__file__).parent.parent / "docs" / "compliance"
 
 # Available documents mapping
 DOCUMENTS = {
