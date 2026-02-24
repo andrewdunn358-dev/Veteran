@@ -251,4 +251,44 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flex: 1,
   },
+  hugoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    gap: 12,
+  },
+  hugoImageContainer: {
+    width: 60,
+    height: 60,
+  },
+  hugoImageWrapper: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#dcfce7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#10b981',
+  },
+  hugoContent: {
+    flex: 1,
+  },
+  hugoTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  hugoSubtitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  hugoDescription: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
 });
