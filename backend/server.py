@@ -5381,7 +5381,7 @@ from routers import (
     staff, organizations, resources, safeguarding, 
     callbacks, live_chat, notes, concerns,
     message_queue, ai_feedback, knowledge_base, compliance,
-    podcasts, data_retention, shift_swaps
+    podcasts, data_retention, shift_swaps, documents
 )
 
 # Core functionality routers
@@ -5404,6 +5404,7 @@ app.include_router(message_queue.router, prefix="/api")
 app.include_router(ai_feedback.router, prefix="/api")
 app.include_router(knowledge_base.router, prefix="/api")
 app.include_router(compliance.router, prefix="/api")
+app.include_router(documents.router, prefix="/api")
 app.include_router(data_retention.router)
 app.include_router(shift_swaps.router, prefix="/api")
 
