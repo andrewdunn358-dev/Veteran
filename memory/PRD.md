@@ -15,10 +15,29 @@
 - **Fix**: Updated `CounsellorStatusUpdate` model in `server.py` to accept `^(available|limited|unavailable)$`
 - **File Changed**: `/app/backend/server.py` line 1080
 
+**🔧 CMS Pages Fix (Complete):**
+- Added missing CMS pages `self-care` and `family-friends` to production database
+- Added public seed endpoint `/api/cms/seed-public` for easier database population
+- **File Changed**: `/app/backend/routers/cms.py`
+
+**🎨 AI Chat Consolidation (Complete - Major Refactor):**
+- Created unified AI chat component with theme support at `/app/frontend/app/chat/[characterId].tsx`
+- Created AI character config at `/app/frontend/src/config/ai-characters.ts` with all 6 characters
+- Characters: Hugo, Bob, Margie, Sentry (Finch), Tommy, Doris
+- All chats now properly respect dark/light theme
+- Reduced code duplication from ~6000 lines across 5 files to ~800 lines in 2 files
+- Updated home.tsx routes to use new unified chat paths (`/chat/hugo`, `/chat/bob`, etc.)
+
+**📁 New Files Created:**
+- `/app/frontend/src/config/ai-characters.ts` - Character configuration
+- `/app/frontend/app/chat/[characterId].tsx` - Dynamic unified chat route
+- `/app/frontend/app/unified-chat.tsx` - Alternative unified chat entry point
+
 **✅ Verified Working:**
 - Callback request flow - creates callback and shows success confirmation page
 - Staff portal can view all callbacks via `/api/callbacks`
 - Auto-refresh every 30 seconds in staff portal
+- New unified chat routes work with theme support
 
 ---
 
