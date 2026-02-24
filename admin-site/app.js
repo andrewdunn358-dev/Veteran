@@ -4613,12 +4613,12 @@ function openGenericModal(title, content) {
 function downloadDocument(filename) {
     // Map old filenames to static PDF files
     const docMap = {
-        'ROPA.md': 'docs/ROPA.pdf',
-        'BACP_ETHICAL_FRAMEWORK_COMPLIANCE.md': 'docs/BACP_Compliance.pdf',
-        'GDPR_AUDIT_REPORT.md': 'docs/GDPR_Audit_Report.pdf',
-        'INCIDENT_RESPONSE_PLAN.md': 'docs/Incident_Response_Plan.pdf',
-        'SECURITY_REVIEW_SCHEDULE.md': 'docs/Security_Review_Schedule.pdf',
-        'SAFEGUARDING_DISCLAIMER.md': 'docs/Safeguarding_Disclaimer.pdf'
+        'ROPA.md': '/docs/ROPA.pdf',
+        'BACP_ETHICAL_FRAMEWORK_COMPLIANCE.md': '/docs/BACP_Compliance.pdf',
+        'GDPR_AUDIT_REPORT.md': '/docs/GDPR_Audit_Report.pdf',
+        'INCIDENT_RESPONSE_PLAN.md': '/docs/Incident_Response_Plan.pdf',
+        'SECURITY_REVIEW_SCHEDULE.md': '/docs/Security_Review_Schedule.pdf',
+        'SAFEGUARDING_DISCLAIMER.md': '/docs/Safeguarding_Disclaimer.pdf'
     };
     
     const pdfPath = docMap[filename];
@@ -4627,9 +4627,15 @@ function downloadDocument(filename) {
         return;
     }
     
-    // Direct download from static files
-    window.open(pdfPath, '_blank');
-    showNotification(`Opening ${pdfPath.split('/').pop()}...`, 'success');
+    // Create a temporary link to force download
+    const link = document.createElement('a');
+    link.href = pdfPath;
+    link.download = pdfPath.split('/').pop();
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showNotification(`Downloading ${pdfPath.split('/').pop()}...`, 'success');
 }
 
 // Escape HTML for security
