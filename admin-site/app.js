@@ -4609,9 +4609,28 @@ function openGenericModal(title, content) {
     setTimeout(() => modal.classList.add('active'), 10);
 }
 
-// Download compliance document
+// Download compliance document as PDF
 function downloadDocument(filename) {
-    showNotification(`Document ${filename} would be downloaded. In production, these are stored in /app/docs/compliance/`, 'info');
+    // Map old filenames to new document IDs
+    const docMap = {
+        'ROPA.md': 'ROPA',
+        'BACP_ETHICAL_FRAMEWORK_COMPLIANCE.md': 'BACP_COMPLIANCE',
+        'GDPR_AUDIT_REPORT.md': 'GDPR_AUDIT',
+        'INCIDENT_RESPONSE_PLAN.md': 'INCIDENT_RESPONSE',
+        'SECURITY_REVIEW_SCHEDULE.md': 'SECURITY_SCHEDULE',
+        'SAFEGUARDING_DISCLAIMER.md': 'SAFEGUARDING'
+    };
+    
+    const docId = docMap[filename];
+    if (!docId) {
+        showNotification(`Unknown document: ${filename}`, 'error');
+        return;
+    }
+    
+    // Open PDF download in new tab
+    const downloadUrl = `${API_BASE}/documents/download/${docId}`;
+    window.open(downloadUrl, '_blank');
+    showNotification(`Downloading ${filename.replace('.md', '.pdf')}...`, 'success');
 }
 
 // Escape HTML for security
