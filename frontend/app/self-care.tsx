@@ -56,7 +56,7 @@ export default function SelfCarePage() {
       
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton} data-testid="back-button">
+        <TouchableOpacity onPress={() => safeGoBack(router)} style={styles.backButton} data-testid="back-button">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Self-Care Tools</Text>
