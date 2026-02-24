@@ -1124,42 +1124,107 @@ body {
 .cms-visual-editor {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
-.page-selector {
+/* Controls Bar */
+.cms-controls-bar {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     background: var(--bg-card);
-    padding: 16px 20px;
+    padding: 12px 20px;
     border-radius: 12px;
     box-shadow: var(--shadow);
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
 }
 
-.page-selector select {
-    padding: 10px 16px;
+.cms-controls-left,
+.cms-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cms-controls-left label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.cms-controls-left select {
+    padding: 8px 14px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
     background: var(--bg-secondary);
     color: var(--text-primary);
     font-size: 14px;
     font-weight: 500;
-    min-width: 180px;
+    min-width: 160px;
 }
 
-.phone-preview-container {
+/* Split Editor Layout */
+.cms-split-editor {
     display: grid;
-    grid-template-columns: 380px 1fr;
+    grid-template-columns: 400px 1fr;
     gap: 24px;
-    min-height: 700px;
+    min-height: 750px;
 }
 
-@media (max-width: 1024px) {
-    .phone-preview-container {
+@media (max-width: 1200px) {
+    .cms-split-editor {
         grid-template-columns: 1fr;
     }
+}
+
+/* Preview Panel */
+.cms-preview-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.cms-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border-radius: 12px 12px 0 0;
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.cms-preview-header i {
+    margin-right: 8px;
+    color: var(--primary);
+}
+
+.preview-theme-toggle {
+    display: flex;
+    gap: 4px;
+}
+
+.theme-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.theme-btn:hover {
+    background: var(--bg-primary);
+}
+
+.theme-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
 }
 
 /* Phone Frame */
