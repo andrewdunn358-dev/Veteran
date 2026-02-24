@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, ActivityIndicator } from 'react-native';
 
 type ThemeMode = 'dark' | 'light';
 
@@ -65,6 +66,7 @@ const THEME_STORAGE_KEY = '@veterans_app_theme';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeMode>('light');
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     loadStoredTheme();
@@ -86,6 +88,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error loading theme:', error);
+    } finally {
+      setIsLoaded(true);
     }
   };
 
@@ -113,6 +117,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const colors = theme === 'dark' ? darkColors : lightColors;
   const isDark = theme === 'dark';
+
+  // Show a loading state while theme is being loaded to prevent flash
+  if (!isLoaded) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#1a2332', justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#4a90e2" />
+      </View>
+    );
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, colors, isDark, toggleTheme, setTheme }}>
