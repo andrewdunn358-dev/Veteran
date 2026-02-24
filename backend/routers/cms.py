@@ -285,7 +285,114 @@ async def seed_cms_public(force: bool = False):
     sections = []
     cards = []
     
-    # Self-Care page sections and cards
+    # =====================
+    # HOME PAGE - AI Team
+    # =====================
+    home_ai_section_id = str(uuid.uuid4())
+    sections.append({
+        "id": home_ai_section_id,
+        "page_slug": "home",
+        "title": "Meet the AI Support Team",
+        "subtitle": "Our AI buddies are here to listen 24/7. Choose who you'd like to chat with.",
+        "type": "ai_team",
+        "order": 1,
+        "created_at": now,
+        "updated_at": now
+    })
+    
+    # AI Character cards
+    ai_characters = [
+        {
+            "title": "Hugo",
+            "description": "Your friendly AI companion for general support and a listening ear",
+            "icon": "chatbubbles",
+            "color": "#3b82f6",
+            "image_url": "https://static.prod-images.emergentagent.com/jobs/bf7a0a9a-b52d-4db3-b85e-aedfe9959d59/images/e6bf5d86d81e05ef6bc0f2d11f30b2f3a44b52c59f3e76cdbd6c9e23f6c0b8a2.png",
+            "route": "/chat/hugo",
+            "order": 1
+        },
+        {
+            "title": "Bob",
+            "description": "Ex-Para veteran who understands military life",
+            "icon": "shield",
+            "color": "#22c55e",
+            "image_url": "https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png",
+            "route": "/chat/bob",
+            "order": 2
+        },
+        {
+            "title": "Margie",
+            "description": "Warm and caring support for emotional wellbeing",
+            "icon": "heart",
+            "color": "#ec4899",
+            "image_url": "https://static.prod-images.emergentagent.com/jobs/bf7a0a9a-b52d-4db3-b85e-aedfe9959d59/images/93c7a09f7b5c9e3b1f4e8d6a2b7c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c.png",
+            "route": "/chat/margie",
+            "order": 3
+        },
+        {
+            "title": "Finch",
+            "description": "Expert in UK military law and veterans' rights",
+            "icon": "book",
+            "color": "#f59e0b",
+            "image_url": "https://static.prod-images.emergentagent.com/jobs/bf7a0a9a-b52d-4db3-b85e-aedfe9959d59/images/finch_avatar.png",
+            "route": "/chat/sentry",
+            "order": 4
+        },
+    ]
+    
+    for char in ai_characters:
+        cards.append({
+            "id": str(uuid.uuid4()),
+            "section_id": home_ai_section_id,
+            "title": char["title"],
+            "description": char["description"],
+            "icon": char["icon"],
+            "color": char["color"],
+            "image_url": char.get("image_url"),
+            "route": char["route"],
+            "order": char["order"],
+            "card_type": "ai_character",
+            "is_visible": True,
+            "created_at": now,
+            "updated_at": now
+        })
+    
+    # Quick Actions section for Home
+    home_actions_section_id = str(uuid.uuid4())
+    sections.append({
+        "id": home_actions_section_id,
+        "page_slug": "home",
+        "title": "Quick Actions",
+        "type": "cards",
+        "order": 2,
+        "created_at": now,
+        "updated_at": now
+    })
+    
+    quick_actions = [
+        {"title": "Emergency Help", "description": "Crisis support numbers", "icon": "warning", "color": "#ef4444", "route": "/crisis", "order": 1},
+        {"title": "Talk to Someone", "description": "Request a callback", "icon": "call", "color": "#22c55e", "route": "/callback", "order": 2},
+        {"title": "Self-Care Tools", "description": "Exercises and resources", "icon": "heart", "color": "#3b82f6", "route": "/self-care", "order": 3},
+    ]
+    
+    for action in quick_actions:
+        cards.append({
+            "id": str(uuid.uuid4()),
+            "section_id": home_actions_section_id,
+            "title": action["title"],
+            "description": action["description"],
+            "icon": action["icon"],
+            "color": action["color"],
+            "route": action["route"],
+            "order": action["order"],
+            "is_visible": True,
+            "created_at": now,
+            "updated_at": now
+        })
+    
+    # =====================
+    # SELF-CARE PAGE
+    # =====================
     self_care_section_id = str(uuid.uuid4())
     sections.append({
         "id": self_care_section_id,
