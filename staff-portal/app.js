@@ -1762,10 +1762,14 @@ function addDayCell(container, date, isCurrentMonth, today) {
     var isToday = date.getTime() === today.getTime();
     var isSelected = dateString === selectedCalendarDate;
     
-    // Find shifts for this day
+    // Find shifts for this day - check both user_id and staff_id for compatibility
     var dayShifts = calendarShifts.filter(function(s) { return s.date === dateString; });
-    var hasMyShift = dayShifts.some(function(s) { return s.staff_id === currentUser.id; });
-    var hasOtherShifts = dayShifts.some(function(s) { return s.staff_id !== currentUser.id; });
+    var hasMyShift = dayShifts.some(function(s) { 
+        return (s.user_id === currentUser.id) || (s.staff_id === currentUser.id); 
+    });
+    var hasOtherShifts = dayShifts.some(function(s) { 
+        return (s.user_id !== currentUser.id) && (s.staff_id !== currentUser.id); 
+    });
     
     var cell = document.createElement('div');
     cell.className = 'calendar-day';
