@@ -274,17 +274,17 @@ export default function DynamicAIChat() {
       
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleGoBack} style={styles.backButton} data-testid="back-button">
+        <Pressable onPress={handleGoBack} style={styles.backButton} data-testid="back-button">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
+        </Pressable>
         <Image source={{ uri: character.avatar }} style={styles.headerAvatar} />
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle}>{character.name}</Text>
           <Text style={styles.headerSubtitle}>{character.role}</Text>
         </View>
-        <TouchableOpacity onPress={clearConversation} style={styles.refreshButton} data-testid="clear-chat-btn">
+        <Pressable onPress={clearConversation} style={styles.refreshButton} data-testid="clear-chat-btn">
           <Ionicons name="refresh" size={22} color={colors.text} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {/* Save conversation banner */}
