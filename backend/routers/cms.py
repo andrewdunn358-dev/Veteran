@@ -251,14 +251,20 @@ async def reorder_cms_cards(updates: dict):
 # ==========================================
 
 @router.post("/seed-public")
-async def seed_cms_public():
+async def seed_cms_public(force: bool = False):
     """Public endpoint to seed CMS data (no auth required for initial setup)"""
     db = get_database()
     
     # Check if already seeded
     existing = await db.cms_pages.count_documents({})
-    if existing > 0:
-        return {"message": "CMS already seeded", "count": existing}
+    if existing > 0 and not force:
+        return {"message": "CMS already seeded", "count": existing, "hint": "Add ?force=true to reseed"}
+    
+    # If force, clear existing data first
+    if force and existing > 0:
+        await db.cms_pages.delete_many({})
+        await db.cms_sections.delete_many({})
+        await db.cms_cards.delete_many({})
     
     now = datetime.utcnow()
     
