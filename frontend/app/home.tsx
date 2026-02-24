@@ -174,177 +174,29 @@ export default function Index() {
           <Text style={styles.taglineEnglish}>"Radio Check" fuses real-time peer support with smart AI insight, creating more than just an app — it's a digital hand on your shoulder when it matters most.</Text>
         </View>
 
-        {/* Main Menu Cards */}
+        {/* Main Menu Cards - CMS Powered */}
         <View style={styles.menuContainer}>
-          {/* Need to Talk - Primary CTA */}
-          <TouchableOpacity 
-            style={styles.primaryCard}
-            onPress={() => router.push('/crisis-support')}
-            activeOpacity={0.9}
-            data-testid="need-to-talk-btn"
-          >
-            <View style={styles.cardIconContainer}>
-              <Ionicons name="heart" size={32} color="#3b82f6" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Need to Talk?</Text>
-              <Text style={styles.cardDescription}>Connect with support now</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#3b82f6" />
-          </TouchableOpacity>
-
-          {/* Talk to a Veteran */}
-          <TouchableOpacity 
-            style={styles.menuCard}
-            onPress={() => router.push('/peer-support')}
-            activeOpacity={0.9}
-            data-testid="talk-to-veteran-btn"
-          >
-            <View style={[styles.cardIconContainer, { backgroundColor: '#dcfce7' }]}>
-              <Ionicons name="people" size={28} color="#22c55e" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Talk to a Veteran</Text>
-              <Text style={styles.cardDescription}>Peer support from those who understand</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
-          </TouchableOpacity>
-
-          {/* Warfare on Lawfare */}
-          <TouchableOpacity 
-            style={styles.menuCard}
-            onPress={() => router.push('/historical-investigations')}
-            activeOpacity={0.9}
-            data-testid="warfare-lawfare-btn"
-          >
-            <View style={[styles.cardIconContainer, { backgroundColor: '#e0e7ff' }]}>
-              <Ionicons name="shield" size={28} color="#6366f1" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Warfare on Lawfare</Text>
-              <Text style={styles.cardDescription}>Support for historical investigations</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
-          </TouchableOpacity>
-
-          {/* Support Organisations */}
-          <TouchableOpacity 
-            style={styles.menuCard}
-            onPress={() => router.push('/organizations')}
-            activeOpacity={0.9}
-            data-testid="support-orgs-btn"
-          >
-            <View style={[styles.cardIconContainer, { backgroundColor: '#fef3c7' }]}>
-              <Ionicons name="list" size={28} color="#f59e0b" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Support Organisations</Text>
-              <Text style={styles.cardDescription}>Directory of veteran services</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
-          </TouchableOpacity>
-
-          {/* Self-Care Tools */}
-          <TouchableOpacity 
-            style={styles.menuCard}
-            onPress={() => router.push('/self-care')}
-            activeOpacity={0.9}
-            data-testid="self-care-btn"
-          >
-            <View style={[styles.cardIconContainer, { backgroundColor: '#fce7f3' }]}>
-              <Ionicons name="fitness" size={28} color="#ec4899" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Self-Care Tools</Text>
-              <Text style={styles.cardDescription}>Journal, grounding, breathing & more</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
-          </TouchableOpacity>
-
-          {/* Friends & Family */}
-          <TouchableOpacity 
-            style={styles.menuCard}
-            onPress={() => router.push('/family-friends')}
-            activeOpacity={0.9}
-            data-testid="family-friends-btn"
-          >
-            <View style={[styles.cardIconContainer, { backgroundColor: '#ede9fe' }]}>
-              <Ionicons name="heart-circle" size={28} color="#7c3aed" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Friends & Family</Text>
-              <Text style={styles.cardDescription}>Worried about a veteran?</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
-          </TouchableOpacity>
-
-          {/* Addictions Support */}
-          <TouchableOpacity 
-            style={styles.menuCard}
-            onPress={() => router.push('/substance-support')}
-            activeOpacity={0.9}
-            data-testid="addictions-support-btn"
-          >
-            <View style={[styles.cardIconContainer, { backgroundColor: '#fef3c7' }]}>
-              <Ionicons name="heart-dislike" size={28} color="#d97706" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Addictions</Text>
-              <Text style={styles.cardDescription}>Alcohol, drugs, gambling & more</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
-          </TouchableOpacity>
-
-          {/* Criminal Justice Support */}
-          <TouchableOpacity 
-            style={styles.menuCard}
-            onPress={() => router.push('/criminal-justice')}
-            activeOpacity={0.9}
-            data-testid="criminal-justice-btn"
-          >
-            <View style={[styles.cardIconContainer, { backgroundColor: '#e0e7ff' }]}>
-              <Ionicons name="shield-checkmark" size={28} color="#4f46e5" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Criminal Justice Support</Text>
-              <Text style={styles.cardDescription}>Help for veterans in or leaving prison</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
-          </TouchableOpacity>
-
-          {/* Recommended Podcasts */}
-          <TouchableOpacity 
-            style={styles.menuCard}
-            onPress={() => router.push('/podcasts')}
-            activeOpacity={0.9}
-            data-testid="podcasts-btn"
-          >
-            <View style={[styles.cardIconContainer, { backgroundColor: '#fce7f3' }]}>
-              <Ionicons name="headset" size={28} color="#db2777" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Recommended Podcasts</Text>
-              <Text style={styles.cardDescription}>Veteran stories & mental health support</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
-          </TouchableOpacity>
-
-          {/* Request a Callback - now below Friends & Family */}
-          <TouchableOpacity 
-            style={[styles.menuCard, styles.callbackCard]}
-            onPress={() => router.push('/callback')}
-            activeOpacity={0.9}
-            data-testid="callback-btn"
-          >
-            <View style={[styles.cardIconContainer, { backgroundColor: '#dcfce7' }]}>
-              <Ionicons name="call" size={28} color="#22c55e" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Request a Callback</Text>
-              <Text style={styles.cardDescription}>{"We'll call you back"}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#22c55e" />
-          </TouchableOpacity>
+          {menuItems.map((item, index) => (
+            <TouchableOpacity 
+              key={index}
+              style={[
+                item.isPrimary ? styles.primaryCard : styles.menuCard,
+                item.isCallback && styles.callbackCard
+              ]}
+              onPress={() => router.push(item.route as any)}
+              activeOpacity={0.9}
+              data-testid={`menu-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              <View style={[styles.cardIconContainer, { backgroundColor: item.bgColor }]}>
+                <Ionicons name={item.icon as any} size={item.isPrimary ? 32 : 28} color={item.color} />
+              </View>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>{item.title}</Text>
+                <Text style={styles.cardDescription}>{item.description}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color={item.isPrimary || item.isCallback ? item.color : colors.textSecondary} />
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Meet the AI Team Section */}
