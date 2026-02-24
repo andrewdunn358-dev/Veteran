@@ -5381,7 +5381,7 @@ from routers import (
     staff, organizations, resources, safeguarding, 
     callbacks, live_chat, notes, concerns,
     message_queue, ai_feedback, knowledge_base, compliance,
-    podcasts, data_retention, shift_swaps, documents
+    podcasts, data_retention, shift_swaps, documents, surveys
 )
 
 # Core functionality routers
