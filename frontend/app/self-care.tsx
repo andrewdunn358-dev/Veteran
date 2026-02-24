@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Pressable, StyleSheet, ScrollView, StatusBar, ActivityIndicator, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -56,9 +56,9 @@ export default function SelfCarePage() {
       
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => safeGoBack(router)} style={styles.backButton} data-testid="back-button">
+        <Pressable onPress={() => safeGoBack(router)} style={styles.backButton} data-testid="back-button">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Self-Care Tools</Text>
         <View style={styles.placeholder} />
       </View>
