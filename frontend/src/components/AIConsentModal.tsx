@@ -168,21 +168,24 @@ export default function AIConsentModal({ visible, onAccept, onDecline, character
   );
 }
 
-const styles = StyleSheet.create({
+// Dynamic styles based on theme
+const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
   },
   modal: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 24,
     width: '100%',
     maxWidth: 400,
     maxHeight: '90%',
+    borderWidth: isDark ? 1 : 0,
+    borderColor: colors.border,
   },
   header: {
     alignItems: 'center',
@@ -192,7 +195,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#eff6ff',
+    backgroundColor: isDark ? '#1e3a5f' : '#eff6ff',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -200,7 +203,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1e293b',
+    color: colors.text,
     textAlign: 'center',
   },
   section: {
@@ -215,11 +218,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1e293b',
+    color: colors.text,
     marginBottom: 10,
   },
   disclosureBox: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: isDark ? '#451a03' : '#fef3c7',
     borderRadius: 12,
     padding: 14,
     borderLeftWidth: 4,
@@ -227,7 +230,7 @@ const styles = StyleSheet.create({
   },
   disclosureText: {
     fontSize: 14,
-    color: '#92400e',
+    color: isDark ? '#fcd34d' : '#92400e',
     lineHeight: 20,
   },
   bold: {
@@ -242,19 +245,19 @@ const styles = StyleSheet.create({
   listText: {
     flex: 1,
     fontSize: 14,
-    color: '#475569',
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   paragraph: {
     fontSize: 13,
-    color: '#64748b',
+    color: colors.textMuted,
     lineHeight: 19,
     marginBottom: 8,
   },
   safeguardingBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#fef2f2',
+    backgroundColor: isDark ? '#450a0a' : '#fef2f2',
     borderRadius: 12,
     padding: 14,
     gap: 10,
@@ -263,24 +266,24 @@ const styles = StyleSheet.create({
   safeguardingText: {
     flex: 1,
     fontSize: 13,
-    color: '#991b1b',
+    color: isDark ? '#fca5a5' : '#991b1b',
     lineHeight: 19,
   },
   crisisButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8fafc',
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 12,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: colors.border,
   },
   crisisIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -291,12 +294,12 @@ const styles = StyleSheet.create({
   crisisName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1e293b',
+    color: colors.text,
   },
   crisisNumber: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#3b82f6',
+    color: colors.primary,
   },
   crisisAvail: {
     fontSize: 12,
@@ -304,7 +307,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   acceptButton: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: colors.primary,
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
@@ -317,7 +320,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 11,
-    color: '#94a3b8',
+    color: colors.textMuted,
     textAlign: 'center',
     marginTop: 14,
     lineHeight: 16,
