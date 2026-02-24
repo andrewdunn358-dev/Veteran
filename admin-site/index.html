@@ -554,24 +554,31 @@
                 <!-- Documentation Links -->
                 <div class="card" style="margin-top: 20px; background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
                     <div class="card-body" style="padding: 24px;">
-                        <h3 style="color: #fff; margin: 0 0 16px 0;"><i class="fas fa-file-alt" style="margin-right: 8px;"></i> Compliance Documentation</h3>
-                        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
-                            <a href="#" onclick="downloadDocument('ROPA.md')" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3);">
-                                <i class="fas fa-download"></i> ROPA
+                        <h3 style="color: #fff; margin: 0 0 16px 0;"><i class="fas fa-file-pdf" style="margin-right: 8px;"></i> Compliance Documentation (PDF Downloads)</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                            <a href="#" onclick="downloadDocument('ROPA.md'); return false;" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; padding: 12px;">
+                                <i class="fas fa-file-pdf" style="margin-right: 8px; color: #ef4444;"></i> ROPA
                             </a>
-                            <a href="#" onclick="downloadDocument('INCIDENT_RESPONSE_PLAN.md')" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3);">
-                                <i class="fas fa-download"></i> Incident Response Plan
+                            <a href="#" onclick="downloadDocument('GDPR_AUDIT_REPORT.md'); return false;" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; padding: 12px;">
+                                <i class="fas fa-file-pdf" style="margin-right: 8px; color: #ef4444;"></i> GDPR Audit Report
                             </a>
-                            <a href="#" onclick="downloadDocument('SECURITY_REVIEW_SCHEDULE.md')" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3);">
-                                <i class="fas fa-download"></i> Security Review Schedule
+                            <a href="#" onclick="downloadDocument('BACP_ETHICAL_FRAMEWORK_COMPLIANCE.md'); return false;" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; padding: 12px;">
+                                <i class="fas fa-file-pdf" style="margin-right: 8px; color: #ef4444;"></i> BACP Compliance
                             </a>
-                            <a href="#" onclick="downloadDocument('BACP_ETHICAL_FRAMEWORK_COMPLIANCE.md')" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3);">
-                                <i class="fas fa-download"></i> BACP Compliance
+                            <a href="#" onclick="downloadDocument('INCIDENT_RESPONSE_PLAN.md'); return false;" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; padding: 12px;">
+                                <i class="fas fa-file-pdf" style="margin-right: 8px; color: #ef4444;"></i> Incident Response
                             </a>
-                            <a href="#" onclick="downloadDocument('GDPR_AUDIT_REPORT.md')" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3);">
-                                <i class="fas fa-download"></i> GDPR Audit Report
+                            <a href="#" onclick="downloadDocument('SECURITY_REVIEW_SCHEDULE.md'); return false;" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; padding: 12px;">
+                                <i class="fas fa-file-pdf" style="margin-right: 8px; color: #ef4444;"></i> Security Schedule
+                            </a>
+                            <a href="#" onclick="downloadDocument('SAFEGUARDING_DISCLAIMER.md'); return false;" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; padding: 12px;">
+                                <i class="fas fa-file-pdf" style="margin-right: 8px; color: #ef4444;"></i> Safeguarding
                             </a>
                         </div>
+                        <p style="color: rgba(255,255,255,0.6); margin-top: 16px; font-size: 13px; margin-bottom: 0;">
+                            <i class="fas fa-info-circle" style="margin-right: 6px;"></i>
+                            Click to download professionally formatted PDF documents
+                        </p>
                     </div>
                 </div>
             </div>
