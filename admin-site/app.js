@@ -4638,6 +4638,116 @@ function downloadDocument(filename) {
     showNotification(`Downloading ${pdfPath.split('/').pop()}...`, 'success');
 }
 
+// ============================================
+// Beta Testing Functions
+// ============================================
+
+// Toggle beta testing mode
+async function toggleBetaMode(enabled) {
+    try {
+        const response = await apiCall('/surveys/beta-enabled', {
+            method: 'POST',
+            body: JSON.stringify({ enabled: enabled })
+        });
+        showNotification(`Beta testing ${enabled ? 'enabled' : 'disabled'}`, 'success');
+        loadBetaStats();
+    } catch (error) {
+        showNotification('Failed to toggle beta mode: ' + error.message, 'error');
+        // Revert checkbox
+        document.getElementById('beta-toggle').checked = !enabled;
+    }
+}
+
+// Load beta testing statistics
+async function loadBetaStats() {
+    try {
+        // Check if beta is enabled
+        const betaStatus = await apiCall('/surveys/beta-enabled');
+        document.getElementById('beta-toggle').checked = betaStatus.beta_enabled;
+        
+        // Load stats
+        const stats = await apiCall('/surveys/stats');
+        
+        document.getElementById('beta-pre-count').textContent = stats.total_pre_surveys || 0;
+        document.getElementById('beta-post-count').textContent = stats.total_post_surveys || 0;
+        document.getElementById('beta-completion-rate').textContent = (stats.completion_rate || 0) + '%';
+        document.getElementById('beta-nps').textContent = stats.nps_score || '--';
+        
+        // Improvement metrics
+        const improvement = stats.improvement || {};
+        updateImprovementMetric('wellbeing-change', improvement.wellbeing_change);
+        updateImprovementMetric('anxiety-change', improvement.anxiety_change, true); // Lower is better for anxiety
+        updateImprovementMetric('mood-change', improvement.mood_change, true); // Lower is better for mood issues
+        
+        // Load recent responses
+        loadBetaResponses();
+    } catch (error) {
+        console.error('Error loading beta stats:', error);
+    }
+}
+
+function updateImprovementMetric(elementId, value, lowerIsBetter = false) {
+    const el = document.getElementById(elementId);
+    if (value === undefined || value === null) {
+        el.textContent = '--';
+        el.style.color = '#9ca3af';
+        return;
+    }
+    
+    const isPositive = lowerIsBetter ? value < 0 : value > 0;
+    const prefix = value > 0 ? '+' : '';
+    el.textContent = prefix + value.toFixed(1);
+    el.style.color = isPositive ? '#22c55e' : value === 0 ? '#9ca3af' : '#ef4444';
+}
+
+// Load survey responses
+async function loadBetaResponses() {
+    try {
+        const data = await apiCall('/surveys/responses?limit=50');
+        const container = document.getElementById('beta-responses');
+        
+        if (!data.responses || data.responses.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No survey responses yet</p>';
+            return;
+        }
+        
+        container.innerHTML = data.responses.map(r => `
+            <div style="background: var(--bg-color); padding: 16px; border-radius: 12px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-weight: 600; color: ${r.survey_type === 'pre' ? '#3b82f6' : '#22c55e'};">
+                        <i class="fas fa-${r.survey_type === 'pre' ? 'clipboard-check' : 'clipboard-list'}"></i>
+                        ${r.survey_type === 'pre' ? 'Pre-Survey' : 'Post-Survey'}
+                    </span>
+                    <span style="color: var(--text-muted); font-size: 12px;">${new Date(r.submitted_at).toLocaleDateString()}</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 13px;">
+                    <div><span style="color: var(--text-muted);">Wellbeing:</span> <strong>${r.wellbeing_score}/10</strong></div>
+                    <div><span style="color: var(--text-muted);">Anxiety:</span> <strong>${r.anxiety_level}/3</strong></div>
+                    <div><span style="color: var(--text-muted);">Mood:</span> <strong>${r.mood_level}/3</strong></div>
+                </div>
+                ${r.survey_type === 'post' ? `
+                    <div style="margin-top: 8px; font-size: 13px;">
+                        <span style="color: var(--text-muted);">App Helped:</span> <strong>${r.app_helped}/5</strong> | 
+                        <span style="color: var(--text-muted);">Would Recommend:</span> <strong>${r.would_recommend}/10</strong>
+                    </div>
+                ` : ''}
+                ${r.hopes ? `<div style="margin-top: 8px; font-size: 13px; color: var(--text-muted); font-style: italic;">"${escapeHtml(r.hopes)}"</div>` : ''}
+                ${r.improvements ? `<div style="margin-top: 8px; font-size: 13px; color: var(--text-muted); font-style: italic;">"${escapeHtml(r.improvements)}"</div>` : ''}
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading responses:', error);
+    }
+}
+
+// Export survey data as CSV
+function exportSurveyData() {
+    window.open(`${CONFIG.API_URL}/api/surveys/export`, '_blank');
+    showNotification('Downloading survey data...', 'success');
+}
+
+// ============================================
+
 // Escape HTML for security
 function escapeHtml(text) {
     if (!text) return '';
