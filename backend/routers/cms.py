@@ -243,3 +243,123 @@ async def reorder_cms_cards(updates: dict):
             {"$set": {"order": new_order}}
         )
     return {"success": True}
+
+
+
+# ==========================================
+# Public Seed Endpoint (No Auth Required)
+# ==========================================
+
+@router.post("/seed-public")
+async def seed_cms_public():
+    """Public endpoint to seed CMS data (no auth required for initial setup)"""
+    db = get_database()
+    
+    # Check if already seeded
+    existing = await db.cms_pages.count_documents({})
+    if existing > 0:
+        return {"message": "CMS already seeded", "count": existing}
+    
+    now = datetime.utcnow()
+    
+    # Default CMS Pages
+    pages = [
+        {"id": str(uuid.uuid4()), "slug": "home", "title": "Home", "nav_order": 1, "is_published": True, "created_at": now, "updated_at": now},
+        {"id": str(uuid.uuid4()), "slug": "self-care", "title": "Self-Care Tools", "nav_order": 2, "is_published": True, "created_at": now, "updated_at": now},
+        {"id": str(uuid.uuid4()), "slug": "peer-support", "title": "Peer Support", "nav_order": 3, "is_published": True, "created_at": now, "updated_at": now},
+        {"id": str(uuid.uuid4()), "slug": "organizations", "title": "Organizations", "nav_order": 4, "is_published": True, "created_at": now, "updated_at": now},
+        {"id": str(uuid.uuid4()), "slug": "family-friends", "title": "Family & Friends", "nav_order": 5, "is_published": True, "created_at": now, "updated_at": now},
+        {"id": str(uuid.uuid4()), "slug": "substance-support", "title": "Substance Support", "nav_order": 6, "is_published": True, "created_at": now, "updated_at": now},
+    ]
+    
+    # Insert pages
+    await db.cms_pages.insert_many(pages)
+    
+    # Create default sections for each page
+    sections = []
+    cards = []
+    
+    # Self-Care page sections and cards
+    self_care_section_id = str(uuid.uuid4())
+    sections.append({
+        "id": self_care_section_id,
+        "page_slug": "self-care",
+        "title": "Self-Care Tools",
+        "type": "cards",
+        "order": 1,
+        "created_at": now,
+        "updated_at": now
+    })
+    
+    # Self-care cards
+    self_care_cards = [
+        {"title": "Mental Health Check", "description": "PHQ-9 & GAD-7 assessments", "icon": "clipboard", "color": "#3b82f6", "route": "/mental-health-screening", "order": 1},
+        {"title": "My Journal", "description": "Write down your thoughts", "icon": "book", "color": "#3b82f6", "route": "/journal", "order": 2},
+        {"title": "Daily Check-in", "description": "Track how you're feeling", "icon": "happy", "color": "#f59e0b", "route": "/mood", "order": 3},
+        {"title": "Grounding Tools", "description": "5-4-3-2-1 and more techniques", "icon": "hand-left", "color": "#22c55e", "route": "/grounding", "order": 4},
+        {"title": "Breathing Exercises", "description": "Box breathing & relaxation", "icon": "cloud", "color": "#06b6d4", "route": "/breathing-game", "order": 5},
+        {"title": "Buddy Finder", "description": "Connect with veterans near you", "icon": "people", "color": "#10b981", "route": "/buddy-finder", "order": 6},
+        {"title": "Resources Library", "description": "Helpful information", "icon": "library", "color": "#ec4899", "route": "/resources", "order": 7},
+    ]
+    
+    for card in self_care_cards:
+        cards.append({
+            "id": str(uuid.uuid4()),
+            "section_id": self_care_section_id,
+            "title": card["title"],
+            "description": card["description"],
+            "icon": card["icon"],
+            "color": card["color"],
+            "route": card["route"],
+            "order": card["order"],
+            "is_visible": True,
+            "created_at": now,
+            "updated_at": now
+        })
+    
+    # Family & Friends page sections
+    family_section_id = str(uuid.uuid4())
+    sections.append({
+        "id": family_section_id,
+        "page_slug": "family-friends",
+        "title": "Support for Family & Friends",
+        "type": "cards",
+        "order": 1,
+        "created_at": now,
+        "updated_at": now
+    })
+    
+    family_cards = [
+        {"title": "Understanding PTSD", "description": "Learn about post-traumatic stress", "icon": "heart", "color": "#ef4444", "route": "/resources", "order": 1},
+        {"title": "Supporting a Veteran", "description": "Tips for family members", "icon": "people", "color": "#3b82f6", "route": "/resources", "order": 2},
+        {"title": "Self-Care for Carers", "description": "Looking after yourself", "icon": "leaf", "color": "#22c55e", "route": "/self-care", "order": 3},
+        {"title": "Find Support Groups", "description": "Connect with other families", "icon": "chatbubbles", "color": "#8b5cf6", "route": "/organizations", "order": 4},
+    ]
+    
+    for card in family_cards:
+        cards.append({
+            "id": str(uuid.uuid4()),
+            "section_id": family_section_id,
+            "title": card["title"],
+            "description": card["description"],
+            "icon": card["icon"],
+            "color": card["color"],
+            "route": card["route"],
+            "order": card["order"],
+            "is_visible": True,
+            "created_at": now,
+            "updated_at": now
+        })
+    
+    # Insert sections and cards
+    if sections:
+        await db.cms_sections.insert_many(sections)
+    if cards:
+        await db.cms_cards.insert_many(cards)
+    
+    return {
+        "message": "CMS seeded successfully",
+        "pages": len(pages),
+        "sections": len(sections),
+        "cards": len(cards)
+    }
