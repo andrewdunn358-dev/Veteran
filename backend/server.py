@@ -2579,9 +2579,9 @@ async def create_peer_supporter(
 
 @api_router.get("/peer-supporters", response_model=List[PeerSupporter])
 async def get_peer_supporters(current_user: User = Depends(get_current_user)):
-    """Get all peer supporters - Requires authentication (admin or peer)"""
-    if current_user.role not in ["admin", "peer"]:
-        raise HTTPException(status_code=403, detail="Access denied. Only admins and peers can view this.")
+    """Get all peer supporters - Requires authentication (admin, counsellor, or peer)"""
+    if current_user.role not in ["admin", "counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Access denied. Staff only.")
     peers = await db.peer_supporters.find().to_list(1000)
     # Decrypt sensitive fields when retrieving
     return [PeerSupporter(**decrypt_document('peer_supporters', p)) for p in peers]
