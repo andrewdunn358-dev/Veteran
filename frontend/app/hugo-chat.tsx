@@ -41,6 +41,7 @@ interface Message {
 export default function HugoChatScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { colors, theme } = useTheme();
   const scrollViewRef = useRef<ScrollView>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
