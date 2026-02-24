@@ -48,14 +48,17 @@ export default function SplashScreen() {
   }, []);
 
   const handleAllowPermissions = async () => {
+    console.log('Allow Microphone button pressed');
     try {
       // Request microphone permission using browser API (works on web)
-      if (Platform.OS === 'web' && navigator.mediaDevices) {
+      if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.mediaDevices) {
         try {
-          await navigator.mediaDevices.getUserMedia({ audio: true });
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
           console.log('Microphone permission: granted');
+          // Stop the stream immediately after getting permission
+          stream.getTracks().forEach(track => track.stop());
         } catch (err) {
-          console.log('Microphone permission: denied or unavailable');
+          console.log('Microphone permission: denied or unavailable', err);
         }
       }
       
