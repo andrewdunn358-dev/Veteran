@@ -4628,7 +4628,7 @@ function downloadDocument(filename) {
     }
     
     // Open PDF download in new tab
-    const downloadUrl = `${API_BASE}/documents/download/${docId}`;
+    const downloadUrl = `${CONFIG.API_URL}/api/documents/download/${docId}`;
     window.open(downloadUrl, '_blank');
     showNotification(`Downloading ${filename.replace('.md', '.pdf')}...`, 'success');
 }
