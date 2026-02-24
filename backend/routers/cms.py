@@ -286,58 +286,77 @@ async def seed_cms_public(force: bool = False):
     cards = []
     
     # =====================
+    # HOME PAGE - Main Menu
+    # =====================
+    home_menu_section_id = str(uuid.uuid4())
+    sections.append({
+        "id": home_menu_section_id,
+        "page_slug": "home",
+        "title": "Main Menu",
+        "subtitle": "",
+        "type": "menu",
+        "order": 1,
+        "created_at": now,
+        "updated_at": now
+    })
+    
+    # Main menu items matching the actual app
+    home_menu_items = [
+        {"title": "Need to Talk?", "description": "Connect with support now", "icon": "heart", "color": "#3b82f6", "bg_color": "#dbeafe", "route": "/crisis-support", "order": 1, "is_primary": True},
+        {"title": "Talk to a Veteran", "description": "Peer support from those who understand", "icon": "people", "color": "#22c55e", "bg_color": "#dcfce7", "route": "/peer-support", "order": 2},
+        {"title": "Warfare on Lawfare", "description": "Support for historical investigations", "icon": "shield", "color": "#6366f1", "bg_color": "#e0e7ff", "route": "/historical-investigations", "order": 3},
+        {"title": "Support Organisations", "description": "Directory of veteran services", "icon": "list", "color": "#f59e0b", "bg_color": "#fef3c7", "route": "/organizations", "order": 4},
+        {"title": "Self-Care Tools", "description": "Journal, grounding, breathing & more", "icon": "fitness", "color": "#ec4899", "bg_color": "#fce7f3", "route": "/self-care", "order": 5},
+        {"title": "Friends & Family", "description": "Worried about a veteran?", "icon": "heart-circle", "color": "#7c3aed", "bg_color": "#ede9fe", "route": "/family-friends", "order": 6},
+        {"title": "Addictions", "description": "Alcohol, drugs, gambling & more", "icon": "heart-dislike", "color": "#d97706", "bg_color": "#fef3c7", "route": "/substance-support", "order": 7},
+        {"title": "Criminal Justice Support", "description": "Help for veterans in or leaving prison", "icon": "shield-checkmark", "color": "#4f46e5", "bg_color": "#e0e7ff", "route": "/criminal-justice", "order": 8},
+        {"title": "Recommended Podcasts", "description": "Veteran stories & mental health support", "icon": "headset", "color": "#db2777", "bg_color": "#fce7f3", "route": "/podcasts", "order": 9},
+        {"title": "Request a Callback", "description": "We'll call you back", "icon": "call", "color": "#22c55e", "bg_color": "#dcfce7", "route": "/callback", "order": 10, "is_callback": True},
+    ]
+    
+    for item in home_menu_items:
+        cards.append({
+            "id": str(uuid.uuid4()),
+            "section_id": home_menu_section_id,
+            "title": item["title"],
+            "description": item["description"],
+            "icon": item["icon"],
+            "color": item["color"],
+            "bg_color": item.get("bg_color"),
+            "route": item["route"],
+            "order": item["order"],
+            "card_type": "menu_item",
+            "is_primary": item.get("is_primary", False),
+            "is_callback": item.get("is_callback", False),
+            "is_visible": True,
+            "created_at": now,
+            "updated_at": now
+        })
+    
+    # =====================
     # HOME PAGE - AI Team
     # =====================
     home_ai_section_id = str(uuid.uuid4())
     sections.append({
         "id": home_ai_section_id,
         "page_slug": "home",
-        "title": "Meet the AI Support Team",
-        "subtitle": "Our AI buddies are here to listen 24/7. Choose who you'd like to chat with.",
+        "title": "Meet the AI Team",
+        "subtitle": "Available 24/7 to chat",
         "type": "ai_team",
-        "order": 1,
+        "order": 2,
         "created_at": now,
         "updated_at": now
     })
     
-    # AI Character cards
+    # AI Character cards matching FALLBACK_AI_TEAM in home.tsx
     ai_characters = [
-        {
-            "title": "Hugo",
-            "description": "Your friendly AI companion for general support and a listening ear",
-            "icon": "chatbubbles",
-            "color": "#3b82f6",
-            "image_url": "https://static.prod-images.emergentagent.com/jobs/bf7a0a9a-b52d-4db3-b85e-aedfe9959d59/images/e6bf5d86d81e05ef6bc0f2d11f30b2f3a44b52c59f3e76cdbd6c9e23f6c0b8a2.png",
-            "route": "/chat/hugo",
-            "order": 1
-        },
-        {
-            "title": "Bob",
-            "description": "Ex-Para veteran who understands military life",
-            "icon": "shield",
-            "color": "#22c55e",
-            "image_url": "https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png",
-            "route": "/chat/bob",
-            "order": 2
-        },
-        {
-            "title": "Margie",
-            "description": "Warm and caring support for emotional wellbeing",
-            "icon": "heart",
-            "color": "#ec4899",
-            "image_url": "https://static.prod-images.emergentagent.com/jobs/bf7a0a9a-b52d-4db3-b85e-aedfe9959d59/images/93c7a09f7b5c9e3b1f4e8d6a2b7c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c.png",
-            "route": "/chat/margie",
-            "order": 3
-        },
-        {
-            "title": "Finch",
-            "description": "Expert in UK military law and veterans' rights",
-            "icon": "book",
-            "color": "#f59e0b",
-            "image_url": "https://static.prod-images.emergentagent.com/jobs/bf7a0a9a-b52d-4db3-b85e-aedfe9959d59/images/finch_avatar.png",
-            "route": "/chat/sentry",
-            "order": 4
-        },
+        {"title": "Tommy", "description": "Your battle buddy", "bio": "Tommy is your straightforward battle buddy. A no-nonsense mate who tells it like it is, but always has your back.", "image_url": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png", "route": "/chat/tommy", "order": 1},
+        {"title": "Doris", "description": "Warm support", "bio": "Doris is a nurturing, compassionate presence who creates a safe space to talk.", "image_url": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png", "route": "/chat/doris", "order": 2},
+        {"title": "Bob", "description": "Ex-Para peer support", "bio": "Bob is a down-to-earth ex-Para who keeps things real.", "image_url": "https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png", "route": "/chat/bob", "order": 3},
+        {"title": "Finch", "description": "Military law & legal support", "bio": "Finch is a knowledgeable companion with expertise in UK military law.", "image_url": "https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png", "route": "/chat/sentry", "order": 4},
+        {"title": "Margie", "description": "Addiction support", "bio": "Margie specialises in supporting those dealing with all types of addiction.", "image_url": "https://static.prod-images.emergentagent.com/jobs/fba61e42-5a99-4622-a43b-84a14c5bcf87/images/313a20c933febb69cc523b6b3647ba814a5b9123a3ea7f674f7a87695a8a4789.png", "route": "/chat/margie", "order": 5},
+        {"title": "Hugo", "description": "Self-help & wellness", "bio": "Hugo is a 35-year-old wellbeing coach focused on mental health, resilience and daily habits.", "image_url": "https://static.prod-images.emergentagent.com/jobs/56155002-fa62-4b53-8fda-4baf701ab83f/images/6be1ae886e76d7b380a66ef3eb98c183e26882fe8e9897aab7e8a8ad4320acb9.png", "route": "/chat/hugo", "order": 6},
+        {"title": "Rita", "description": "Family support", "bio": "Rita is a warm, grounded family-support companion for partners, spouses, parents and loved ones.", "image_url": "https://static.prod-images.emergentagent.com/jobs/bf7a0a9a-b52d-4db3-b85e-aedfe9959d59/images/fd3c1add3b95c627676f7848bc963c3e1afe0b7c3e1187304df81ea307705318.png", "route": "/chat/margie", "order": 7},
     ]
     
     for char in ai_characters:
@@ -346,8 +365,7 @@ async def seed_cms_public(force: bool = False):
             "section_id": home_ai_section_id,
             "title": char["title"],
             "description": char["description"],
-            "icon": char["icon"],
-            "color": char["color"],
+            "bio": char.get("bio", ""),
             "image_url": char.get("image_url"),
             "route": char["route"],
             "order": char["order"],
