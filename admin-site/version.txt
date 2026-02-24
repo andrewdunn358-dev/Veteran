@@ -1,0 +1,9 @@
+Radio Check Admin Portal
+Version: 2.4.0
+Build Date: 2026-02-24
+Build Time: 14:15 UTC
+
+Changes in this version:
+- PDF document downloads for compliance docs (ROPA, GDPR, BACP, etc.)
+- Fixed shift rota to show staff names
+- Fixed downloadDocument API_BASE error
