@@ -196,29 +196,6 @@ export default function CrisisSupport() {
           </TouchableOpacity>
         </View>
 
-        {/* Section Title - Talk to Someone */}
-        <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textSecondary, marginBottom: 16 }}>
-          Talk to Someone Now
-        </Text>
-
-        {/* On-Duty Counsellors Card */}
-        <TouchableOpacity 
-          style={{ backgroundColor: colors.primary, borderRadius: 16, padding: 20, marginBottom: 16 }}
-          onPress={() => router.push('/counsellors')}
-          activeOpacity={0.8}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center', marginRight: 16 }}>
-              <Ionicons name="people-circle" size={32} color="#ffffff" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 18, fontWeight: '700', color: '#ffffff', marginBottom: 4 }}>On-Duty Counsellors</Text>
-              <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)' }}>Professional support available now</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#ffffff" />
-          </View>
-        </TouchableOpacity>
-
         {/* More Options Link */}
         <TouchableOpacity 
           style={{ backgroundColor: colors.card, borderRadius: 12, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
