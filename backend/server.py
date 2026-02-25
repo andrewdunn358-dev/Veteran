@@ -1072,6 +1072,11 @@ AI_CHARACTERS = {
         "name": "Rita",
         "prompt": RITA_SYSTEM_PROMPT,
         "avatar": "https://static.prod-images.emergentagent.com/jobs/bf7a0a9a-b52d-4db3-b85e-aedfe9959d59/images/fd3c1add3b95c627676f7848bc963c3e1afe0b7c3e1187304df81ea307705318.png"
+    },
+    "catherine": {
+        "name": "Catherine",
+        "prompt": CATHERINE_SYSTEM_PROMPT,
+        "avatar": "https://customer-assets.emergentagent.com/job_72f515a0-bbb0-4a78-ba1a-bd850699b7a7/artifacts/3gai3jua_catherine.jpeg"
     }
 }
 
