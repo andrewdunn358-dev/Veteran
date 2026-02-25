@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StatusBar, Linking, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StatusBar, Linking, ActivityIndicator, Platform, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 import { API_URL } from '../src/config/api';
+
+// Hugo's avatar URL
+const HUGO_AVATAR = 'https://static.prod-images.emergentagent.com/jobs/56155002-fa62-4b53-8fda-4baf701ab83f/images/6be1ae886e76d7b380a66ef3eb98c183e26882fe8e9897aab7e8a8ad4320acb9.png';
 
 interface Organization {
   id: string;
