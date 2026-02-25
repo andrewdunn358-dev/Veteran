@@ -1065,23 +1065,44 @@ function renderSafeguardingLogs(alerts) {
                 <tr>
                     <th>Date/Time</th>
                     <th>Risk Level</th>
-                    <th>Type</th>
-                    <th>User</th>
-                    <th>Staff</th>
+                    <th>Score</th>
+                    <th>Session</th>
+                    <th>Location</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                ${alerts.map(alert => `
+                ${alerts.map(alert => {
+                    const riskLevel = (alert.risk_level || 'unknown').toUpperCase();
+                    const badgeClass = riskLevel === 'RED' ? 'danger' : riskLevel === 'AMBER' ? 'warning' : riskLevel === 'YELLOW' ? 'warning' : 'info';
+                    const location = alert.geo_city && alert.geo_country ? `${alert.geo_city}, ${alert.geo_country}` : (alert.client_ip || 'Unknown');
+                    return `
                     <tr>
                         <td>${formatDateTime(alert.created_at)}</td>
-                        <td><span class="badge badge-${alert.risk_level === 'high' ? 'danger' : alert.risk_level === 'medium' ? 'warning' : 'info'}">${alert.risk_level || 'Unknown'}</span></td>
-                        <td>${alert.alert_type || '-'}</td>
-                        <td>${alert.user_name || 'Anonymous'}</td>
-                        <td>${alert.assigned_to_name || '-'}</td>
-                        <td><span class="badge badge-${alert.status === 'resolved' ? 'success' : alert.status === 'pending' ? 'warning' : 'secondary'}">${alert.status}</span></td>
+                        <td><span class="badge badge-${badgeClass}">${riskLevel}</span></td>
+                        <td><strong>${alert.risk_score || 0}</strong></td>
+                        <td>${alert.session_id ? alert.session_id.substring(0, 12) + '...' : '-'}</td>
+                        <td>${location}</td>
+                        <td><span class="badge badge-${alert.status === 'resolved' ? 'success' : alert.status === 'acknowledged' ? 'warning' : 'secondary'}">${alert.status || 'active'}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline" onclick="viewSafeguardingAlert('${alert.id}')" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            ${alert.status === 'active' ? `
+                            <button class="btn btn-sm btn-warning" onclick="acknowledgeSafeguardingAlert('${alert.id}')" title="Acknowledge">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            ` : ''}
+                            ${alert.status !== 'resolved' ? `
+                            <button class="btn btn-sm btn-success" onclick="resolveSafeguardingAlert('${alert.id}')" title="Resolve">
+                                <i class="fas fa-check-double"></i>
+                            </button>
+                            ` : ''}
+                        </td>
                     </tr>
-                `).join('')}
+                    `;
+                }).join('')}
             </tbody>
         </table>
     `;
