@@ -5372,10 +5372,11 @@ async function viewSafeguardingAlert(alertId) {
             ? alert.triggered_indicators.map(t => `<span class="badge badge-warning">${t}</span>`).join(' ')
             : '<span class="text-muted">None recorded</span>';
         
+        const characterName = alert.character ? alert.character.charAt(0).toUpperCase() + alert.character.slice(1) : 'AI';
         const conversationHtml = alert.conversation_history && alert.conversation_history.length > 0
             ? alert.conversation_history.map(msg => `
                 <div class="message ${msg.role === 'user' ? 'user-message' : 'assistant-message'}">
-                    <strong>${msg.role === 'user' ? 'User' : 'AI'}:</strong> ${msg.content || msg.message || ''}
+                    <strong>${msg.role === 'user' ? 'User' : characterName}:</strong> ${msg.content || msg.message || ''}
                 </div>
             `).join('')
             : '<p class="text-muted">No conversation history available</p>';
