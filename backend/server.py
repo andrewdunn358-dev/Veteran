@@ -4499,7 +4499,7 @@ async def send_concern_notification(concern: Concern):
             <p><strong>Consent to contact veteran:</strong> {'Yes' if concern.consent_to_contact else 'No'}</p>
             
             <p style="text-align: center; margin: 30px 0;">
-                <a href="{FRONTEND_URL}/login" style="background-color: {urgency_color}; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block;">View in Staff Portal</a>
+                <a href="{STAFF_PORTAL_URL}" style="background-color: {urgency_color}; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block;">View in Staff Portal</a>
             </p>
         </body>
         </html>
