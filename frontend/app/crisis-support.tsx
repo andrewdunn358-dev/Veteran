@@ -51,6 +51,33 @@ export default function CrisisSupport() {
           </Text>
         </View>
 
+        {/* AI Battle Buddies - Right under You're Not Alone */}
+        <TouchableOpacity 
+          style={{ backgroundColor: colors.card, borderRadius: 16, padding: 16, marginBottom: 20, borderWidth: 2, borderColor: colors.primary }}
+          onPress={() => router.push('/ai-buddies')}
+          activeOpacity={0.9}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', marginRight: 12 }}>
+              <Image 
+                source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png' }}
+                style={{ width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: colors.border }}
+              />
+              <Image 
+                source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png' }}
+                style={{ width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: colors.border, marginLeft: -16 }}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text }}>AI Battle Buddies</Text>
+              <Text style={{ fontSize: 14, color: colors.textSecondary }}>Chat with Tommy or Doris - available 24/7</Text>
+            </View>
+            <View style={{ backgroundColor: colors.primary, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
+              <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>24/7</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
         {/* Emergency Banner */}
         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#cc0000', borderRadius: 12, padding: 20, marginBottom: 24 }}>
           <Ionicons name="warning" size={28} color="#ffffff" />
