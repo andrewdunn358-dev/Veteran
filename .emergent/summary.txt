@@ -1,169 +1,192 @@
 <analysis>**original_problem_statement:**
-The user wants to build Radio Check, a mental health and peer support application for veterans. The project includes a React Native mobile app, a Python FastAPI backend, and has expanded to feature user authentication, AI chat personas, a staff availability calendar, a Buddy Finder, a comprehensive CMS, and a standalone static marketing website. The primary goal is to provide a robust, self-contained support platform.
+The user wants to build Radio Check, a mental health and peer support application for veterans. The project includes a React Native mobile app, a Python FastAPI backend, and several web portals (Admin, Staff). The user wants to expand the app's functionality and gain full control over its content via a Content Management System (CMS).
 
 **PRODUCT REQUIREMENTS**
--   Functional peer-to-peer audio calls.
--   A working staff rota/calendar system with shift swap capabilities.
--   A fully functional Content Management System (CMS).
--   A marketing website to promote the app.
--   Admin and Staff web portals for managing the application.
--   Implementation of clinical screening tools (PHQ-9 / GAD-7).
--   All portals and the app must be functional on both desktop and mobile devices.
--   Admin portal to include comprehensive logging/analytics.
--   Implement compliance recommendations from BACP, GDPR, and ROPA, including data retention policies and user consent.
--   Create comprehensive documentation for project overview, costs, and operational strategy for potential funders.
+- A working staff rota/calendar system with shift swap capabilities.
+- A fully functional Content Management System (CMS) that allows editing of all app content, ideally with a visual What-You-See-Is-What-You-Get (WYSIWYG) editor.
+- A beta testing feedback survey system (pre/post usage) that can be toggled on/off from the admin portal.
+- All portals and the app must be functional on both desktop and mobile devices.
+- Generation of compliance documents as downloadable PDFs from the admin portal.
+- Creation of a comprehensive project overview document for a board presentation, detailing all features and development time.
+- Implementation of push notifications, mood tracking, and other core support features.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is now largely functional across its production environments (Vercel, Render, 20i). This session involved a massive debugging effort that resolved the critical blockers from the previous session.
+The application is a complex full-stack system with a React Native (Expo) frontend, a FastAPI backend, and separate static HTML/JS portals for Admin and Staff.
 
-The core fixes were:
-1.  **Authentication System Overhaul**: Fixed the root cause of the 401 Unauthorized errors by correcting inconsistencies in JWT secret key loading and token subject validation ( vs ) across the backend.
-2.  **Centralized API Configuration**: Created a failsafe API configuration in the frontend () to prevent the production app from calling preview backend URLs. All frontend files were refactored to use this central config.
-3.  **Production Database Seeding**: Added public seed endpoints and populated the empty production database with necessary 'Organizations' and 'Resources' data.
-4.  **Portal & Permission Fixes**: Resolved numerous bugs in the admin and staff portals related to incorrect API URLs, missing auth headers, and incorrect role permissions for viewing staff lists.
-5.  **Monitoring Dashboard**: Added a new Monitoring tab to the admin portal to display real-time server and user activity stats.
-6.  **UI/UX Improvements**: Replaced non-functional  calls on the frontend settings page with proper web-compatible modals for Report an Issue and Contact Us.
-
-The application has moved from a Broken state to a Mostly Functional state, with the user able to log in and use most features. The focus has shifted from critical deployment fires to specific feature bugs.
+This session focused on fixing user-reported bugs and adding significant new features:
+- **Bug Fixes**:
+    - The dark/light theme, previously broken for AI chat modals, has been fixed by refactoring the  and the  to handle asynchronous theme loading on the web.
+    - The browser's back button, which failed after a page refresh, has been fixed by implementing a  utility and replacing  with  for better web compatibility.
+    - A critical  error when creating staff shifts has been resolved by adding the required  as a query parameter in the API call.
+- **Feature Enhancements**:
+    - The staff rota now correctly displays staff names instead of a generic Staff label.
+    - Compliance documents in the admin portal are now available as downloadable static PDF files, removing a complex and faulty backend dependency.
+- **New Features**:
+    - A complete beta feedback survey system has been implemented. It includes a frontend modal for users and a full management interface in the admin portal (toggle on/off, view responses, export data).
+    - The main app's Home page menu is now dynamically driven by the CMS, with a hardcoded fallback to prevent breakage. This was the first step in a larger CMS overhaul.
 
 **Last working item**:
--   **Last item agent was working**: The user reported a  error when a logged-in counsellor tries to change their availability status in the staff portal. The agent identified the user's report but did not have a chance to investigate or fix it.
--   **Status**: NOT STARTED
+-   **Last item agent was working**: The agent was working on two user requests in parallel:
+    1.  Creating a comprehensive project documentation file () for a board meeting.
+    2.  Starting a major user experience overhaul for the CMS editor in the admin portal to make it more like a visual builder (split-screen, live preview, click-to-edit).
+-   **Status**: IN PROGRESS
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: backend testing agent
--   **User Testing Done**: Y
+-   **Which testing method agent to use?**: Manual testing by user after deployment.
+-   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1**: Counsellor status update fails with  (P0).
--   **Issue 2**: Callback request from the app doesn't provide user confirmation, and the user reported not seeing it in the staff portal (P1).
--   **Issue 3**: The user-reported issue that report an issue and contact us buttons do nothing needs verification. A modal was implemented, but its effectiveness for the user is unconfirmed (P2).
--   **Issue 4**: Render backend cron job is still potentially failing. A fix was provided ( script and deployment guide), but its success is unverified (P2).
--   **Issue 5**: The user creation UI in the React Native admin screen () is inconsistent with the static web admin portal (P2).
+-   **Issue 1: Incomplete CMS Editor Overhaul (P0)**: The agent started refactoring the admin portal's CMS editor for a better UX (, , ) but has not finished the implementation. The goal is to provide a split-screen layout with a live phone preview and click-to-edit capabilities.
+-   **Issue 2: Callback Request Confirmation (P1)**: The user previously reported that the callback request from the app doesn't provide clear user confirmation and doesn't appear in the staff portal. The agent believed this was fixed, but it is pending user verification.
+-   **Issue 3: Render Cron Job Failure (P2)**: The cron job for shift reminders on the Render-hosted backend is potentially failing. This was mentioned in the initial handoff but has not been investigated.
+-   **Issue 4: Inconsistent Admin User Creation UI (P2)**: The UI for creating users in the React Native admin screen is inconsistent with the static web admin portal. This was mentioned in the initial handoff but has not been addressed.
 
 **Issues Detail**:
--   **Issue 1: Counsellor status update fails with 422**
-    -   **Attempted fixes**: None. This was the last bug reported in the session.
+-   **Issue 1: Incomplete CMS Editor Overhaul**
+    -   **Attempted fixes**: The agent created new HTML layouts and CSS styles for a split-screen editor and started modifying the JavaScript in  to power the new functionality.
     -   **Next debug checklist**:
-        1.  Examine the  endpoint in .
-        2.  Check the Pydantic model () being used for the request body. The 422 error indicates the JSON payload sent from the staff portal does not match the model's schema.
-        3.  Inspect the  function in  to see what payload is being constructed and sent.
-        4.  Reproduce the issue using  to confirm the payload problem.
-    -   **Why fix this issue and what will be achieved with the fix?**: This is a core function for staff members to manage their availability for calls.
-    -   **Status**: NOT STARTED
+        1.  Resume editing .
+        2.  Implement the  function with controls like color pickers and icon selectors.
+        3.  Implement the click-to-edit functionality, linking the preview pane to the edit panel.
+        4.  Implement drag-and-drop reordering for sections and cards.
+    -   **Why fix this issue and what will be achieved with the fix?**: To satisfy the user's request for a more intuitive, visual way to manage app content, moving closer to a WYSIWYG experience.
+    -   **Status**: IN PROGRESS
     -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: Backend
+    -   **Should Test frontend/backend/both after fix?**: Frontend (Admin Portal)
     -   **Blocked on other issue**: None
 
--   **Issue 2: Callback confirmation and visibility**
-    -   **Attempted fixes**: The agent tested the callback submission and retrieval flow locally and confirmed it works.
-    -   **Next debug checklist**:
-        1.  Ask the user to perform the action again now that auth issues are fixed.
-        2.  Add a toast notification or a confirmation message on the callback submission page ().
-        3.  Guide the user to the Callbacks section in the staff portal and check for polling/refresh issues in .
-    -   **Why fix this issue and what will be achieved with the fix?**: Improves user experience by providing clear feedback and ensures staff can see and respond to support requests.
-    -   **Status**: USER VERIFICATION PENDING
-    -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: Frontend
-
 **In progress Task List**:
--   None.
+-   **Task 1: Create Board Presentation Document (P0)**
+    -   **Where to resume**: Continue writing the content for . The agent has already located the company logo. The document should detail all features of the main app, staff portal, admin portal, and static website, along with an estimation of build time.
+    -   **What will be achieved with this?**: A formal document for the user to present to their board.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: NA
+    -   **Blocked on something**: None
+
+-   **Task 2: Full CMS Integration for All App Pages (P1)**
+    -   **Where to resume**: The Home page is now connected to the CMS. The next step is to apply the same pattern (fetch data from CMS with a hardcoded fallback) to other pages like Self-Care, Family & Friends, Organizations, etc. This involves editing each page's  file in .
+    -   **What will be achieved with this?**: The user will be able to edit the content of every page in the app directly from the admin portal's CMS, fulfilling a primary requirement.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: Both (Backend for CMS data, Frontend for rendering).
+    -   **Blocked on something**: None
 
 **Upcoming and Future Tasks**
 **Upcoming Tasks**:
--   **(P1) Verify Cron Job Fix**: Confirm with the user that the cron job for shift reminders is now working on Render.
--   **(P1) Push Notifications for Shift Swaps**: Implement the frontend registration and handling for notifications.
--   **(P2) Mood Tracking Over Time**: Enhance the existing graph with filtering and trend analysis.
+-   **(P1) Full CMS Control**: Move hardcoded content like AI Character personas and Crisis Numbers from the backend code into the CMS database so they are editable from the admin portal.
+-   **(P1) Push Notifications**: Implement push notifications for shift reminders and user engagement prompts.
+-   **(P2) Mood Tracker Journal**: Build the daily mood check-in feature with graphs to visualize trends over time.
 
 **Future Tasks**:
--   **(Refactor)** Consolidate the 7 separate AI chat screen files (, , etc.) into a single, reusable  component that takes a character ID as a parameter.
+-   **(Feature)** Implement a true visual page builder (like GrapesJS) to replace the current structured CMS editor.
+-   **(Feature)** Add Appointment Booking to schedule calls with counsellors.
+-   **(Feature)** Add Secure Messaging for peer-to-peer chat.
+-   **(Feature)** Add Achievement Badges/Gamification to encourage daily use.
 -   **(Feature)** Build out app store assets (screenshots, marketing copy).
 -   **(Feature)** Add structured Cognitive Behavioural Therapy (CBT) courses.
 -   **(Feature)** Welsh Language Support.
 
 **Completed work in this session**
--   **Production Authentication Fix (DONE)**: Resolved critical 401 Unauthorized errors on admin/staff portals by fixing JWT secret loading and token subject () validation.
--   **Frontend API URL Failsafe (DONE)**: Created a centralized API config to prevent the production app from calling incorrect preview URLs and refactored over 20 files to use it.
--   **Database Seeding (DONE)**: Added public seed endpoints and populated the production DB with 'Organizations' and 'Resources' data.
--   **Admin/Staff Portal Bug Fixes (DONE)**: Corrected numerous bugs related to API calls, permissions, and undefined variables for Rota, Team on Duty, and Swap Requests.
--   **Admin Monitoring Dashboard (DONE)**: Implemented a new backend endpoint and frontend UI to show real-time CPU, memory, and user activity stats.
--   **Settings Page Modals (DONE)**: Replaced non-functional web alerts with proper modals for Report an Issue and Contact Us.
--   **Staff Permissions Fix (DONE)**: Updated backend endpoints to allow 'peer' roles to view the Team on Duty list.
--   **Render Build Fix (DONE)**: Removed a non-existent  dependency from  that was causing the build to fail.
+-   **Dark/Light Theme Fix (DONE)**: Fixed the AI Chat consent modal () and the core  to correctly apply dark mode on the web.
+-   **Browser Back Button Fix (DONE)**: Created a  utility () and replaced  with  to ensure the back button works after a page refresh.
+-   **Staff Shift Creation 422 Error (DONE)**: Fixed a bug preventing staff from creating shifts by adding required user details as query params in .
+-   **Staff Rota Name Display (DONE)**: Updated the staff portal to show user names on the rota instead of a generic label.
+-   **Compliance PDF Downloads (DONE)**: Refactored the feature to use simple, reliable static PDF files hosted in the  folder, removing a complex and failing backend process.
+-   **Beta Feedback Survey System (DONE)**: Built a full-featured survey system with a backend API (), frontend modal (), and admin portal controls for management and data export.
+-   **Home Page CMS Integration (DONE)**: Refactored the main app's home page () to be dynamically driven by the CMS, with a safe fallback mechanism.
 
 **Earlier issues found/mentioned but not fixed**
--   None. The major issues from the previous handoff were resolved in this session.
+-   **Issue 1: Render Cron Job Failure**: The status of the backend cron job for shift reminders is unknown and was never verified.
+    -   **Debug checklist**: Ask the user to check the cron job logs on their Render dashboard to confirm if the  script is executing successfully.
+    -   **Why to solve this issue and what will be achieved with this?**: Ensures automated shift reminders are sent to staff, a key operational feature.
+    -   **Should Test frontend/backend/both after fix**: Backend (via user checking Render logs).
+    -   **Is recurring issue?**: N
+-   **Issue 2: Inconsistent User Creation UI**: The UI/UX for user creation in the React Native admin app () differs from the static web admin portal.
+    -   **Debug checklist**: Visually compare the two user creation flows and harmonize the UI/UX.
+    -   **Why to solve this issue and what will be achieved with this?**: Provides a consistent and less confusing experience for administrators.
+    -   **Should Test frontend/backend/both after fix**: Frontend.
+    -   **Is recurring issue?**: N
 
 **Known issue recurrence from previous fork**
--   **Authentication Failure**: The critical auth failure was a recurring issue that has been addressed at its root cause (inconsistent JWT secret handling). Status: RESOLVED.
--   **Vercel Backend URL**: The production frontend pointing to the wrong backend was a recurring issue. This is now resolved with a code-level failsafe. Status: RESOLVED.
+-   None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Frontend (App)**: React Native, Expo, TypeScript
--   **Web Portals**: Static HTML, CSS, JavaScript (hosted on 20i)
--   **Backend**: Python, FastAPI, Pydantic, MongoDB (hosted on Render)
--   **Authentication**: JWT (JSON Web Tokens). Key fix involved ensuring the JWT  field contained the user uid=0(root) gid=0(root) groups=0(root) (not ) and was validated correctly.
--   **Deployment**: Vercel (Frontend), Render (Backend), 20i (Static Sites). The distinction between these environments and their respective configurations was a major theme.
+-   **Feature Toggling**: A feature flag system was built for the Beta Survey, allowing it to be enabled/disabled from the admin portal without code changes.
+-   **CMS-Driven UI with Fallbacks**: A robust pattern was established in  to render UI from a CMS API call, but fall back to hardcoded data if the API fails or returns no content, ensuring app stability.
+-   **Static Asset Generation**: The PDF download feature was simplified by pre-generating static PDF files and hosting them directly, a more robust solution than on-the-fly backend conversion.
+-   **Async State Initialization**: Fixed a theme-flickering issue by adding a loading state to the  to wait for  before rendering the app.
 
 **key DB schema**
--   **users**:  (Updated to track user activity for monitoring)
--   **organizations**: Seeded in production.
--   **resources**: Seeded in production.
+-   **settings**: (New collection) Stores global settings like the beta survey feature flag. 
+-   **survey_responses**: (New collection) Stores user feedback. 
 
 **All files of reference**
--   **Core Auth Fix**: , 
--   **API URL Failsafe**:  (and all consuming files)
--   **Admin Portal**: , 
--   **Staff Portal**: 
--   **Settings Page Modals**: 
--   **Counsellor Status Bug**: ,  (in the  function)
+-   **Beta Survey**: , , 
+-   **CMS Integration**: , 
+-   **Theme/Back Button Fixes**: , , 
+-   **Staff Rota Fixes**: 
+-   **PDF Downloads**: , 
+-   **CMS Editor Overhaul (In Progress)**: , , 
 
 **Areas that need refactoring**:
--   The  and  files are now extremely large (>5000 lines) and monolithic. They should be broken down into smaller, more manageable JavaScript modules to improve maintainability.
--   The various AI chat screens (, , etc.) are still duplicated and should be consolidated into a single reusable component.
+-   The backend  file still contains hardcoded data for AI characters (). This should be migrated to the MongoDB CMS to be editable.
+-   Many frontend pages (, etc.) are still partially or fully hardcoded and need to be connected to the CMS, following the pattern established in .
 
 **key api endpoints**
--   : **CURRENTLY BUGGED (422)**.
--   : Now working correctly on production.
--   : New public endpoint to seed data.
--   : New public endpoint to seed data.
--   : New endpoint for the admin monitoring dashboard.
+-   : **FIXED**. Now works correctly from the staff portal.
+-   : **DEPRECATED**. Replaced with static file links.
+-   : **NEW**. Submits a user's survey response.
+-   : **NEW**. Gets aggregate stats for the admin portal.
+-   : **NEW**. Gets a global setting value.
+-   : **NEW**. Updates a global setting value.
+-   : **UPDATED**. Now supports forcing a re-seed of production data.
 
 **Critical Info for New Agent**
--   The application is now stable and working on production. The user can log in to all portals. Your main focus should be on fixing the remaining feature-level bugs.
--   **The user MANUALLY uploads static files.** Any changes made to  or  are NOT auto-deployed. You must remind the user to upload the updated , , etc., to their 20i hosting for those changes to take effect.
--   The most pressing issue is the  error when counsellors try to update their status. Start your investigation there.
--   The user is now providing specific console logs for bugs, which is very helpful. Pay close attention to these.
+-   **Vercel Deploy Hook**: After any changes are saved to GitHub, you MUST trigger a Vercel deployment by sending a POST request to the deploy hook URL: .
+-   **Static Portals (Admin/Staff)**: The  and  are static sites. Any changes to their files (, , , or new assets in ) require the user to **manually upload the updated folders to their 20i hosting**. The agent's work is not live until the user does this.
+-   **Hybrid CMS State**: The application is in a transitional state. The Home page menu is now CMS-driven, but most other content pages are still hardcoded. The long-term goal is to make everything editable via the CMS.
+-   **Git Commits**: The platform handles git commits via the Save to Github button. You cannot change the author. Do not attempt to use On branch main
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	../backend/logs/
+	yarn.lock
+
+nothing added to commit but untracked files present (use "git add" to track) commands directly.
 
 **documents and test reports created in this job**
+-    (In Progress)
 -   
--    (Updated)
+-   
+-   
+-   
+-   
+-   
+-   
 
 **Last 10 User Messages and any pending HUMAN messages**
-10. **User**: Reports that when a counsellor changes their status, it fails with a 422 error. (Status: PENDING)
-9. **User**: Confirms Team on Duty is now visible to peers after backend fix was deployed. (Status: Resolved)
-8. **User**: Reports that peers can't see the Team on Duty, getting a 403 Forbidden error. (Status: Resolved by agent)
-7. **User**: Confirms Settings modals are working. Asks about Team on Duty visibility for peers. (Status: Partially Resolved)
-6. **User**: Reports that Contact Us and Report an Issue still don't work, and Team on Duty fails to load in the staff portal. (Status: Resolved by agent)
-5. **User**: Confirms resources are now visible. Asks about several new issues. (Status: Partially Resolved)
-4. **User**: Confirms deployment is done for resource seeding. (Status: Resolved)
-3. **User**: Reports that the  page is empty. (Status: Resolved by agent)
-2. **User**: Reports that the staff online count in the new monitoring dashboard seems incorrect. (Status: Resolved by agent)
-1. **User**: Confirms deployment is done and asks agent to run the public seed command for organizations. (Status: Resolved)
+10. **User**: Requests a document for a board presentation, outlining all app features and development time. (Status: In Progress)
+9.  **User**: Asks to trigger a Vercel deployment via a newly provided deploy hook URL after every push. (Status: Acknowledged, Implemented)
+8.  **User**: Asks for git commits to be authored by them. (Status: Responded, explained platform limitation)
+7.  **User**: Asks to improve the current CMS with a better UX (live preview, click-to-edit) instead of a full WYSIWYG overhaul. (Status: In Progress)
+6.  **User**: Asks for an exploration of options for a true WYSIWYG editor like Elementor. (Status: Responded with detailed analysis)
+5.  **User**: Asks if refactoring the app to be fully CMS-driven will break it. (Status: Responded with a safe, fallback-based plan)
+4.  **User**: Reports the CMS is still not working and the visual editor does not match the actual app. (Status: Resolved, by connecting the Home page to CMS)
+3.  **User**: Asks what other features should be added to the app and states the CMS isn't working to edit every part of the app. (Status: Responded with a prioritized feature list)
+2.  **User**: Reports Vercel deployment is failing due to an import path error in . (Status: Resolved)
+1.  **User**: Reports losing access to Vercel after making the repo private. (Status: Responded with instructions to fix)
 
 **Project Health Check:**
--   **Broken**: No. The application is now functional.
--   **Mocked**: No.
+-   **Broken**: No
+-   **Mocked**: No
 
 **3rd Party Integrations**
 -   **OpenAI GPT-4**: For AI chat personas.
 -   **Resend**: For email notifications.
 -   **Expo Push Notifications**: Infrastructure is set up.
--   **react-native-youtube-iframe**: For the podcast feature.
+-   **WeasyPrint**: For PDF generation (installed, but the feature was refactored to use static files).
 -   **Render**: Backend hosting.
 -   **Vercel**: Frontend app hosting.
 -   **20i**: Static site hosting for admin/staff portals.
@@ -172,7 +195,7 @@ The application has moved from a Broken state to a Mostly Functional state, with
 -   **Testing agent used after significant changes**: NO
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: []
--   **Known regressions**: None from this session.
+-   **Known regressions**: None.
 
 **Credentials to test flow:**
 -   **Admin User**:
@@ -180,4 +203,5 @@ The application has moved from a Broken state to a Mostly Functional state, with
     -   Password: 
 
 **What agent forgot to execute**
--   The agent did not get to debug the final issue reported by the user: the  error when a counsellor updates their status. This is the immediate next step.</analysis>
+-   The agent did not address the longstanding issues from the initial handoff regarding the **Render cron job status** and the **inconsistent user creation UI** in the admin app.
+-   The agent started the full CMS integration but only completed the Home page. The user's request to be able to edit every part of the app is still largely pending.</analysis>
