@@ -201,31 +201,6 @@ export default function CrisisSupport() {
           </View>
         </TouchableOpacity>
 
-        {/* AI Battle Buddies - Now below the header and helplines */}
-        <TouchableOpacity 
-          style={{ backgroundColor: colors.card, borderRadius: 16, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: colors.border }}
-          onPress={() => router.push('/ai-buddies')}
-          activeOpacity={0.9}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ flexDirection: 'row', marginRight: 12 }}>
-              <Image 
-                source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png' }}
-                style={{ width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: colors.border }}
-              />
-              <Image 
-                source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png' }}
-                style={{ width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: colors.border, marginLeft: -16 }}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text }}>AI Battle Buddies</Text>
-              <Text style={{ fontSize: 14, color: colors.textSecondary }}>Chat with Tommy or Doris - available 24/7</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
-          </View>
-        </TouchableOpacity>
-
         {/* More Options Link */}
         <TouchableOpacity 
           style={{ backgroundColor: colors.card, borderRadius: 12, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
