@@ -3929,6 +3929,13 @@ async def get_ai_characters():
                 "description": "A warm, grounded family-support companion for partners, spouses and loved ones of military personnel.",
                 "avatar": AI_CHARACTERS["rita"]["avatar"],
                 "bio": "I've been around the military for a long time. My son served, and I've experienced more than most people have. I understand what families go through because I've lived it."
+            },
+            {
+                "id": "catherine",
+                "name": "Catherine",
+                "description": "Calm, composed, and grounded support. She helps you think clearly when emotions run high.",
+                "avatar": AI_CHARACTERS["catherine"]["avatar"],
+                "bio": "Catherine is composed, articulate, and grounded. She helps you think clearly when emotions run high and approach problems with calm intelligence."
             }
         ],
         "about": {
