@@ -691,8 +691,8 @@ async function loadSafeguardingAlerts(isPolling) {
                 // Play sound for new alerts
                 playAlertSound();
                 
-                // Show notification banner
-                showNewAlertBanner(newAlerts.length);
+                // Show notification banner and modal for RED alerts
+                showNewAlertBanner(newAlerts.length, newAlerts);
                 
                 // Highlight new alert cards
                 newAlerts.forEach(function(a) {
