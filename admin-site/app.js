@@ -5357,6 +5357,164 @@ function stopMonitoringAutoRefresh() {
     }
 }
 
+
+// === SAFEGUARDING ALERT MANAGEMENT FUNCTIONS ===
+
+async function viewSafeguardingAlert(alertId) {
+    try {
+        const alert = await apiCall(`/safeguarding-alerts/${alertId}`);
+        if (!alert) {
+            showToast('Alert not found', 'error');
+            return;
+        }
+        
+        const triggersHtml = alert.triggered_indicators && alert.triggered_indicators.length > 0
+            ? alert.triggered_indicators.map(t => `<span class="badge badge-warning">${t}</span>`).join(' ')
+            : '<span class="text-muted">None recorded</span>';
+        
+        const conversationHtml = alert.conversation_history && alert.conversation_history.length > 0
+            ? alert.conversation_history.map(msg => `
+                <div class="message ${msg.role === 'user' ? 'user-message' : 'assistant-message'}">
+                    <strong>${msg.role === 'user' ? 'User' : 'AI'}:</strong> ${msg.content || msg.message || ''}
+                </div>
+            `).join('')
+            : '<p class="text-muted">No conversation history available</p>';
+        
+        const modalContent = `
+            <div class="safeguarding-detail">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <label>Alert ID:</label>
+                        <span>${alert.id}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Risk Level:</label>
+                        <span class="badge badge-${alert.risk_level === 'RED' ? 'danger' : alert.risk_level === 'AMBER' ? 'warning' : 'info'}">${alert.risk_level}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Risk Score:</label>
+                        <span><strong>${alert.risk_score || 0}</strong></span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Status:</label>
+                        <span class="badge badge-${alert.status === 'resolved' ? 'success' : alert.status === 'acknowledged' ? 'warning' : 'secondary'}">${alert.status || 'active'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Session ID:</label>
+                        <span>${alert.session_id || 'Unknown'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Character:</label>
+                        <span>${alert.character || 'Unknown'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Client IP:</label>
+                        <span>${alert.client_ip || 'Unknown'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Location:</label>
+                        <span>${alert.geo_city && alert.geo_country ? `${alert.geo_city}, ${alert.geo_country}` : 'Unknown'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>ISP:</label>
+                        <span>${alert.geo_isp || 'Unknown'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Created:</label>
+                        <span>${formatDateTime(alert.created_at)}</span>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>Triggered Indicators</h4>
+                    <div class="triggers-list">${triggersHtml}</div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>Triggering Message</h4>
+                    <div class="triggering-message">${alert.triggering_message || 'Not recorded'}</div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>AI Response</h4>
+                    <div class="ai-response">${alert.ai_response || 'Not recorded'}</div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>Conversation History</h4>
+                    <div class="conversation-history">${conversationHtml}</div>
+                </div>
+                
+                <div class="detail-actions">
+                    ${alert.status === 'active' ? `<button class="btn btn-warning" onclick="acknowledgeSafeguardingAlert('${alert.id}'); closeModal();">Acknowledge</button>` : ''}
+                    ${alert.status !== 'resolved' ? `<button class="btn btn-success" onclick="resolveSafeguardingAlert('${alert.id}'); closeModal();">Mark Resolved</button>` : ''}
+                    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+                </div>
+            </div>
+        `;
+        
+        showModal('Safeguarding Alert Details', modalContent);
+    } catch (error) {
+        console.error('Error viewing safeguarding alert:', error);
+        showToast('Failed to load alert details', 'error');
+    }
+}
+
+async function acknowledgeSafeguardingAlert(alertId) {
+    try {
+        await apiCall(`/safeguarding-alerts/${alertId}/acknowledge`, { method: 'PATCH' });
+        showToast('Alert acknowledged', 'success');
+        loadLogs(); // Refresh the logs view
+    } catch (error) {
+        console.error('Error acknowledging alert:', error);
+        showToast('Failed to acknowledge alert', 'error');
+    }
+}
+
+async function resolveSafeguardingAlert(alertId) {
+    try {
+        await apiCall(`/safeguarding-alerts/${alertId}/resolve`, { method: 'PATCH' });
+        showToast('Alert resolved', 'success');
+        loadLogs(); // Refresh the logs view
+    } catch (error) {
+        console.error('Error resolving alert:', error);
+        showToast('Failed to resolve alert', 'error');
+    }
+}
+
+function showModal(title, content) {
+    // Check if modal container exists, if not create it
+    let modalContainer = document.getElementById('safeguarding-modal');
+    if (!modalContainer) {
+        modalContainer = document.createElement('div');
+        modalContainer.id = 'safeguarding-modal';
+        modalContainer.className = 'modal-overlay';
+        document.body.appendChild(modalContainer);
+    }
+    
+    modalContainer.innerHTML = `
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3>${title}</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                ${content}
+            </div>
+        </div>
+    `;
+    
+    modalContainer.style.display = 'flex';
+}
+
+function closeModal() {
+    const modal = document.getElementById('safeguarding-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+
 // Hook into tab switching to start/stop monitoring refresh
 const originalSwitchTab = window.switchTab || function() {};
 window.switchTab = function(tabName) {
