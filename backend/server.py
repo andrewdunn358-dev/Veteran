@@ -1883,7 +1883,7 @@ async def send_safeguarding_email_notification(alert: SafeguardingAlert, risk_da
     
     try:
         # Get admin notification email from settings
-        settings = await db.settings.find_one({})
+        settings = await db.settings.find_one({"_id": "site_settings"}, {"_id": 0})
         admin_email = settings.get("admin_notification_email", "") if settings else ""
         
         if not admin_email:
