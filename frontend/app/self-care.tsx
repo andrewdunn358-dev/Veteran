@@ -7,8 +7,8 @@ import { useTheme } from '../src/context/ThemeContext';
 import { useCMSContent, getSection, CMSCard } from '../src/hooks/useCMSContent';
 import { safeGoBack } from '../src/utils/navigation';
 
-// Hugo's avatar URL
-const HUGO_AVATAR = 'https://static.prod-images.emergentagent.com/jobs/56155002-fa62-4b53-8fda-4baf701ab83f/images/6be1ae886e76d7b380a66ef3eb98c183e26882fe8e9897aab7e8a8ad4320acb9.png';
+// Catherine's avatar URL
+const CATHERINE_AVATAR = 'https://customer-assets.emergentagent.com/job_72f515a0-bbb0-4a78-ba1a-bd850699b7a7/artifacts/3gai3jua_catherine.jpeg';
 
 // Fallback hardcoded tools (used when CMS is empty or unavailable)
 const FALLBACK_TOOLS = [
