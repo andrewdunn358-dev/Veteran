@@ -30,11 +30,24 @@
 **🔧 Rita Route Fix (Bug Fix):**
 - Fixed Rita's route in home.tsx from `/chat/margie` to `/chat/rita`
 
+**🔄 Hugo Persona Transformation (Complete - Major Update):**
+- Transformed Hugo from "Self-Help & Wellness Guide" to "Veteran Services Navigator"
+- New role: Knowledgeable navigator of UK veteran support systems
+- Focus areas: Housing, legal support, employment, benefits, local charities, statutory services
+- Added postcode-aware lookup rules for local service prioritisation
+- Added hard decision logic for urgent situations (homeless tonight, crisis, etc.)
+- Response format: What's Happening → Who Can Help → Why → What to Do Next
+- Updated in 4 locations:
+  - `/app/backend/server.py` (HUGO_SYSTEM_PROMPT - full new persona)
+  - `/app/frontend/src/config/ai-characters.ts` (role, description, welcome message)
+  - `/app/frontend/app/home.tsx` (bio and description in AI team)
+  - `/app/backend/server.py` (API endpoint description)
+
 **📁 Files Changed:**
 - `/app/frontend/app/unified-chat.tsx` - Fixed handleConnectToStaff function
-- `/app/frontend/src/config/ai-characters.ts` - Updated Catherine avatar URL
-- `/app/frontend/app/home.tsx` - Added Catherine to AI team, fixed Rita route
-- `/app/backend/server.py` - Updated Catherine avatar in two places
+- `/app/frontend/src/config/ai-characters.ts` - Updated Catherine avatar, Hugo's new role
+- `/app/frontend/app/home.tsx` - Added Catherine to AI team, fixed Rita route, Hugo's new bio
+- `/app/backend/server.py` - Updated Catherine avatar, Hugo's new persona, API descriptions
 
 ---
 
