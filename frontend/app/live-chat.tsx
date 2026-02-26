@@ -96,10 +96,6 @@ export default function LiveChat() {
 
     socket.on('registered', (data) => {
       console.log('Registered:', data);
-      
-      // Also register WebRTC for voice calls
-      webRTC.register(userId, 'user', userName);
-      
       // Request human chat after registration
       requestHumanChat();
     });
