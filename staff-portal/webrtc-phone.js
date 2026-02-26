@@ -815,11 +815,16 @@ function stopRingtone() {
 }
 
 // Export for use
-window.WebRTCPhone = {
+window.webRTCPhone = {
     init: initWebRTCPhone,
     acceptCall: acceptCall,
     rejectCall: rejectCall,
     endCall: endCall,
     setAvailability: setAvailability,
-    isConnected: () => isRegistered
+    isConnected: () => isRegistered,
+    isRegistered: isRegistered,
+    get socket() { return socket; }  // Expose socket for live chat
 };
+
+// Also keep old name for compatibility
+window.WebRTCPhone = window.webRTCPhone;
