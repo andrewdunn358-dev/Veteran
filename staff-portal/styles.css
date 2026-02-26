@@ -153,6 +153,8 @@ body {
 .btn-success { background: var(--success); color: white; }
 .btn-warning { background: var(--warning); color: white; }
 .btn-danger { background: var(--danger); color: white; }
+.btn-info { background: #0ea5e9; color: white; }
+.btn-info:hover { background: #0284c7; }
 
 .btn-outline {
     background: transparent;
