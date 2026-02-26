@@ -670,6 +670,48 @@ async def accept_chat_request(sid, data):
             }, to=socket_id)
 
 
+
+@sio.event
+async def staff_chat_invite(sid, data):
+    """
+    Staff initiates chat with a user from safeguarding alert
+    Data: {session_id, staff_id, staff_name, alert_id}
+    """
+    session_id = data.get('session_id')
+    staff_id = data.get('staff_id')
+    staff_name = data.get('staff_name')
+    alert_id = data.get('alert_id')
+    
+    logger.info(f"Staff {staff_name} sending chat invite for session {session_id}")
+    
+    # Try to find the user by their session ID
+    target_sid = None
+    for socket_id, user in connected_users.items():
+        # Check if the user's ID contains the session ID or vice versa
+        user_id = user.get('user_id', '')
+        if session_id and (session_id in user_id or user_id in session_id):
+            target_sid = socket_id
+            break
+    
+    if target_sid:
+        # User is connected - send them the chat invite
+        await sio.emit('staff_chat_invite', {
+            'staff_id': staff_id,
+            'staff_name': staff_name,
+            'alert_id': alert_id,
+            'message': f'{staff_name} would like to chat with you'
+        }, to=target_sid)
+        
+        logger.info(f"Chat invite sent to user {target_sid}")
+    else:
+        # User not connected - notify staff
+        await sio.emit('chat_invite_failed', {
+            'reason': 'User is not currently connected',
+            'session_id': session_id
+        }, to=sid)
+        logger.info(f"User for session {session_id} not connected")
+
+
 def get_active_chat_rooms():
     """Get list of active chat rooms (for admin)"""
     return active_chat_rooms
