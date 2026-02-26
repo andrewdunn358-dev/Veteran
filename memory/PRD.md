@@ -256,6 +256,11 @@ Vercel (app.radiocheck.me)  →  Render (veterans-support-api.onrender.com)
 - [ ] Full CMS Integration for all app pages (continue from home.tsx pattern)
 
 ### Future / Backlog
+- [ ] **External Callback Phone Integration** - Currently users can leave a callback phone number, but staff can only call via WebRTC (in-app). If user closes app, staff can't reach them. Options to solve:
+  - VoIP/SIP integration (Twilio, Vonage) for actual phone calls
+  - SMS bridge to notify user to open app
+  - Push notifications to bring user back to app
+  - Show callback number prominently so staff can call from their own phone (quick fix)
 - [ ] Welsh language support
 - [ ] SMS text reminders (Twilio)
 - [ ] Structured CBT courses
