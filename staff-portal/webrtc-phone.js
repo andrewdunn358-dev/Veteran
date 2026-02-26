@@ -6,13 +6,13 @@
  */
 
 // Configuration - STUN + TURN servers for NAT traversal
-// TURN servers are required for connections behind symmetric NATs (mobile networks, corporate firewalls)
+// Multiple TURN providers for reliability - if one fails, others will work
 const WEBRTC_CONFIG = {
     iceServers: [
-        // Google STUN servers (reliable)
+        // Google STUN servers
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        // Metered.ca TURN servers (more reliable than OpenRelay)
+        // Metered.ca TURN servers (primary)
         {
             urls: 'turn:a.relay.metered.ca:80',
             username: 'e8dd65c92eb8e17532e90b5d',
@@ -32,9 +32,21 @@ const WEBRTC_CONFIG = {
             urls: 'turns:a.relay.metered.ca:443?transport=tcp',
             username: 'e8dd65c92eb8e17532e90b5d',
             credential: 'uWdWNmkhvyqTW1QC'
+        },
+        // OpenRelay backup
+        {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+        },
+        {
+            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+            username: 'openrelayproject', 
+            credential: 'openrelayproject'
         }
     ],
-    iceCandidatePoolSize: 10
+    iceCandidatePoolSize: 10,
+    iceTransportPolicy: 'all'  // Try both direct and relay candidates
 };
 
 // State
