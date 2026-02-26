@@ -1229,12 +1229,6 @@ async function initiateStaffCall(alertId, sessionId) {
         showNotification('Failed to initiate call: ' + error.message, 'error');
     }
 }
-        await acknowledgeSafeguardingAlert(alertId);
-        
-    } catch (error) {
-        showNotification('Failed to initiate call: ' + error.message, 'error');
-    }
-}
 
 
 
