@@ -119,10 +119,17 @@ export default function DynamicAIChat() {
   };
 
   const handleConnectToStaff = () => {
-    // Close the safeguarding modal first, then navigate to live chat
+    // Close the safeguarding modal first, then navigate to live chat with session context
     setShowSafeguardingModal(false);
     setSafeguardingView('main');
-    router.push('/live-chat');
+    router.push({
+      pathname: '/live-chat',
+      params: { 
+        alertId: currentAlertId || '',
+        sessionId: sessionId,
+        preferredType: 'chat'
+      }
+    });
   };
 
   // Check consent on mount
