@@ -1,220 +1,173 @@
 <analysis>**original_problem_statement:**
-The user wants to build Radio Check, a mental health and peer support application for veterans. The project includes a React Native mobile app, a Python FastAPI backend, and several web portals (Admin, Staff). The user wants to expand the app's functionality and gain full control over its content via a Content Management System (CMS).
+The user wants to build Radio Check, a mental health and peer support application for veterans. The project includes a React web application, a Python FastAPI backend, and web portals for Admin and Staff. The core goal is to provide immediate, reliable real-time support (audio calls and text chat) to users, especially those flagged by a safeguarding system. The user also wants to gain full control over the app's content via a Content Management System (CMS) and improve the overall user experience for individuals in crisis.
 
 **PRODUCT REQUIREMENTS**
 - A working staff rota/calendar system with shift swap capabilities.
-- A fully functional Content Management System (CMS) that allows editing of all app content, ideally with a visual What-You-See-Is-What-You-Get (WYSIWYG) editor.
-- A beta testing feedback survey system (pre/post usage) that can be toggled on/off from the admin portal.
+- A fully functional Content Management System (CMS) that allows editing of all app content.
+- A beta testing feedback survey system.
 - Generation of compliance documents as downloadable PDFs from the admin portal.
-- Creation of a comprehensive project overview document for a board presentation.
-- Implementation of push notifications, mood tracking, and other core support features.
 - A robust, multi-layered safeguarding system to monitor user chats for risk and alert staff.
+- Implementation of push notifications, mood tracking, and other core support features.
 - Distinct, well-defined AI personas for peer support.
+- A reliable WebRTC and live chat system for user-to-staff communication.
+- An improved, intuitive user flow for accessing help during a crisis.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack system with a React Native (Expo) frontend, a monolithic FastAPI backend, and static HTML/JS portals for Admin and Staff.
+A full-stack application with a React/Expo frontend, a FastAPI backend, and static HTML/JS portals for Admin and Staff.
 
-This session involved significant work on documentation, AI chat functionality, and the safeguarding system.
-- **Documentation**: Created comprehensive board presentation, feature list, and technical overview documents in MD, PPTX, and DOCX formats, styled with the app's brand colors.
-- **AI Chat Fixes**: Resolved a critical bug causing an AI character (Bob) to loop. This was due to a request/response mismatch between the frontend and backend API, which has now been fixed for all chat components. All 7 AI characters were verified to be working correctly.
-- **AI Character Management**:
-    - A new AI character, Catherine, was created with a detailed persona and added to the backend and frontend.
-    - The Hugo AI character's persona was updated with a highly detailed, rules-based system for signposting UK veteran services.
-    - An incorrect character role for Margie was fixed, and the missing Rita character was added to the frontend configuration.
-- **Safeguarding System**:
-    - **Alerts Fixed**: Resolved an issue where safeguarding email alerts were not being sent by adding the  to the environment and fixing database query logic in .
-    - **Email Links Fixed**: Corrected hardcoded URLs in email templates to point to the correct staff portal ().
-    - **Admin Portal UI**: Improved the safeguarding alerts view in the admin portal to show correct character names and risk levels, and added a detailed modal view for individual alerts.
-- **UI/UX Updates**: Re-ordered components on the Crisis Support and Peer Support pages as per user request and moved AI chat characters to their correct pages.
+This session was highly focused on fixing critical bugs and responding to user-initiated architectural questions and feature requests. Key accomplishments include:
+- **Critical Bug Fixes**: Successfully resolved long-standing, recurring issues with WebRTC (no audio) and Live Chat (connection failures). This was achieved by implementing user-provided TURN server credentials and refactoring the backend/frontend socket event logic.
+- **Asset Localization**: All externally hosted image assets (avatars) were downloaded and moved into the project's  directory. The entire codebase was updated to use these local paths, making the application self-contained and independent of external CDNs.
+- **Vercel Build Fix**: A deployment-blocking error related to the  plugin in  was resolved.
+- **Safeguarding Flow Redesign**: Based on user feedback, the agent began a 3-phase redesign of the crisis support flow. Phase 1 (redesigning the user-facing modal to offer distinct Call and Chat options) was implemented but required follow-up fixes. Phase 2 (integrating call/chat requests into the staff portal's safeguarding alerts) is currently in progress.
 
 **Last working item**:
--   **Last item agent was working**: The agent was working on a multi-part user request:
-    1.  Fixing the Talk to Someone Now button in the user-facing safeguarding pop-up, which was not dismissing the modal upon being clicked.
-    2.  Implementing the extensive new persona/logic for the Hugo AI character.
-    3.  Updating Hugo's tagline/bio on the frontend.
-    4.  Adding the new Catherine character to the Meet the AI Team section.
--   **Status**: IN PROGRESS
--   **Agent Testing Done**: N
--   **Which testing method agent to use?**: Frontend testing agent to verify the safeguarding modal flow and UI changes. Manual testing by curl to verify the new Hugo persona logic.
--   **User Testing Done**: N
+- **Last item agent was working**: Implementing Phase 2 of the new safeguarding flow. The agent was modifying  to link incoming chat requests directly to existing safeguarding alerts for the same user. This involves hiding the generic chat request banner and instead showing an indicator within the specific user's safeguarding alert card, creating a more contextual experience for staff.
+- **Status**: IN PROGRESS
+- **Agent Testing Done**: N
+- **Which testing method agent to use?**: both. Use the frontend testing agent to simulate the user journey (triggering a safeguarding alert, then requesting a chat) and manually verify the UI changes on the staff portal to confirm the new indicator appears correctly within the alert card.
+- **User Testing Done**: Y (For the previous set of fixes, which revealed new issues that the agent is now addressing).
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Talk to Someone Now button fails to navigate (P0)**: When a user clicks the Talk to Someone Now button in the safeguarding modal, the modal does not close, preventing navigation. The user is stuck on the screen.
--   **Issue 2: Safeguarding history shows incorrect character name (P1)**: The user reported that the conversation history in the admin portal was attributing all AI messages to Doris. The agent pushed a fix to  but it is pending user verification.
--   **Issue 3: Incomplete CMS Editor Overhaul (P1)**: A major refactor of the admin portal's CMS editor for a better UX (split-screen, live preview) was started but is paused.
--   **Issue 4: Render Cron Job Failure (P2)**: The cron job for shift reminders on the Render-hosted backend is potentially failing and has not been investigated.
--   **Issue 5: Inconsistent Admin User Creation UI (P2)**: The UI for creating users in the React Native admin screen is inconsistent with the static web admin portal. This has not been addressed.
+- **Issue 1: Safeguarding chat from alert doesn't connect (P0)**: The user reported that after the Phase 1 UI redesign, clicking the Chat button from the safeguarding alert does not connect the staff to the user. The agent is currently working on fixing this by linking the chat request to the alert on the staff portal.
+- **Issue 2: Chat banner appears before safeguarding alert (P0)**: The user noted that the generic green chat request banner can sometimes appear before the more critical safeguarding pop-up, causing confusion. The agent's current work in  aims to suppress this banner if a safeguarding alert is already present for the user.
+- **Issue 3: Speaker phone vs. Earpiece on mobile web (P1)**: The agent identified this is a web browser limitation on mobile devices and cannot be fixed without a native app build. The code was commented to reflect this reality. This is a known limitation, not an active bug.
+- **Issue 4: Production CORS/500 error on  (P1)**: This issue from the previous handoff was not addressed.
+- **Issue 5: Safeguarding history shows incorrect character name (P1)**: From the previous handoff, remains unverified.
+- **Issue 6: Incomplete CMS Editor Overhaul (P1)**: Paused.
 
 **Issues Detail**:
--   **Issue 1: Talk to Someone Now button fails to navigate**
-    -   **Attempted fixes**: The agent successfully added the button to all required chat components ( and ). However, the implementation of the  handler is faulty.
-    -   **Next debug checklist**:
-        1.  Examine the  function for the Talk to Someone Now button in both  and .
-        2.  Ensure the state to close the modal is set *before* or concurrently with the navigation logic.
-        3.  The logic should be: 1. Close modal, 2. Navigate to the appropriate page (e.g., peer support).
-    -   **Why fix this issue and what will be achieved with the fix?**: This is a critical user journey for a user in distress. It connects them directly with human support when the AI detects a high-risk situation.
-    -   **Status**: IN PROGRESS
-    -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Frontend
-    -   **Blocked on other issue**: None
-
--   **Issue 2: Safeguarding history shows incorrect character name**
-    -   **Attempted fixes**: The agent modified  to use the  field from the API response when rendering the conversation history, instead of a hardcoded AI label.
-    -   **Next debug checklist**: Ask the user to verify by checking a new alert in the admin portal. The user must upload the new  folder to their 20i hosting first.
-    -   **Why fix this issue and what will be achieved with the fix?**: Provides accurate context to staff reviewing safeguarding alerts, helping them understand which AI persona the user was interacting with.
-    -   **Status**: USER VERIFICATION PENDING
-    -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: Frontend (Admin Portal)
-    -   **Blocked on other issue**: None
+- **Issue 1 & 2: Broken Safeguarding Chat Flow**
+    - **Attempted fixes**: The agent redesigned the user-facing modal but this broke the connection logic. The current fix involves modifying  to intelligently link an incoming  socket event to an existing safeguarding alert, rather than treating it as a separate notification.
+    - **Next debug checklist**:
+        1.  Finalize the logic in  to find the alert corresponding to the user ID from the chat request.
+        2.  Update the  function to display a User is requesting to chat indicator inside the alert card.
+        3.  Ensure the Chat with User button on the alert card uses the pending request information to join the correct room.
+        4.  Verify that the generic chat banner is hidden when the request is successfully linked to an alert.
+    - **Why fix this issue and what will be achieved with the fix?**: This is the core of the new, improved crisis flow. Fixing it will make the process of connecting a user in crisis with a staff member seamless and context-aware.
+    - **Status**: IN PROGRESS
+    - **Is recurring issue?**: N
+    - **Should Test frontend/backend/both after fix?**: Both
 
 **In progress Task List**:
--   **Task 1: Implement Hugo's New Persona & UI Updates (P0)**
-    -   **Where to resume**: The new, detailed system prompt for Hugo is in the user's last message. This needs to be implemented in , replacing the old . His tagline and bio on the frontend also need to be updated.
-    -   **What will be achieved with this?**: Hugo will transform from a general coach to a specialized, rules-based navigator for UK veteran support services, providing much more practical and actionable advice.
-    -   **Status**: NOT STARTED
-    -   **Should Test frontend/backend/both after fix?**: Both
-    -   **Blocked on something**: None
-
--   **Task 2: Add Catherine to Meet the AI Team (P0)**
-    -   **Where to resume**: Catherine's character exists, but she needs to be added to the Meet the AI Team section of the app, likely on the Home page or a dedicated About page.
-    -   **What will be achieved with this?**: Makes the new character discoverable to users.
-    -   **Status**: NOT STARTED
-    -   **Should Test frontend/backend/both after fix?**: Frontend
-    -   **Blocked on something**: None
-
--   **Task 3: Full CMS Integration for All App Pages (P1)**
-    -   **Where to resume**: The Home page is CMS-driven. The next step is to apply the same pattern (fetch data from CMS with a hardcoded fallback) to other pages like , , etc.
-    -   **What will be achieved with this?**: The user will be able to edit the content of every page in the app from the admin portal.
-    -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: Both
-    -   **Blocked on something**: None
+- **Task 1: Complete New Safeguarding Flow (P0)**
+    - **Where to resume**: Continue editing . The agent has added the logic to find pending chat requests and associate them with alerts; the next step is to update the UI rendering in  and  to use this new linked information.
+    - **What will be achieved with this?**: A complete, intuitive, and robust flow for users in crisis, and a less confusing interface for staff.
+    - **Status**: IN PROGRESS
+    - **Should Test frontend/backend/both after fix?**: Both
+    - **Blocked on something**: No.
 
 **Upcoming and Future Tasks**
 **Upcoming Tasks**:
--   **(P1) Full CMS Control**: Migrate hardcoded AI Character personas and Crisis Numbers from  into the CMS database so they are editable from the admin portal.
--   **(P1) Push Notifications**: Implement push notifications for shift reminders and user engagement.
--   **(P2) Mood Tracker Journal**: Build the daily mood check-in feature with graphs to visualize trends.
+- **(P0) Safeguarding Flow - Phase 3**: Implement the Staff Busy fallback screen on the user's side, which should include calming content like a breathing exercise, and the option to switch to chat or keep trying the call.
+- **(P1) External Callback Phone Integration**: The user has shown interest in more robust communication. A migration to a managed service like Twilio was discussed and would be a good next step.
+- **(P1) Full CMS Control**: Migrate hardcoded AI Character personas and Crisis Numbers from  into the CMS database.
+- **(P2) Mood Tracker Journal**: Build the daily mood check-in feature.
 
 **Future Tasks**:
--   **(Feature)** Implement a true visual page builder (like GrapesJS) to replace the current structured CMS editor.
--   **(Feature)** Add Appointment Booking to schedule calls with counsellors.
--   **(Feature)** Add Secure Messaging for peer-to-peer chat.
--   **(Feature)** Add Achievement Badges/Gamification.
--   **(Feature)** Build out app store assets (screenshots, marketing copy).
--   **(Feature)** Add structured Cognitive Behavioural Therapy (CBT) courses.
--   **(Feature)** Welsh Language Support.
+- Convert the Expo-based web app to a pure React framework like Next.js for better performance and easier maintenance.
+- Implement a true visual page builder (like GrapesJS).
+- Add Appointment Booking, Secure Messaging, Achievement Badges, CBT courses.
+- Add Welsh Language Support.
 
 **Completed work in this session**
--   **Board & Technical Documentation (DONE)**: Created comprehensive board presentation, feature list, and technical overview documents in MD, PPTX, and DOCX formats.
--   **AI Chat Loop & API Mismatch (DONE)**: Fixed the  endpoint by aligning frontend request keys (, ) and backend response keys () in  and .
--   **Safeguarding Email Alerts (DONE)**: Enabled email notifications by adding the , setting the destination email, and fixing database query logic in .
--   **Broken Email Links (DONE)**: Replaced a faulty, generic  with specific  and  variables in  to ensure alert and password reset links work correctly.
--   **New AI Character Catherine (DONE)**: Created and integrated the Catherine persona into the backend and frontend, placing her on the self-care page.
--   **UI Reorganization (DONE)**: Moved UI components on the Crisis Support, Peer Support, Self-Care, and Organizations pages as requested.
--   **Safeguarding Admin UI (DONE)**: Enhanced the admin portal to show a detailed modal for alerts and display the correct AI character name in conversation history.
--   **Vercel Deployments Triggered (DONE)**: Pushed frontend changes to Vercel via the deploy hook.
+- **WebRTC Audio Fixed**: Resolved a critical, recurring no audio bug by implementing user-provided TURN server credentials from ExpressTURN in both  and .
+- **Live Chat Connection Fixed**: Refactored the backend () and staff portal () to use a robust Socket.IO flow for initiating chats, resolving 404 errors and connection failures.
+- **Person is Busy Bug Fixed**: Corrected backend status management in  to ensure staff availability is properly reset after calls and chats.
+- **Vercel Build Failure Fixed**: Resolved a deployment-blocking error by removing the  plugin from .
+- **Localized All Image Assets**: Downloaded all externally hosted avatars, moved them to , and updated all file paths in the frontend and backend to be self-contained.
+- **Ringtone Logic Improved**: Replaced a faulty ringtone with a reliable Web Audio API implementation in  and added logic to handle browser audio autoplay restrictions.
+- **Safeguarding Flow UI Redesigned (Phase 1)**: Updated the safeguarding modals in  and  to give users a clear choice between Call and Chat.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: Render Cron Job Failure**: The status of the backend cron job for shift reminders is unknown and was never verified.
-    -   **Debug checklist**: Ask the user to check the cron job logs on their Render dashboard.
-    -   **Why to solve this issue and what will be achieved with this?**: Ensures automated shift reminders are sent to staff.
-    -   **Should Test frontend/backend/both after fix**: Backend (via user checking Render logs).
-    -   **Is recurring issue?**: N
--   **Issue 2: Inconsistent User Creation UI**: The UI/UX for user creation in the React Native admin app differs from the static web admin portal.
-    -   **Debug checklist**: Visually compare the two user creation flows and harmonize the UI/UX.
-    -   **Why to solve this issue and what will be achieved with this?**: Provides a consistent and less confusing experience for administrators.
-    -   **Should Test frontend/backend/both after fix**: Frontend.
-    -   **Is recurring issue?**: N
+- **Issue 1: Render cron job failure**: Status of the backend cron job for shift reminders is still unknown.
+- **Issue 2: Inconsistent User Creation UI**: UI in the React Native admin app differs from the static web admin portal.
 
 **Known issue recurrence from previous fork**
--   None.
+- The **WebRTC no-audio bug** was a major recurring issue from the previous fork. It has now been **RESOLVED** by correctly diagnosing the need for a reliable TURN server and guiding the user to provide their own credentials.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Dual Safeguarding System**: The app uses both a custom weighted keyword system and the integrated  to monitor conversations, escalating if either flags a concern.
--   **Dynamic AI Personas**: AI character behavior is controlled by detailed system prompts stored in , allowing for nuanced and distinct personalities.
--   **Real-time Alerting**: The staff portal uses  to poll for new safeguarding alerts, triggering audio-visual notifications (sound, banner, urgent modal) for immediate staff attention.
--   **Configuration-driven Notifications**: The destination email for critical alerts is stored in the database and managed via an API, allowing for changes without code deployment.
+- **WebRTC**: The core of audio calls. This session's main success was fixing NAT traversal by using a user-provided TURN server (ExpressTURN). Debugging involved analyzing ICE candidate logs.
+- **Socket.IO**: The backbone of real-time signaling for WebRTC and live chat. Agent fixed multiple event handling bugs (, ) and state management ().
+- **TURN/STUN Servers**: The unreliability of free/public TURN servers was a key learning. The solution was for the user to create their own account with a dedicated provider (ExpressTURN).
+- **Expo for Web Deployment**: The agent debugged Vercel-specific issues, including a plugin build error and correcting asset paths by moving images to the  directory, which Vercel serves statically at the root.
 
 **key DB schema**
--   **settings**: Now stores  as part of the  document.
--   **safeguarding_alerts**: Confirmed to store conversation history, risk level, triggers, and character ID for each alert.
+- **live_chat_rooms**: A document is now created in this collection when a staff member accepts a chat request, which fixed a 404 Not Found error when joining rooms.
 
 **changes in tech stack**
--   Added  and  to  for document generation.
+- **ExpressTURN**: Added as a new, critical third-party dependency for WebRTC functionality.
 
 **All files of reference**
--   **AI Chat & Safeguarding Logic**: 
--   **AI Chat Frontend**: , 
--   **AI Character Config**: 
--   **Admin Portal Alerts**: 
--   **Staff Portal Alerts**: , 
--   **Content Pages**: , , , 
--   **New Documents**: , , 
+- **Safeguarding & Chat Logic**: , 
+- **WebRTC Client (Staff)**: 
+- **WebRTC Client (User)**: 
+- **Safeguarding UI**: , 
+- **Asset Configuration**: , , 
 
 **Areas that need refactoring**:
--   **Monolithic **: This file has grown to over 5000 lines. It urgently needs to be broken down into smaller modules for routing, services (AI, safeguarding, email), and configuration to improve maintainability.
--   **Hardcoded AI Personas**: The detailed AI system prompts are still hardcoded in . They should be migrated to the CMS database to be editable from the admin portal, as per the original product requirements.
--   **Hardcoded URLs in Backend**: The recent fix introduced  and  as hardcoded variables. These should be moved to environment variables () for better configuration management.
+- ****: This file is becoming a large, complex monolith. The new safeguarding flow logic is making it harder to maintain. It should be broken into modules (e.g., , , ).
+- **Monolithic  and **: These backend files are large and would benefit from being broken down into smaller, more focused modules (e.g., separating WebRTC signaling, chat, and status logic).
+- **WebRTC Implementation**: The user asked about managed services like Twilio or Daily.co. Migrating the custom WebRTC code to one of these services would drastically reduce complexity and improve reliability, making it a high-value refactoring task.
 
 **key api endpoints**
--   : Core AI chat endpoint. Request/response format is now stable.
--   : Fetches all safeguarding alerts for the portals.
--   : **NEW**. Fetches a single alert for the admin portal's detail view.
--   : **NEW**. Sets the destination email for safeguarding alerts.
+- Interactions have moved heavily towards Socket.IO events. Key events worked on:
+  - : Now creates a room in the database.
+  - : New event to allow staff to proactively invite a user to chat from a safeguarding alert.
+  -  / : Now correctly resets staff availability.
 
 **Critical Info for New Agent**
--   **Manual Deployments Required**: The user must manually upload the  and  folders to their 20i hosting for any changes to those static sites to go live.
--   **Environment Variables**: The backend now depends on . It should also be configured to use environment variables for  and  instead of the current hardcoded values.
--   **Refactor **: The  file is critically large. Prioritize breaking it down into smaller, focused modules during any significant backend work to reduce complexity and risk.
+- **User Deploys Staff Portal Manually**: Remember that the  directory is **NOT** deployed via Git. The user must manually upload , , and  to their 20i hosting. Always remind the user of this multi-step deployment process.
+- **TURN Credentials are Key**: The WebRTC audio is entirely dependent on the user's ExpressTURN credentials. If audio fails, the first step is to verify these credentials haven't expired and are correctly configured in both  and .
+- **Focus on the New Safeguarding Flow**: The user's top priority is the new 3-phase crisis support flow. The current work is on Phase 2 (staff-side integration). The immediate next step is to complete that and move to Phase 3 (the staff busy waiting experience).
+- **User is Open to Architectural Changes**: The user asked about migrating away from custom WebRTC to a managed service (e.g., Twilio) and from Expo for Web to pure React/Next.js. Keep these options in mind as they represent significant opportunities to improve the app's stability and maintainability.
 
 **documents and test reports created in this job**
--   , , 
--   , , 
--   , , 
+- No new documents were created.
 
 **Last 10 User Messages and any pending HUMAN messages**
-10. **User**: Asked to update Hugo's AI persona with a very detailed new prompt, fix the Talk to Someone Now button, and add Catherine to the Meet the team section. (Status: In Progress)
-9.  **User**: Reported the Talk to Someone Now button was still not working correctly on the safeguarding pop-up. (Status: In Progress)
-8.  **User**: Requested UI reordering and the creation of a new AI character, Catherine, with a specific prompt and avatar. (Status: Implemented)
-7.  **User**: Reported a bug where the admin portal's safeguarding history showed Doris as the character for all conversations. (Status: Fix implemented, pending user verification)
-6.  **User**: Asked if the Vercel deployment hook was triggered. (Status: Confirmed)
-5.  **User**: Asked to verify that a specific AI safety layer from a GitHub repo was still integrated. (Status: Verified)
-4.  **User**: Requested a full check of all AI characters and the safeguarding system. (Status: Completed)
-3.  **User**: Reported the Bob AI chat character was looping and not responding correctly. (Status: Resolved)
-2.  **User**: Fixed a misunderstanding about Render environment variables. (Status: Resolved)
-1.  **User**: Pointed out that email links were using the wrong URL and asked for a review of all hardcoded URLs. (Status: Resolved)
+1.  **User**: Asks about a better way to do AI/call/chat using robust API integrations. (Agent provided a detailed breakdown of Twilio, Daily.co, and Stream).
+2.  **User**: Reports audio is not working again after a git push, providing logs showing ICE failure.
+3.  **User**: Confirms their  file has the OpenRelay TURN configuration.
+4.  **User**: Reports audio still failing after agent switched to a new Metered.ca TURN server.
+5.  **User**: Posts the full content of the updated  file.
+6.  **User**: Reports the ringtone doesn't play on the first incoming call, and provides logs showing ICE failure again.
+7.  **User**: Asks how to set up their own TURN server account.
+8.  **User**: Provides their new ExpressTURN credentials after signing up.
+9.  **User**: Confirms audio is working but the ringtone didn't work the first time.
+10. **User**: Reports that the chat alert still pops up before the safeguarding alert, and that clicking chat from the safeguarding alert doesn't work. This is the current active issue being worked on.
 
 **Project Health Check:**
--   **Broken**: No
--   **Mocked**: No
+- **Broken**: No. The core functionalities (audio calls, basic chat) are now working. However, the new safeguarding flow is partially implemented and therefore the user experience for that specific path is broken.
 
 **3rd Party Integrations**
--   **OpenAI GPT-4**: For AI chat personas.
--   **Resend**: For email notifications (now configured and working).
--   **Expo Push Notifications**: Infrastructure is set up but not fully implemented.
--   **Render**: Backend hosting.
--   **Vercel**: Frontend app hosting.
--   **20i**: Static site hosting for admin/staff portals.
--   **python-pptx, python-docx**: For document generation.
+- **ExpressTURN**: New. A TURN server provider for WebRTC NAT traversal. Requires user-provided credentials.
+- **OpenAI GPT-4**: For AI chat personas.
+- **Resend**: For email notifications.
+- **Expo Push Notifications**: Infrastructure exists but is not implemented.
+- **Render**: Backend hosting.
+- **Vercel**: Frontend app hosting.
+- **20i**: Static site hosting for admin/staff portals.
 
 **Testing status**
--   **Testing agent used after significant changes**: NO
--   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: []
--   **Known regressions**: The Talk to Someone Now button was implemented but its  behavior is broken.
+- **Testing agent used after significant changes**: NO
+- **Troubleshoot agent used after agent stuck in loop**: NO
+- **Test files created**: []
+- **Known regressions**: None. Major regressions from the previous fork were fixed.
 
 **Credentials to test flow:**
--   **Admin User**:
-    -   Email: 
-    -   Password: 
+- **Admin User**:
+    - Email: 
+    - Password: 
+- **Staff User**:
+    - Email: 
+    - Password: 
 
 **What agent forgot to execute**
--   The agent did not finish the implementation for Hugo's new persona and the related UI updates (tagline/bio).
--   The agent did not add Catherine to the Meet the AI Team section.
--   The agent identified the Talk to Someone Now button was faulty but did not complete the fix for the  behavior.
--   The longstanding issues from the initial handoff (**Render cron job status** and the **inconsistent user creation UI**) remain unaddressed.</analysis>
+- The agent did not update  or a similar changelog file after completing the significant bug fixes and starting the new feature, which is a missed step in the development workflow.
+- The agent's global search-and-replace command () to localize assets inadvertently broke the path to the logo image, causing a build failure that required a subsequent hotfix. This highlights the need for more precise file edits.</analysis>
