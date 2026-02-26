@@ -457,6 +457,62 @@ function endCall() {
 }
 
 /**
+ * Make outbound call to a user
+ * @param {string} targetUserId - The user ID or session ID to call
+ */
+function makeOutboundCall(targetUserId) {
+    if (!socket || !isRegistered) {
+        showNotification('Phone not connected. Please wait...', 'error');
+        return;
+    }
+    
+    if (currentCallId) {
+        showNotification('Already in a call', 'warning');
+        return;
+    }
+    
+    console.log('Initiating call to:', targetUserId);
+    
+    // Generate a call ID
+    currentCallId = 'call_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    // Emit call request to server
+    socket.emit('call_initiate', {
+        call_id: currentCallId,
+        target_user_id: targetUserId,
+        call_type: 'voice'
+    });
+    
+    // Update UI to show dialing
+    updatePhoneStatus('dialing', 'Calling...');
+    showDialingUI(targetUserId);
+    
+    // Play ringback tone (optional)
+    // playRingbackTone();
+    
+    showNotification('Calling user...', 'info');
+}
+
+/**
+ * Show dialing UI
+ */
+function showDialingUI(targetId) {
+    if (phoneUI.container) {
+        phoneUI.container.style.display = 'block';
+    }
+    if (phoneUI.callerInfo) {
+        phoneUI.callerInfo.innerHTML = '<i class="fas fa-phone-alt fa-spin"></i> Calling: ' + targetId.substring(0, 20) + '...';
+    }
+    if (phoneUI.callActions) {
+        phoneUI.callActions.style.display = 'block';
+        phoneUI.callActions.innerHTML = '<button class="phone-btn phone-btn-hangup" onclick="endCall()"><i class="fas fa-phone-slash"></i> Cancel</button>';
+    }
+    if (phoneUI.incomingActions) {
+        phoneUI.incomingActions.style.display = 'none';
+    }
+}
+
+/**
  * Cleanup call resources
  */
 function cleanupCall() {
