@@ -47,7 +47,7 @@ IMPORTANT: If someone mentions self-harm, suicide, or severe distress, pause nav
   bob: {
     id: 'bob',
     name: 'Bob',
-    avatar: 'https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png',
+    avatar: `${AVATAR_BASE}/bob.png`,
     role: 'Peer Support Buddy',
     description: 'A friendly ear when you need to talk. Bob understands military life and is here to listen without judgment.',
     welcomeMessage: "Alright mate, Bob here. Fancy a brew and a chat? What's going on with you today?",
