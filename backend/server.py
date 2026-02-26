@@ -4317,23 +4317,12 @@ async def buddy_chat(request: BuddyChatRequest, req: Request):
             await db.safeguarding_alerts.insert_one(alert.dict())
             logging.warning(f"SAFEGUARDING ALERT [{risk_level}] Score: {risk_data['score']} - Alert: {alert_id} - Session: {request.sessionId} - IP: {client_ip} - Location: {geo_data.get('geo_city', 'Unknown')}, {geo_data.get('geo_country', 'Unknown')}")
             
-            # Emit real-time notification to staff via Socket.IO
-            try:
-                from webrtc_signaling import sio
-                await sio.emit('new_safeguarding_alert', {
-                    'id': alert.id,
-                    'session_id': request.sessionId,
-                    'character_id': character,
-                    'risk_level': risk_level,
-                    'risk_score': risk_data['score'],
-                    'triggered_indicators': [t["indicator"] for t in risk_data.get("triggered_indicators", [])],
-                    'geo_city': geo_data.get('geo_city', ''),
-                    'geo_country': geo_data.get('geo_country', ''),
-                    'created_at': alert.created_at.isoformat() if hasattr(alert.created_at, 'isoformat') else str(alert.created_at)
-                })
-                logging.info(f"Emitted new_safeguarding_alert via Socket.IO for {alert_id}")
-            except Exception as socket_err:
-                logging.error(f"Failed to emit safeguarding alert via Socket.IO: {socket_err}")
+            # NOTE: We no longer emit the alert immediately here.
+            # The alert will be emitted when the user chooses to call or chat,
+            # ensuring they are connected and ready to receive.
+            # This is handled by:
+            # - request_human_chat (when user chooses chat) -> sends incoming_chat_request
+            # - request_human_call (when user chooses call) -> sends incoming_call_request
             
             # Send email notification to admin (only for RED alerts or first AMBER)
             if risk_level == "RED" or risk_data["session_history_count"] <= 1:
