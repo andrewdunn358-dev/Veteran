@@ -1,278 +1,105 @@
-# Radio Check - Product Requirements Document
+# Radio Check - Mental Health & Peer Support for Veterans
 
-## Project Overview
-**Radio Check** is a mental health and peer support application for veterans.
+## Original Problem Statement
+Build "Radio Check," a mental health and peer support application for veterans. The project includes a React Native/Expo web app, Python FastAPI backend, and web portals (Admin, Staff). Key requirements include:
+- Staff rota/calendar system with shift swap capabilities
+- Content Management System (CMS) for app content editing
+- Beta testing feedback survey system
+- Compliance document generation as PDFs
+- Multi-layered safeguarding system for user chat monitoring
+- Push notifications, mood tracking, and core support features
+- Distinct AI personas for peer support
+- WebRTC and live chat for user-to-staff communication
 
----
-
-## Session Summary - February 26, 2026 (Latest Update)
-
-### ✅ Completed This Session
-
-**📞 Removed External Phone Call Buttons (Complete):**
-- Removed Samaritans (116123) and Combat Stress (0800 138 1619) external call buttons from:
-  - `/app/frontend/app/unified-chat.tsx` - safeguarding modal
-  - `/app/frontend/app/chat/[characterId].tsx` - safeguarding modal  
-  - `/app/frontend/app/live-chat.tsx` - header and quick actions
-- All calls are now WebRTC-based within the app as requested
-- Replaced external call buttons with in-app navigation options (Crisis Resources, Peer Support)
-
-**👥 Staff Portal - Contact User Feature (Complete):**
-- Added "Chat with User" and "Call User" buttons to safeguarding alerts in staff portal
-- Staff can now initiate contact with users directly from safeguarding alerts
-- `initiateStaffChat()` creates a live chat room linked to the alert
-- `initiateStaffCall()` uses WebRTC phone if available, falls back to chat if no phone number
-- Added proper character name mapping for all AI characters (Tommy, Doris, Bob, Finch, Margie, Hugo, Rita, Catherine)
-- Added `.btn-info` CSS style for call button
-
-**🔧 Vercel Deployment Fix (Complete):**
-- Fixed `expo-router/internal/static` module error by upgrading to SDK 55
-- Updated `vercel.json` with correct build configuration
-- Upgraded `expo-router` from 6.0.23 to 55.0.2 to match SDK version
-
-**📁 Files Changed:**
-- `/app/frontend/app/unified-chat.tsx` - Removed external call buttons
-- `/app/frontend/app/chat/[characterId].tsx` - Removed external call buttons
-- `/app/frontend/app/live-chat.tsx` - Removed external calls, added close button, updated quick actions
-- `/app/staff-portal/app.js` - Added initiateStaffChat/Call functions, contact buttons, character mapping
-- `/app/staff-portal/styles.css` - Added .btn-info style
-- `/app/frontend/package.json` - SDK 55 upgrades
-- `/app/frontend/vercel.json` - Fixed build config
-
----
-
-## Session Summary - February 25, 2026 (Previous Session)
-
-### ✅ Completed This Session
-
-**🐛 "Talk to Someone Now" Button Fix (Complete - P0):**
-- Fixed the safeguarding modal "Talk to Someone Now" button in `unified-chat.tsx`
-- **Root Cause**: Modal was not closing before navigation, causing user to be stuck
-- **Fix**: Added `setShowSafeguardingModal(false)` and `setSafeguardingView('main')` before `router.push('/live-chat')`
-- Button now correctly closes modal and navigates to live chat
-
-**🎨 Catherine AI Avatar Updated (Complete):**
-- Generated new AI-style avatar for Catherine (replacing real photo per user request)
-- New avatar: Professional digital portrait style, composed intelligent woman in her 50s
-- Updated in three locations:
-  - `/app/frontend/src/config/ai-characters.ts`
-  - `/app/backend/server.py` (AI_CHARACTERS dict)
-  - `/app/backend/server.py` (API endpoint response)
-
-**➕ Catherine Added to "Meet the AI Team" (Complete):**
-- Added Catherine to `FALLBACK_AI_TEAM` array in `/app/frontend/app/home.tsx`
-- Catherine now appears in the Meet the AI Team section with correct avatar and bio
-
-**🔧 Rita Route Fix (Bug Fix):**
-- Fixed Rita's route in home.tsx from `/chat/margie` to `/chat/rita`
-
-**🔄 Hugo Persona Transformation (Complete - Major Update):**
-- Transformed Hugo from "Self-Help & Wellness Guide" to "Veteran Services Navigator"
-- New role: Knowledgeable navigator of UK veteran support systems
-- Focus areas: Housing, legal support, employment, benefits, local charities, statutory services
-- Added postcode-aware lookup rules for local service prioritisation
-- Added hard decision logic for urgent situations (homeless tonight, crisis, etc.)
-- Response format: What's Happening → Who Can Help → Why → What to Do Next
-- Updated in 4 locations:
-  - `/app/backend/server.py` (HUGO_SYSTEM_PROMPT - full new persona)
-  - `/app/frontend/src/config/ai-characters.ts` (role, description, welcome message)
-  - `/app/frontend/app/home.tsx` (bio and description in AI team)
-  - `/app/backend/server.py` (API endpoint description)
-
-**📁 Files Changed:**
-- `/app/frontend/app/unified-chat.tsx` - Fixed handleConnectToStaff function
-- `/app/frontend/src/config/ai-characters.ts` - Updated Catherine avatar, Hugo's new role
-- `/app/frontend/app/home.tsx` - Added Catherine to AI team, fixed Rita route, Hugo's new bio
-- `/app/backend/server.py` - Updated Catherine avatar, Hugo's new persona, API descriptions
-
----
-
-## Session Summary - February 24, 2026 (Previous Session)
-
-### ✅ Completed This Session (Current Fork)
-
-**🎨 Dark/Light Theme Fix for AI Chats (Complete):**
-- Fixed `AIConsentModal.tsx` to properly respect dark/light theme
-- Updated `ThemeContext.tsx` to wait for theme to load before rendering children (prevents flash of light theme)
-- Consent modal now shows with correct theme colors in both light and dark modes
-
-**🔧 Back Button After Refresh Fix (Complete):**
-- Created `/app/frontend/src/utils/navigation.ts` with `safeGoBack` utility
-- When no browser history exists (after page refresh), navigates to `/home` instead of doing nothing
-- Updated `self-care.tsx` and `chat/[characterId].tsx` to use `Pressable` instead of `TouchableOpacity` for better web compatibility
-
-**🛠️ AI Character Lookup Improvement (Complete):**
-- Updated `getCharacter()` in `ai-characters.ts` to support name-based lookup
-- Now `/chat/finch` and `/chat/sentry` both correctly show the Finch character
-
-**📁 Files Changed:**
-- `/app/frontend/src/components/AIConsentModal.tsx` - Theme-aware consent modal
-- `/app/frontend/src/context/ThemeContext.tsx` - Added loading state
-- `/app/frontend/src/utils/navigation.ts` - NEW: Safe navigation utility
-- `/app/frontend/app/self-care.tsx` - Using Pressable and safeGoBack
-- `/app/frontend/app/chat/[characterId].tsx` - Using Pressable and safeGoBack
-- `/app/frontend/src/config/ai-characters.ts` - Enhanced character lookup
-
----
-
-### ✅ Completed Previous Fork (Same Day)
-
-**🐛 Bug Fix - Counsellor Status 422 Error (Complete):**
-- Fixed `PATCH /api/counsellors/{user_id}/status` endpoint returning 422 Unprocessable Content
-- **Root Cause**: Pydantic validation pattern `^(available|busy|off)$` didn't match UI values (`limited`, `unavailable`)
-- **Fix**: Updated `CounsellorStatusUpdate` model in `server.py` to accept `^(available|limited|unavailable)$`
-- **File Changed**: `/app/backend/server.py` line 1080
-
-**🔧 CMS Pages Fix (Complete):**
-- Added missing CMS pages `self-care` and `family-friends` to production database
-- Added public seed endpoint `/api/cms/seed-public` for easier database population
-- **File Changed**: `/app/backend/routers/cms.py`
-
-**🎨 AI Chat Consolidation (Complete - Major Refactor):**
-- Created unified AI chat component with theme support at `/app/frontend/app/chat/[characterId].tsx`
-- Created AI character config at `/app/frontend/src/config/ai-characters.ts` with all 6 characters
-- Characters: Hugo, Bob, Margie, Sentry (Finch), Tommy, Doris
-- All chats now properly respect dark/light theme
-- Reduced code duplication from ~6000 lines across 5 files to ~800 lines in 2 files
-- Updated home.tsx routes to use new unified chat paths (`/chat/hugo`, `/chat/bob`, etc.)
-
-**📁 New Files Created:**
-- `/app/frontend/src/config/ai-characters.ts` - Character configuration
-- `/app/frontend/app/chat/[characterId].tsx` - Dynamic unified chat route
-- `/app/frontend/app/unified-chat.tsx` - Alternative unified chat entry point
-
-**✅ Verified Working:**
-- Callback request flow - creates callback and shows success confirmation page
-- Staff portal can view all callbacks via `/api/callbacks`
-- Auto-refresh every 30 seconds in staff portal
-- New unified chat routes work with theme support
-
----
-
-## Session Summary - February 23, 2026
-
-### ✅ Completed That Session
-
-**🔧 Production Deployment Fixes (Complete):**
-1. ✅ **API URL Failsafe** - Created `/frontend/src/config/api.ts`
-   - Prevents production builds from using preview URLs
-   - Automatically falls back to production backend if misconfigured
-   - Logs warnings when failsafe activates
-
-2. ✅ **Updated ALL 20+ Frontend Files** to use safe API config:
-   - `counsellors.tsx`, `peer-support.tsx` - Contact pages
-   - `ai-buddies.tsx`, `ai-chat.tsx` - AI chat screens
-   - `tommy-chat.tsx`, `doris-chat.tsx`, `hugo-chat.tsx`, `bob-chat.tsx`, `margie-chat.tsx`, `sentry-chat.tsx` - Individual AI persona screens
-   - `organizations.tsx`, `resources.tsx` - Directory pages
-   - `family-friends.tsx` - Family support
-   - `counsellor-portal.tsx`, `peer-portal.tsx`, `admin.tsx` - Staff screens
-   - `mental-health-screening.tsx` - PHQ-9/GAD-7 screening
-   - `buddy-finder.tsx`, `live-chat.tsx`, `callback.tsx` - Communication features
-   - `your-data-rights.tsx`, `my-availability.tsx` - Settings
-   - `forgot-password.tsx`, `reset-password.tsx` - Auth flows
-   - `podcasts.tsx` - Removed hardcoded preview URL
-
-3. ✅ **Cron Job Helper** - Created `/backend/cron_runner.py`
-   - Simplifies Render cron job setup
-   - Handles path setup automatically
-   - Commands: `shift_reminders`, `data_retention`
-
-4. ✅ **Production Deployment Guide** - Created `/docs/PRODUCTION_DEPLOYMENT.md`
-   - Complete architecture overview
-   - Environment variables documentation
-   - Cron job setup instructions
-   - Troubleshooting guide
-
-**📋 Verified Working:**
-- Authentication flow (login, JWT tokens, protected endpoints)
-- AI Buddies (Tommy and Doris) displaying correctly
-- Mental Health Screening page
-- All API endpoints tested and passing
-
----
-
-### Previously Completed
-
-**🩺 PHQ-9 / GAD-7 Mental Health Screening (Complete):**
-- PHQ-9 (Depression) - 9 questions
-- GAD-7 (Anxiety) - 7 questions
-- Score interpretation with severity levels
-- Share results with counsellor feature
-- Crisis helpline links for severe cases
-
-**🔄 Shift Swap / Cover Requests (Complete):**
-- Full API for shift swaps
-- Admin approval workflow
-- Staff portal integration
-- Email notifications
-
-**📊 Earlier Features:**
-- Staff Rota Dashboard (Admin + Staff portals)
-- Cookie consent banners
-- Report an Issue button
-- Email shift reminders
-- AI consent modals
-- Mood tracking graph
-
----
-
-## Production Deployment
-
-### Architecture
+## Current Architecture
 ```
-Vercel (app.radiocheck.me)  →  Render (veterans-support-api.onrender.com)
-20i (admin.radiocheck.me)   →  Render
-20i (staff.radiocheck.me)   →  Render
+/app
+├── backend/
+│   ├── server.py           # Main FastAPI app (monolithic, ~5700 lines)
+│   ├── webrtc_signaling.py # Socket.IO signaling for WebRTC calls and chat
+│   └── routes/             # Modularized route handlers
+├── frontend/               # Expo/React Native web app
+│   ├── app/                # App screens (home, chat, live-chat, peer-support)
+│   └── hooks/              # useWebRTCCallWeb.ts for in-app calls
+├── staff-portal/           # Static HTML/JS for staff (hosted on 20i)
+│   ├── app.js              # Staff portal logic
+│   ├── webrtc-phone.js     # WebRTC calling for staff
+│   └── styles.css
+└── admin-site/             # Static HTML admin portal (hosted on 20i)
 ```
 
-### Cron Jobs (Render)
-- **shift_reminders**: `cd backend && python cron_runner.py shift_reminders` (every 15 min)
-- **data_retention**: `cd backend && python cron_runner.py data_retention` (daily 3 AM)
+## Hosting
+- **Frontend App**: Vercel (auto-deploy from GitHub)
+- **Backend**: Render (WebSocket-enabled)
+- **Staff/Admin Portals**: 20i (manual upload)
+- **Database**: MongoDB
 
-### Key Files for Deployment
-- `/frontend/src/config/api.ts` - API URL failsafe
-- `/backend/cron_runner.py` - Cron job runner
-- `/docs/PRODUCTION_DEPLOYMENT.md` - Full deployment guide
+## What's Been Implemented
 
----
+### Session - February 26, 2025
+- **WebRTC Audio Fix**: Added Metered.ca TURN servers to frontend and staff portal for NAT traversal
+- **Live Chat Flow Fix**: Added Socket.IO event listeners for real-time chat requests:
+  - Staff portal now receives `incoming_chat_request` when users click "Talk to Someone"
+  - Staff can accept via `accept_chat_request` and join same room as user
+  - Added visual banner UI for incoming chat requests
 
-## Remaining Tasks
+### Previous Sessions
+- AI persona updates (Hugo as UK services navigator, Catherine avatar fixes)
+- Vercel build fix (Expo SDK 55 upgrade)
+- Safeguarding alert system with risk scoring
+- Staff portal WebRTC phone integration
+- Live chat modal for staff
+- "Call User" and "Chat with User" buttons on safeguarding alerts
+- Session timeout and activity tracking
 
-### High Priority (P0)
-- [x] API URL failsafe for production - DONE
-- [x] Cron job setup helper - DONE
-- [x] Counsellor status 422 error fix - DONE (Feb 24)
-- [x] CMS pages missing (self-care, family-friends) - DONE (Feb 24)
-- [x] AI Chat theme support - DONE (Feb 24) - Consolidated to unified component
-- [x] AI Consent Modal dark/light theme - DONE (Feb 24) - Modal now respects theme
-- [x] Back button after refresh fix - DONE (Feb 24) - Using safeGoBack utility
-- [x] Board Presentation Document - DONE (Feb 25) - /app/board_presentation.md created
+## Known Issues
 
-### Medium Priority (P1)
-- [ ] Push notifications integration
-- [ ] DPIA document for AI processing
-- [ ] Verify Render cron job is working
-- [ ] Delete old AI chat files (hugo-chat.tsx, bob-chat.tsx, etc.) after production testing
-- [ ] Full CMS Integration for all app pages (continue from home.tsx pattern)
+### P0 (Critical) - Under Testing
+- ~~WebRTC audio not working~~ - Fixed with TURN servers (needs production testing)
+- ~~Live chat not connecting~~ - Fixed Socket.IO flow (needs production testing)
 
-### Future / Backlog
-- [ ] **External Callback Phone Integration** - Currently users can leave a callback phone number, but staff can only call via WebRTC (in-app). If user closes app, staff can't reach them. Options to solve:
-  - VoIP/SIP integration (Twilio, Vonage) for actual phone calls
-  - SMS bridge to notify user to open app
-  - Push notifications to bring user back to app
-  - Show callback number prominently so staff can call from their own phone (quick fix)
-- [ ] Welsh language support
-- [ ] SMS text reminders (Twilio)
-- [ ] Structured CBT courses
-- [ ] Mood tracking enhancements (filtering, trend analysis)
+### P1 (High Priority)
+- Production CORS/500 error on `/api/surveys/status/` endpoint
+- Safeguarding history shows incorrect character name (fix unverified)
+- CMS Editor overhaul (paused)
+- External callback phone integration (users leaving phone numbers)
 
----
+### P2 (Medium Priority)
+- Render cron job status unknown (shift reminders)
+- Inconsistent admin user creation UI between platforms
+
+## Upcoming Tasks (Prioritized)
+
+### P1 - Next Sprint
+1. Verify WebRTC and chat fixes on production
+2. Fix CORS/500 error on surveys endpoint
+3. External callback phone integration (Twilio/push notifications)
+4. Migrate hardcoded AI personas to CMS
+5. Push notifications implementation
+
+### P2 - Backlog
+1. Mood tracker journal feature
+2. Visual page builder for CMS
+3. Appointment booking system
+4. Secure messaging
+5. Achievement badges system
+6. CBT courses integration
+7. Welsh language support
+
+## 3rd Party Integrations
+- **OpenAI GPT-4**: AI chat personas
+- **Resend**: Email notifications
+- **Metered.ca**: TURN server for WebRTC (free tier)
+- **Expo Push**: Infrastructure ready (not implemented)
 
 ## Test Credentials
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@veteran.dbty.co.uk | ChangeThisPassword123! |
+- **Admin**: admin@veteran.dbty.co.uk / ChangeThisPassword123!
+- **Staff**: sharon@radiocheck.me / ChangeThisPassword123!
 
----
-
-*Last Updated: February 24, 2026*
+## Deployment Process
+1. **Frontend**: Push to GitHub → Vercel auto-deploys
+2. **Backend**: Push to GitHub → Render auto-deploys
+3. **Staff/Admin Portals**: Manual upload to 20i hosting:
+   - `staff-portal/app.js`
+   - `staff-portal/webrtc-phone.js`
+   - `staff-portal/styles.css`
