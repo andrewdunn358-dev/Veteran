@@ -548,6 +548,25 @@ function setupLiveChatRequestListeners() {
         // Join the chat room
         joinLiveChat(data.room_id);
     });
+    
+    // Listen for new safeguarding alerts (real-time notification)
+    socket.off('new_safeguarding_alert');
+    socket.on('new_safeguarding_alert', function(data) {
+        console.log('New safeguarding alert received via Socket.IO:', data);
+        
+        // Play alert sound
+        playAlertSound();
+        
+        // Immediately reload safeguarding alerts to show the new one
+        loadSafeguardingAlerts(true);
+        
+        // Show urgent alert modal for RED alerts
+        if (data.risk_level === 'RED') {
+            showNotification('URGENT: New RED-level safeguarding alert!', 'error');
+        } else if (data.risk_level === 'AMBER') {
+            showNotification('New safeguarding alert received', 'warning');
+        }
+    });
 }
 
 // Show banner for incoming chat request
