@@ -159,6 +159,10 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     socketRef.current.on('connect', () => {
       console.log('WebRTC: Connected to signaling server');
       setIsConnected(true);
+      // Expose socket on window for other components to use (e.g., peer-support)
+      if (typeof window !== 'undefined') {
+        (window as any).__webrtc_socket = socketRef.current;
+      }
     });
 
     socketRef.current.on('disconnect', () => {
