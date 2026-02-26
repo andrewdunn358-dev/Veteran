@@ -454,9 +454,13 @@ async def leave_chat_room(sid, data):
             if not active_chat_rooms[room_id]['participants']:
                 del active_chat_rooms[room_id]
         
-        # Clear room from user
+        # Clear room from user and reset status to available
         if sid in connected_users:
             connected_users[sid].pop('current_room', None)
+            # Reset status to available when leaving chat
+            if connected_users[sid].get('status') == 'in_chat':
+                connected_users[sid]['status'] = 'available'
+                logger.info(f"User {user_id} status reset to available after leaving chat")
         
         logger.info(f"User {user_id} left chat room {room_id}")
         
