@@ -32,8 +32,17 @@ export default function PeerSupport() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Safeguarding call waiting state
-  const [isWaitingForSupport, setIsWaitingForSupport] = useState(false);
+  // Check URL params on initial load (for web, useLocalSearchParams may not work on first render)
+  const getInitialWaitingState = () => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('preferredType') === 'call' && urlParams.get('alertId');
+    }
+    return false;
+  };
+  
+  // Safeguarding call waiting state - initialize from URL params
+  const [isWaitingForSupport, setIsWaitingForSupport] = useState(getInitialWaitingState);
   const [waitingMessage, setWaitingMessage] = useState('Connecting you to support...');
   const pulseAnim = useState(new Animated.Value(1))[0];
   
