@@ -45,6 +45,10 @@ export default function LiveChat() {
   const [userId] = useState(() => `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const [userName] = useState('You');
   
+  // WebRTC call state
+  const [incomingCall, setIncomingCall] = useState<{ callId: string; callerName: string; callType: string } | null>(null);
+  const [activeCall, setActiveCall] = useState<{ callId: string; status: string } | null>(null);
+  
   const scrollViewRef = useRef<ScrollView>(null);
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
