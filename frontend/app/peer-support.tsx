@@ -54,17 +54,31 @@ export default function PeerSupport() {
   
   // Handle safeguarding call flow - auto-register and show waiting screen
   useEffect(() => {
-    console.log('Peer support params:', params);
-    console.log('preferredType:', params.preferredType, 'alertId:', params.alertId);
+    console.log('Peer support params:', JSON.stringify(params));
     
-    if (params.preferredType === 'call' && params.alertId) {
+    // For web, also check window.location.search as fallback
+    let preferredType = params.preferredType;
+    let alertIdParam = params.alertId;
+    let sessionIdParam = params.sessionId;
+    
+    if (typeof window !== 'undefined' && !preferredType) {
+      const urlParams = new URLSearchParams(window.location.search);
+      preferredType = urlParams.get('preferredType') || undefined;
+      alertIdParam = urlParams.get('alertId') || undefined;
+      sessionIdParam = urlParams.get('sessionId') || undefined;
+      console.log('Fallback URL params:', preferredType, alertIdParam, sessionIdParam);
+    }
+    
+    console.log('Final preferredType:', preferredType, 'alertId:', alertIdParam);
+    
+    if (preferredType === 'call' && alertIdParam) {
       console.log('Safeguarding call flow - registering for incoming calls');
       setIsWaitingForSupport(true);
       setWaitingMessage('Connecting you to a supporter...');
       
       // Register with WebRTC so staff can call us
       // Use the sessionId from params if available, otherwise use generated userId
-      const registrationId = params.sessionId || userId;
+      const registrationId = sessionIdParam || userId;
       register(registrationId, 'user', 'Veteran in need');
       
       // Start pulse animation
