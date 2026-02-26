@@ -525,7 +525,8 @@ export default function UnifiedAIChat() {
                         pathname: '/peer-support',
                         params: { 
                           alertId: currentAlertId,
-                          preferredType: 'call'
+                          preferredType: 'call',
+                          sessionId: sessionId
                         }
                       });
                     }}
