@@ -349,14 +349,17 @@ async def seed_cms_public(force: bool = False):
     })
     
     # AI Character cards matching FALLBACK_AI_TEAM in home.tsx
+    # Using local avatar paths - images are in frontend/assets/images/
+    avatar_base = "/assets/images"
     ai_characters = [
-        {"title": "Tommy", "description": "Your battle buddy", "bio": "Tommy is your straightforward battle buddy. A no-nonsense mate who tells it like it is, but always has your back.", "image_url": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png", "route": "/chat/tommy", "order": 1},
-        {"title": "Doris", "description": "Warm support", "bio": "Doris is a nurturing, compassionate presence who creates a safe space to talk.", "image_url": "https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png", "route": "/chat/doris", "order": 2},
-        {"title": "Bob", "description": "Ex-Para peer support", "bio": "Bob is a down-to-earth ex-Para who keeps things real.", "image_url": "https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png", "route": "/chat/bob", "order": 3},
-        {"title": "Finch", "description": "Military law & legal support", "bio": "Finch is a knowledgeable companion with expertise in UK military law.", "image_url": "https://static.prod-images.emergentagent.com/jobs/26fef91b-7832-48ee-9b54-6cd204a344d5/images/f2058ae7a5d15ff3f002514d4ada7039eeddf405b897ae4fc1f0a68a1114e1d8.png", "route": "/chat/sentry", "order": 4},
-        {"title": "Margie", "description": "Addiction support", "bio": "Margie specialises in supporting those dealing with all types of addiction.", "image_url": "https://static.prod-images.emergentagent.com/jobs/fba61e42-5a99-4622-a43b-84a14c5bcf87/images/313a20c933febb69cc523b6b3647ba814a5b9123a3ea7f674f7a87695a8a4789.png", "route": "/chat/margie", "order": 5},
-        {"title": "Hugo", "description": "Self-help & wellness", "bio": "Hugo is a 35-year-old wellbeing coach focused on mental health, resilience and daily habits.", "image_url": "https://static.prod-images.emergentagent.com/jobs/56155002-fa62-4b53-8fda-4baf701ab83f/images/6be1ae886e76d7b380a66ef3eb98c183e26882fe8e9897aab7e8a8ad4320acb9.png", "route": "/chat/hugo", "order": 6},
-        {"title": "Rita", "description": "Family support", "bio": "Rita is a warm, grounded family-support companion for partners, spouses, parents and loved ones.", "image_url": "https://static.prod-images.emergentagent.com/jobs/bf7a0a9a-b52d-4db3-b85e-aedfe9959d59/images/fd3c1add3b95c627676f7848bc963c3e1afe0b7c3e1187304df81ea307705318.png", "route": "/chat/margie", "order": 7},
+        {"title": "Tommy", "description": "Your battle buddy", "bio": "Tommy is your straightforward battle buddy. A no-nonsense mate who tells it like it is, but always has your back.", "image_url": f"{avatar_base}/tommy.png", "route": "/chat/tommy", "order": 1},
+        {"title": "Doris", "description": "Warm support", "bio": "Doris is a nurturing, compassionate presence who creates a safe space to talk.", "image_url": f"{avatar_base}/doris.png", "route": "/chat/doris", "order": 2},
+        {"title": "Bob", "description": "Ex-Para peer support", "bio": "Bob is a down-to-earth ex-Para who keeps things real.", "image_url": f"{avatar_base}/bob.png", "route": "/chat/bob", "order": 3},
+        {"title": "Finch", "description": "Military law & legal support", "bio": "Finch is a knowledgeable companion with expertise in UK military law.", "image_url": f"{avatar_base}/finch.png", "route": "/chat/sentry", "order": 4},
+        {"title": "Margie", "description": "Addiction support", "bio": "Margie specialises in supporting those dealing with all types of addiction.", "image_url": f"{avatar_base}/margie.png", "route": "/chat/margie", "order": 5},
+        {"title": "Hugo", "description": "Self-help & wellness", "bio": "Hugo is a 35-year-old wellbeing coach focused on mental health, resilience and daily habits.", "image_url": f"{avatar_base}/hugo.png", "route": "/chat/hugo", "order": 6},
+        {"title": "Rita", "description": "Family support", "bio": "Rita is a warm, grounded family-support companion for partners, spouses, parents and loved ones.", "image_url": f"{avatar_base}/rita.png", "route": "/chat/rita", "order": 7},
+        {"title": "Catherine", "description": "Self-care & mindfulness", "bio": "Catherine offers gentle self-care guidance and mindfulness techniques.", "image_url": f"{avatar_base}/catherine.png", "route": "/chat/catherine", "order": 8},
     ]
     
     for char in ai_characters:
