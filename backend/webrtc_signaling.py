@@ -540,12 +540,14 @@ async def typing_stop(sid, data):
 async def request_human_chat(sid, data):
     """
     User requests to chat with a human (handover from AI)
-    Data: {user_id, user_name, reason?, preferred_type: 'counsellor'|'peer'|'any'}
+    Data: {user_id, user_name, reason?, preferred_type: 'counsellor'|'peer'|'any', session_id?, alert_id?}
     """
     user_id = data.get('user_id')
     user_name = data.get('user_name', 'A veteran')
     reason = data.get('reason', 'Requested human support')
     preferred_type = data.get('preferred_type', 'any')
+    session_id = data.get('session_id', '')  # Original AI chat session ID for matching
+    alert_id = data.get('alert_id', '')  # Associated safeguarding alert ID
     
     # Find available staff
     available_staff = []
@@ -570,7 +572,7 @@ async def request_human_chat(sid, data):
     # Create a chat request that goes to available staff
     request_id = f"req_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{sid[:8]}"
     
-    logger.info(f"Human chat request from {user_name} ({user_id}), {len(available_staff)} staff available")
+    logger.info(f"Human chat request from {user_name} ({user_id}), session: {session_id}, {len(available_staff)} staff available")
     
     # Notify all available staff about the request
     for staff in available_staff:
@@ -580,6 +582,8 @@ async def request_human_chat(sid, data):
             'user_name': user_name,
             'reason': reason,
             'preferred_type': preferred_type,
+            'session_id': session_id,  # Pass the session ID for linking to safeguarding alerts
+            'alert_id': alert_id,  # Pass the alert ID if available
             'timestamp': datetime.utcnow().isoformat()
         }, to=staff['socket_id'])
     
