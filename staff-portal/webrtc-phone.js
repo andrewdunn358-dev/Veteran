@@ -298,11 +298,23 @@ async function startWebRTCConnection(createOffer) {
         // Handle ICE candidates
         peerConnection.onicecandidate = (event) => {
             if (event.candidate) {
+                // Log the type of candidate (helps debug TURN issues)
+                const candidateType = event.candidate.candidate.includes('relay') ? 'TURN relay' : 
+                                     event.candidate.candidate.includes('srflx') ? 'STUN reflexive' : 'host';
+                console.log('Generated ICE candidate:', candidateType, event.candidate.candidate.substring(0, 100));
+                
                 socket.emit('webrtc_ice_candidate', {
                     call_id: currentCallId,
                     candidate: event.candidate
                 });
+            } else {
+                console.log('ICE candidate gathering complete');
             }
+        };
+        
+        // Log ICE gathering state
+        peerConnection.onicegatheringstatechange = () => {
+            console.log('ICE gathering state:', peerConnection.iceGatheringState);
         };
         
         // Log ICE connection state
