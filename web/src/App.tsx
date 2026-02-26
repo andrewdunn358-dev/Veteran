@@ -8,6 +8,9 @@ import Portal from './pages/Portal';
 import AiBuddies from './pages/AiBuddies';
 import Chat from './pages/Chat';
 import Crisis from './pages/Crisis';
+import Callback from './pages/Callback';
+import Podcasts from './pages/Podcasts';
+import PeerSupport from './pages/PeerSupport';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const {user,isLoading}=useAuth();
@@ -27,6 +30,9 @@ export default function App() {
           <Route path="/buddies" element={<AiBuddies/>}/>
           <Route path="/chat/:characterId" element={<Chat/>}/>
           <Route path="/crisis" element={<Crisis/>}/>
+          <Route path="/callback" element={<Callback/>}/>
+          <Route path="/podcasts" element={<Podcasts/>}/>
+          <Route path="/peer-support" element={<PeerSupport/>}/>
           <Route path="*" element={<Navigate to="/"/>}/>
         </Routes>
       </BrowserRouter>

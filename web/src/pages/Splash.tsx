@@ -44,11 +44,11 @@ export default function Splash() {
           <p style={{color:'#fff',fontSize:'20px',fontWeight:'600',textAlign:'center',margin:'0 0 8px'}}>
             Do you need to speak with someone right now?
           </p>
-          <button onClick={()=>navigate('/crisis')}
+          <button onClick={()=>navigate('/crisis', { replace: true })}
             style={{backgroundColor:'#0d9488',color:'#fff',border:'none',borderRadius:'14px',padding:'18px',fontSize:'17px',fontWeight:'600',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'10px'}}>
             💬 Yes, connect me now
           </button>
-          <button onClick={()=>navigate('/home')}
+          <button onClick={()=>navigate('/home', { replace: true })}
             style={{backgroundColor:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,0.3)',borderRadius:'14px',padding:'16px',fontSize:'17px',fontWeight:'500',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'10px'}}>
             ⊞ I'm ok, take me to the app
           </button>
