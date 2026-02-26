@@ -2228,6 +2228,27 @@ function startChatPolling(roomId) {
     }, 5000);  // Increased from 3s to 5s to reduce interference
 }
 
+// Call user from within the chat modal
+function callUserFromChat() {
+    if (!currentChatUserId) {
+        showNotification('Unable to call - user connection ID not available', 'error');
+        return;
+    }
+    
+    // Check if WebRTC phone is available
+    if (!webRTCPhone || !webRTCPhone.isRegistered) {
+        showNotification('WebRTC phone not connected. Please wait for connection...', 'error');
+        return;
+    }
+    
+    console.log('Calling user from chat:', currentChatUserId);
+    showNotification('Calling user...', 'info');
+    
+    // Initiate the call
+    makeOutboundCall(currentChatUserId);
+}
+
+
 // Update chat messages in modal
 function updateChatMessages(messages) {
     var messagesDiv = document.getElementById('livechat-messages');
