@@ -200,7 +200,7 @@ IMPORTANT: If someone mentions self-harm, suicide, or severe distress, gently ac
   doris: {
     id: 'doris',
     name: 'Doris',
-    avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png',
+    avatar: `${AVATAR_BASE}/doris.png`,
     role: 'Warm & Compassionate Listener',
     description: 'Doris is a nurturing, compassionate presence who creates a safe space to talk. Like a caring grandmother who listens without judgement.',
     welcomeMessage: "Hello dear, I'm Doris. It takes courage to reach out. I'm here to listen - what would you like to talk about?",
