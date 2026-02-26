@@ -798,7 +798,15 @@ function showUrgentAlertModal(alert) {
             '<div class="urgent-alert-actions">' +
                 '<p class="action-prompt">The user is seeing support options. If they request to talk, be ready to respond.</p>' +
                 '<div class="action-buttons">' +
-                    '<button class="btn btn-success btn-lg" onclick="takeAlertAction(\'' + alert.id + '\', \'acknowledge\')">' +
+                    '<button class="btn btn-primary btn-lg" onclick="initiateStaffChat(\'' + alert.id + '\', \'' + alert.session_id + '\'); closeUrgentModal();">' +
+                        '<i class="fas fa-comments"></i> Chat with User' +
+                    '</button>' +
+                    '<button class="btn btn-info btn-lg" onclick="initiateStaffCall(\'' + alert.id + '\', \'' + alert.session_id + '\'); closeUrgentModal();">' +
+                        '<i class="fas fa-phone-alt"></i> Call User' +
+                    '</button>' +
+                '</div>' +
+                '<div class="action-buttons" style="margin-top: 12px;">' +
+                    '<button class="btn btn-success" onclick="takeAlertAction(\'' + alert.id + '\', \'acknowledge\')">' +
                         '<i class="fas fa-hand-paper"></i> I\'m Monitoring This' +
                     '</button>' +
                     '<button class="btn btn-secondary" onclick="closeUrgentModal()">' +
