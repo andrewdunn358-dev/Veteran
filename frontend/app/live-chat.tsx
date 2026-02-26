@@ -367,10 +367,10 @@ export default function LiveChat() {
           </View>
         </View>
         <TouchableOpacity 
-          style={styles.callButton}
-          onPress={() => Linking.openURL('tel:116123')}
+          style={styles.endCallButton}
+          onPress={() => router.back()}
         >
-          <FontAwesome5 name="phone-alt" size={16} color="#16a34a" />
+          <FontAwesome5 name="times" size={16} color="#dc2626" />
         </TouchableOpacity>
       </View>
 
