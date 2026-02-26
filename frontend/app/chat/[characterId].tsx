@@ -602,31 +602,6 @@ export default function DynamicAIChat() {
                 </TouchableOpacity>
               </>
             )}
-                  >
-                    <FontAwesome5 name="phone-alt" size={24} color="#2563eb" />
-                    <View style={styles.safeguardingOptionContent}>
-                      <Text style={styles.safeguardingOptionTitle}>Request a Callback</Text>
-                      <Text style={styles.safeguardingOptionDesc}>Leave your number, we'll call you</Text>
-                    </View>
-                    <FontAwesome5 name="chevron-right" size={16} color={colors.textMuted} />
-                  </TouchableOpacity>
-                </ScrollView>
-
-                <View style={styles.emergencyNote}>
-                  <FontAwesome5 name="exclamation-triangle" size={16} color={isDark ? '#fcd34d' : '#92400e'} />
-                  <Text style={styles.emergencyNoteText}>
-                    In immediate danger? Call 999
-                  </Text>
-                </View>
-
-                <TouchableOpacity 
-                  style={styles.safeguardingContinue}
-                  onPress={closeSafeguardingModal}
-                >
-                  <Text style={styles.safeguardingContinueText}>Continue chatting with {character.name}</Text>
-                </TouchableOpacity>
-              </>
-            )}
 
             {safeguardingView === 'callback' && (
               <>
