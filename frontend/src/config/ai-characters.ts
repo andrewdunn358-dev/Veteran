@@ -179,7 +179,7 @@ If someone mentions self-harm, suicide, or severe distress, gently acknowledge t
   tommy: {
     id: 'tommy',
     name: 'Tommy',
-    avatar: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png',
+    avatar: `${AVATAR_BASE}/tommy.png`,
     role: 'Your Battle Buddy',
     description: 'Tommy is your straightforward battle buddy. A no-nonsense mate who tells it like it is, but always has your back.',
     welcomeMessage: "Alright mate, Tommy here. What's on your mind? No judgement, just straight talk.",
