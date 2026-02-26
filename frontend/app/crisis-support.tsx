@@ -78,11 +78,11 @@ export default function CrisisSupport() {
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <View style={{ flexDirection: 'row', marginRight: 12 }}>
               <Image 
-                source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/slx9i8gj_image.png' }}
+                source={{ uri: '/assets/images/tommy.png' }}
                 style={{ width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: colors.border }}
               />
               <Image 
-                source={{ uri: 'https://customer-assets.emergentagent.com/job_47488e3d-c9ce-4f22-ba89-b000b32c4954/artifacts/1cxzxfrj_image.png' }}
+                source={{ uri: '/assets/images/doris.png' }}
                 style={{ width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: colors.border, marginLeft: -16 }}
               />
             </View>

@@ -445,7 +445,7 @@ export default function PeerSupport() {
               activeOpacity={0.9}
             >
               <Image 
-                source={{ uri: 'https://static.prod-images.emergentagent.com/jobs/e42bf70a-a287-4141-b70d-0728db3b1a3c/images/5ccb4f3dba33762dc691a5023cd5a26342d43ef9a7e95308f48f38301df65f8c.png' }}
+                source={{ uri: '/assets/images/bob.png' }}
                 style={styles.bobAvatar}
               />
               <View style={styles.bobTextContainer}>
