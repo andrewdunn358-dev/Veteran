@@ -2025,6 +2025,9 @@ function joinChatRoomSocket(roomId) {
             name: currentUser.name
         });
         
+        // Mark Socket.IO as connected for chat - disable polling
+        socketChatConnected = true;
+        
         // Listen for incoming chat messages (backend emits 'new_chat_message')
         webRTCPhone.socket.off('new_chat_message'); // Remove any existing listener
         webRTCPhone.socket.on('new_chat_message', function(data) {
