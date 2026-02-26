@@ -13,7 +13,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const NEW_LOGO_URL = require('../images/logo.png');
+const NEW_LOGO_URL = require('../assets/images/logo.png');
 
 // AI Team member type
 interface AITeamMember {
