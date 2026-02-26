@@ -1227,7 +1227,7 @@ AI_CHARACTERS = {
     "catherine": {
         "name": "Catherine",
         "prompt": CATHERINE_SYSTEM_PROMPT,
-        "avatar": "https://static.prod-images.emergentagent.com/jobs/3f1769a6-9483-465f-acf7-4bb9481c6a27/images/d2155280abe1ea1840e44b336a709130586d01add35daa5b320738debc38da6b.png"
+        "avatar": "https://customer-assets.emergentagent.com/job_3f1769a6-9483-465f-acf7-4bb9481c6a27/artifacts/vkvfic4v_image.png"
     }
 }
 
