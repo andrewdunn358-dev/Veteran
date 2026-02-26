@@ -1078,9 +1078,54 @@ async function acknowledgeSafeguardingAlert(id) {
 // Initiate staff chat with a user from a safeguarding alert
 async function initiateStaffChat(alertId, sessionId) {
     try {
-        showNotification('Starting chat room for this alert...', 'info');
+        showNotification('Looking for active chat room...', 'info');
         
-        // Create a live chat room linked to the safeguarding alert
+        // First, check if there's already an active live chat room for this alert or session
+        var roomsResponse = await fetch(CONFIG.API_URL + '/api/live-chat/rooms', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+        
+        var rooms = await roomsResponse.json();
+        
+        // Find a room that matches this alert or session
+        var existingRoom = rooms.find(function(room) {
+            return room.status === 'active' && (
+                room.safeguarding_alert_id === alertId ||
+                room.ai_session_id === sessionId ||
+                (sessionId && room.ai_session_id && room.ai_session_id.includes(sessionId.split('-')[0]))
+            );
+        });
+        
+        if (existingRoom) {
+            // Join the existing room
+            showNotification('Found active chat room - joining...', 'success');
+            joinLiveChat(existingRoom.id);
+            await acknowledgeSafeguardingAlert(alertId);
+            return;
+        }
+        
+        // No existing room - check if there are any active rooms waiting for staff
+        var waitingRooms = rooms.filter(function(room) {
+            return room.status === 'active' && !room.staff_id;
+        });
+        
+        if (waitingRooms.length > 0) {
+            // Join the most recent waiting room
+            var latestRoom = waitingRooms.sort(function(a, b) {
+                return new Date(b.created_at) - new Date(a.created_at);
+            })[0];
+            
+            showNotification('Joining waiting user...', 'success');
+            joinLiveChat(latestRoom.id);
+            await acknowledgeSafeguardingAlert(alertId);
+            return;
+        }
+        
+        // No existing room found - create a new one (user may need to click "Talk to Someone")
+        showNotification('No active chat from user. Creating room - user will need to connect...', 'info');
+        
         var response = await fetch(CONFIG.API_URL + '/api/live-chat/rooms', {
             method: 'POST',
             headers: {
@@ -1104,8 +1149,6 @@ async function initiateStaffChat(alertId, sessionId) {
         
         // Join the chat room
         joinLiveChat(data.room_id);
-        
-        showNotification('Chat room created - waiting for user to connect', 'success');
         
         // Auto-acknowledge the safeguarding alert
         await acknowledgeSafeguardingAlert(alertId);
