@@ -21,7 +21,10 @@ export interface AICharacter {
 }
 
 // Local avatar paths - these images are in frontend/assets/images/
-const AVATAR_BASE = '/assets/images';
+// For production on Vercel, use the app domain
+const AVATAR_BASE = typeof window !== 'undefined' && window.location.hostname.includes('radiocheck') 
+  ? 'https://app.radiocheck.me/assets/images'
+  : '/assets/images';
 
 export const AI_CHARACTERS: Record<string, AICharacter> = {
   hugo: {
