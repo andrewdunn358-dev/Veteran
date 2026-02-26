@@ -530,7 +530,8 @@ export default function DynamicAIChat() {
                         pathname: '/peer-support',
                         params: { 
                           alertId: currentAlertId,
-                          preferredType: 'call'
+                          preferredType: 'call',
+                          sessionId: sessionId
                         }
                       });
                     }}
