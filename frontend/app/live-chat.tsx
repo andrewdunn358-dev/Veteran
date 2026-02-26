@@ -400,6 +400,53 @@ export default function LiveChat() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
+      {/* Incoming Call Modal */}
+      {incomingCall && (
+        <View style={styles.incomingCallOverlay}>
+          <View style={styles.incomingCallModal}>
+            <View style={styles.callPulse}>
+              <FontAwesome5 name="phone-alt" size={32} color="#16a34a" />
+            </View>
+            <Text style={styles.incomingCallTitle}>Incoming Call</Text>
+            <Text style={styles.incomingCallName}>{incomingCall.callerName}</Text>
+            <Text style={styles.incomingCallType}>{incomingCall.callType === 'video' ? 'Video Call' : 'Voice Call'}</Text>
+            <View style={styles.incomingCallActions}>
+              <TouchableOpacity 
+                style={[styles.callActionButton, styles.rejectButton]} 
+                onPress={rejectIncomingCall}
+              >
+                <FontAwesome5 name="phone-slash" size={24} color="#fff" />
+                <Text style={styles.callActionText}>Decline</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.callActionButton, styles.acceptButton]} 
+                onPress={acceptIncomingCall}
+              >
+                <FontAwesome5 name="phone" size={24} color="#fff" />
+                <Text style={styles.callActionText}>Answer</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Active Call Banner */}
+      {activeCall && (
+        <View style={styles.activeCallBanner}>
+          <FontAwesome5 name="phone-alt" size={16} color="#fff" />
+          <Text style={styles.activeCallText}>
+            {activeCall.status === 'connecting' ? 'Connecting...' : 'In call'}
+          </Text>
+          <TouchableOpacity 
+            style={styles.endCallBtnSmall} 
+            onPress={endActiveCall}
+          >
+            <FontAwesome5 name="phone-slash" size={14} color="#fff" />
+            <Text style={styles.endCallBtnText}>End</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity 
