@@ -235,7 +235,12 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
 
     // WebRTC signaling
     socketRef.current.on('webrtc_offer', async (data: any) => {
-      await handleOffer(data.offer);
+      console.log('WebRTC: Received offer from peer', data.call_id);
+      try {
+        await handleOffer(data.offer);
+      } catch (err) {
+        console.error('WebRTC: Error handling offer:', err);
+      }
     });
 
     socketRef.current.on('webrtc_answer', async (data: any) => {
