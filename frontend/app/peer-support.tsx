@@ -95,7 +95,7 @@ export default function PeerSupport() {
         setWaitingMessage('Please stay on this screen to receive your call');
       }, 8000);
     }
-  }, [params.preferredType, params.alertId]);
+  }, []); // Run once on mount - params are checked via window.location
   
   // Handle incoming call - auto-show when we receive one
   useEffect(() => {
