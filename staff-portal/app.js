@@ -1523,7 +1523,23 @@ async function initiateStaffCall(alertId, sessionId) {
         
         showNotification('Looking for user connection...', 'info');
         
-        // First, check if there's an active live chat room with this user
+        // PRIORITY 1: Check if there's a pending chat request from this user (most reliable)
+        // The pending chat request has the user's current Socket.IO ID
+        var pendingRequest = window.pendingChatRequest;
+        if (pendingRequest && pendingRequest.user_id) {
+            // Check if the pending request matches this safeguarding alert
+            var requestSessionId = pendingRequest.session_id || '';
+            if (requestSessionId === sessionId || 
+                (requestSessionId && sessionId && requestSessionId.includes(sessionId.split('-')[0]))) {
+                console.log('Using user_id from pending chat request:', pendingRequest.user_id);
+                showNotification('Found user - calling now...', 'info');
+                makeOutboundCall(pendingRequest.user_id);
+                await acknowledgeSafeguardingAlert(alertId);
+                return;
+            }
+        }
+        
+        // PRIORITY 2: Check for an active live chat room with this user
         var roomsResponse = await fetch(CONFIG.API_URL + '/api/live-chat/rooms', {
             headers: {
                 'Authorization': 'Bearer ' + token
