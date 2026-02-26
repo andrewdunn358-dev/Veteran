@@ -762,62 +762,90 @@ function createAudioElement() {
 }
 
 function createRingtone() {
-    // Use HTML5 Audio with a data URL for the ringtone
+    // Create ringtone using Web Audio API (works better than base64)
     ringtone = {
-        audio: null,
+        context: null,
         isPlaying: false,
+        intervalId: null,
         isEnabled: false
     };
     
-    // Create audio element
-    const audio = new Audio();
-    audio.loop = true;
-    // Simple ringtone tone as base64 (short beep pattern)
-    audio.src = 'data:audio/wav;base64,UklGRl9vT19teleXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU5vT19teleX';
-    audio.volume = 0.7;
-    ringtone.audio = audio;
-    
-    // Pre-enable audio on first user interaction (click anywhere on page)
+    // Pre-enable audio context on first user interaction
     const enableAudio = () => {
         if (!ringtone.isEnabled) {
-            // Play and immediately pause to unlock audio
-            ringtone.audio.play().then(() => {
-                ringtone.audio.pause();
-                ringtone.audio.currentTime = 0;
+            try {
+                ringtone.context = new (window.AudioContext || window.webkitAudioContext)();
+                // Resume if suspended
+                if (ringtone.context.state === 'suspended') {
+                    ringtone.context.resume();
+                }
                 ringtone.isEnabled = true;
-                console.log('Ringtone audio enabled');
-            }).catch(() => {});
+                console.log('Audio context enabled');
+            } catch (e) {
+                console.log('Could not enable audio context:', e);
+            }
         }
-        document.removeEventListener('click', enableAudio);
-        document.removeEventListener('keydown', enableAudio);
     };
     
-    document.addEventListener('click', enableAudio);
-    document.addEventListener('keydown', enableAudio);
+    // Enable on any user interaction
+    document.addEventListener('click', enableAudio, { once: true });
+    document.addEventListener('keydown', enableAudio, { once: true });
+    document.addEventListener('touchstart', enableAudio, { once: true });
 }
 
 function playRingtone() {
+    if (ringtone.isPlaying) return;
+    ringtone.isPlaying = true;
+    
     try {
-        if (ringtone.isPlaying) return;
-        ringtone.isPlaying = true;
-        
-        if (ringtone.audio) {
-            ringtone.audio.currentTime = 0;
-            ringtone.audio.play().catch(e => {
-                console.log('Ringtone blocked - click page to enable');
-            });
+        // Create audio context if not exists
+        if (!ringtone.context) {
+            ringtone.context = new (window.AudioContext || window.webkitAudioContext)();
         }
         
-        // Also use system notification sound as backup
-        if ('Notification' in window && Notification.permission === 'granted') {
-            // Browser notification with sound
-            new Notification('Incoming Call', {
-                body: 'Someone is calling...',
-                icon: '/favicon.ico',
-                requireInteraction: true,
-                silent: false
-            });
+        // Resume if suspended
+        if (ringtone.context.state === 'suspended') {
+            ringtone.context.resume();
         }
+        
+        // UK-style double ring pattern
+        const playRing = () => {
+            if (!ringtone.isPlaying) return;
+            
+            const ctx = ringtone.context;
+            const now = ctx.currentTime;
+            
+            // Create two oscillators for UK ring tone (400Hz + 450Hz)
+            const playBurst = (startTime, duration) => {
+                const osc1 = ctx.createOscillator();
+                const osc2 = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc1.frequency.value = 400;
+                osc2.frequency.value = 450;
+                osc1.type = 'sine';
+                osc2.type = 'sine';
+                gain.gain.value = 0.1;
+                
+                osc1.start(startTime);
+                osc2.start(startTime);
+                osc1.stop(startTime + duration);
+                osc2.stop(startTime + duration);
+            };
+            
+            // Double ring: burst, gap, burst
+            playBurst(now, 0.4);
+            playBurst(now + 0.6, 0.4);
+        };
+        
+        // Play immediately and repeat every 2 seconds
+        playRing();
+        ringtone.intervalId = setInterval(playRing, 2000);
+        
     } catch (e) {
         console.log('Could not play ringtone:', e);
     }
@@ -825,9 +853,9 @@ function playRingtone() {
 
 function stopRingtone() {
     ringtone.isPlaying = false;
-    if (ringtone.audio) {
-        ringtone.audio.pause();
-        ringtone.audio.currentTime = 0;
+    if (ringtone.intervalId) {
+        clearInterval(ringtone.intervalId);
+        ringtone.intervalId = null;
     }
 }
 
