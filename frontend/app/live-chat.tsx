@@ -228,10 +228,12 @@ export default function LiveChat() {
   const requestHumanChat = () => {
     if (socketRef.current) {
       socketRef.current.emit('request_human_chat', {
-        user_id: userId,
+        user_id: sessionId || userId, // Use the original session ID if available for matching
         user_name: userName,
         reason: alertId ? 'Safeguarding alert triggered' : 'Requested human support',
-        preferred_type: preferredStaffType
+        preferred_type: preferredStaffType,
+        session_id: sessionId, // Pass the original session ID for linking to safeguarding alerts
+        alert_id: alertId
       });
     }
   };
