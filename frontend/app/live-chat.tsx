@@ -436,17 +436,17 @@ export default function LiveChat() {
       <View style={styles.quickActions}>
         <TouchableOpacity 
           style={styles.quickAction}
-          onPress={() => Linking.openURL('tel:116123')}
-        >
-          <FontAwesome5 name="phone-alt" size={14} color="#64748b" />
-          <Text style={styles.quickActionText}>Call Samaritans</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.quickAction}
           onPress={() => router.push('/crisis-support')}
         >
           <FontAwesome5 name="list" size={14} color="#64748b" />
-          <Text style={styles.quickActionText}>More Options</Text>
+          <Text style={styles.quickActionText}>Crisis Resources</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.quickAction}
+          onPress={() => router.push('/peer-support')}
+        >
+          <FontAwesome5 name="users" size={14} color="#64748b" />
+          <Text style={styles.quickActionText}>Peer Support</Text>
         </TouchableOpacity>
       </View>
 
