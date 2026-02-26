@@ -31,6 +31,7 @@ export default function PeerSupport() {
   const [peerSupporters, setPeerSupporters] = useState<PeerVeteran[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   
   // Safeguarding call waiting state
   const [isWaitingForSupport, setIsWaitingForSupport] = useState(false);
@@ -51,6 +52,11 @@ export default function PeerSupport() {
   
   // Generate unique user ID for this session
   const [userId] = useState(() => `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  
+  // Mark component as mounted (for client-side only logic)
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   // Handle safeguarding call flow - auto-register and show waiting screen
   useEffect(() => {
