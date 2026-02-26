@@ -5,7 +5,43 @@
 
 ---
 
-## Session Summary - February 25, 2026 (Latest Update)
+## Session Summary - February 26, 2026 (Latest Update)
+
+### ✅ Completed This Session
+
+**📞 Removed External Phone Call Buttons (Complete):**
+- Removed Samaritans (116123) and Combat Stress (0800 138 1619) external call buttons from:
+  - `/app/frontend/app/unified-chat.tsx` - safeguarding modal
+  - `/app/frontend/app/chat/[characterId].tsx` - safeguarding modal  
+  - `/app/frontend/app/live-chat.tsx` - header and quick actions
+- All calls are now WebRTC-based within the app as requested
+- Replaced external call buttons with in-app navigation options (Crisis Resources, Peer Support)
+
+**👥 Staff Portal - Contact User Feature (Complete):**
+- Added "Chat with User" and "Call User" buttons to safeguarding alerts in staff portal
+- Staff can now initiate contact with users directly from safeguarding alerts
+- `initiateStaffChat()` creates a live chat room linked to the alert
+- `initiateStaffCall()` uses WebRTC phone if available, falls back to chat if no phone number
+- Added proper character name mapping for all AI characters (Tommy, Doris, Bob, Finch, Margie, Hugo, Rita, Catherine)
+- Added `.btn-info` CSS style for call button
+
+**🔧 Vercel Deployment Fix (Complete):**
+- Fixed `expo-router/internal/static` module error by upgrading to SDK 55
+- Updated `vercel.json` with correct build configuration
+- Upgraded `expo-router` from 6.0.23 to 55.0.2 to match SDK version
+
+**📁 Files Changed:**
+- `/app/frontend/app/unified-chat.tsx` - Removed external call buttons
+- `/app/frontend/app/chat/[characterId].tsx` - Removed external call buttons
+- `/app/frontend/app/live-chat.tsx` - Removed external calls, added close button, updated quick actions
+- `/app/staff-portal/app.js` - Added initiateStaffChat/Call functions, contact buttons, character mapping
+- `/app/staff-portal/styles.css` - Added .btn-info style
+- `/app/frontend/package.json` - SDK 55 upgrades
+- `/app/frontend/vercel.json` - Fixed build config
+
+---
+
+## Session Summary - February 25, 2026 (Previous Session)
 
 ### ✅ Completed This Session
 
