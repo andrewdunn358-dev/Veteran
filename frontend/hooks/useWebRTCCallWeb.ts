@@ -538,12 +538,24 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
   };
 
   const acceptCall = useCallback(() => {
-    if (!currentCallIdRef.current) return;
-    console.log('WebRTC: Accepting call', currentCallIdRef.current);
-    socketRef.current?.emit('call_accept', { call_id: currentCallIdRef.current });
+    console.log('WebRTC: acceptCall() called');
+    console.log('WebRTC: currentCallIdRef.current =', currentCallIdRef.current);
+    console.log('WebRTC: socketRef.current connected =', socketRef.current?.connected);
+    
+    if (!currentCallIdRef.current) {
+      console.log('WebRTC: No call ID to accept');
+      return;
+    }
+    
+    if (!socketRef.current?.connected) {
+      console.log('WebRTC: Socket not connected, cannot accept call');
+      return;
+    }
+    
+    console.log('WebRTC: Emitting call_accept for', currentCallIdRef.current);
+    socketRef.current.emit('call_accept', { call_id: currentCallIdRef.current });
     setCallState('connecting');
-    // Don't start WebRTC here - wait for call_accepted event to avoid race condition
-    // The call_accepted handler will trigger startWebRTCConnection
+    console.log('WebRTC: Call state set to connecting, waiting for call_accepted event');
   }, []);
 
   const rejectCall = useCallback(() => {
