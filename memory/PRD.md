@@ -34,19 +34,30 @@ Build "Radio Check," a mental health and peer support application for veterans. 
 1. **Chat banner timing** - Added 1.5s delay before showing generic chat banner to allow safeguarding alerts to load first
 2. **Messages disappearing in chat** - Fixed by disabling polling when Socket.IO is connected (set `socketChatConnected` flag)
 3. **Call from safeguarding alert not working** - Fixed by checking `window.pendingChatRequest.user_id` first (which has the actual Socket.IO user ID), instead of using the AI chat session ID
+4. **Incoming call UI missing** - Added Accept/Reject buttons for incoming calls on the user's waiting screen
+
+**New Features:**
+1. **"Waiting for Support" Screen** - When user clicks "Call a Supporter", they see a waiting screen with:
+   - Pulsing phone icon
+   - Status messages that update over time
+   - Option to switch to text chat
+   - Cancel button
+2. **Incoming Call UI** - Users now see "Accept" and "Decline" buttons when staff calls them
+3. **Call Button in Chat Modal** - Staff can escalate from text chat to voice call without leaving the chat
 
 **Safeguarding Flow - Phase 2 Complete:**
 - ✅ Added `data-session-id` attribute to safeguarding alert cards in staff portal
 - ✅ Created `acceptPendingChatFromAlert` function for accepting chats from alert cards
-- ✅ Updated frontend chat screens (`chat/[characterId].tsx`, `unified-chat.tsx`) to pass `sessionId` and `alertId` when navigating to live-chat
+- ✅ Updated frontend chat screens (`chat/[characterId].tsx`, `unified-chat.tsx`) to pass `sessionId` and `alertId` when navigating to live-chat or peer-support
 - ✅ Updated `live-chat.tsx` to include `session_id` in `request_human_chat` socket emit
 - ✅ Updated backend `webrtc_signaling.py` to include `session_id` in `incoming_chat_request` events sent to staff
 - ✅ Added CSS for `.user-request-indicator` component in `staff-portal/styles.css`
-- ✅ Improved matching logic between chat requests and safeguarding alerts using session IDs
+- ✅ User registers with WebRTC when waiting for call - staff can now call them directly
 
 **Key Files Modified:**
-- `staff-portal/app.js` - renderSafeguardingAlerts, setupLiveChatRequestListeners, acceptPendingChatFromAlert, initiateStaffCall, joinChatRoomSocket, leaveChatRoomSocket, startChatPolling
-- `staff-portal/styles.css` - Added user-request-indicator CSS
+- `staff-portal/app.js` - renderSafeguardingAlerts, setupLiveChatRequestListeners, acceptPendingChatFromAlert, initiateStaffCall, joinChatRoomSocket, leaveChatRoomSocket, startChatPolling, callUserFromChat
+- `staff-portal/styles.css` - Added user-request-indicator CSS, call button styling
+- `frontend/app/peer-support.tsx` - Waiting for support screen, incoming call Accept/Reject UI
 - `frontend/app/chat/[characterId].tsx` - handleConnectToStaff passes sessionId
 - `frontend/app/unified-chat.tsx` - handleConnectToStaff passes sessionId
 - `frontend/app/live-chat.tsx` - requestHumanChat includes session_id
