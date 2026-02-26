@@ -1357,19 +1357,25 @@ async function initiateStaffCall(alertId, sessionId) {
             }
         }
         
-        // Get the user ID to call - either from the room or use the session ID
+        // Get the user ID to call - either from the room or use the session ID directly
         var targetUserId = null;
         
-        if (existingRoom && existingRoom.user_id) {
+        if (existingRoom && existingRoom.user_session_id) {
+            targetUserId = existingRoom.user_session_id;
+        } else if (existingRoom && existingRoom.user_id) {
             targetUserId = existingRoom.user_id;
+        } else if (sessionId) {
+            // Try using the session ID directly - user might still be connected
+            targetUserId = sessionId;
         }
         
         if (!targetUserId) {
-            // User is not in a live chat room - they need to click "Talk to Someone" first
-            alert('Cannot call user directly - they are not in a live chat session.\n\n' +
-                  'The user needs to click "Talk to Someone Now" from the safeguarding popup to enable voice calls.\n\n' +
-                  'Would you like to open a chat room and wait for them to connect?');
-            await initiateStaffChat(alertId, sessionId);
+            showNotification('User is not connected. They need to be in the app to receive calls.', 'warning');
+            
+            // Ask if they want to open chat instead
+            if (confirm('Cannot call user - they are not connected.\n\nWould you like to open a chat room instead? The user will see it when they return to the app.')) {
+                await initiateStaffChat(alertId, sessionId);
+            }
             return;
         }
         
