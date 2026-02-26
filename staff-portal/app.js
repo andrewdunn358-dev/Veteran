@@ -2062,6 +2062,9 @@ function joinChatRoomSocket(roomId) {
 
 // Leave chat room via Socket.IO
 function leaveChatRoomSocket() {
+    // Reset socket chat connected flag
+    socketChatConnected = false;
+    
     if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket && currentChatRoom) {
         webRTCPhone.socket.emit('leave_chat_room', {
             room_id: currentChatRoom,
@@ -2069,7 +2072,7 @@ function leaveChatRoomSocket() {
         });
         
         // Remove listeners
-        webRTCPhone.socket.off('chat_message');
+        webRTCPhone.socket.off('new_chat_message');
         webRTCPhone.socket.off('user_joined_chat');
         webRTCPhone.socket.off('user_left_chat');
     }
