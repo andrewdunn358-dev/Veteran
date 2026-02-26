@@ -1976,13 +1976,35 @@ async function joinLiveChat(roomId) {
 }
 
 // Show Live Chat Modal
+var currentChatUserId = null;  // Store the user ID for calling from chat
+
 async function showLiveChatModal(roomId) {
     // Get room messages
     try {
         var response = await apiCall('/live-chat/rooms/' + roomId + '/messages');
         var messages = response.messages || [];
         
-        // Create modal HTML
+        // Try to get the user's session ID from the room info or pending request
+        currentChatUserId = null;
+        
+        // Check if there's room info with user_session_id
+        try {
+            var roomInfo = await apiCall('/live-chat/rooms/' + roomId);
+            if (roomInfo && roomInfo.user_session_id) {
+                currentChatUserId = roomInfo.user_session_id;
+            }
+        } catch (e) {
+            console.log('Could not get room info:', e);
+        }
+        
+        // Fallback: check pending chat request
+        if (!currentChatUserId && window.pendingChatRequest && window.pendingChatRequest.user_id) {
+            currentChatUserId = window.pendingChatRequest.user_id;
+        }
+        
+        console.log('Chat modal - user ID for calls:', currentChatUserId);
+        
+        // Create modal HTML with Call button
         var modalHtml = '<div class="livechat-modal" id="livechat-modal">' +
             '<div class="livechat-modal-content">' +
                 '<div class="livechat-modal-header">' +
@@ -2006,6 +2028,9 @@ async function showLiveChatModal(roomId) {
                     '</button>' +
                 '</div>' +
                 '<div class="livechat-actions">' +
+                    '<button class="btn btn-success" onclick="callUserFromChat()">' +
+                        '<i class="fas fa-phone-alt"></i> Call User' +
+                    '</button>' +
                     '<button class="btn btn-warning" onclick="endLiveChat(\'' + roomId + '\')">' +
                         '<i class="fas fa-phone-slash"></i> End Chat' +
                     '</button>' +
