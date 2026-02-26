@@ -365,16 +365,16 @@ export default function LiveChat() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
-      {/* Incoming Call Modal */}
-      {incomingCall && (
+      {/* Incoming Call Modal - using WebRTC hook */}
+      {webRTC.callInfo?.isIncoming && webRTC.callState === 'ringing' && (
         <View style={styles.incomingCallOverlay}>
           <View style={styles.incomingCallModal}>
             <View style={styles.callPulse}>
               <FontAwesome5 name="phone-alt" size={32} color="#16a34a" />
             </View>
             <Text style={styles.incomingCallTitle}>Incoming Call</Text>
-            <Text style={styles.incomingCallName}>{incomingCall.callerName}</Text>
-            <Text style={styles.incomingCallType}>{incomingCall.callType === 'video' ? 'Video Call' : 'Voice Call'}</Text>
+            <Text style={styles.incomingCallName}>{webRTC.callInfo?.peerName || 'Staff'}</Text>
+            <Text style={styles.incomingCallType}>{webRTC.callInfo?.callType === 'video' ? 'Video Call' : 'Voice Call'}</Text>
             <View style={styles.incomingCallActions}>
               <TouchableOpacity 
                 style={[styles.callActionButton, styles.rejectButton]} 
@@ -395,12 +395,12 @@ export default function LiveChat() {
         </View>
       )}
 
-      {/* Active Call Banner */}
-      {activeCall && (
+      {/* Active Call Banner - using WebRTC hook */}
+      {(webRTC.callState === 'connecting' || webRTC.callState === 'connected') && (
         <View style={styles.activeCallBanner}>
           <FontAwesome5 name="phone-alt" size={16} color="#fff" />
           <Text style={styles.activeCallText}>
-            {activeCall.status === 'connecting' ? 'Connecting...' : 'In call'}
+            {webRTC.callState === 'connecting' ? 'Connecting...' : `In call (${webRTC.callDuration}s)`}
           </Text>
           <TouchableOpacity 
             style={styles.endCallBtnSmall} 
