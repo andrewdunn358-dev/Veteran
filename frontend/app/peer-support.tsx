@@ -86,6 +86,22 @@ export default function PeerSupport() {
       const registrationId = sessionIdParam || userId;
       register(registrationId, 'user', 'Veteran in need');
       
+      // After a short delay for registration, emit request_human_call to notify staff
+      // This ensures the user is registered and ready before staff tries to call
+      setTimeout(() => {
+        console.log('Emitting request_human_call to notify staff');
+        // Access the socket from the window (it's stored there by useWebRTCCall)
+        if (typeof window !== 'undefined' && (window as any).__webrtc_socket?.connected) {
+          (window as any).__webrtc_socket.emit('request_human_call', {
+            user_id: registrationId,
+            user_name: 'Veteran in need',
+            session_id: sessionIdParam || '',
+            alert_id: alertIdParam || ''
+          });
+          setWaitingMessage('Request sent - a supporter will call you shortly...');
+        }
+      }, 2000);
+      
       // Start pulse animation
       Animated.loop(
         Animated.sequence([
@@ -96,11 +112,9 @@ export default function PeerSupport() {
       
       // Update waiting message after a few seconds
       setTimeout(() => {
-        setWaitingMessage('A supporter will call you shortly...');
-      }, 3000);
-      
-      setTimeout(() => {
-        setWaitingMessage('Please stay on this screen to receive your call');
+        if (isWaitingForSupport) {
+          setWaitingMessage('Please stay on this screen to receive your call');
+        }
       }, 8000);
     }
   }, [isMounted]); // Run after mount and isMounted becomes true
