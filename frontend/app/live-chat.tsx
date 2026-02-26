@@ -290,30 +290,17 @@ export default function LiveChat() {
     }
   };
 
-  // WebRTC call functions
+  // WebRTC call functions - using the hook
   const acceptIncomingCall = () => {
-    if (socketRef.current && incomingCall) {
-      socketRef.current.emit('call_accept', { call_id: incomingCall.callId });
-      setActiveCall({ callId: incomingCall.callId, status: 'connecting' });
-      setIncomingCall(null);
-    }
+    webRTC.acceptCall();
   };
 
   const rejectIncomingCall = () => {
-    if (socketRef.current && incomingCall) {
-      socketRef.current.emit('call_reject', { 
-        call_id: incomingCall.callId,
-        reason: 'rejected'
-      });
-      setIncomingCall(null);
-    }
+    webRTC.rejectCall();
   };
 
   const endActiveCall = () => {
-    if (socketRef.current && activeCall) {
-      socketRef.current.emit('call_end', { call_id: activeCall.callId });
-      setActiveCall(null);
-    }
+    webRTC.endCall();
   };
 
   const handleEndChat = () => {
