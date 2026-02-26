@@ -278,8 +278,9 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
       audio.playsInline = true; // Required for mobile browsers
       audio.id = 'webrtc-remote-audio';
       
-      // Force speaker output on mobile (not earpiece)
-      (audio as any).setSinkId?.('default').catch(() => {});
+      // Note: Web browsers on mobile typically use the speaker by default
+      // True earpiece routing requires a native app with expo-av or react-native-incall-manager
+      // For privacy, users should use headphones when in public
       
       // Important: Don't hide the audio element on mobile as it can cause issues
       audio.style.position = 'fixed';
