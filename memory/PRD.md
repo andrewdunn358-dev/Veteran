@@ -28,7 +28,26 @@ Build "Radio Check," a mental health and peer support application for veterans. 
 
 ## What's Been Implemented
 
-### Session - February 26, 2025
+### Session - February 26, 2025 (Latest)
+
+**Safeguarding Flow - Phase 2 Complete:**
+- ✅ Added `data-session-id` attribute to safeguarding alert cards in staff portal
+- ✅ Created `acceptPendingChatFromAlert` function for accepting chats from alert cards
+- ✅ Updated frontend chat screens (`chat/[characterId].tsx`, `unified-chat.tsx`) to pass `sessionId` and `alertId` when navigating to live-chat
+- ✅ Updated `live-chat.tsx` to include `session_id` in `request_human_chat` socket emit
+- ✅ Updated backend `webrtc_signaling.py` to include `session_id` in `incoming_chat_request` events sent to staff
+- ✅ Added CSS for `.user-request-indicator` component in `staff-portal/styles.css`
+- ✅ Improved matching logic between chat requests and safeguarding alerts using session IDs
+
+**Key Files Modified:**
+- `staff-portal/app.js` - renderSafeguardingAlerts, setupLiveChatRequestListeners, acceptPendingChatFromAlert
+- `staff-portal/styles.css` - Added user-request-indicator CSS
+- `frontend/app/chat/[characterId].tsx` - handleConnectToStaff passes sessionId
+- `frontend/app/unified-chat.tsx` - handleConnectToStaff passes sessionId
+- `frontend/app/live-chat.tsx` - requestHumanChat includes session_id
+- `backend/webrtc_signaling.py` - request_human_chat handler includes session_id
+
+### Previous Session - February 26, 2025
 
 **WebRTC Audio Fix:**
 - Added ExpressTURN credentials (user's account)
@@ -50,12 +69,6 @@ Build "Radio Check," a mental health and peer support application for veterans. 
 - Updated all paths from /assets/images/ to /images/
 - Images: tommy, doris, bob, finch, margie, hugo, rita, catherine
 
-### Previous Sessions
-- AI persona updates (Hugo, Catherine)
-- Vercel build fix (Expo SDK 55)
-- Safeguarding alert system
-- Staff portal WebRTC integration
-
 ## Current TURN Server Config
 ```javascript
 // ExpressTURN - user's account
@@ -71,12 +84,8 @@ Build "Radio Check," a mental health and peer support application for veterans. 
 ### P0 - Immediate
 1. ✅ WebRTC audio working
 2. ✅ Safeguarding popup with Call/Chat options
-3. Test and verify new popup flow
-
-### P1 - Phase 2: Staff Integration
-1. Show call/chat requests INSIDE safeguarding alert card
-2. Staff can accept call OR offer chat from same place
-3. Link user requests to their safeguarding alert
+3. ✅ Phase 2 - Link chat requests to safeguarding alerts
+4. User testing of complete safeguarding flow
 
 ### P1 - Phase 3: Waiting Experience
 1. "Staff busy" fallback screen
@@ -85,10 +94,13 @@ Build "Radio Check," a mental health and peer support application for veterans. 
 4. "Switch to chat" option
 
 ### P2 - Backlog
-1. Ringtone improvements (current requires user click first)
-2. Push notifications
-3. Mood tracker journal
-4. CMS editor overhaul
+1. External Callback Phone Integration (Twilio migration)
+2. Full CMS Control - Migrate AI personas and Crisis Numbers to database
+3. Ringtone improvements (current requires user click first)
+4. Push notifications
+5. Mood tracker journal
+6. CMS editor overhaul
+7. Production CORS/500 error on `/api/surveys/status/`
 
 ## 3rd Party Integrations
 - **OpenAI GPT-4**: AI chat personas
@@ -102,4 +114,4 @@ Build "Radio Check," a mental health and peer support application for veterans. 
 ## Deployment Process
 1. **Frontend**: Push to GitHub → Vercel auto-deploys
 2. **Backend**: Push to GitHub → Render auto-deploys
-3. **Staff/Admin Portals**: Manual upload to 20i hosting
+3. **Staff/Admin Portals**: Manual upload to 20i hosting (app.js, webrtc-phone.js, styles.css)
