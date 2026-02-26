@@ -1,9 +1,9 @@
 {
-  "buildCommand": "npx expo export -p web",
+  "version": 2,
+  "buildCommand": "npx expo export --platform web",
   "outputDirectory": "dist",
-  "framework": null,
   "installCommand": "yarn install",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

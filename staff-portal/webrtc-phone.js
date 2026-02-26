@@ -5,15 +5,29 @@
  * No PBX required - uses Socket.IO for signaling
  */
 
-// Configuration - STUN servers for NAT traversal
+// Configuration - STUN + TURN servers for NAT traversal
+// TURN servers are required for connections behind symmetric NATs (mobile networks, corporate firewalls)
 const WEBRTC_CONFIG = {
     iceServers: [
         // Google STUN servers (reliable)
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-        // Twilio STUN (backup)
-        { urls: 'stun:global.stun.twilio.com:3478' },
+        // OpenRelay free TURN servers
+        {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+        },
+        {
+            urls: 'turn:openrelay.metered.ca:443',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+        },
+        {
+            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+        }
     ],
     iceCandidatePoolSize: 10
 };
@@ -250,6 +264,16 @@ async function startWebRTCConnection(createOffer) {
                             });
                         });
                     }
+                    // Also check inbound (receiving) stats
+                    if (peerConnection) {
+                        peerConnection.getStats().then(stats => {
+                            stats.forEach(report => {
+                                if (report.type === 'inbound-rtp' && report.kind === 'audio') {
+                                    console.log('Audio RECEIVING - bytes:', report.bytesReceived, 'packets:', report.packetsReceived, 'lost:', report.packetsLost || 0);
+                                }
+                            });
+                        });
+                    }
                 }, 3000);
             }
         });
@@ -454,6 +478,62 @@ function endCall() {
     cleanupCall();
     updatePhoneStatus('online', 'Ready for calls');
     showNotification('Call ended', 'info');
+}
+
+/**
+ * Make outbound call to a user
+ * @param {string} targetUserId - The user ID or session ID to call
+ */
+function makeOutboundCall(targetUserId) {
+    if (!socket || !isRegistered) {
+        showNotification('Phone not connected. Please wait...', 'error');
+        return;
+    }
+    
+    if (currentCallId) {
+        showNotification('Already in a call', 'warning');
+        return;
+    }
+    
+    console.log('Initiating call to:', targetUserId);
+    
+    // Generate a call ID
+    currentCallId = 'call_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    // Emit call request to server
+    socket.emit('call_initiate', {
+        call_id: currentCallId,
+        target_user_id: targetUserId,
+        call_type: 'voice'
+    });
+    
+    // Update UI to show dialing
+    updatePhoneStatus('dialing', 'Calling...');
+    showDialingUI(targetUserId);
+    
+    // Play ringback tone (optional)
+    // playRingbackTone();
+    
+    showNotification('Calling user...', 'info');
+}
+
+/**
+ * Show dialing UI
+ */
+function showDialingUI(targetId) {
+    if (phoneUI.container) {
+        phoneUI.container.style.display = 'block';
+    }
+    if (phoneUI.callerInfo) {
+        phoneUI.callerInfo.innerHTML = '<i class="fas fa-phone-alt fa-spin"></i> Calling: ' + targetId.substring(0, 20) + '...';
+    }
+    if (phoneUI.callActions) {
+        phoneUI.callActions.style.display = 'block';
+        phoneUI.callActions.innerHTML = '<button class="phone-btn phone-btn-hangup" onclick="endCall()"><i class="fas fa-phone-slash"></i> Cancel</button>';
+    }
+    if (phoneUI.incomingActions) {
+        phoneUI.incomingActions.style.display = 'none';
+    }
 }
 
 /**
@@ -759,11 +839,16 @@ function stopRingtone() {
 }
 
 // Export for use
-window.WebRTCPhone = {
+window.webRTCPhone = {
     init: initWebRTCPhone,
     acceptCall: acceptCall,
     rejectCall: rejectCall,
     endCall: endCall,
     setAvailability: setAvailability,
-    isConnected: () => isRegistered
+    isConnected: () => isRegistered,
+    get isRegistered() { return isRegistered; },
+    get socket() { return socket; }  // Expose socket for live chat
 };
+
+// Also keep old name for compatibility
+window.WebRTCPhone = window.webRTCPhone;

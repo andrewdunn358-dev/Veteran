@@ -378,6 +378,11 @@ async function initializeWebRTCPhone() {
         
         if (success) {
             console.log('WebRTC Phone initialized for:', currentUser.name);
+            
+            // Setup live chat request listeners after a short delay to ensure socket is connected
+            setTimeout(function() {
+                setupLiveChatRequestListeners();
+            }, 2000);
         }
         
     } catch (error) {
@@ -385,6 +390,112 @@ async function initializeWebRTCPhone() {
         updatePhoneStatusUI('error');
         alert('WebRTC Phone Error: ' + error.message);
     }
+}
+
+// Setup listeners for incoming live chat requests
+function setupLiveChatRequestListeners() {
+    if (typeof webRTCPhone === 'undefined' || !webRTCPhone.socket) {
+        console.warn('WebRTC socket not available for chat request listeners');
+        return;
+    }
+    
+    var socket = webRTCPhone.socket;
+    console.log('Setting up live chat request listeners on socket');
+    
+    // Listen for incoming chat requests from users (when they click "Talk to Someone")
+    socket.off('incoming_chat_request'); // Remove any existing listener
+    socket.on('incoming_chat_request', function(data) {
+        console.log('Received incoming chat request:', data);
+        
+        // Check if there's already an urgent safeguarding alert modal open
+        // If so, don't show a separate chat banner (the user clicked "Talk to Someone" from there)
+        var urgentModal = document.getElementById('urgent-alert-modal');
+        if (urgentModal) {
+            console.log('Safeguarding modal already open - skipping chat banner');
+            // Just show a brief notification instead
+            showNotification('User clicked "Talk to Someone" - use the Chat button in the alert', 'info');
+            return;
+        }
+        
+        // Play alert sound
+        playAlertSound();
+        
+        // Show notification banner
+        showIncomingChatRequestBanner(data);
+    });
+    
+    // Listen for when another staff member takes a chat request
+    socket.off('chat_request_taken');
+    socket.on('chat_request_taken', function(data) {
+        console.log('Chat request taken by:', data.accepted_by);
+        // Hide the banner if it's still showing
+        dismissIncomingChatBanner();
+        showNotification('Chat request taken by ' + data.accepted_by, 'info');
+    });
+    
+    // Listen for chat request confirmation (when we accept)
+    socket.off('chat_request_confirmed');
+    socket.on('chat_request_confirmed', function(data) {
+        console.log('Chat request confirmed, room:', data.room_id);
+        // Join the chat room
+        joinLiveChat(data.room_id);
+    });
+}
+
+// Show banner for incoming chat request
+function showIncomingChatRequestBanner(data) {
+    var existingBanner = document.getElementById('incoming-chat-banner');
+    if (existingBanner) existingBanner.remove();
+    
+    var banner = document.createElement('div');
+    banner.id = 'incoming-chat-banner';
+    banner.className = 'incoming-chat-banner';
+    banner.innerHTML = 
+        '<div class="banner-content">' +
+            '<i class="fas fa-comments"></i>' +
+            '<div class="banner-text">' +
+                '<strong>' + escapeHtml(data.user_name || 'A veteran') + '</strong> is requesting to chat' +
+                '<span class="banner-reason">' + escapeHtml(data.reason || 'Requested human support') + '</span>' +
+            '</div>' +
+            '<div class="banner-actions">' +
+                '<button class="btn btn-success" onclick="acceptIncomingChatRequest(\'' + data.request_id + '\', \'' + data.user_id + '\')">' +
+                    '<i class="fas fa-check"></i> Accept' +
+                '</button>' +
+                '<button class="btn btn-secondary" onclick="dismissIncomingChatBanner()">' +
+                    '<i class="fas fa-times"></i> Dismiss' +
+                '</button>' +
+            '</div>' +
+        '</div>';
+    
+    document.body.appendChild(banner);
+    
+    // Auto-dismiss after 60 seconds
+    setTimeout(function() {
+        dismissIncomingChatBanner();
+    }, 60000);
+}
+
+// Accept incoming chat request
+function acceptIncomingChatRequest(requestId, userId) {
+    if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket) {
+        console.log('Accepting chat request:', requestId, 'from user:', userId);
+        
+        webRTCPhone.socket.emit('accept_chat_request', {
+            request_id: requestId,
+            user_id: userId
+        });
+        
+        dismissIncomingChatBanner();
+        showNotification('Accepting chat request...', 'info');
+    } else {
+        showNotification('Socket not connected. Please refresh the page.', 'error');
+    }
+}
+
+// Dismiss incoming chat banner
+function dismissIncomingChatBanner() {
+    var banner = document.getElementById('incoming-chat-banner');
+    if (banner) banner.remove();
 }
 
 // Update phone status in UI
@@ -691,8 +802,8 @@ async function loadSafeguardingAlerts(isPolling) {
                 // Play sound for new alerts
                 playAlertSound();
                 
-                // Show notification banner
-                showNewAlertBanner(newAlerts.length);
+                // Show notification banner and modal for RED alerts
+                showNewAlertBanner(newAlerts.length, newAlerts);
                 
                 // Highlight new alert cards
                 newAlerts.forEach(function(a) {
@@ -723,7 +834,7 @@ async function loadSafeguardingAlerts(isPolling) {
 }
 
 // Show new alert notification banner
-function showNewAlertBanner(count) {
+function showNewAlertBanner(count, newAlerts) {
     var banner = document.getElementById('new-alert-banner');
     if (!banner) {
         banner = document.createElement('div');
@@ -735,10 +846,110 @@ function showNewAlertBanner(count) {
     banner.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + count + ' NEW SAFEGUARDING ALERT' + (count > 1 ? 'S' : '') + ' <button onclick="dismissAlertBanner()">View</button>';
     banner.classList.add('show');
     
-    // Auto-dismiss after 10 seconds
+    // For RED level alerts, show a full-screen modal
+    if (newAlerts && newAlerts.length > 0) {
+        var redAlert = newAlerts.find(function(a) { return a.risk_level === 'RED'; });
+        if (redAlert) {
+            showUrgentAlertModal(redAlert);
+        }
+    }
+    
+    // Auto-dismiss banner after 10 seconds
     setTimeout(function() {
         banner.classList.remove('show');
     }, 10000);
+}
+
+// Show urgent alert modal for RED-level alerts
+function showUrgentAlertModal(alert) {
+    var existingModal = document.getElementById('urgent-alert-modal');
+    if (existingModal) existingModal.remove();
+    
+    var location = alert.geo_city && alert.geo_country ? alert.geo_city + ', ' + alert.geo_country : 'Unknown location';
+    var triggers = alert.triggered_indicators ? alert.triggered_indicators.join(', ') : 'Unknown';
+    
+    var modal = document.createElement('div');
+    modal.id = 'urgent-alert-modal';
+    modal.className = 'urgent-alert-modal';
+    modal.innerHTML = 
+        '<div class="urgent-alert-content">' +
+            '<div class="urgent-alert-header">' +
+                '<i class="fas fa-exclamation-circle"></i>' +
+                '<h2>URGENT: Safeguarding Alert</h2>' +
+            '</div>' +
+            '<div class="urgent-alert-body">' +
+                '<div class="alert-risk-badge risk-red">RED RISK - Score: ' + (alert.risk_score || 0) + '</div>' +
+                '<div class="alert-info-grid">' +
+                    '<div class="alert-info-item">' +
+                        '<span class="label">Session:</span>' +
+                        '<span class="value">' + (alert.session_id || 'Unknown').substring(0, 20) + '...</span>' +
+                    '</div>' +
+                    '<div class="alert-info-item">' +
+                        '<span class="label">AI Character:</span>' +
+                        '<span class="value">' + (alert.character || 'Unknown') + '</span>' +
+                    '</div>' +
+                    '<div class="alert-info-item">' +
+                        '<span class="label">Location:</span>' +
+                        '<span class="value">' + location + '</span>' +
+                    '</div>' +
+                    '<div class="alert-info-item">' +
+                        '<span class="label">ISP:</span>' +
+                        '<span class="value">' + (alert.geo_isp || 'Unknown') + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="alert-triggers">' +
+                    '<span class="label">Triggered Keywords:</span>' +
+                    '<span class="triggers">' + triggers + '</span>' +
+                '</div>' +
+                '<div class="alert-message">' +
+                    '<span class="label">Message:</span>' +
+                    '<p>' + (alert.triggering_message || 'No message recorded') + '</p>' +
+                '</div>' +
+            '</div>' +
+            '<div class="urgent-alert-actions">' +
+                '<p class="action-prompt">The user is seeing support options. If they request to talk, be ready to respond.</p>' +
+                '<div class="action-buttons">' +
+                    '<button class="btn btn-primary btn-lg" onclick="initiateStaffChat(\'' + alert.id + '\', \'' + alert.session_id + '\'); closeUrgentModal();">' +
+                        '<i class="fas fa-comments"></i> Chat with User' +
+                    '</button>' +
+                    '<button class="btn btn-info btn-lg" onclick="initiateStaffCall(\'' + alert.id + '\', \'' + alert.session_id + '\'); closeUrgentModal();">' +
+                        '<i class="fas fa-phone-alt"></i> Call User' +
+                    '</button>' +
+                '</div>' +
+                '<div class="action-buttons" style="margin-top: 12px;">' +
+                    '<button class="btn btn-success" onclick="takeAlertAction(\'' + alert.id + '\', \'acknowledge\')">' +
+                        '<i class="fas fa-hand-paper"></i> I\'m Monitoring This' +
+                    '</button>' +
+                    '<button class="btn btn-secondary" onclick="closeUrgentModal()">' +
+                        'Dismiss' +
+                    '</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    
+    document.body.appendChild(modal);
+    
+    // Pulse sound continues until acknowledged
+    playAlertSound();
+}
+
+function closeUrgentModal() {
+    var modal = document.getElementById('urgent-alert-modal');
+    if (modal) modal.remove();
+}
+
+async function takeAlertAction(alertId, action) {
+    try {
+        if (action === 'acknowledge') {
+            await apiCall('/safeguarding-alerts/' + alertId + '/acknowledge', { method: 'PATCH' });
+            showNotification('You are now monitoring this alert', 'success');
+        }
+        closeUrgentModal();
+        loadSafeguardingAlerts(false);
+    } catch (error) {
+        console.error('Error taking alert action:', error);
+        showNotification('Error: ' + error.message, 'error');
+    }
 }
 
 function dismissAlertBanner() {
@@ -788,10 +999,41 @@ function renderSafeguardingAlerts(alerts) {
         if (alert.status === 'active') {
             actions = '<button class="btn btn-warning" onclick="acknowledgeSafeguardingAlert(\'' + alert.id + '\')"><i class="fas fa-hand-paper"></i> Acknowledge</button>';
         }
+        
+        // Add contact buttons - Call (WebRTC) and Chat
+        actions += '<button class="btn btn-primary" onclick="initiateStaffChat(\'' + alert.id + '\', \'' + alert.session_id + '\')">' +
+            '<i class="fas fa-comments"></i> Chat with User</button>';
+        actions += '<button class="btn btn-info" onclick="initiateStaffCall(\'' + alert.id + '\', \'' + alert.session_id + '\')">' +
+            '<i class="fas fa-phone-alt"></i> Call User</button>';
+        
         actions += '<button class="btn btn-success" onclick="resolveSafeguardingAlert(\'' + alert.id + '\')"><i class="fas fa-check"></i> Resolve</button>';
         
-        var characterIcon = alert.character === 'tommy' ? 'fa-user' : 'fa-user-circle';
-        var characterName = alert.character === 'tommy' ? 'Tommy' : 'Doris';
+        // Get proper character name from the characters mapping
+        var characterNames = {
+            'tommy': 'Tommy',
+            'doris': 'Doris',
+            'bob': 'Bob',
+            'finch': 'Finch',
+            'margie': 'Margie',
+            'hugo': 'Hugo',
+            'rita': 'Rita',
+            'catherine': 'Catherine',
+            'sentry': 'Finch'
+        };
+        var characterIcons = {
+            'tommy': 'fa-user',
+            'doris': 'fa-user-circle',
+            'bob': 'fa-user-tie',
+            'finch': 'fa-balance-scale',
+            'margie': 'fa-heart',
+            'hugo': 'fa-compass',
+            'rita': 'fa-users',
+            'catherine': 'fa-brain',
+            'sentry': 'fa-balance-scale'
+        };
+        var characterIcon = characterIcons[alert.character] || 'fa-robot';
+        var characterName = characterNames[alert.character] || alert.character || 'AI';
+        
         
         // Risk level styling
         var riskLevel = alert.risk_level || 'AMBER';
@@ -940,6 +1182,213 @@ async function acknowledgeSafeguardingAlert(id) {
         showNotification('Failed: ' + error.message, 'error');
     }
 }
+
+
+// ============ STAFF-INITIATED CONTACT ============
+
+// Initiate staff chat with a user from a safeguarding alert
+async function initiateStaffChat(alertId, sessionId) {
+    try {
+        showNotification('Looking for active chat room...', 'info');
+        
+        // First, check if there's already an active live chat room for this alert or session
+        var roomsResponse = await fetch(CONFIG.API_URL + '/api/live-chat/rooms', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+        
+        var rooms = await roomsResponse.json();
+        
+        // Find a room that matches this alert or session
+        var existingRoom = rooms.find(function(room) {
+            return room.status === 'active' && (
+                room.safeguarding_alert_id === alertId ||
+                room.ai_session_id === sessionId ||
+                (sessionId && room.ai_session_id && room.ai_session_id.includes(sessionId.split('-')[0]))
+            );
+        });
+        
+        if (existingRoom) {
+            // Join the existing room
+            showNotification('Found active chat room - joining...', 'success');
+            joinLiveChat(existingRoom.id);
+            await acknowledgeSafeguardingAlert(alertId);
+            return;
+        }
+        
+        // No existing room - check if there are any active rooms waiting for staff
+        var waitingRooms = rooms.filter(function(room) {
+            return room.status === 'active' && !room.staff_id;
+        });
+        
+        if (waitingRooms.length > 0) {
+            // Join the most recent waiting room
+            var latestRoom = waitingRooms.sort(function(a, b) {
+                return new Date(b.created_at) - new Date(a.created_at);
+            })[0];
+            
+            showNotification('Joining waiting user...', 'success');
+            joinLiveChat(latestRoom.id);
+            await acknowledgeSafeguardingAlert(alertId);
+            return;
+        }
+        
+        // No existing room found - try to reach user via Socket.IO
+        // The user might still be connected from the safeguarding alert
+        if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket) {
+            showNotification('User not in chat yet. Sending chat invite...', 'info');
+            
+            // Send a chat invite to the user (if they're still connected)
+            webRTCPhone.socket.emit('staff_chat_invite', {
+                session_id: sessionId,
+                staff_id: currentUser.id,
+                staff_name: currentUser.name,
+                alert_id: alertId
+            });
+            
+            // Wait briefly for a response, then create room anyway
+            setTimeout(async function() {
+                // Create a room and wait for user to connect
+                try {
+                    var response = await fetch(CONFIG.API_URL + '/api/live-chat/rooms', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({
+                            staff_id: currentUser.id,
+                            staff_name: currentUser.name,
+                            staff_type: currentUser.role,
+                            safeguarding_alert_id: alertId,
+                            ai_session_id: sessionId
+                        })
+                    });
+                    
+                    var data = await response.json();
+                    
+                    if (response.ok) {
+                        showNotification('Chat room created - waiting for user to connect...', 'info');
+                        joinLiveChat(data.room_id);
+                        await acknowledgeSafeguardingAlert(alertId);
+                    }
+                } catch (e) {
+                    console.error('Error creating room:', e);
+                }
+            }, 1000);
+            
+            return;
+        }
+        
+        // Fallback: Create room via API
+        showNotification('Creating chat room - user will need to connect...', 'info');
+        
+        var response = await fetch(CONFIG.API_URL + '/api/live-chat/rooms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                staff_id: currentUser.id,
+                staff_name: currentUser.name,
+                staff_type: currentUser.role,
+                safeguarding_alert_id: alertId,
+                ai_session_id: sessionId
+            })
+        });
+        
+        var data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to create chat room');
+        }
+        
+        // Join the chat room
+        joinLiveChat(data.room_id);
+        
+        // Auto-acknowledge the safeguarding alert
+        await acknowledgeSafeguardingAlert(alertId);
+        
+    } catch (error) {
+        showNotification('Failed to initiate chat: ' + error.message, 'error');
+    }
+}
+
+// Initiate staff WebRTC call to a user from a safeguarding alert
+async function initiateStaffCall(alertId, sessionId) {
+    try {
+        // Check if WebRTC phone is available and registered
+        if (!webRTCPhone || !webRTCPhone.isRegistered) {
+            showNotification('WebRTC phone not connected. Please wait for connection...', 'error');
+            return;
+        }
+        
+        showNotification('Looking for user connection...', 'info');
+        
+        // First, check if there's an active live chat room with this user
+        var roomsResponse = await fetch(CONFIG.API_URL + '/api/live-chat/rooms', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+        
+        var rooms = await roomsResponse.json();
+        
+        // Find a room that matches this alert or session
+        var existingRoom = rooms.find(function(room) {
+            return room.status === 'active' && (
+                room.safeguarding_alert_id === alertId ||
+                room.ai_session_id === sessionId ||
+                (sessionId && room.ai_session_id && room.ai_session_id.includes(sessionId.split('-')[0]))
+            );
+        });
+        
+        // Also check for any waiting rooms
+        if (!existingRoom) {
+            var waitingRooms = rooms.filter(function(room) {
+                return room.status === 'active' && !room.staff_id;
+            });
+            if (waitingRooms.length > 0) {
+                existingRoom = waitingRooms.sort(function(a, b) {
+                    return new Date(b.created_at) - new Date(a.created_at);
+                })[0];
+            }
+        }
+        
+        // Get the user ID to call - either from the room or use the session ID
+        var targetUserId = null;
+        
+        if (existingRoom && existingRoom.user_id) {
+            targetUserId = existingRoom.user_id;
+        }
+        
+        if (!targetUserId) {
+            // User is not in a live chat room - they need to click "Talk to Someone" first
+            alert('Cannot call user directly - they are not in a live chat session.\n\n' +
+                  'The user needs to click "Talk to Someone Now" from the safeguarding popup to enable voice calls.\n\n' +
+                  'Would you like to open a chat room and wait for them to connect?');
+            await initiateStaffChat(alertId, sessionId);
+            return;
+        }
+        
+        // Initiate WebRTC call to the user
+        console.log('Initiating WebRTC call to user:', targetUserId);
+        showNotification('Calling user via WebRTC...', 'info');
+        
+        // Use the makeOutboundCall function
+        makeOutboundCall(targetUserId);
+        
+        // Auto-acknowledge the safeguarding alert
+        await acknowledgeSafeguardingAlert(alertId);
+        
+    } catch (error) {
+        showNotification('Failed to initiate call: ' + error.message, 'error');
+    }
+}
+
+
 
 // Resolve Safeguarding Alert
 async function resolveSafeguardingAlert(id) {
@@ -1326,7 +1775,10 @@ async function showLiveChatModal(roomId) {
         // Add modal to page
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         
-        // Start polling for new messages
+        // Join chat room via Socket.IO for real-time messaging
+        joinChatRoomSocket(roomId);
+        
+        // Also start polling as backup
         startChatPolling(roomId);
         
         // Focus input
@@ -1340,6 +1792,84 @@ async function showLiveChatModal(roomId) {
         console.error('Error opening chat:', error);
         showNotification('Failed to open chat', 'error');
     }
+}
+
+// Join chat room via Socket.IO
+function joinChatRoomSocket(roomId) {
+    // Use the WebRTC phone socket if available
+    if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket) {
+        console.log('Joining chat room via Socket.IO:', roomId);
+        
+        webRTCPhone.socket.emit('join_chat_room', {
+            room_id: roomId,
+            user_id: currentUser.id,
+            user_type: currentUser.role,
+            name: currentUser.name
+        });
+        
+        // Listen for incoming chat messages (backend emits 'new_chat_message')
+        webRTCPhone.socket.off('new_chat_message'); // Remove any existing listener
+        webRTCPhone.socket.on('new_chat_message', function(data) {
+            console.log('Received chat message via Socket.IO:', data);
+            if (data.room_id === currentChatRoom && data.sender_id !== currentUser.id) {
+                appendChatMessage(data.message, data.sender_name, data.sender_type, data.timestamp);
+            }
+        });
+        
+        // Listen for user joining
+        webRTCPhone.socket.off('user_joined_chat');
+        webRTCPhone.socket.on('user_joined_chat', function(data) {
+            console.log('User joined chat:', data);
+            if (data.room_id === currentChatRoom) {
+                showNotification(data.name + ' joined the chat', 'info');
+            }
+        });
+        
+        // Listen for user leaving
+        webRTCPhone.socket.off('user_left_chat');
+        webRTCPhone.socket.on('user_left_chat', function(data) {
+            console.log('User left chat:', data);
+            if (data.room_id === currentChatRoom) {
+                showNotification(data.name + ' left the chat', 'info');
+            }
+        });
+        
+    } else {
+        console.log('WebRTC socket not available, using polling only');
+    }
+}
+
+// Leave chat room via Socket.IO
+function leaveChatRoomSocket() {
+    if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket && currentChatRoom) {
+        webRTCPhone.socket.emit('leave_chat_room', {
+            room_id: currentChatRoom,
+            user_id: currentUser.id
+        });
+        
+        // Remove listeners
+        webRTCPhone.socket.off('chat_message');
+        webRTCPhone.socket.off('user_joined_chat');
+        webRTCPhone.socket.off('user_left_chat');
+    }
+}
+
+// Append a chat message to the UI
+function appendChatMessage(text, senderName, senderType, timestamp) {
+    var messagesDiv = document.getElementById('livechat-messages');
+    if (!messagesDiv) return;
+    
+    var isStaff = senderType === 'counsellor' || senderType === 'peer' || senderType === 'admin';
+    var displayName = isStaff ? senderName : 'User';
+    var time = timestamp ? new Date(timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
+    
+    messagesDiv.innerHTML += '<div class="chat-message ' + (isStaff ? 'staff' : 'user') + '">' +
+        '<span class="msg-sender">' + escapeHtml(displayName) + '</span>' +
+        '<span class="msg-text">' + escapeHtml(text) + '</span>' +
+        '<span class="msg-time">' + time + '</span>' +
+    '</div>';
+    
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
 // Handle Enter key in chat input
@@ -1357,6 +1887,18 @@ async function sendChatMessage() {
     if (!text || !currentChatRoom) return;
     
     try {
+        // Send via Socket.IO for real-time delivery
+        if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket) {
+            webRTCPhone.socket.emit('chat_message', {
+                room_id: currentChatRoom,
+                message: text,
+                sender_id: currentUser.id,
+                sender_name: currentUser.name,
+                sender_type: currentUser.role
+            });
+        }
+        
+        // Also save to API for persistence
         await apiCall('/live-chat/rooms/' + currentChatRoom + '/messages', {
             method: 'POST',
             body: JSON.stringify({ text: text, sender: 'staff' })
@@ -1410,6 +1952,9 @@ function updateChatMessages(messages) {
 
 // Close Live Chat Modal
 function closeLiveChatModal() {
+    // Leave Socket.IO room
+    leaveChatRoomSocket();
+    
     if (chatPollingInterval) {
         clearInterval(chatPollingInterval);
         chatPollingInterval = null;

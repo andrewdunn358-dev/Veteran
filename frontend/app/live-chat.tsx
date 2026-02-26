@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
   StyleSheet,
   Alert,
-  Linking,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -202,6 +201,9 @@ export default function LiveChat() {
       console.error('Socket connection error:', error);
       setIsLoading(false);
     });
+    
+    // Note: WebRTC call handling is now done by the useWebRTCCall hook
+    // The hook listens on its own socket connection for incoming_call, call_accepted, call_ended, etc.
   };
 
   const requestHumanChat = () => {
@@ -367,10 +369,10 @@ export default function LiveChat() {
           </View>
         </View>
         <TouchableOpacity 
-          style={styles.callButton}
-          onPress={() => Linking.openURL('tel:116123')}
+          style={styles.endCallButton}
+          onPress={() => router.back()}
         >
-          <FontAwesome5 name="phone-alt" size={16} color="#16a34a" />
+          <FontAwesome5 name="times" size={16} color="#dc2626" />
         </TouchableOpacity>
       </View>
 
@@ -436,17 +438,17 @@ export default function LiveChat() {
       <View style={styles.quickActions}>
         <TouchableOpacity 
           style={styles.quickAction}
-          onPress={() => Linking.openURL('tel:116123')}
-        >
-          <FontAwesome5 name="phone-alt" size={14} color="#64748b" />
-          <Text style={styles.quickActionText}>Call Samaritans</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.quickAction}
           onPress={() => router.push('/crisis-support')}
         >
           <FontAwesome5 name="list" size={14} color="#64748b" />
-          <Text style={styles.quickActionText}>More Options</Text>
+          <Text style={styles.quickActionText}>Crisis Resources</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.quickAction}
+          onPress={() => router.push('/peer-support')}
+        >
+          <FontAwesome5 name="users" size={14} color="#64748b" />
+          <Text style={styles.quickActionText}>Peer Support</Text>
         </TouchableOpacity>
       </View>
 
@@ -566,6 +568,11 @@ const styles = StyleSheet.create({
   callButton: {
     padding: 12,
     backgroundColor: '#2d3a4d',
+    borderRadius: 8,
+  },
+  endCallButton: {
+    padding: 12,
+    backgroundColor: '#fee2e2',
     borderRadius: 8,
   },
   waitingBanner: {
@@ -735,5 +742,103 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748b',
     fontStyle: 'italic',
+  },
+  // Incoming Call Modal Styles
+  incomingCallOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  incomingCallModal: {
+    backgroundColor: '#1e293b',
+    borderRadius: 24,
+    padding: 32,
+    alignItems: 'center',
+    width: '85%',
+    maxWidth: 320,
+  },
+  callPulse: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(22, 163, 74, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  incomingCallTitle: {
+    fontSize: 14,
+    color: '#94a3b8',
+    marginBottom: 8,
+  },
+  incomingCallName: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  incomingCallType: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 32,
+  },
+  incomingCallActions: {
+    flexDirection: 'row',
+    gap: 24,
+  },
+  callActionButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 4,
+  },
+  rejectButton: {
+    backgroundColor: '#dc2626',
+  },
+  acceptButton: {
+    backgroundColor: '#16a34a',
+  },
+  callActionText: {
+    fontSize: 11,
+    color: '#fff',
+    fontWeight: '500',
+  },
+  // Active Call Banner
+  activeCallBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#16a34a',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 10,
+  },
+  activeCallText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: '500',
+  },
+  endCallBtnSmall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#dc2626',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    gap: 6,
+  },
+  endCallBtnText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: '500',
   },
 });

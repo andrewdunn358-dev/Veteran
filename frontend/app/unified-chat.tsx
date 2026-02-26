@@ -77,12 +77,54 @@ export default function UnifiedAIChat() {
   // Safeguarding state
   const [showSafeguardingModal, setShowSafeguardingModal] = useState(false);
   const [currentAlertId, setCurrentAlertId] = useState<string | null>(null);
-  const [safeguardingView, setSafeguardingView] = useState<'main' | 'callback' | 'connecting' | 'callback_success'>('main');
+  const [safeguardingView, setSafeguardingView] = useState<'main' | 'callback' | 'connecting' | 'callback_success' | 'live_chat'>('main');
   const [callbackPhone, setCallbackPhone] = useState('');
   const [callbackName, setCallbackName] = useState('');
   const [isSubmittingCallback, setIsSubmittingCallback] = useState(false);
   const [availableStaff, setAvailableStaff] = useState<AvailableStaff>({ counsellors: [], peers: [] });
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [staffAvailable, setStaffAvailable] = useState(false);
+
+  // Check for available staff when safeguarding modal opens
+  useEffect(() => {
+    if (showSafeguardingModal) {
+      checkStaffAvailability();
+    }
+  }, [showSafeguardingModal]);
+
+  const checkStaffAvailability = async () => {
+    setIsCheckingAvailability(true);
+    try {
+      const [counsellorsRes, peersRes] = await Promise.all([
+        fetch(`${API_URL}/api/counsellors/available`),
+        fetch(`${API_URL}/api/peer-supporters/available`)
+      ]);
+      
+      const counsellors = await counsellorsRes.json();
+      const peers = await peersRes.json();
+      
+      const availableCounsellors = Array.isArray(counsellors) ? counsellors : [];
+      const availablePeers = Array.isArray(peers) ? peers : [];
+      
+      setAvailableStaff({ 
+        counsellors: availableCounsellors, 
+        peers: availablePeers 
+      });
+      setStaffAvailable(availableCounsellors.length > 0 || availablePeers.length > 0);
+    } catch (error) {
+      console.error('Error checking staff availability:', error);
+      setStaffAvailable(false);
+    } finally {
+      setIsCheckingAvailability(false);
+    }
+  };
+
+  const handleConnectToStaff = () => {
+    // Close the safeguarding modal first, then navigate to live chat
+    setShowSafeguardingModal(false);
+    setSafeguardingView('main');
+    router.push('/live-chat');
+  };
 
   // Check consent on mount
   useEffect(() => {
@@ -158,22 +200,22 @@ export default function UnifiedAIChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: messageText,
-          character_id: character.id,
-          session_id: sessionId,
+          character: character.id,
+          sessionId: sessionId,
         }),
       });
 
       const data = await response.json();
 
       // Check for safeguarding alert
-      if (data.safeguarding_alert) {
-        setCurrentAlertId(data.alert_id);
+      if (data.safeguardingTriggered) {
+        setCurrentAlertId(data.safeguardingAlertId);
         setShowSafeguardingModal(true);
       }
 
       const buddyMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: data.response || "I'm here for you. Sometimes it helps to just talk.",
+        text: data.reply || "I'm here for you. Sometimes it helps to just talk.",
         sender: 'buddy',
         timestamp: new Date(),
       };
@@ -216,28 +258,6 @@ export default function UnifiedAIChat() {
       setShowEmailModal(false);
     } catch (error) {
       console.error('Error saving email:', error);
-    }
-  };
-
-  // Check staff availability for safeguarding
-  const checkStaffAvailability = async () => {
-    setIsCheckingAvailability(true);
-    try {
-      const [counsellorsRes, peersRes] = await Promise.all([
-        fetch(`${API_URL}/api/counsellors`),
-        fetch(`${API_URL}/api/peer-supporters`),
-      ]);
-      const counsellors = await counsellorsRes.json();
-      const peers = await peersRes.json();
-      
-      setAvailableStaff({
-        counsellors: counsellors.filter((c: any) => c.status === 'available'),
-        peers: peers.filter((p: any) => p.status === 'available'),
-      });
-    } catch (error) {
-      console.error('Error checking availability:', error);
-    } finally {
-      setIsCheckingAvailability(false);
     }
   };
 
@@ -488,6 +508,38 @@ export default function UnifiedAIChat() {
                 </Text>
                 
                 <ScrollView style={styles.safeguardingScroll} showsVerticalScrollIndicator={false}>
+                  {/* Talk to Someone Now - Always show, with availability status */}
+                  <TouchableOpacity
+                    style={[styles.safeguardingOption, { backgroundColor: '#dcfce7', borderColor: '#16a34a', borderWidth: 2 }]}
+                    onPress={handleConnectToStaff}
+                  >
+                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#16a34a', justifyContent: 'center', alignItems: 'center' }}>
+                      <FontAwesome5 name="comments" size={18} color="#ffffff" />
+                    </View>
+                    <View style={styles.safeguardingOptionContent}>
+                      <Text style={[styles.safeguardingOptionTitle, { color: '#16a34a' }]}>Talk to Someone Now</Text>
+                      <Text style={styles.safeguardingOptionDesc}>
+                        {isCheckingAvailability 
+                          ? 'Checking availability...'
+                          : staffAvailable
+                            ? (availableStaff.counsellors.length > 0 && availableStaff.peers.length > 0 
+                                ? 'Counsellor & peer supporter available'
+                                : availableStaff.counsellors.length > 0 
+                                  ? 'Counsellor available now'
+                                  : 'Peer supporter available now')
+                            : 'Connect with our support team'}
+                      </Text>
+                    </View>
+                    {staffAvailable && (
+                      <View style={{ backgroundColor: '#16a34a', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
+                        <Text style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>LIVE</Text>
+                      </View>
+                    )}
+                    {!staffAvailable && !isCheckingAvailability && (
+                      <FontAwesome5 name="chevron-right" size={16} color="#16a34a" />
+                    )}
+                  </TouchableOpacity>
+
                   <TouchableOpacity
                     style={styles.safeguardingOption}
                     onPress={() => setSafeguardingView('callback')}
@@ -498,30 +550,6 @@ export default function UnifiedAIChat() {
                       <Text style={styles.safeguardingOptionDesc}>Leave your number, we'll call you</Text>
                     </View>
                     <FontAwesome5 name="chevron-right" size={16} color={colors.textMuted} />
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity
-                    style={styles.safeguardingOption}
-                    onPress={() => Linking.openURL('tel:116123')}
-                  >
-                    <FontAwesome5 name="hands-helping" size={24} color="#16a34a" />
-                    <View style={styles.safeguardingOptionContent}>
-                      <Text style={styles.safeguardingOptionTitle}>Samaritans</Text>
-                      <Text style={styles.safeguardingOptionDesc}>Free 24/7 support: 116 123</Text>
-                    </View>
-                    <FontAwesome5 name="external-link-alt" size={14} color={colors.textMuted} />
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity
-                    style={styles.safeguardingOption}
-                    onPress={() => Linking.openURL('tel:08001381619')}
-                  >
-                    <FontAwesome5 name="user-shield" size={24} color="#7c3aed" />
-                    <View style={styles.safeguardingOptionContent}>
-                      <Text style={styles.safeguardingOptionTitle}>Combat Stress</Text>
-                      <Text style={styles.safeguardingOptionDesc}>Veterans helpline: 0800 138 1619</Text>
-                    </View>
-                    <FontAwesome5 name="external-link-alt" size={14} color={colors.textMuted} />
                   </TouchableOpacity>
                 </ScrollView>
 

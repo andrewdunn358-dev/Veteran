@@ -27,9 +27,22 @@ const RTC_CONFIG: RTCConfiguration = {
     // Google STUN servers (reliable)
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-    // Twilio STUN (backup)
-    { urls: 'stun:global.stun.twilio.com:3478' },
+    // OpenRelay free TURN servers
+    {
+      urls: 'turn:openrelay.metered.ca:80',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
   ],
   iceCandidatePoolSize: 10,
 };
@@ -265,8 +278,9 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
       audio.playsInline = true; // Required for mobile browsers
       audio.id = 'webrtc-remote-audio';
       
-      // Force speaker output on mobile (not earpiece)
-      (audio as any).setSinkId?.('default').catch(() => {});
+      // Note: Web browsers on mobile typically use the speaker by default
+      // True earpiece routing requires a native app with expo-av or react-native-incall-manager
+      // For privacy, users should use headphones when in public
       
       // Important: Don't hide the audio element on mobile as it can cause issues
       audio.style.position = 'fixed';

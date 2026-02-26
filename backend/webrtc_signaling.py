@@ -63,10 +63,14 @@ async def disconnect(sid):
             del user_to_socket[user_id]
         del connected_users[sid]
     
-    # End any active calls
+    # End any active calls and reset other party's status
     for call_id, call in list(active_calls.items()):
         if call['caller_sid'] == sid or call['callee_sid'] == sid:
             other_sid = call['callee_sid'] if call['caller_sid'] == sid else call['caller_sid']
+            # Reset the other party's status to available
+            if other_sid in connected_users:
+                connected_users[other_sid]['status'] = 'available'
+                logger.info(f"Reset status to available for {other_sid} after peer disconnect")
             await sio.emit('call_ended', {
                 'call_id': call_id,
                 'reason': 'peer_disconnected'
@@ -454,9 +458,13 @@ async def leave_chat_room(sid, data):
             if not active_chat_rooms[room_id]['participants']:
                 del active_chat_rooms[room_id]
         
-        # Clear room from user
+        # Clear room from user and reset status to available
         if sid in connected_users:
             connected_users[sid].pop('current_room', None)
+            # Reset status to available when leaving chat
+            if connected_users[sid].get('status') == 'in_chat':
+                connected_users[sid]['status'] = 'available'
+                logger.info(f"User {user_id} status reset to available after leaving chat")
         
         logger.info(f"User {user_id} left chat room {room_id}")
         
@@ -613,6 +621,24 @@ async def accept_chat_request(sid, data):
     
     # Create a chat room
     room_id = f"chat_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{staff_info.get('user_id', '')[:8]}"
+    
+    # Create the room in the database so the API can find it
+    try:
+        from server import db
+        room_doc = {
+            "id": room_id,
+            "user_session_id": requester_user_id,
+            "staff_id": staff_info.get('user_id'),
+            "staff_name": staff_info.get('name'),
+            "status": "active",
+            "request_type": staff_info.get('user_type'),
+            "created_at": datetime.utcnow().isoformat(),
+            "messages": []
+        }
+        await db.live_chat_rooms.insert_one(room_doc)
+        logger.info(f"Created chat room in database: {room_id}")
+    except Exception as e:
+        logger.error(f"Error creating chat room in database: {e}")
     
     # Update staff status
     connected_users[sid]['status'] = 'in_chat'

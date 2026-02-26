@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StatusBar, Linking, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StatusBar, Linking, ActivityIndicator, Platform, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 import { API_URL } from '../src/config/api';
+
+// Hugo's avatar URL
+const HUGO_AVATAR = 'https://static.prod-images.emergentagent.com/jobs/56155002-fa62-4b53-8fda-4baf701ab83f/images/6be1ae886e76d7b380a66ef3eb98c183e26882fe8e9897aab7e8a8ad4320acb9.png';
 
 interface Organization {
   id: string;
@@ -87,6 +90,37 @@ export default function Organizations() {
               UK organisations providing support to veterans. All services are confidential.
             </Text>
           </View>
+
+          {/* Hugo AI Buddy Card */}
+          <TouchableOpacity 
+            style={{ 
+              flexDirection: 'row', 
+              alignItems: 'center', 
+              backgroundColor: colors.card, 
+              borderRadius: 16, 
+              padding: 16, 
+              marginBottom: 20, 
+              borderWidth: 2, 
+              borderColor: '#10b981' 
+            }}
+            onPress={() => router.push('/chat/hugo')}
+            activeOpacity={0.8}
+          >
+            <Image 
+              source={{ uri: HUGO_AVATAR }} 
+              style={{ width: 56, height: 56, borderRadius: 28, marginRight: 14 }}
+            />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text }}>Chat with Hugo</Text>
+              <Text style={{ fontSize: 13, color: '#10b981', fontWeight: '600', marginTop: 2 }}>Self-Help & Wellness Guide</Text>
+              <Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 4 }}>
+                Daily habits, grounding techniques, finding your routine
+              </Text>
+            </View>
+            <View style={{ backgroundColor: '#10b981', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
+              <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>24/7</Text>
+            </View>
+          </TouchableOpacity>
 
           {/* Loading State */}
           {isLoading ? (
