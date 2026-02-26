@@ -6,32 +6,22 @@
  */
 
 // Configuration - STUN + TURN servers for NAT traversal
-// Multiple TURN providers for reliability - if one fails, others will work
 const WEBRTC_CONFIG = {
     iceServers: [
         // Google STUN servers
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        // Twilio free STUN
-        { urls: 'stun:global.stun.twilio.com:3478' },
-        // OpenRelay public TURN (no auth required)
+        // ExpressTURN - your account
         {
-            urls: 'turn:openrelay.metered.ca:80',
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
+            urls: 'turn:free.expressturn.com:3478',
+            username: '000000002087494108',
+            credential: 'VGqVfeznpN8ZxyueC6MSG71Sso8='
         },
         {
-            urls: 'turn:openrelay.metered.ca:443',
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
-        },
-        {
-            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
-        },
-        // Cloudflare public STUN
-        { urls: 'stun:stun.cloudflare.com:3478' }
+            urls: 'turn:free.expressturn.com:3478?transport=tcp',
+            username: '000000002087494108',
+            credential: 'VGqVfeznpN8ZxyueC6MSG71Sso8='
+        }
     ],
     iceCandidatePoolSize: 10,
     iceTransportPolicy: 'all'
