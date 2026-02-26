@@ -410,102 +410,125 @@ function setupLiveChatRequestListeners() {
         // Store the chat request data globally so we can link it to safeguarding alerts
         window.pendingChatRequest = data;
         
-        // Check if there's a safeguarding alert for this user - if so, link them
-        // Use the correct CSS class: .safeguarding-card (not .safeguarding-alert-card)
-        var safeguardingCards = document.querySelectorAll('.safeguarding-card');
-        var linkedToAlert = false;
-        
-        console.log('Found safeguarding cards:', safeguardingCards.length);
-        console.log('Incoming request data - session_id:', data.session_id, 'user_id:', data.user_id, 'alert_id:', data.alert_id);
-        
-        safeguardingCards.forEach(function(card) {
-            // Check if the alert is for the same user using data-session-id attribute
-            var cardSessionId = card.getAttribute('data-session-id') || '';
-            var incomingSessionId = data.session_id || '';  // Use the session_id from the request
-            var incomingUserId = data.user_id || '';
+        // Function to check for matching safeguarding alert
+        function checkForMatchingAlert() {
+            // Check if there's a safeguarding alert for this user - if so, link them
+            // Use the correct CSS class: .safeguarding-card (not .safeguarding-alert-card)
+            var safeguardingCards = document.querySelectorAll('.safeguarding-card');
+            var linkedToAlert = false;
             
-            console.log('Checking match - Card session:', cardSessionId, 'Request session:', incomingSessionId, 'User ID:', incomingUserId);
+            console.log('Found safeguarding cards:', safeguardingCards.length);
+            console.log('Incoming request data - session_id:', data.session_id, 'user_id:', data.user_id, 'alert_id:', data.alert_id);
             
-            // Try multiple matching strategies
-            var isMatch = false;
-            
-            // Strategy 1: Direct session ID match (most reliable)
-            if (cardSessionId && incomingSessionId && cardSessionId === incomingSessionId) {
-                isMatch = true;
-                console.log('Match via direct session ID');
-            }
-            // Strategy 2: Session ID contains match (e.g., "tommy-1234567890-abc" matches "tommy-1234567890-abc")
-            else if (cardSessionId && incomingSessionId) {
-                var cardParts = cardSessionId.split('-');
-                var sessionParts = incomingSessionId.split('-');
+            safeguardingCards.forEach(function(card) {
+                // Check if the alert is for the same user using data-session-id attribute
+                var cardSessionId = card.getAttribute('data-session-id') || '';
+                var incomingSessionId = data.session_id || '';  // Use the session_id from the request
+                var incomingUserId = data.user_id || '';
                 
-                // Check if character and timestamp match (first two parts)
-                if (cardParts.length >= 2 && sessionParts.length >= 2) {
-                    if (cardParts[0] === sessionParts[0] && cardParts[1] === sessionParts[1]) {
+                console.log('Checking match - Card session:', cardSessionId, 'Request session:', incomingSessionId, 'User ID:', incomingUserId);
+                
+                // Try multiple matching strategies
+                var isMatch = false;
+                
+                // Strategy 1: Direct session ID match (most reliable)
+                if (cardSessionId && incomingSessionId && cardSessionId === incomingSessionId) {
+                    isMatch = true;
+                    console.log('Match via direct session ID');
+                }
+                // Strategy 2: Session ID contains match (e.g., "tommy-1234567890-abc" matches "tommy-1234567890-abc")
+                else if (cardSessionId && incomingSessionId) {
+                    var cardParts = cardSessionId.split('-');
+                    var sessionParts = incomingSessionId.split('-');
+                    
+                    // Check if character and timestamp match (first two parts)
+                    if (cardParts.length >= 2 && sessionParts.length >= 2) {
+                        if (cardParts[0] === sessionParts[0] && cardParts[1] === sessionParts[1]) {
+                            isMatch = true;
+                            console.log('Match via character+timestamp');
+                        }
+                    }
+                    
+                    // Also check if one contains the other
+                    if (!isMatch && (cardSessionId.includes(incomingSessionId) || incomingSessionId.includes(cardSessionId))) {
                         isMatch = true;
-                        console.log('Match via character+timestamp');
+                        console.log('Match via contains');
+                    }
+                }
+                // Strategy 3: Fallback - match via user_id if it contains session parts
+                else if (cardSessionId && incomingUserId) {
+                    var cardParts = cardSessionId.split('-');
+                    var userParts = incomingUserId.split('_');
+                    
+                    if (userParts.length > 1 && cardSessionId.includes(userParts[1])) {
+                        isMatch = true;
+                        console.log('Match via user_id fallback');
+                    } else if (cardParts.length > 0 && incomingUserId.includes(cardParts[0])) {
+                        isMatch = true;
+                        console.log('Match via card_parts fallback');
                     }
                 }
                 
-                // Also check if one contains the other
-                if (!isMatch && (cardSessionId.includes(incomingSessionId) || incomingSessionId.includes(cardSessionId))) {
-                    isMatch = true;
-                    console.log('Match via contains');
+                if (isMatch) {
+                    console.log('Match found! Linking chat request to safeguarding alert');
+                    linkedToAlert = true;
+                    
+                    // Re-render the safeguarding alerts to show the indicator
+                    loadSafeguardingAlerts(false);
+                    
+                    // Scroll to the alert card
+                    setTimeout(function() {
+                        var updatedCard = document.querySelector('[data-alert-id="' + card.getAttribute('data-alert-id') + '"]');
+                        if (updatedCard) {
+                            updatedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 300);
+                    
+                    // Play alert sound
+                    playAlertSound();
+                    
+                    showNotification('User wants to chat! See the safeguarding alert below.', 'success');
                 }
-            }
-            // Strategy 3: Fallback - match via user_id if it contains session parts
-            else if (cardSessionId && incomingUserId) {
-                var cardParts = cardSessionId.split('-');
-                var userParts = incomingUserId.split('_');
-                
-                if (userParts.length > 1 && cardSessionId.includes(userParts[1])) {
-                    isMatch = true;
-                    console.log('Match via user_id fallback');
-                } else if (cardParts.length > 0 && incomingUserId.includes(cardParts[0])) {
-                    isMatch = true;
-                    console.log('Match via card_parts fallback');
-                }
-            }
+            });
             
-            if (isMatch) {
-                console.log('Match found! Linking chat request to safeguarding alert');
-                linkedToAlert = true;
-                
-                // Re-render the safeguarding alerts to show the indicator
-                loadSafeguardingAlerts(false);
-                
-                // Scroll to the alert card
-                setTimeout(function() {
-                    var updatedCard = document.querySelector('[data-alert-id="' + card.getAttribute('data-alert-id') + '"]');
-                    if (updatedCard) {
-                        updatedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }, 300);
-                
-                // Play alert sound
-                playAlertSound();
-                
-                showNotification('User wants to chat! See the safeguarding alert below.', 'success');
-            }
-        });
+            return linkedToAlert;
+        }
         
-        // If not linked to a safeguarding alert, show the banner
+        // First check - immediate
+        var linkedToAlert = checkForMatchingAlert();
+        
+        // If not linked yet, wait 1.5 seconds and try again (safeguarding alerts may be loading)
         if (!linkedToAlert) {
-            console.log('No matching safeguarding alert found, showing chat banner');
+            console.log('No immediate match - waiting for safeguarding alerts to load...');
             
-            // Check if there's already an urgent safeguarding alert modal open
-            var urgentModal = document.getElementById('urgent-alert-modal');
-            if (urgentModal) {
-                console.log('Safeguarding modal already open - storing request for later');
-                showNotification('User clicked "Talk to Someone" - use the Chat button in the alert', 'info');
-                return;
-            }
-            
-            // Play alert sound
-            playAlertSound();
-            
-            // Show notification banner
-            showIncomingChatRequestBanner(data);
+            setTimeout(function() {
+                // Check if pending request still exists (wasn't handled yet)
+                if (!window.pendingChatRequest || window.pendingChatRequest.request_id !== data.request_id) {
+                    console.log('Pending request no longer valid - skipping delayed check');
+                    return;
+                }
+                
+                // Try again
+                linkedToAlert = checkForMatchingAlert();
+                
+                if (!linkedToAlert) {
+                    console.log('Still no matching safeguarding alert found, showing chat banner');
+                    
+                    // Check if there's already an urgent safeguarding alert modal open
+                    var urgentModal = document.getElementById('urgent-alert-modal');
+                    if (urgentModal) {
+                        console.log('Safeguarding modal already open - storing request for later');
+                        showNotification('User clicked "Talk to Someone" - use the Chat button in the alert', 'info');
+                        return;
+                    }
+                    
+                    // Play alert sound
+                    playAlertSound();
+                    
+                    // Show notification banner
+                    showIncomingChatRequestBanner(data);
+                }
+            }, 1500);  // Wait 1.5 seconds for safeguarding alerts to potentially load
         }
     });
     
