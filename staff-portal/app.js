@@ -1058,11 +1058,29 @@ function renderSafeguardingAlerts(alerts) {
     container.innerHTML = alerts.map(function(alert) {
         // Check if there's a pending chat/call request for this user
         var pendingRequest = window.pendingChatRequest;
-        var hasPendingRequest = pendingRequest && pendingRequest.user_id && 
-            (alert.session_id && (
-                alert.session_id.includes(pendingRequest.user_id.split('_')[1] || '') || 
-                pendingRequest.user_id.includes((alert.session_id || '').split('-')[0])
-            ));
+        var hasPendingRequest = false;
+        
+        if (pendingRequest && pendingRequest.user_id && alert.session_id) {
+            var requestUserId = pendingRequest.user_id || '';
+            var alertSessionId = alert.session_id || '';
+            
+            // Try multiple matching strategies
+            // Strategy 1: Direct comparison
+            if (alertSessionId === requestUserId) {
+                hasPendingRequest = true;
+            }
+            // Strategy 2: Extract unique parts from session IDs
+            else {
+                var userParts = requestUserId.split('_');
+                var sessionParts = alertSessionId.split('-');
+                
+                if (userParts.length > 1 && alertSessionId.includes(userParts[1])) {
+                    hasPendingRequest = true;
+                } else if (sessionParts.length > 0 && requestUserId.includes(sessionParts[0])) {
+                    hasPendingRequest = true;
+                }
+            }
+        }
         
         // User request indicator (shown prominently at top of card)
         var userRequestHtml = '';
