@@ -202,6 +202,25 @@ export default function LiveChat() {
       setIsLoading(false);
     });
     
+    // Handle staff chat invite (when staff initiates chat from safeguarding alert)
+    socket.on('staff_chat_invite', (data) => {
+      console.log('Staff chat invite received:', data);
+      setStaffName(data.staff_name);
+      setIsConnected(true);
+      setIsLoading(false);
+      // Auto-accept the chat invite
+      if (data.room_id) {
+        setRoomId(data.room_id);
+      }
+      // Add system message
+      setMessages(prev => [...prev, {
+        id: `sys_${Date.now()}`,
+        text: `${data.staff_name} would like to chat with you`,
+        sender: 'system',
+        timestamp: new Date().toISOString()
+      }]);
+    });
+    
     // Note: WebRTC call handling is now done by the useWebRTCCall hook
     // The hook listens on its own socket connection for incoming_call, call_accepted, call_ended, etc.
   };
