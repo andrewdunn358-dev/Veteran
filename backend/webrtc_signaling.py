@@ -614,6 +614,24 @@ async def accept_chat_request(sid, data):
     # Create a chat room
     room_id = f"chat_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{staff_info.get('user_id', '')[:8]}"
     
+    # Create the room in the database so the API can find it
+    try:
+        from server import db
+        room_doc = {
+            "id": room_id,
+            "user_session_id": requester_user_id,
+            "staff_id": staff_info.get('user_id'),
+            "staff_name": staff_info.get('name'),
+            "status": "active",
+            "request_type": staff_info.get('user_type'),
+            "created_at": datetime.utcnow().isoformat(),
+            "messages": []
+        }
+        await db.live_chat_rooms.insert_one(room_doc)
+        logger.info(f"Created chat room in database: {room_id}")
+    except Exception as e:
+        logger.error(f"Error creating chat room in database: {e}")
+    
     # Update staff status
     connected_users[sid]['status'] = 'in_chat'
     
