@@ -1084,24 +1084,52 @@ function renderSafeguardingAlerts(alerts) {
         var pendingRequest = window.pendingChatRequest;
         var hasPendingRequest = false;
         
-        if (pendingRequest && pendingRequest.user_id && alert.session_id) {
+        if (pendingRequest && alert.session_id) {
+            var requestSessionId = pendingRequest.session_id || '';  // The session ID from the chat request
             var requestUserId = pendingRequest.user_id || '';
             var alertSessionId = alert.session_id || '';
             
+            console.log('renderSafeguardingAlerts - checking match:', {
+                requestSessionId: requestSessionId,
+                requestUserId: requestUserId,
+                alertSessionId: alertSessionId
+            });
+            
             // Try multiple matching strategies
-            // Strategy 1: Direct comparison
-            if (alertSessionId === requestUserId) {
+            // Strategy 1: Direct session ID match (most reliable)
+            if (requestSessionId && alertSessionId === requestSessionId) {
                 hasPendingRequest = true;
+                console.log('Match via direct session_id');
             }
-            // Strategy 2: Extract unique parts from session IDs
-            else {
+            // Strategy 2: Check if session IDs share the same character and timestamp
+            else if (requestSessionId && alertSessionId) {
+                var requestParts = requestSessionId.split('-');
+                var alertParts = alertSessionId.split('-');
+                
+                if (requestParts.length >= 2 && alertParts.length >= 2) {
+                    if (requestParts[0] === alertParts[0] && requestParts[1] === alertParts[1]) {
+                        hasPendingRequest = true;
+                        console.log('Match via character+timestamp');
+                    }
+                }
+                
+                // Also check contains
+                if (!hasPendingRequest && (alertSessionId.includes(requestSessionId) || requestSessionId.includes(alertSessionId))) {
+                    hasPendingRequest = true;
+                    console.log('Match via contains');
+                }
+            }
+            // Strategy 3: Fallback - match via user_id
+            else if (requestUserId && alertSessionId) {
                 var userParts = requestUserId.split('_');
                 var sessionParts = alertSessionId.split('-');
                 
                 if (userParts.length > 1 && alertSessionId.includes(userParts[1])) {
                     hasPendingRequest = true;
+                    console.log('Match via user_id fallback');
                 } else if (sessionParts.length > 0 && requestUserId.includes(sessionParts[0])) {
                     hasPendingRequest = true;
+                    console.log('Match via session_parts fallback');
                 }
             }
         }
