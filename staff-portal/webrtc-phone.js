@@ -264,6 +264,16 @@ async function startWebRTCConnection(createOffer) {
                             });
                         });
                     }
+                    // Also check inbound (receiving) stats
+                    if (peerConnection) {
+                        peerConnection.getStats().then(stats => {
+                            stats.forEach(report => {
+                                if (report.type === 'inbound-rtp' && report.kind === 'audio') {
+                                    console.log('Audio RECEIVING - bytes:', report.bytesReceived, 'packets:', report.packetsReceived, 'lost:', report.packetsLost || 0);
+                                }
+                            });
+                        });
+                    }
                 }, 3000);
             }
         });
