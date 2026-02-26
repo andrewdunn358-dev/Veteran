@@ -30,6 +30,11 @@ Build "Radio Check," a mental health and peer support application for veterans. 
 
 ### Session - February 26, 2025 (Latest)
 
+**Bug Fixes:**
+1. **Chat banner timing** - Added 1.5s delay before showing generic chat banner to allow safeguarding alerts to load first
+2. **Messages disappearing in chat** - Fixed by disabling polling when Socket.IO is connected (set `socketChatConnected` flag)
+3. **Call from safeguarding alert not working** - Fixed by checking `window.pendingChatRequest.user_id` first (which has the actual Socket.IO user ID), instead of using the AI chat session ID
+
 **Safeguarding Flow - Phase 2 Complete:**
 - ✅ Added `data-session-id` attribute to safeguarding alert cards in staff portal
 - ✅ Created `acceptPendingChatFromAlert` function for accepting chats from alert cards
@@ -40,7 +45,7 @@ Build "Radio Check," a mental health and peer support application for veterans. 
 - ✅ Improved matching logic between chat requests and safeguarding alerts using session IDs
 
 **Key Files Modified:**
-- `staff-portal/app.js` - renderSafeguardingAlerts, setupLiveChatRequestListeners, acceptPendingChatFromAlert
+- `staff-portal/app.js` - renderSafeguardingAlerts, setupLiveChatRequestListeners, acceptPendingChatFromAlert, initiateStaffCall, joinChatRoomSocket, leaveChatRoomSocket, startChatPolling
 - `staff-portal/styles.css` - Added user-request-indicator CSS
 - `frontend/app/chat/[characterId].tsx` - handleConnectToStaff passes sessionId
 - `frontend/app/unified-chat.tsx` - handleConnectToStaff passes sessionId
