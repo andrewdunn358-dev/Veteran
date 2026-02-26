@@ -221,19 +221,34 @@ async def call_accept(sid, data):
     call_id = data.get('call_id')
     
     if call_id not in active_calls:
+        logger.warning(f"Call accept failed: call {call_id} not found")
         await sio.emit('call_failed', {'reason': 'call_not_found'}, to=sid)
         return
     
     call = active_calls[call_id]
     
+    # Check if this socket is the callee by user_id (more reliable than sid which can change)
+    caller_info = connected_users.get(sid, {})
+    accepting_user_id = caller_info.get('user_id')
+    
+    # The callee could have reconnected with a new socket ID
+    # So we check if the user_id matches the callee_id
     if call['callee_sid'] != sid:
-        await sio.emit('call_failed', {'reason': 'not_authorized'}, to=sid)
-        return
+        # Socket ID changed - check if user_id matches
+        if accepting_user_id != call['callee_id']:
+            logger.warning(f"Call accept failed: user {accepting_user_id} is not the callee {call['callee_id']}")
+            await sio.emit('call_failed', {'reason': 'not_authorized'}, to=sid)
+            return
+        else:
+            # User reconnected - update the callee_sid to their new socket
+            logger.info(f"Callee socket changed from {call['callee_sid']} to {sid}")
+            call['callee_sid'] = sid
     
     call['status'] = 'accepted'
-    connected_users[sid]['status'] = 'in_call'
+    if sid in connected_users:
+        connected_users[sid]['status'] = 'in_call'
     
-    logger.info(f"Call accepted: {call_id}")
+    logger.info(f"Call accepted: {call_id} by {accepting_user_id}")
     
     # Notify caller to start WebRTC negotiation (they will create the offer)
     await sio.emit('call_accepted', {
