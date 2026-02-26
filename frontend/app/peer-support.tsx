@@ -60,6 +60,8 @@ export default function PeerSupport() {
   
   // Handle safeguarding call flow - auto-register and show waiting screen
   useEffect(() => {
+    if (!isMounted) return;
+    
     // For web, check window.location.search directly since useLocalSearchParams may not be ready
     let preferredType: string | undefined | null = params.preferredType;
     let alertIdParam: string | undefined | null = params.alertId;
@@ -101,7 +103,7 @@ export default function PeerSupport() {
         setWaitingMessage('Please stay on this screen to receive your call');
       }, 8000);
     }
-  }, []); // Run once on mount - params are checked via window.location
+  }, [isMounted]); // Run after mount and isMounted becomes true
   
   // Handle incoming call - auto-show when we receive one
   useEffect(() => {
