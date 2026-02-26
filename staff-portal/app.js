@@ -1617,7 +1617,10 @@ async function showLiveChatModal(roomId) {
         // Add modal to page
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         
-        // Start polling for new messages
+        // Join chat room via Socket.IO for real-time messaging
+        joinChatRoomSocket(roomId);
+        
+        // Also start polling as backup
         startChatPolling(roomId);
         
         // Focus input
@@ -1631,6 +1634,84 @@ async function showLiveChatModal(roomId) {
         console.error('Error opening chat:', error);
         showNotification('Failed to open chat', 'error');
     }
+}
+
+// Join chat room via Socket.IO
+function joinChatRoomSocket(roomId) {
+    // Use the WebRTC phone socket if available
+    if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket) {
+        console.log('Joining chat room via Socket.IO:', roomId);
+        
+        webRTCPhone.socket.emit('join_chat_room', {
+            room_id: roomId,
+            user_id: currentUser.id,
+            user_type: currentUser.role,
+            name: currentUser.name
+        });
+        
+        // Listen for incoming chat messages
+        webRTCPhone.socket.off('chat_message'); // Remove any existing listener
+        webRTCPhone.socket.on('chat_message', function(data) {
+            console.log('Received chat message via Socket.IO:', data);
+            if (data.room_id === currentChatRoom && data.sender_id !== currentUser.id) {
+                appendChatMessage(data.message, data.sender_name, data.sender_type, data.timestamp);
+            }
+        });
+        
+        // Listen for user joining
+        webRTCPhone.socket.off('user_joined_chat');
+        webRTCPhone.socket.on('user_joined_chat', function(data) {
+            console.log('User joined chat:', data);
+            if (data.room_id === currentChatRoom) {
+                showNotification(data.name + ' joined the chat', 'info');
+            }
+        });
+        
+        // Listen for user leaving
+        webRTCPhone.socket.off('user_left_chat');
+        webRTCPhone.socket.on('user_left_chat', function(data) {
+            console.log('User left chat:', data);
+            if (data.room_id === currentChatRoom) {
+                showNotification(data.name + ' left the chat', 'info');
+            }
+        });
+        
+    } else {
+        console.log('WebRTC socket not available, using polling only');
+    }
+}
+
+// Leave chat room via Socket.IO
+function leaveChatRoomSocket() {
+    if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket && currentChatRoom) {
+        webRTCPhone.socket.emit('leave_chat_room', {
+            room_id: currentChatRoom,
+            user_id: currentUser.id
+        });
+        
+        // Remove listeners
+        webRTCPhone.socket.off('chat_message');
+        webRTCPhone.socket.off('user_joined_chat');
+        webRTCPhone.socket.off('user_left_chat');
+    }
+}
+
+// Append a chat message to the UI
+function appendChatMessage(text, senderName, senderType, timestamp) {
+    var messagesDiv = document.getElementById('livechat-messages');
+    if (!messagesDiv) return;
+    
+    var isStaff = senderType === 'counsellor' || senderType === 'peer' || senderType === 'admin';
+    var displayName = isStaff ? senderName : 'User';
+    var time = timestamp ? new Date(timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
+    
+    messagesDiv.innerHTML += '<div class="chat-message ' + (isStaff ? 'staff' : 'user') + '">' +
+        '<span class="msg-sender">' + escapeHtml(displayName) + '</span>' +
+        '<span class="msg-text">' + escapeHtml(text) + '</span>' +
+        '<span class="msg-time">' + time + '</span>' +
+    '</div>';
+    
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
 // Handle Enter key in chat input
