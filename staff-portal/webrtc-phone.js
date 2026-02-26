@@ -12,26 +12,21 @@ const WEBRTC_CONFIG = {
         // Google STUN servers (reliable)
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        // Metered.ca free TURN servers (required for NAT traversal behind symmetric NATs)
+        // OpenRelay free TURN servers
         {
-            urls: 'turn:standard.relay.metered.ca:80',
-            username: 'e8dd65c92eb8e17532e90b5d',
-            credential: 'uWdWNmkhvyqTW1QC'
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
         },
         {
-            urls: 'turn:standard.relay.metered.ca:80?transport=tcp',
-            username: 'e8dd65c92eb8e17532e90b5d',
-            credential: 'uWdWNmkhvyqTW1QC'
+            urls: 'turn:openrelay.metered.ca:443',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
         },
         {
-            urls: 'turn:standard.relay.metered.ca:443',
-            username: 'e8dd65c92eb8e17532e90b5d',
-            credential: 'uWdWNmkhvyqTW1QC'
-        },
-        {
-            urls: 'turns:standard.relay.metered.ca:443?transport=tcp',
-            username: 'e8dd65c92eb8e17532e90b5d',
-            credential: 'uWdWNmkhvyqTW1QC'
+            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
         }
     ],
     iceCandidatePoolSize: 10
