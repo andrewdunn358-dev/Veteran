@@ -645,6 +645,63 @@ function dismissIncomingChatBanner() {
     if (banner) banner.remove();
 }
 
+// Show banner for incoming call request (when user chooses "Call a Supporter")
+function showIncomingCallRequestBanner(data) {
+    var existingBanner = document.getElementById('incoming-call-request-banner');
+    if (existingBanner) existingBanner.remove();
+    
+    var banner = document.createElement('div');
+    banner.id = 'incoming-call-request-banner';
+    banner.className = 'incoming-call-banner';
+    banner.innerHTML = 
+        '<div class="banner-content call-request">' +
+            '<i class="fas fa-phone-alt"></i>' +
+            '<div class="banner-text">' +
+                '<strong>' + escapeHtml(data.user_name || 'A veteran') + '</strong> wants to speak to someone' +
+                '<span class="banner-reason">They are ready to receive your call</span>' +
+            '</div>' +
+            '<div class="banner-actions">' +
+                '<button class="btn btn-success" onclick="callUserFromRequest(\'' + data.user_id + '\')">' +
+                    '<i class="fas fa-phone"></i> Call Now' +
+                '</button>' +
+                '<button class="btn btn-secondary" onclick="dismissIncomingCallBanner()">' +
+                    '<i class="fas fa-times"></i> Dismiss' +
+                '</button>' +
+            '</div>' +
+        '</div>';
+    
+    document.body.appendChild(banner);
+    
+    // Auto-dismiss after 60 seconds
+    setTimeout(function() {
+        dismissIncomingCallBanner();
+    }, 60000);
+}
+
+// Call user from incoming call request
+function callUserFromRequest(userId) {
+    if (!webRTCPhone || !webRTCPhone.isRegistered) {
+        showNotification('WebRTC phone not connected. Please wait...', 'error');
+        return;
+    }
+    
+    console.log('Calling user from request:', userId);
+    showNotification('Calling user...', 'info');
+    
+    // Initiate the call
+    makeOutboundCall(userId);
+    
+    // Dismiss the banner
+    dismissIncomingCallBanner();
+}
+
+// Dismiss incoming call request banner
+function dismissIncomingCallBanner() {
+    var banner = document.getElementById('incoming-call-request-banner');
+    if (banner) banner.remove();
+    window.pendingCallRequest = null;
+}
+
 // Update phone status in UI
 function updatePhoneStatusUI(status) {
     var statusEl = document.getElementById('phone-status');
