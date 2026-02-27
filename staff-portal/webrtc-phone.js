@@ -367,12 +367,17 @@ async function startWebRTCConnection(createOffer) {
         
         // Create offer if we're the initiator
         if (createOffer) {
+            console.log('=== CREATING WEBRTC OFFER ===');
+            console.log('Creating offer for call_id:', currentCallId);
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
+            console.log('Offer created, emitting webrtc_offer event');
+            console.log('Socket connected:', socket.connected);
             socket.emit('webrtc_offer', {
                 call_id: currentCallId,
                 offer: offer
             });
+            console.log('webrtc_offer event emitted');
         }
         
     } catch (error) {
