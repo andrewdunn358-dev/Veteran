@@ -5064,12 +5064,15 @@ class StaffJoinChat(BaseModel):
 @api_router.post("/live-chat/rooms/{room_id}/join")
 async def staff_join_live_chat(room_id: str, join_data: StaffJoinChat, current_user: User = Depends(get_current_user)):
     """Staff member joins a live chat room"""
+    logging.info(f"staff_join_live_chat: room_id={room_id}, staff_id={join_data.staff_id}")
+    
     if current_user.role not in ["admin", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Only staff can join chat rooms")
     
     # Check in-memory first
     if room_id in live_chat_rooms:
         room = live_chat_rooms[room_id]
+        logging.info(f"staff_join_live_chat: Found room in memory")
         if room["staff_id"] and room["staff_id"] != join_data.staff_id:
             raise HTTPException(status_code=400, detail="Chat room already has a staff member assigned")
         
@@ -5082,8 +5085,20 @@ async def staff_join_live_chat(room_id: str, join_data: StaffJoinChat, current_u
         {"$set": {"staff_id": join_data.staff_id, "staff_name": join_data.staff_name}}
     )
     
+    logging.info(f"staff_join_live_chat: DB update result - matched_count={result.matched_count}")
+    
     if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Chat room not found")
+        # Room not in DB yet - try to find it in memory and create if needed
+        logging.warning(f"staff_join_live_chat: Room {room_id} not found in DB, checking memory")
+        if room_id in live_chat_rooms:
+            # Room exists in memory but not DB - insert it
+            logging.info(f"staff_join_live_chat: Found in memory, inserting to DB")
+            room_doc = live_chat_rooms[room_id].copy()
+            room_doc["staff_id"] = join_data.staff_id
+            room_doc["staff_name"] = join_data.staff_name
+            await db.live_chat_rooms.insert_one(room_doc)
+        else:
+            raise HTTPException(status_code=404, detail="Chat room not found")
     
     logging.info(f"Staff {join_data.staff_name} joined chat room: {room_id}")
     
