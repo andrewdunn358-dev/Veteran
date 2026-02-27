@@ -85,9 +85,14 @@ export default function LiveChat() {
       console.log('Socket connected:', socket.id);
       setIsConnected(true);
       
+      // Use sessionId for registration if available (for safeguarding flow matching)
+      // This ensures the user_id used for registration matches what's sent in request_human_chat
+      const registrationId = sessionId || userId;
+      console.log('Registering with user_id:', registrationId);
+      
       // Register as a user
       socket.emit('register', {
-        user_id: userId,
+        user_id: registrationId,
         user_type: 'user',
         name: userName,
         status: 'available'
