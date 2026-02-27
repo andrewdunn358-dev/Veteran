@@ -2224,19 +2224,30 @@ function joinChatRoomSocket(roomId) {
         // Listen for user leaving
         webRTCPhone.socket.off('user_left_chat');
         webRTCPhone.socket.on('user_left_chat', function(data) {
-            console.log('User left chat:', data);
-            console.log('currentChatRoom:', currentChatRoom);
-            console.log('Match check:', data.room_id === currentChatRoom);
-            
-            // Show notification if in the same room OR if we have an active chat modal open
-            var chatModalOpen = document.getElementById('livechat-modal') !== null;
-            if (data.room_id === currentChatRoom || chatModalOpen) {
-                var userName = data.user_name || data.name || 'User';
-                var reason = data.reason === 'disconnected' ? ' (disconnected)' : '';
-                showNotification(userName + ' has left the chat' + reason, 'warning');
+            try {
+                console.log('User left chat:', data);
+                console.log('currentChatRoom:', currentChatRoom);
+                console.log('Match check:', data.room_id === currentChatRoom);
                 
-                // Add system message to chat
-                appendSystemMessage(userName + ' has left the chat' + reason);
+                // Show notification if in the same room OR if we have an active chat modal open
+                var chatModalOpen = document.getElementById('livechat-modal') !== null;
+                console.log('Chat modal open:', chatModalOpen);
+                
+                if (data.room_id === currentChatRoom || chatModalOpen) {
+                    var userName = data.user_name || data.name || 'User';
+                    var reason = data.reason === 'disconnected' ? ' (disconnected)' : '';
+                    console.log('Showing notification for:', userName + reason);
+                    showNotification(userName + ' has left the chat' + reason, 'warning');
+                    
+                    // Add system message to chat
+                    console.log('Appending system message...');
+                    appendSystemMessage(userName + ' has left the chat' + reason);
+                    console.log('System message appended');
+                } else {
+                    console.log('NOT showing notification - room mismatch and no modal');
+                }
+            } catch (err) {
+                console.error('Error in user_left_chat handler:', err);
             }
         });
         
