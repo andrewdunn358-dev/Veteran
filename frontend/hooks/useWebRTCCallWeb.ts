@@ -436,27 +436,44 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
   const handleOffer = async (offer: RTCSessionDescriptionInit) => {
     if (Platform.OS !== 'web') return;
     
+    console.log('WebRTC handleOffer: Starting to process offer');
+    console.log('WebRTC handleOffer: Existing peerConnection:', !!peerConnectionRef.current);
+    
     if (!peerConnectionRef.current) {
+      console.log('WebRTC handleOffer: No peer connection, creating one...');
       await startWebRTCConnection(false);
     }
     
-    await peerConnectionRef.current?.setRemoteDescription(new RTCSessionDescription(offer));
-    hasRemoteDescriptionRef.current = true;
-    console.log('WebRTC: Remote description set (offer)');
-    
-    // Process pending ICE candidates
-    await processPendingIceCandidates();
-    
-    const answer = await peerConnectionRef.current?.createAnswer();
-    await peerConnectionRef.current?.setLocalDescription(answer);
-    
-    socketRef.current?.emit('webrtc_answer', {
-      call_id: currentCallIdRef.current,
-      answer: answer,
-    });
-    
-    setCallState('connected');
-    startCallTimer();
+    try {
+      console.log('WebRTC handleOffer: Setting remote description...');
+      await peerConnectionRef.current?.setRemoteDescription(new RTCSessionDescription(offer));
+      hasRemoteDescriptionRef.current = true;
+      console.log('WebRTC handleOffer: Remote description set (offer)');
+      
+      // Process pending ICE candidates
+      await processPendingIceCandidates();
+      
+      console.log('WebRTC handleOffer: Creating answer...');
+      const answer = await peerConnectionRef.current?.createAnswer();
+      console.log('WebRTC handleOffer: Answer created, setting local description...');
+      await peerConnectionRef.current?.setLocalDescription(answer);
+      
+      console.log('WebRTC handleOffer: Sending answer via socket...');
+      console.log('WebRTC handleOffer: Socket connected:', socketRef.current?.connected);
+      console.log('WebRTC handleOffer: Call ID:', currentCallIdRef.current);
+      
+      socketRef.current?.emit('webrtc_answer', {
+        call_id: currentCallIdRef.current,
+        answer: answer,
+      });
+      
+      console.log('WebRTC handleOffer: Answer sent successfully!');
+      
+      setCallState('connected');
+      startCallTimer();
+    } catch (err) {
+      console.error('WebRTC handleOffer: ERROR:', err);
+    }
   };
 
   const handleAnswer = async (answer: RTCSessionDescriptionInit) => {
