@@ -371,16 +371,25 @@ async def webrtc_answer(sid, data):
     call_id = data.get('call_id')
     answer = data.get('answer')
     
+    logger.info(f"=== WEBRTC ANSWER EVENT ===")
+    logger.info(f"webrtc_answer: Received from sid={sid}, call_id={call_id}")
+    logger.info(f"webrtc_answer: Answer type={answer.get('type') if answer else 'None'}")
+    
     if call_id not in active_calls:
+        logger.warning(f"webrtc_answer: Call {call_id} not found in active_calls")
         return
     
     call = active_calls[call_id]
     target_sid = call['callee_sid'] if call['caller_sid'] == sid else call['caller_sid']
     
+    logger.info(f"webrtc_answer: Forwarding from {sid} to target_sid={target_sid}")
+    
     await sio.emit('webrtc_answer', {
         'call_id': call_id,
         'answer': answer
     }, to=target_sid)
+    
+    logger.info(f"webrtc_answer: Answer forwarded successfully to {target_sid}")
 
 
 @sio.event
