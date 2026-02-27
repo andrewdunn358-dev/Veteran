@@ -86,36 +86,42 @@ export default function PeerSupport() {
       const registrationId = sessionIdParam || userId;
       register(registrationId, 'user', 'Veteran in need');
       
-      // After a short delay for registration, emit request_human_call to notify staff
-      // This ensures the user is registered and ready before staff tries to call
-      setTimeout(() => {
-        console.log('Emitting request_human_call to notify staff');
-        // Access the socket from the window (it's stored there by useWebRTCCall)
-        if (typeof window !== 'undefined' && (window as any).__webrtc_socket?.connected) {
-          (window as any).__webrtc_socket.emit('request_human_call', {
+      // Wait for socket to be connected before notifying staff
+      // This ensures the user is fully registered and can receive calls
+      const checkAndNotifyStaff = () => {
+        const socket = typeof window !== 'undefined' ? (window as any).__webrtc_socket : null;
+        if (socket?.connected) {
+          console.log('Socket connected! Emitting request_human_call to notify staff');
+          console.log('User socket ID:', socket.id);
+          socket.emit('request_human_call', {
             user_id: registrationId,
             user_name: 'Veteran in need',
             session_id: sessionIdParam || '',
             alert_id: alertIdParam || ''
           });
           setWaitingMessage('Request sent - a supporter will call you shortly...');
+          return true;
         }
-      }, 2000);
+        return false;
+      };
       
-      // Start pulse animation
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1.2, duration: 1000, useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
-        ])
-      ).start();
-      
-      // Update waiting message after a few seconds
-      setTimeout(() => {
-        if (isWaitingForSupport) {
-          setWaitingMessage('Please stay on this screen to receive your call');
+      // Try immediately, then retry every 500ms for up to 10 seconds
+      let attempts = 0;
+      const maxAttempts = 20;
+      const retryInterval = setInterval(() => {
+        attempts++;
+        console.log(`Checking socket connection (attempt ${attempts}/${maxAttempts})...`);
+        if (checkAndNotifyStaff() || attempts >= maxAttempts) {
+          clearInterval(retryInterval);
+          if (attempts >= maxAttempts) {
+            console.warn('Socket connection timed out, request may not have been sent');
+            setWaitingMessage('Connection issue - please try again');
+          }
         }
-      }, 8000);
+      }, 500);
+      
+      // Cleanup interval on unmount
+      return () => clearInterval(retryInterval);
     }
   }, [isMounted]); // Run after mount and isMounted becomes true
   
