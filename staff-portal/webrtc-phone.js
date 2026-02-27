@@ -206,6 +206,15 @@ function setupSocketHandlers() {
         updatePhoneStatus('online', 'Ready for calls');
     });
     
+    // WebRTC error
+    socket.on('webrtc_error', (data) => {
+        console.error('=== WEBRTC ERROR ===');
+        console.error('WebRTC error:', data);
+        showNotification(data.message || 'WebRTC connection error', 'error');
+        cleanupCall();
+        updatePhoneStatus('online', 'Ready for calls');
+    });
+    
     // WebRTC signaling
     socket.on('webrtc_offer', async (data) => {
         console.log('Received WebRTC offer');
