@@ -17,6 +17,9 @@ Build "Radio Check," a mental health and peer support application for veterans. 
 │   └── routers/            # Modularized route handlers
 ├── frontend/               # Expo/React Native web app
 │   ├── app/                # App screens
+│   │   ├── staff-webview.tsx   # WebView for staff portal (mobile)
+│   │   ├── admin-webview.tsx   # WebView for admin portal (mobile)
+│   │   └── portal.tsx          # Routes based on role
 │   ├── hooks/              # useWebRTCCallWeb.ts for calls
 │   └── public/images/      # Local avatar images
 ├── staff-portal/           # Static HTML/JS (hosted on 20i)
@@ -25,6 +28,22 @@ Build "Radio Check," a mental health and peer support application for veterans. 
 │   └── styles.css
 └── admin-site/             # Static admin portal (20i)
 ```
+
+## Mobile App Architecture (WebView Approach)
+
+When staff/admin login to the mobile app:
+```
+Login → Check Role
+├── role = 'user'      → Native veteran screens (home, AI chat, etc.)
+├── role = 'counsellor'/'peer' → WebView loads staff.radiocheck.me
+└── role = 'admin'     → WebView loads admin.radiocheck.me
+```
+
+**Benefits:**
+- Single app for veterans and staff
+- Reuses existing portal code
+- Auto-login via token injection
+- Native header with refresh/logout
 
 ## New Call/Chat Flow (Fixed)
 
