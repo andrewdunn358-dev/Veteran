@@ -59,6 +59,18 @@ async def disconnect(sid):
     # Clean up user from tracking
     if sid in connected_users:
         user_id = connected_users[sid].get('user_id')
+        current_room = connected_users[sid].get('current_room')
+        
+        # Notify chat room if user was in one
+        if current_room:
+            logger.info(f"User {user_id} disconnected while in chat room {current_room}")
+            await sio.emit('user_left_chat', {
+                'room_id': current_room,
+                'user_id': user_id,
+                'reason': 'disconnected',
+                'user_name': user_info.get('name', 'User') if user_info else 'User'
+            }, room=current_room)
+        
         if user_id and user_id in user_to_socket:
             del user_to_socket[user_id]
         del connected_users[sid]
