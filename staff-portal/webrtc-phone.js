@@ -141,13 +141,23 @@ function setupSocketHandlers() {
     
     // Call accepted - start WebRTC negotiation
     socket.on('call_accepted', async (data) => {
-        console.log('Call accepted:', data);
+        console.log('=== CALL ACCEPTED EVENT ===');
+        console.log('Call accepted data:', data);
+        console.log('Current call ID:', currentCallId);
+        console.log('is_callee:', data.is_callee);
         stopRingtone();
         
         // If we're the callee, we wait for the offer (don't create one)
         // If we're the caller, we create the offer
         const shouldCreateOffer = !data.is_callee;
-        await startWebRTCConnection(shouldCreateOffer);
+        console.log('Should create offer:', shouldCreateOffer);
+        
+        try {
+            await startWebRTCConnection(shouldCreateOffer);
+            console.log('WebRTC connection started, shouldCreateOffer:', shouldCreateOffer);
+        } catch (err) {
+            console.error('Error starting WebRTC connection:', err);
+        }
         
         // Update UI to show connecting state
         if (data.is_callee) {
