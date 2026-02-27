@@ -623,18 +623,28 @@ function showIncomingChatRequestBanner(data) {
 }
 
 // Accept incoming chat request
+// Accept incoming chat request
 function acceptIncomingChatRequest(requestId, userId) {
+    console.log('=== ACCEPT CHAT REQUEST ===');
+    console.log('acceptIncomingChatRequest called with requestId:', requestId, 'userId:', userId);
+    console.log('webRTCPhone defined:', typeof webRTCPhone !== 'undefined');
+    console.log('webRTCPhone.socket:', webRTCPhone?.socket);
+    console.log('webRTCPhone.socket.connected:', webRTCPhone?.socket?.connected);
+    
     if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket) {
-        console.log('Accepting chat request:', requestId, 'from user:', userId);
+        console.log('Emitting accept_chat_request event...');
         
         webRTCPhone.socket.emit('accept_chat_request', {
             request_id: requestId,
             user_id: userId
         });
         
+        console.log('accept_chat_request event emitted, waiting for chat_request_confirmed...');
+        
         dismissIncomingChatBanner();
         showNotification('Accepting chat request...', 'info');
     } else {
+        console.error('Socket not available!');
         showNotification('Socket not connected. Please refresh the page.', 'error');
     }
 }
