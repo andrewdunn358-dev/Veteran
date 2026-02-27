@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../src/context/AuthContext';
 
@@ -14,13 +14,21 @@ export default function PortalRouter() {
       } else {
         switch (user.role) {
           case 'admin':
-            router.replace('/admin');
+            // Use WebView for admin portal on mobile, redirect on web
+            if (Platform.OS === 'web') {
+              router.replace('/admin');
+            } else {
+              router.replace('/admin-webview');
+            }
             break;
           case 'counsellor':
-            router.replace('/counsellor-portal');
-            break;
           case 'peer':
-            router.replace('/peer-portal');
+            // Use WebView for staff portal on mobile, existing screens on web
+            if (Platform.OS === 'web') {
+              router.replace('/counsellor-portal');
+            } else {
+              router.replace('/staff-webview');
+            }
             break;
           default:
             router.replace('/login');
