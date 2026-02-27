@@ -50,26 +50,54 @@ Build "Radio Check," a mental health and peer support application for veterans. 
 
 ## What's Been Implemented
 
-### Session - February 27, 2025 (Current)
+### Session - February 27, 2025 (Latest - COMPREHENSIVE FIX)
 
-**Critical Bug Fix - Call ID Mismatch:**
-The call connection was failing because:
-1. Staff portal generated its own `call_id` locally in `makeOutboundCall()`
-2. Backend generated a DIFFERENT `call_id` in `call_initiate` handler
-3. Staff portal wasn't listening for `call_ringing` event to get the server's authoritative call_id
-4. WebRTC signaling used mismatched call IDs, causing offers to not be delivered
+**ROOT CAUSE ANALYSIS COMPLETE:**
 
-**Fixes Applied:**
-1. **Added `call_ringing` handler** to `webrtc-phone.js` - Staff portal now updates `currentCallId` with server's authoritative ID
-2. **Fixed socket initialization** in `useWebRTCCallWeb.ts` - Socket now recreates cleanly if disconnected (was just reconnecting without re-attaching listeners)
-3. **Improved socket wait logic** in `peer-support.tsx` - Now actively polls for socket connection before notifying staff (was using fixed 2s timeout)
-4. **Added extensive logging** to trace the call flow end-to-end
+The call connection was failing because of a **call_id mismatch**:
+1. Staff portal generates local `call_id` in `makeOutboundCall()`: `call_xxx_localTimestamp`
+2. Backend generates DIFFERENT `call_id` in `call_initiate`: `call_xxx_serverTimestamp`
+3. Backend sends `call_accepted` with server's `call_id`
+4. Staff portal's `call_accepted` handler was NOT updating `currentCallId`
+5. Staff sends `webrtc_offer` with WRONG `call_id`
+6. Backend can't find the call → **offer silently dropped**
+7. User never receives offer → **call hangs on "Connecting"**
+
+**COMPREHENSIVE FIXES APPLIED:**
+
+1. **CRITICAL FIX in `webrtc-phone.js` - `call_accepted` handler:**
+   - Now updates `currentCallId` from `data.call_id` (server's authoritative ID)
+   - This ensures WebRTC signaling uses the correct call ID
+
+2. **Added `call_ringing` handler** in `webrtc-phone.js`:
+   - Also updates `currentCallId` as a backup sync point
+
+3. **Added `webrtc_error` event handler** in `webrtc-phone.js`:
+   - Shows meaningful error message when WebRTC signaling fails
+
+4. **Enhanced `webrtc_offer` handler in backend:**
+   - Now logs all active call IDs when a mismatch occurs
+   - Emits `webrtc_error` back to sender so they know the offer failed
+   - Checks if target is still connected before forwarding
+
+5. **Fixed chat room collection** in `accept_chat_request`:
+   - Was inserting into `db.chat_rooms`
+   - Now inserts into `db.live_chat_rooms` AND `live_chat_rooms` dict
+   - Matches the API endpoints in `server.py`
+
+6. **Improved socket initialization** in `useWebRTCCallWeb.ts`:
+   - Now fully recreates socket if disconnected (was just reconnecting without re-attaching listeners)
+
+7. **Improved socket wait logic** in `peer-support.tsx`:
+   - Now polls every 500ms until socket is confirmed connected
+   - Was using fixed 2s timeout which could fail on slow connections
 
 **Key Files Modified:**
-- `staff-portal/webrtc-phone.js` - Added `call_ringing` handler, logging
-- `frontend/hooks/useWebRTCCallWeb.ts` - Fixed socket initialization, added logging
-- `frontend/app/peer-support.tsx` - Improved socket wait logic
-- `backend/webrtc_signaling.py` - Added detailed logging for `call_accept`, `webrtc_offer`, `webrtc_answer`
+- `staff-portal/webrtc-phone.js` - call_id sync fix, error handling
+- `staff-portal/app.js` - Added logging for chat acceptance flow
+- `frontend/hooks/useWebRTCCallWeb.ts` - Socket reconnection fix, logging
+- `frontend/app/peer-support.tsx` - Socket wait polling
+- `backend/webrtc_signaling.py` - Error handling, logging, chat room fix
 
 ### Session - February 26, 2025 (Previous)
 
