@@ -16,13 +16,15 @@ const SIPGATE_CONFIG = {
     token: '4ac9a5dd-abf8-46c1-91a6-78b42c9c9ad9',
     // Your Sipgate phone number - this phone will ring first
     callerNumber: '01670898443',
-    // Device ID (optional - can be found in Sipgate dashboard)
-    deviceId: null
+    // Device ID - will be auto-detected
+    deviceId: null,
+    // Available devices (populated on init)
+    devices: []
 };
 
 // State
 let sipgateState = {
-    isReady: true,
+    isReady: false,
     currentSessionId: null,
     isInCall: false
 };
