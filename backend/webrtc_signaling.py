@@ -499,6 +499,7 @@ async def join_chat_room(sid, data):
     # Update connected users with room info
     if sid in connected_users:
         connected_users[sid]['current_room'] = room_id
+        connected_users[sid]['name'] = name  # Store name for disconnect notification
     
     logger.info(f"User {name} ({user_id}) joined chat room {room_id}")
     
