@@ -2225,7 +2225,12 @@ function joinChatRoomSocket(roomId) {
         webRTCPhone.socket.off('user_left_chat');
         webRTCPhone.socket.on('user_left_chat', function(data) {
             console.log('User left chat:', data);
-            if (data.room_id === currentChatRoom) {
+            console.log('currentChatRoom:', currentChatRoom);
+            console.log('Match check:', data.room_id === currentChatRoom);
+            
+            // Show notification if in the same room OR if we have an active chat modal open
+            var chatModalOpen = document.getElementById('livechat-modal') !== null;
+            if (data.room_id === currentChatRoom || chatModalOpen) {
                 var userName = data.user_name || data.name || 'User';
                 var reason = data.reason === 'disconnected' ? ' (disconnected)' : '';
                 showNotification(userName + ' has left the chat' + reason, 'warning');
