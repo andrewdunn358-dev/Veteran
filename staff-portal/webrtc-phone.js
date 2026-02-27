@@ -908,9 +908,11 @@ window.webRTCPhone = {
     rejectCall: rejectCall,
     endCall: endCall,
     setAvailability: setAvailability,
+    cleanupCall: cleanupCall,  // Expose for manual cleanup
     isConnected: () => isRegistered,
     get isRegistered() { return isRegistered; },
-    get socket() { return socket; }  // Expose socket for live chat
+    get socket() { return socket; },  // Expose socket for live chat
+    get currentCallId() { return currentCallId; }  // Check if in call
 };
 
 // Also keep old name for compatibility
