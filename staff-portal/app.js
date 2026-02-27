@@ -433,17 +433,6 @@ async function initializeWebRTCPhone() {
             }, 2000);
         }
         
-        // Initialize SIP Phone for external calls (Sipgate)
-        try {
-            if (typeof initSIPPhone === 'function') {
-                console.log('Initializing Sipgate SIP Phone...');
-                initSIPPhone();
-            }
-        } catch (sipError) {
-            console.error('SIP Phone initialization failed:', sipError);
-            // Don't alert - SIP phone is optional/for testing
-        }
-        
     } catch (error) {
         console.error('WebRTC Phone initialization failed:', error);
         updatePhoneStatusUI('error');
