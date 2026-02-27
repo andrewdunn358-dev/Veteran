@@ -86,6 +86,14 @@ export default function PeerSupport() {
       const registrationId = sessionIdParam || userId;
       register(registrationId, 'user', 'Veteran in need');
       
+      // Start pulse animation
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.2, duration: 1000, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
+        ])
+      ).start();
+      
       // Wait for socket to be connected before notifying staff
       // This ensures the user is fully registered and can receive calls
       const checkAndNotifyStaff = () => {
@@ -119,6 +127,13 @@ export default function PeerSupport() {
           }
         }
       }, 500);
+      
+      // Update waiting message after a few seconds
+      setTimeout(() => {
+        if (isWaitingForSupport) {
+          setWaitingMessage('Please stay on this screen to receive your call');
+        }
+      }, 8000);
       
       // Cleanup interval on unmount
       return () => clearInterval(retryInterval);
