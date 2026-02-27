@@ -35,11 +35,80 @@ let sipUI = {};
 /**
  * Initialize Sipgate Click-to-Call
  */
-function initSIPPhone() {
+async function initSIPPhone() {
     console.log('Initializing Sipgate Click-to-Call...');
     setupSipgateUI();
-    updateSipgateStatus('online', 'Ready for external calls');
-    return true;
+    updateSipgateStatus('connecting', 'Connecting to Sipgate...');
+    
+    // Fetch available devices from Sipgate
+    try {
+        const devices = await fetchSipgateDevices();
+        
+        if (devices && devices.length > 0) {
+            SIPGATE_CONFIG.devices = devices;
+            // Use the first available device
+            SIPGATE_CONFIG.deviceId = devices[0].id;
+            console.log('Using device:', SIPGATE_CONFIG.deviceId, devices[0]);
+            sipgateState.isReady = true;
+            updateSipgateStatus('online', 'Ready for external calls');
+            populateDeviceSelector(devices);
+        } else {
+            console.warn('No devices found in Sipgate account');
+            updateSipgateStatus('error', 'No devices found');
+        }
+    } catch (error) {
+        console.error('Failed to fetch Sipgate devices:', error);
+        updateSipgateStatus('error', 'Connection failed: ' + error.message);
+    }
+    
+    return sipgateState.isReady;
+}
+
+/**
+ * Fetch available devices from Sipgate API
+ */
+async function fetchSipgateDevices() {
+    const response = await fetch(`${SIPGATE_CONFIG.apiUrl}/devices`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Basic ' + btoa(`${SIPGATE_CONFIG.tokenId}:${SIPGATE_CONFIG.token}`)
+        }
+    });
+    
+    if (!response.ok) {
+        throw new Error(`Failed to fetch devices: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('Sipgate devices:', data);
+    
+    // Filter for phone-type devices (extensions, phones)
+    return data.items || [];
+}
+
+/**
+ * Populate device selector dropdown
+ */
+function populateDeviceSelector(devices) {
+    const selector = document.getElementById('sip-device-selector');
+    if (!selector) return;
+    
+    selector.innerHTML = '';
+    devices.forEach(device => {
+        const option = document.createElement('option');
+        option.value = device.id;
+        option.textContent = `${device.alias || device.id} (${device.type})`;
+        if (device.id === SIPGATE_CONFIG.deviceId) {
+            option.selected = true;
+        }
+        selector.appendChild(option);
+    });
+    
+    selector.addEventListener('change', (e) => {
+        SIPGATE_CONFIG.deviceId = e.target.value;
+        console.log('Selected device:', SIPGATE_CONFIG.deviceId);
+    });
 }
 
 /**
