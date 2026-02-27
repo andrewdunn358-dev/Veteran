@@ -131,16 +131,22 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
   // Initialize socket connection
   const initializeSocket = useCallback(() => {
     if (Platform.OS !== 'web') return;
+    
+    console.log('WebRTC initializeSocket: Starting...');
+    console.log('WebRTC initializeSocket: socketRef.current exists:', !!socketRef.current);
+    console.log('WebRTC initializeSocket: socketRef.current?.connected:', socketRef.current?.connected);
+    
     if (socketRef.current?.connected) {
-      console.log('WebRTC: Socket already connected');
+      console.log('WebRTC: Socket already connected, socket ID:', socketRef.current.id);
       return;
     }
     
-    // Don't create duplicate sockets
+    // If socket exists but not connected, disconnect and recreate to ensure clean state
     if (socketRef.current) {
-      console.log('WebRTC: Socket exists but not connected, reconnecting...');
-      socketRef.current.connect();
-      return;
+      console.log('WebRTC: Socket exists but not connected, recreating for clean state...');
+      socketRef.current.removeAllListeners();
+      socketRef.current.disconnect();
+      socketRef.current = null;
     }
     
     // The backend URL already doesn't have /api suffix
