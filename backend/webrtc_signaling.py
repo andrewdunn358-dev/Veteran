@@ -345,10 +345,18 @@ async def webrtc_offer(sid, data):
     logger.info(f"=== WEBRTC OFFER EVENT ===")
     logger.info(f"webrtc_offer: Received from sid={sid}, call_id={call_id}")
     logger.info(f"webrtc_offer: Offer type={offer.get('type') if offer else 'None'}")
+    logger.info(f"webrtc_offer: Active calls: {list(active_calls.keys())}")
     
     if call_id not in active_calls:
-        logger.warning(f"webrtc_offer: Call {call_id} not found in active_calls")
-        logger.warning(f"webrtc_offer: Available calls: {list(active_calls.keys())}")
+        logger.error(f"webrtc_offer: CRITICAL - Call {call_id} not found in active_calls!")
+        logger.error(f"webrtc_offer: Available call IDs: {list(active_calls.keys())}")
+        logger.error(f"webrtc_offer: This usually means call_id mismatch between client and server")
+        # Emit error back to sender so they know the offer failed
+        await sio.emit('webrtc_error', {
+            'error': 'call_not_found',
+            'call_id': call_id,
+            'message': 'Call ID not found on server. Please retry the call.'
+        }, to=sid)
         return
     
     call = active_calls[call_id]
@@ -356,6 +364,16 @@ async def webrtc_offer(sid, data):
     
     logger.info(f"webrtc_offer: Forwarding from {sid} to target_sid={target_sid}")
     logger.info(f"webrtc_offer: Is target in connected_users? {target_sid in connected_users}")
+    
+    if target_sid not in connected_users:
+        logger.error(f"webrtc_offer: Target {target_sid} not in connected_users!")
+        logger.error(f"webrtc_offer: Connected users: {list(connected_users.keys())}")
+        await sio.emit('webrtc_error', {
+            'error': 'peer_disconnected',
+            'call_id': call_id,
+            'message': 'The other party has disconnected.'
+        }, to=sid)
+        return
     
     await sio.emit('webrtc_offer', {
         'call_id': call_id,
