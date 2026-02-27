@@ -1294,9 +1294,8 @@ function renderSafeguardingAlerts(alerts) {
             actions = '<button class="btn btn-warning" onclick="acknowledgeSafeguardingAlert(\'' + alert.id + '\')"><i class="fas fa-hand-paper"></i> Acknowledge</button>';
         }
         
-        // Add contact buttons - Call (WebRTC) and Chat
-        actions += '<button class="btn btn-primary" onclick="initiateStaffChat(\'' + alert.id + '\', \'' + alert.session_id + '\')">' +
-            '<i class="fas fa-comments"></i> Chat with User</button>';
+        // Add contact buttons - Call (WebRTC) only
+        // Note: Chat button removed as it requires user to initiate chat request first
         actions += '<button class="btn btn-info" onclick="initiateStaffCall(\'' + alert.id + '\', \'' + alert.session_id + '\')">' +
             '<i class="fas fa-phone-alt"></i> Call User</button>';
         
