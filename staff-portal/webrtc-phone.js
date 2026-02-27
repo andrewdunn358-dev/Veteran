@@ -128,6 +128,17 @@ function setupSocketHandlers() {
         showIncomingCall(data.caller_name, data.call_type);
     });
     
+    // Call ringing - staff initiated call, server sends back the authoritative call_id
+    socket.on('call_ringing', (data) => {
+        console.log('Call ringing - server assigned call_id:', data);
+        // IMPORTANT: Update to the server's authoritative call_id
+        // This ensures WebRTC signaling uses the correct ID
+        if (data.call_id) {
+            console.log('Updating currentCallId from', currentCallId, 'to', data.call_id);
+            currentCallId = data.call_id;
+        }
+    });
+    
     // Call accepted - start WebRTC negotiation
     socket.on('call_accepted', async (data) => {
         console.log('Call accepted:', data);
