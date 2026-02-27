@@ -2233,21 +2233,35 @@ function joinChatRoomSocket(roomId) {
                 var chatModalOpen = document.getElementById('livechat-modal') !== null;
                 console.log('Chat modal open:', chatModalOpen);
                 
+                // Always show notification if room matches or modal is open
                 if (data.room_id === currentChatRoom || chatModalOpen) {
-                    var userName = data.user_name || data.name || 'User';
-                    var reason = data.reason === 'disconnected' ? ' (disconnected)' : '';
-                    console.log('Showing notification for:', userName + reason);
-                    showNotification(userName + ' has left the chat' + reason, 'warning');
+                    var userName = data.user_name || data.name || 'The user';
+                    var reason = '';
+                    if (data.reason === 'disconnected') {
+                        reason = ' (connection lost)';
+                    } else if (data.reason === 'left') {
+                        reason = '';
+                    }
                     
-                    // Add system message to chat
-                    console.log('Appending system message...');
-                    appendSystemMessage(userName + ' has left the chat' + reason);
-                    console.log('System message appended');
+                    var message = userName + ' has left the chat' + reason;
+                    console.log('Showing notification:', message);
+                    
+                    // Show notification
+                    showNotification(message, 'warning');
+                    
+                    // Add system message to chat window
+                    if (document.getElementById('livechat-messages')) {
+                        appendSystemMessage(message);
+                    }
+                    
+                    console.log('Notification shown successfully');
                 } else {
-                    console.log('NOT showing notification - room mismatch and no modal');
+                    console.log('NOT showing notification - no room match and no modal open');
                 }
             } catch (err) {
                 console.error('Error in user_left_chat handler:', err);
+                // Still try to show notification even if error
+                showNotification('User has left the chat', 'warning');
             }
         });
         
