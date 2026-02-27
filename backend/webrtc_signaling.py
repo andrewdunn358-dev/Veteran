@@ -743,8 +743,9 @@ async def accept_chat_request(sid, data):
     logger.info(f"accept_chat_request: Creating room {room_id}")
     
     # Create the room in the database so the API can find it
+    # IMPORTANT: Must use live_chat_rooms collection to match the API endpoints in server.py
     try:
-        from server import db
+        from server import db, live_chat_rooms
         room_doc = {
             "id": room_id,
             "user_session_id": requester_user_id,
@@ -755,8 +756,11 @@ async def accept_chat_request(sid, data):
             "created_at": datetime.utcnow().isoformat(),
             "messages": []
         }
-        await db.chat_rooms.insert_one(room_doc)
-        logger.info(f"Created chat room in database: {room_id}")
+        # Add to in-memory dict for immediate access
+        live_chat_rooms[room_id] = room_doc.copy()
+        # Also persist to database
+        await db.live_chat_rooms.insert_one(room_doc)
+        logger.info(f"Created chat room in database AND in-memory: {room_id}")
     except Exception as e:
         logger.error(f"Error creating chat room in database: {e}")
     
