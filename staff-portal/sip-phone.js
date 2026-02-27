@@ -228,12 +228,6 @@ function setupSipgateUI() {
             </div>
             
             <div class="sip-dial-section">
-                <div class="sip-device-row">
-                    <label for="sip-device-selector">Device:</label>
-                    <select id="sip-device-selector" class="sip-device-select">
-                        <option value="">Loading devices...</option>
-                    </select>
-                </div>
                 <div class="sip-input-group">
                     <input type="tel" id="sip-phone-number" placeholder="Enter phone number (e.g. 07911123456)" class="sip-phone-input">
                     <button id="sip-call-btn" class="btn btn-success" onclick="dialSipgateNumber()" disabled>
@@ -242,7 +236,7 @@ function setupSipgateUI() {
                 </div>
                 <div class="sip-how-it-works">
                     <i class="fas fa-info-circle"></i>
-                    <span>Click Call → Your selected device rings → Answer → Connected to destination</span>
+                    <span>Click Call → Your Sipgate phone rings → Answer → Connected to destination</span>
                 </div>
             </div>
             
@@ -282,8 +276,7 @@ function setupSipgateUI() {
         activeCall: document.getElementById('sip-active-call'),
         callNumber: document.getElementById('sip-call-number'),
         callTimer: document.getElementById('sip-call-timer'),
-        callHint: document.getElementById('sip-call-hint'),
-        deviceSelector: document.getElementById('sip-device-selector')
+        callHint: document.getElementById('sip-call-hint')
     };
     
     // Enter key to dial
