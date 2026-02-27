@@ -2226,7 +2226,12 @@ function joinChatRoomSocket(roomId) {
         webRTCPhone.socket.on('user_left_chat', function(data) {
             console.log('User left chat:', data);
             if (data.room_id === currentChatRoom) {
-                showNotification(data.name + ' left the chat', 'info');
+                var userName = data.user_name || data.name || 'User';
+                var reason = data.reason === 'disconnected' ? ' (disconnected)' : '';
+                showNotification(userName + ' has left the chat' + reason, 'warning');
+                
+                // Add system message to chat
+                appendSystemMessage(userName + ' has left the chat' + reason);
             }
         });
         
