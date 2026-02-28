@@ -798,6 +798,8 @@ async def create_approval_request(
         # Send email notification to CSO
         await send_cso_approval_notification(request_dict)
         
+        # Remove MongoDB _id before returning
+        request_dict.pop("_id", None)
         return request_dict
     except Exception as e:
         logging.error(f"Error creating approval request: {e}")
