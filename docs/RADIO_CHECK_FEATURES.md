@@ -166,6 +166,14 @@ Current AI Personas:
 | **User Notes** | Persistent user context | ✅ Live |
 | **Safeguarding Notes** | Alert resolution notes | ✅ Live |
 
+### Incident Reporting
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Report Incident** | Staff can log safety incidents | ✅ Live |
+| **Severity Levels** | Level 1/2/3 classification | ✅ Live |
+| **Automatic Notification** | Email sent to CSO/Admin | ✅ Live |
+| **Audit Trail** | All reports logged for compliance | ✅ Live |
+
 ---
 
 ## Admin Portal Features
