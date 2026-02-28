@@ -58,50 +58,30 @@ async def connect(sid, environ):
 
 @sio.event
 async def disconnect(sid):
-    """Handle disconnection"""
+    """Handle disconnection with grace period for reconnection"""
     logger.info(f"Client disconnected: {sid}")
     
     # Get user info before removing
     user_info = connected_users.get(sid)
     
-    # Clean up user from tracking
+    if not user_info:
+        logger.info(f"No user info found for disconnected sid: {sid}")
+        return
+    
+    user_id = user_info.get('user_id')
+    current_room = user_info.get('current_room')
+    user_type = user_info.get('user_type')
+    user_name = user_info.get('name', 'User')
+    
+    # Clean up from connected_users immediately
     if sid in connected_users:
-        user_id = connected_users[sid].get('user_id')
-        current_room = connected_users[sid].get('current_room')
-        user_type = connected_users[sid].get('user_type')
-        
-        # Notify chat room if user was in one
-        if current_room:
-            logger.info(f"User {user_id} (type: {user_type}) disconnected while in chat room {current_room}")
-            
-            user_name = user_info.get('name', 'User') if user_info else 'User'
-            
-            # Emit to the room
-            await sio.emit('user_left_chat', {
-                'room_id': current_room,
-                'user_id': user_id,
-                'reason': 'disconnected',
-                'user_name': user_name
-            }, room=current_room)
-            
-            # Also emit to all connected staff (in case they're not in the room)
-            # This is a backup to ensure staff see when users disconnect
-            if user_type == 'user':
-                for staff_sid, staff_info in connected_users.items():
-                    if staff_sid != sid and staff_info.get('user_type') in ['counsellor', 'peer', 'admin']:
-                        logger.info(f"Also notifying staff {staff_info.get('user_id')} about user disconnect")
-                        await sio.emit('user_left_chat', {
-                            'room_id': current_room,
-                            'user_id': user_id,
-                            'reason': 'disconnected',
-                            'user_name': user_name
-                        }, to=staff_sid)
-        
         if user_id and user_id in user_to_socket:
-            del user_to_socket[user_id]
+            # Only remove if this is the current socket for this user
+            if user_to_socket.get(user_id) == sid:
+                del user_to_socket[user_id]
         del connected_users[sid]
     
-    # End any active calls and reset other party's status
+    # End any active calls immediately (no grace period for calls)
     for call_id, call in list(active_calls.items()):
         if call['caller_sid'] == sid or call['callee_sid'] == sid:
             other_sid = call['callee_sid'] if call['caller_sid'] == sid else call['caller_sid']
@@ -115,12 +95,73 @@ async def disconnect(sid):
             }, to=other_sid)
             del active_calls[call_id]
     
-    # Notify others that staff member went offline
-    if user_info and user_info.get('user_type') in ['counsellor', 'peer']:
-        await sio.emit('staff_offline', {
-            'user_id': user_info['user_id'],
-            'name': user_info.get('name', 'Unknown')
-        })
+    # For chat room notifications, use a grace period to allow reconnection
+    if current_room:
+        logger.info(f"User {user_id} (type: {user_type}) disconnected while in chat room {current_room}")
+        logger.info(f"Starting {DISCONNECT_GRACE_PERIOD}s grace period before notifying...")
+        
+        # Cancel any existing pending disconnect for this user
+        if user_id in pending_disconnects:
+            pending_disconnects[user_id].cancel()
+            logger.info(f"Cancelled previous pending disconnect for {user_id}")
+        
+        # Create a delayed notification task
+        async def delayed_disconnect_notification():
+            try:
+                await asyncio.sleep(DISCONNECT_GRACE_PERIOD)
+                
+                # Check if user reconnected during grace period
+                if user_id in user_to_socket:
+                    logger.info(f"User {user_id} reconnected during grace period - not sending disconnect notification")
+                    return
+                
+                logger.info(f"Grace period expired - sending disconnect notification for {user_id}")
+                
+                # Emit to the room
+                await sio.emit('user_left_chat', {
+                    'room_id': current_room,
+                    'user_id': user_id,
+                    'reason': 'disconnected',
+                    'user_name': user_name
+                }, room=current_room)
+                
+                # Also emit to all connected staff (in case they're not in the room)
+                if user_type == 'user':
+                    for staff_sid, staff_info in connected_users.items():
+                        if staff_info.get('user_type') in ['counsellor', 'peer', 'admin']:
+                            logger.info(f"Notifying staff {staff_info.get('user_id')} about user disconnect")
+                            await sio.emit('user_left_chat', {
+                                'room_id': current_room,
+                                'user_id': user_id,
+                                'reason': 'disconnected',
+                                'user_name': user_name
+                            }, to=staff_sid)
+                
+                # Notify about staff going offline
+                if user_type in ['counsellor', 'peer']:
+                    await sio.emit('staff_offline', {
+                        'user_id': user_id,
+                        'name': user_name
+                    })
+                
+            except asyncio.CancelledError:
+                logger.info(f"Disconnect notification cancelled for {user_id} (user reconnected)")
+            finally:
+                # Clean up pending disconnect
+                if user_id in pending_disconnects:
+                    del pending_disconnects[user_id]
+        
+        # Start the delayed task
+        task = asyncio.create_task(delayed_disconnect_notification())
+        pending_disconnects[user_id] = task
+    
+    else:
+        # No chat room - just notify about staff going offline immediately
+        if user_type in ['counsellor', 'peer']:
+            await sio.emit('staff_offline', {
+                'user_id': user_id,
+                'name': user_name
+            })
 
 
 @sio.event
