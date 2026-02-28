@@ -993,6 +993,23 @@ body {
     background: linear-gradient(90deg, #fef3c7 0%, var(--bg-card) 15%);
 }
 
+/* Acknowledged state overrides risk level colors */
+.safeguarding-card.acknowledged,
+.safeguarding-card.risk-red.acknowledged,
+.safeguarding-card.risk-amber.acknowledged {
+    border-left-color: #16a34a !important;
+    background: linear-gradient(90deg, #dcfce7 0%, var(--bg-card) 15%) !important;
+}
+
+/* Resolved state */
+.safeguarding-card.resolved,
+.safeguarding-card.risk-red.resolved,
+.safeguarding-card.risk-amber.resolved {
+    border-left-color: #6b7280 !important;
+    background: linear-gradient(90deg, #f3f4f6 0%, var(--bg-card) 15%) !important;
+    opacity: 0.7;
+}
+
 .card-indicators {
     font-size: 12px;
     color: #dc2626;
