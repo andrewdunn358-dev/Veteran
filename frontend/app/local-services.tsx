@@ -148,25 +148,119 @@ export default function LocalServicesPage() {
   const [searchResult, setSearchResult] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nameSearchResults, setNameSearchResults] = useState<{ name: string; phone: string; url: string; region: string }[]>([]);
   
   const styles = createStyles(colors, theme);
 
+  // Search by organization name or town across all regions
+  const searchByName = (query: string): { name: string; phone: string; url: string; region: string }[] => {
+    const results: { name: string; phone: string; url: string; region: string }[] = [];
+    const lowerQuery = query.toLowerCase();
+    
+    // Search through all regional services
+    Object.entries(REGIONAL_SERVICES).forEach(([region, services]) => {
+      services.forEach(service => {
+        if (service.name.toLowerCase().includes(lowerQuery)) {
+          results.push({ ...service, region });
+        }
+      });
+    });
+    
+    // Also search national services
+    VETERAN_NHS_SERVICES.forEach(service => {
+      if (service.name.toLowerCase().includes(lowerQuery) || 
+          service.desc.toLowerCase().includes(lowerQuery)) {
+        results.push({ name: service.name, phone: service.phone, url: service.url, region: service.coverage });
+      }
+    });
+    
+    return results;
+  };
+
+  // Town/area to region mapping
+  const getRegionFromTown = (town: string): string | null => {
+    const lowerTown = town.toLowerCase();
+    
+    // North East towns
+    if (['durham', 'seaham', 'sunderland', 'newcastle', 'gateshead', 'hartlepool', 'middlesbrough', 'stockton', 'darlington', 'bishop auckland', 'peterlee', 'washington', 'south shields', 'north shields', 'whitley bay', 'tynemouth', 'consett', 'chester-le-street', 'houghton', 'easington'].some(t => lowerTown.includes(t))) {
+      return 'North East';
+    }
+    // North West towns
+    if (['manchester', 'liverpool', 'preston', 'blackpool', 'bolton', 'wigan', 'warrington', 'chester', 'carlisle', 'lancaster', 'blackburn', 'burnley', 'rochdale', 'oldham', 'stockport', 'salford'].some(t => lowerTown.includes(t))) {
+      return 'North West';
+    }
+    // Yorkshire towns
+    if (['leeds', 'sheffield', 'bradford', 'york', 'hull', 'doncaster', 'wakefield', 'huddersfield', 'halifax', 'barnsley', 'rotherham', 'scarborough', 'harrogate'].some(t => lowerTown.includes(t))) {
+      return 'Yorkshire';
+    }
+    // Midlands towns
+    if (['birmingham', 'nottingham', 'leicester', 'coventry', 'derby', 'stoke', 'wolverhampton', 'dudley', 'walsall', 'telford', 'lincoln', 'northampton'].some(t => lowerTown.includes(t))) {
+      return 'Midlands';
+    }
+    // London
+    if (['london', 'westminster', 'camden', 'islington', 'hackney', 'tower hamlets', 'greenwich', 'lewisham', 'southwark', 'lambeth', 'wandsworth', 'hammersmith', 'kensington', 'chelsea', 'brent', 'ealing', 'hounslow', 'richmond', 'kingston', 'croydon', 'bromley', 'bexley', 'havering', 'barking', 'redbridge', 'newham', 'walthamstow', 'enfield', 'barnet', 'haringey'].some(t => lowerTown.includes(t))) {
+      return 'London';
+    }
+    // South East towns
+    if (['brighton', 'southampton', 'portsmouth', 'reading', 'oxford', 'milton keynes', 'slough', 'guildford', 'maidstone', 'canterbury', 'dover', 'hastings', 'eastbourne', 'crawley', 'woking', 'basingstoke', 'winchester'].some(t => lowerTown.includes(t))) {
+      return 'South East';
+    }
+    // South West towns
+    if (['bristol', 'bath', 'exeter', 'plymouth', 'bournemouth', 'poole', 'swindon', 'gloucester', 'cheltenham', 'taunton', 'torquay', 'truro', 'penzance'].some(t => lowerTown.includes(t))) {
+      return 'South West';
+    }
+    // East of England towns
+    if (['cambridge', 'norwich', 'ipswich', 'peterborough', 'colchester', 'chelmsford', 'southend', 'luton', 'watford', 'stevenage', 'st albans', 'bedford'].some(t => lowerTown.includes(t))) {
+      return 'East of England';
+    }
+    // Wales
+    if (['cardiff', 'swansea', 'newport', 'wrexham', 'barry', 'neath', 'cwmbran', 'pontypool', 'llanelli', 'bridgend', 'caerphilly', 'merthyr', 'rhondda', 'aberdare', 'pontypridd'].some(t => lowerTown.includes(t))) {
+      return 'Wales';
+    }
+    // Scotland
+    if (['edinburgh', 'glasgow', 'aberdeen', 'dundee', 'inverness', 'perth', 'stirling', 'falkirk', 'ayr', 'kilmarnock', 'paisley', 'east kilbride', 'hamilton', 'motherwell', 'livingston', 'dunfermline', 'kirkcaldy'].some(t => lowerTown.includes(t))) {
+      return 'Scotland';
+    }
+    // Northern Ireland
+    if (['belfast', 'derry', 'londonderry', 'lisburn', 'newry', 'bangor', 'newtownabbey', 'craigavon', 'ballymena', 'newtownards', 'carrickfergus', 'coleraine', 'omagh', 'armagh', 'enniskillen'].some(t => lowerTown.includes(t))) {
+      return 'Northern Ireland';
+    }
+    
+    return null;
+  };
+
   const handleSearch = () => {
     if (!postcode.trim()) {
-      setError('Please enter a postcode');
+      setError('Please enter a postcode, town, or service name');
       return;
     }
     
     setIsSearching(true);
     setError(null);
+    setNameSearchResults([]);
     
-    // Simulate search delay
     setTimeout(() => {
-      const region = getRegionFromPostcode(postcode);
+      const query = postcode.trim();
+      
+      // First try postcode lookup
+      let region = getRegionFromPostcode(query);
+      
+      // If not a postcode, try town name
+      if (!region) {
+        region = getRegionFromTown(query);
+      }
+      
+      // Also search by organization name
+      const nameResults = searchByName(query);
+      
       if (region) {
         setSearchResult(region);
+        setNameSearchResults([]);
+      } else if (nameResults.length > 0) {
+        setSearchResult(null);
+        setNameSearchResults(nameResults);
       } else {
-        setError('Could not find services for this postcode. Try the national services below.');
+        setError('Could not find services. Try a postcode, town name, or organisation name.');
       }
       setIsSearching(false);
     }, 500);
