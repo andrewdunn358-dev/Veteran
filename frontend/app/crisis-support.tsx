@@ -247,14 +247,24 @@ export default function CrisisSupport() {
               <Text style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 20 }}>Local North East support with counselling, peer groups, housing and benefits help. Mon-Fri 9am-4pm.</Text>
             </View>
           </View>
-          <TouchableOpacity
-            style={{ flexDirection: 'row', backgroundColor: '#0891b2', borderRadius: 8, padding: 16, alignItems: 'center', justifyContent: 'center', gap: 8 }}
-            onPress={() => handleCall('01915815677')}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="call" size={24} color="#ffffff" />
-            <Text style={{ fontSize: 16, fontWeight: '600', color: '#ffffff' }}>0191 581 5677</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <TouchableOpacity
+              style={{ flex: 1, flexDirection: 'row', backgroundColor: '#0891b2', borderRadius: 8, padding: 16, alignItems: 'center', justifyContent: 'center', gap: 8 }}
+              onPress={() => handleCall('01915815677')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="call" size={24} color="#ffffff" />
+              <Text style={{ fontSize: 16, fontWeight: '600', color: '#ffffff' }}>0191 581 5677</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ flexDirection: 'row', backgroundColor: colors.surfaceHover, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderColor: colors.border }}
+              onPress={() => handleWebsite('https://www.eastdurhamveteranstrust.org.uk')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="globe-outline" size={18} color={colors.textSecondary} />
+              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textSecondary }}>Website</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* More Options Link */}
