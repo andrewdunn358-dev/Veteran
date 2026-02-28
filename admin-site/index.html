@@ -1015,6 +1015,243 @@
                 </div>
             </div>
 
+            <!-- Governance Tab - Clinical Safety & Compliance -->
+            <div id="governance-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2><i class="fas fa-balance-scale"></i> Clinical Safety Governance</h2>
+                    <p style="color: var(--text-secondary); margin-top: 5px;">DCB0129-aligned governance, hazard management, and CSO oversight</p>
+                </div>
+                
+                <!-- Governance Sub-tabs -->
+                <div class="governance-subtabs" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 15px;">
+                    <button class="btn btn-secondary btn-small governance-subtab active" data-subtab="hazards" onclick="showGovernanceSubtab('hazards')">
+                        <i class="fas fa-exclamation-triangle"></i> Hazard Register
+                    </button>
+                    <button class="btn btn-secondary btn-small governance-subtab" data-subtab="kpis" onclick="showGovernanceSubtab('kpis')">
+                        <i class="fas fa-chart-line"></i> Safeguarding KPIs
+                    </button>
+                    <button class="btn btn-secondary btn-small governance-subtab" data-subtab="incidents" onclick="showGovernanceSubtab('incidents')">
+                        <i class="fas fa-file-medical"></i> Incident Management
+                    </button>
+                    <button class="btn btn-secondary btn-small governance-subtab" data-subtab="moderation" onclick="showGovernanceSubtab('moderation')">
+                        <i class="fas fa-user-shield"></i> Peer Moderation
+                    </button>
+                    <button class="btn btn-secondary btn-small governance-subtab" data-subtab="approvals" onclick="showGovernanceSubtab('approvals')">
+                        <i class="fas fa-clipboard-check"></i> CSO Approvals
+                    </button>
+                </div>
+
+                <!-- Hazard Register Section -->
+                <div id="hazards-section" class="governance-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3><i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i> Hazard Register</h3>
+                        <div>
+                            <button class="btn btn-primary btn-small" onclick="openAddHazardModal()">
+                                <i class="fas fa-plus"></i> Add Hazard
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="loadHazards()">
+                                <i class="fas fa-sync"></i> Refresh
+                            </button>
+                            <button class="btn btn-outline btn-small" onclick="exportGovernanceData()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                        Track and manage identified risks to patient/user safety. Risk ratings are calculated automatically.
+                    </p>
+                    <div id="hazard-list" class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Hazard</th>
+                                    <th>Severity</th>
+                                    <th>Likelihood</th>
+                                    <th>Risk</th>
+                                    <th>Status</th>
+                                    <th>Owner</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hazards-tbody">
+                                <tr><td colspan="8" class="no-data">Loading hazards...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- KPIs Section -->
+                <div id="kpis-section" class="governance-section" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3><i class="fas fa-chart-line" style="color: #10b981;"></i> Safeguarding Performance KPIs</h3>
+                        <div>
+                            <select id="kpi-period" onchange="loadKPIs()" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);">
+                                <option value="7">Last 7 days</option>
+                                <option value="30" selected>Last 30 days</option>
+                                <option value="90">Last 90 days</option>
+                            </select>
+                            <button class="btn btn-secondary btn-small" onclick="loadKPIs()">
+                                <i class="fas fa-sync"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div id="kpi-cards" class="kpi-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <div class="kpi-card">
+                            <div class="kpi-label">Avg High-Risk Response</div>
+                            <div class="kpi-value" id="kpi-high-risk-time">--</div>
+                            <div class="kpi-target">Target: &lt; 15 min</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Avg Imminent Response</div>
+                            <div class="kpi-value" id="kpi-imminent-time">--</div>
+                            <div class="kpi-target">Target: &lt; 5 min</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">SLA Compliance</div>
+                            <div class="kpi-value" id="kpi-sla">--%</div>
+                            <div class="kpi-target">Target: &gt; 90%</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Total High-Risk Alerts</div>
+                            <div class="kpi-value" id="kpi-high-risk-count">--</div>
+                            <div class="kpi-target">Period total</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Total Imminent Alerts</div>
+                            <div class="kpi-value" id="kpi-imminent-count">--</div>
+                            <div class="kpi-target">Period total</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Medium Risk Alerts</div>
+                            <div class="kpi-value" id="kpi-medium-count">--</div>
+                            <div class="kpi-target">Period total</div>
+                        </div>
+                    </div>
+                    <div id="kpi-chart-container" style="margin-top: 30px; background: var(--bg-tertiary); padding: 20px; border-radius: 12px;">
+                        <h4 style="margin-bottom: 15px;">Risk Level Distribution</h4>
+                        <canvas id="kpi-risk-chart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Incidents Section -->
+                <div id="incidents-section" class="governance-section" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3><i class="fas fa-file-medical" style="color: #ef4444;"></i> Incident Management</h3>
+                        <div>
+                            <button class="btn btn-primary btn-small" onclick="openAddIncidentModal()">
+                                <i class="fas fa-plus"></i> New Incident
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="loadIncidents()">
+                                <i class="fas fa-sync"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div id="incidents-list" class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Incident #</th>
+                                    <th>Title</th>
+                                    <th>Level</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="incidents-tbody">
+                                <tr><td colspan="6" class="no-data">Loading incidents...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Peer Moderation Section -->
+                <div id="moderation-section" class="governance-section" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3><i class="fas fa-user-shield" style="color: #6366f1;"></i> Peer Moderation Queue</h3>
+                        <button class="btn btn-secondary btn-small" onclick="loadModerationQueue()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                        Review user reports and take moderation actions. All actions are logged for audit purposes.
+                    </p>
+                    <div id="moderation-queue" class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Report ID</th>
+                                    <th>Reported User</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="moderation-tbody">
+                                <tr><td colspan="6" class="no-data">No pending reports</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CSO Approvals Section -->
+                <div id="approvals-section" class="governance-section" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3><i class="fas fa-clipboard-check" style="color: #8b5cf6;"></i> CSO Approval Queue</h3>
+                        <button class="btn btn-secondary btn-small" onclick="loadCSOApprovals()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="cso-info" style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+                        <h4 style="color: #92400e; margin-bottom: 8px;"><i class="fas fa-user-md"></i> Clinical Safety Officer Responsibilities</h4>
+                        <ul style="color: #78350f; font-size: 14px; margin: 0; padding-left: 20px;">
+                            <li>Review and approve risk threshold changes</li>
+                            <li>Approve trigger list updates before deployment</li>
+                            <li>Review escalation rule modifications</li>
+                            <li>Sign off on annual safeguarding review</li>
+                            <li>Maintain and review the Hazard Log</li>
+                        </ul>
+                    </div>
+                    <div id="approvals-list" class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Request ID</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Requested By</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="approvals-tbody">
+                                <tr><td colspan="6" class="no-data">No pending approvals</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- CSO Sign-off Section -->
+                    <div class="cso-signoff" style="margin-top: 30px; padding: 20px; background: var(--bg-tertiary); border-radius: 12px; border: 2px solid var(--primary);">
+                        <h4 style="margin-bottom: 15px;"><i class="fas fa-signature"></i> CSO Sign-off</h4>
+                        <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                            As Clinical Safety Officer, I confirm that I have reviewed the current safeguarding systems and hazard register.
+                        </p>
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <input type="text" id="cso-name" placeholder="CSO Name" style="padding: 10px; border-radius: 6px; border: 1px solid var(--border); flex: 1; min-width: 200px;">
+                            <input type="text" id="cso-qualification" placeholder="Qualification (e.g., RMN, Psychologist)" style="padding: 10px; border-radius: 6px; border: 1px solid var(--border); flex: 1; min-width: 200px;">
+                            <button class="btn btn-primary" onclick="submitCSOSignoff()">
+                                <i class="fas fa-check"></i> Submit Sign-off
+                            </button>
+                        </div>
+                        <div id="last-signoff" style="margin-top: 15px; font-size: 13px; color: var(--text-secondary);">
+                            <!-- Will be populated with last sign-off info -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Settings Tab -->
             <div id="settings-tab" class="tab-content">
                 <div class="tab-header">
