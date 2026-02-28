@@ -224,6 +224,35 @@ The call connection was failing because of a **call_id mismatch**:
 
 ## Latest Update - December 28, 2025
 
+### Governance Email Notifications (COMPLETED)
+Implemented automatic email notifications for the governance system:
+
+**Email Triggers:**
+- **New Incident Created**: Emails sent to CSO + Admin based on severity
+  - Level 3 (Critical): Immediate notification to both
+  - Level 2 (High): Within-shift notification
+  - Level 1 (Moderate): Admin only
+- **CSO Approval Required**: Emails CSO when approval needed
+
+**Configuration:**
+- CSO Email: `admin@radiocheck.me` (configurable via Settings API)
+- Admin Email: `admin@radiocheck.me` (configurable via Settings API)
+- Domain verification required in Resend for email delivery
+
+**Settings Model Updated:**
+- Added `cso_email` field to `SiteSettings` model
+- All governance emails configurable via `/api/settings`
+
+### Documentation Updates (COMPLETED)
+- **Created**: `/app/docs/DEVELOPER_HANDOVER.md` - Comprehensive developer guide
+  - System architecture explanation
+  - All API router documentation
+  - WebRTC flow diagrams
+  - Database schema details
+  - Troubleshooting guide
+- **Updated**: `/app/docs/RADIO_CHECK_FEATURES.md` - Added governance features
+- **Updated**: `/app/docs/GOVERNANCE_OPERATIONS_GUIDE.md` - Email notification section
+
 ### Clinical Safety Governance Implementation (COMPLETED)
 Implemented comprehensive NHS DCB0129-aligned governance system:
 
