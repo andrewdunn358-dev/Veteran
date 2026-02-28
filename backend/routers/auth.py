@@ -380,14 +380,15 @@ async def admin_reset_password(data: AdminResetPassword, current_user: User = De
     
     # Check password history (last 3 passwords)
     password_history = user.get("password_history", [])
-    new_hash = hash_password(new_password)
     
     for old_hash in password_history[-3:]:
         try:
             if verify_password(new_password, old_hash):
                 raise HTTPException(status_code=400, detail="Cannot reuse any of your last 3 passwords")
-        except:
-            pass  # If hash comparison fails, skip
+        except HTTPException:
+            raise  # Re-raise HTTP exceptions
+        except Exception:
+            pass  # If hash comparison fails for other reasons, skip
     
     # Also check current password
     current_hash = user.get("hashed_password") or user.get("password_hash")
@@ -395,8 +396,13 @@ async def admin_reset_password(data: AdminResetPassword, current_user: User = De
         try:
             if verify_password(new_password, current_hash):
                 raise HTTPException(status_code=400, detail="Cannot reuse any of your last 3 passwords")
-        except:
-            pass
+        except HTTPException:
+            raise  # Re-raise HTTP exceptions
+        except Exception:
+            pass  # If hash comparison fails for other reasons, skip
+    
+    # Create new hash
+    new_hash = hash_password(new_password)
     
     # Update password history (keep last 3)
     if current_hash:
