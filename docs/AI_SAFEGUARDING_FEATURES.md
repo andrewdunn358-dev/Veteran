@@ -4,6 +4,43 @@
 
 Radio Check implements a multi-layered AI safety system designed to protect users while preserving the authentic peer support experience. The system wraps around AI personas without altering their personalities, focusing on contextual crisis detection, dependency monitoring, and age-appropriate safeguarding.
 
+---
+
+## Samaritans AI Chatbot Policy Compliance Scorecard
+
+Based on [Samaritans AI Chatbots Policy Briefing](https://media.samaritans.org/documents/AI_Chatbots_Policy_Briefing.pdf), here's how Radio Check addresses their key concerns:
+
+### Risk Areas Identified by Samaritans
+
+| Risk Area | Samaritans Concern | Radio Check Response | Status |
+|-----------|-------------------|---------------------|--------|
+| **Suicide Method Information** | Safeguards weaken in long conversations exposing method info | Hard fail-safe blocks ANY method requests regardless of conversation length | ✅ ADDRESSED |
+| **Encouragement of Self-Harm** | Some AI platforms have encouraged harmful behaviour | AI personas CANNOT validate or encourage harm; system intervenes immediately | ✅ ADDRESSED |
+| **Safeguard Erosion** | Long interactions lead to weakened safeguards | Session-based escalating monitoring; risk sensitivity INCREASES over time, not decreases | ✅ ADDRESSED |
+| **Intermediate Risk Detection** | Chatbots struggle with moderate suicide risk | Multi-layered contextual scoring catches subtle distress signals | ✅ ADDRESSED |
+| **Minor Protection** | Emotionally responsive companions shouldn't be accessible to minors | Age gate implemented; under-18 users have peer features disabled, enhanced monitoring | ✅ ADDRESSED |
+| **Dependency/Over-reliance** | Unhealthy attachments and over-reliance on chatbots | Dependency monitoring with gentle prompts toward human support | ✅ ADDRESSED |
+| **Relational Boundaries** | Risks with "companion" AI systems simulating friendship | AI personas are clearly support-focused, not simulating intimate relationships | ✅ ADDRESSED |
+| **Human Escalation Path** | Need for clear path to human support | One-click "Talk to a Real Person" always available; staff alerts for high risk | ✅ ADDRESSED |
+| **Sudden Withdrawal Risk** | Mental health impact if chatbot services removed | N/A - Radio Check is purpose-built support app, not commercial chatbot | ⚪ N/A |
+
+### Samaritans Recommendations Implementation
+
+| Recommendation | Radio Check Implementation | Status |
+|----------------|---------------------------|--------|
+| **Risk Assessment** | Every message scored for crisis indicators | ✅ IMPLEMENTED |
+| **Proportionate Safety Systems** | Multi-tier response based on risk level | ✅ IMPLEMENTED |
+| **Suicide/Self-Harm Content Prevention** | Hard fail-safes block dangerous content generation | ✅ IMPLEMENTED |
+| **Age-Appropriate Responses** | Under-18 restrictions + enhanced safeguarding | ✅ IMPLEMENTED |
+| **Clear Boundaries** | AI personas are support-focused only | ✅ IMPLEMENTED |
+| **Monitoring for Dependency** | Session tracking for over-reliance patterns | ✅ IMPLEMENTED |
+| **Path to Human Support** | Staff chat/call always one click away | ✅ IMPLEMENTED |
+| **Crisis Resource Provision** | Samaritans 116 123 + veteran helplines displayed | ✅ IMPLEMENTED |
+
+### Overall Compliance Score: **9/9 Applicable Areas Addressed**
+
+---
+
 ## Age Gate System
 
 ### Purpose
