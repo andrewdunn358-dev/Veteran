@@ -276,12 +276,19 @@ async def create_case(
             raise HTTPException(status_code=400, detail="Case already exists for this alert")
         
         # Create case record
+        # Map risk level from alert (uppercase) to case model (lowercase)
+        alert_risk = alert.get("risk_level", "moderate").lower()
+        if alert_risk not in ["low", "moderate", "high", "imminent"]:
+            # Map RED to high, AMBER to moderate
+            risk_map = {"red": "high", "amber": "moderate", "green": "low", "yellow": "moderate"}
+            alert_risk = risk_map.get(alert_risk, "moderate")
+        
         case = CaseRecord(
             session_id=alert.get("session_id", "unknown"),
             safeguarding_alert_id=request.safeguarding_alert_id,
             assigned_to=user_id,
             assigned_to_name=user_name,
-            current_risk=RiskLevel(alert.get("risk_level", "moderate").lower()),
+            current_risk=RiskLevel(alert_risk),
             ai_conversation=alert.get("conversation_history", [])
         )
         
