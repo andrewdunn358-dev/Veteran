@@ -91,6 +91,16 @@ Current AI Personas:
 | **Beta Survey** | Feedback collection | ✅ Live |
 | **Settings** | Preferences management | ✅ Live |
 
+### Age Gate System
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **DOB Collection** | First-time users enter date of birth | ✅ Live |
+| **Local Storage** | DOB stored on device only (privacy) | ✅ Live |
+| **Under-18 Detection** | Automatic age verification | ✅ Live |
+| **Feature Restrictions** | Peer matching disabled for minors | ✅ Live |
+| **Enhanced Safety** | 1.3x risk multiplier for under-18s | ✅ Live |
+| **Info Screen** | Friendly explanation of restrictions | ✅ Live |
+
 ---
 
 ## Staff Portal Features
