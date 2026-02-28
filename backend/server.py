@@ -48,6 +48,9 @@ from enhanced_safety_layer import (
     RiskLevel,
 )
 
+# Import governance router for clinical safety & compliance
+from governance_router import governance_router, set_db as set_governance_db
+
 # ============ RATE LIMITING & BOT PROTECTION ============
 
 # Rate limit configuration
