@@ -3327,3 +3327,180 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 2000);
 });
+
+
+// ============ SAFEGUARDING MONITOR FUNCTIONS ============
+
+function toggleSafeguardingMonitor() {
+    var monitor = document.getElementById('safeguarding-monitor');
+    if (monitor) {
+        var isVisible = monitor.style.display !== 'none';
+        monitor.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible) {
+            refreshMonitor();
+        }
+    }
+}
+
+async function refreshMonitor() {
+    try {
+        var response = await fetch(CONFIG.API_URL + '/api/safeguarding/monitor', {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load monitor data');
+        
+        var data = await response.json();
+        
+        var activityEl = document.getElementById('monitor-activity');
+        if (!activityEl) return;
+        
+        if (data.recent_alerts.length === 0) {
+            activityEl.innerHTML = '<p class="no-data">No recent alerts in the last 24 hours</p>';
+            return;
+        }
+        
+        var html = '<div class="activity-list">';
+        data.recent_alerts.forEach(function(alert) {
+            var levelClass = alert.risk_level.toLowerCase();
+            var triggers = alert.triggered_indicators.map(function(t) {
+                return '<span class="trigger-badge ' + t.level.toLowerCase() + '">' + t.indicator + ' (+' + t.weight + ')</span>';
+            }).join(' ');
+            
+            html += '<div class="activity-item ' + levelClass + '">';
+            html += '<div class="activity-header">';
+            html += '<span class="risk-badge ' + levelClass + '">' + alert.risk_level + '</span>';
+            html += '<span class="score">Score: ' + alert.score + '</span>';
+            html += '<span class="timestamp">' + new Date(alert.timestamp).toLocaleString() + '</span>';
+            html += '</div>';
+            html += '<div class="triggers">' + triggers + '</div>';
+            html += '</div>';
+        });
+        html += '</div>';
+        
+        activityEl.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Error refreshing monitor:', error);
+        showNotification('Failed to load monitor data', 'error');
+    }
+}
+
+async function testSafeguardingPhrase() {
+    var phraseInput = document.getElementById('test-phrase');
+    var resultEl = document.getElementById('test-result');
+    
+    if (!phraseInput || !phraseInput.value.trim()) {
+        showNotification('Please enter a phrase to test', 'warning');
+        return;
+    }
+    
+    try {
+        var response = await fetch(CONFIG.API_URL + '/api/safeguarding/test', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ phrase: phraseInput.value })
+        });
+        
+        if (!response.ok) throw new Error('Test failed');
+        
+        var data = await response.json();
+        
+        var levelClass = data.risk_level.toLowerCase();
+        var triggers = data.triggered_indicators.map(function(t) {
+            return '<span class="trigger-badge ' + t.level.toLowerCase() + '">' + t.indicator + ' (+' + t.weight + ')</span>';
+        }).join(' ');
+        
+        var html = '<div class="test-result-card ' + levelClass + '">';
+        html += '<div class="result-header">';
+        html += '<span class="risk-badge ' + levelClass + '">' + data.risk_level + '</span>';
+        html += '<span class="score">Score: ' + data.score + '</span>';
+        html += data.would_create_alert ? '<span class="alert-badge">Would create alert</span>' : '<span class="no-alert-badge">No alert</span>';
+        html += '</div>';
+        if (triggers) {
+            html += '<div class="triggers">' + triggers + '</div>';
+        } else {
+            html += '<p class="no-triggers">No triggers matched</p>';
+        }
+        html += '</div>';
+        
+        resultEl.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Error testing phrase:', error);
+        showNotification('Failed to test phrase', 'error');
+    }
+}
+
+async function loadTriggerPhrases() {
+    try {
+        var response = await fetch(CONFIG.API_URL + '/api/safeguarding/triggers', {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load triggers');
+        
+        var data = await response.json();
+        
+        var triggerEl = document.getElementById('trigger-phrases');
+        if (!triggerEl) return;
+        
+        var html = '';
+        
+        // RED indicators
+        html += '<div class="trigger-section red">';
+        html += '<h5>RED Indicators (' + data.red_indicators.triggers.length + ') - ' + data.red_indicators.threshold_info + '</h5>';
+        html += '<div class="trigger-pills">';
+        data.red_indicators.triggers.slice(0, 20).forEach(function(t) {
+            html += '<span class="trigger-pill red">' + t.phrase + ' (+' + t.weight + ')</span>';
+        });
+        if (data.red_indicators.triggers.length > 20) {
+            html += '<span class="more-badge">+' + (data.red_indicators.triggers.length - 20) + ' more</span>';
+        }
+        html += '</div></div>';
+        
+        // AMBER indicators
+        html += '<div class="trigger-section amber">';
+        html += '<h5>AMBER Indicators (' + data.amber_indicators.triggers.length + ') - ' + data.amber_indicators.threshold_info + '</h5>';
+        html += '<div class="trigger-pills">';
+        data.amber_indicators.triggers.slice(0, 20).forEach(function(t) {
+            html += '<span class="trigger-pill amber">' + t.phrase + ' (+' + t.weight + ')</span>';
+        });
+        if (data.amber_indicators.triggers.length > 20) {
+            html += '<span class="more-badge">+' + (data.amber_indicators.triggers.length - 20) + ' more</span>';
+        }
+        html += '</div></div>';
+        
+        // Modifiers
+        html += '<div class="trigger-section modifier">';
+        html += '<h5>Modifiers (' + data.modifiers.triggers.length + ') - ' + data.modifiers.threshold_info + '</h5>';
+        html += '<div class="trigger-pills">';
+        data.modifiers.triggers.forEach(function(t) {
+            html += '<span class="trigger-pill modifier">' + t.phrase + ' (+' + t.weight + ')</span>';
+        });
+        html += '</div></div>';
+        
+        // Scoring rules
+        html += '<div class="scoring-rules">';
+        html += '<h5>Scoring Rules</h5>';
+        html += '<ul>';
+        Object.entries(data.scoring_rules).forEach(function([level, rule]) {
+            html += '<li><span class="risk-badge ' + level.toLowerCase() + '">' + level + '</span> ' + rule + '</li>';
+        });
+        html += '</ul></div>';
+        
+        triggerEl.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Error loading triggers:', error);
+        showNotification('Failed to load trigger phrases', 'error');
+    }
+}
+
