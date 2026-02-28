@@ -3328,7 +3328,9 @@ async def get_settings():
     return settings or {
         "logo_url": None, 
         "site_name": "Veterans Support",
-        "peer_registration_notification_email": None
+        "peer_registration_notification_email": None,
+        "admin_notification_email": None,
+        "cso_email": None
     }
 
 @api_router.put("/settings")
