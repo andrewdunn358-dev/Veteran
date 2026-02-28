@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useWebRTCCall, formatCallDuration } from '../hooks/useWebRTCCallWeb';
 import { useTheme } from '../src/context/ThemeContext';
 import { API_URL } from '../src/config/api';
+import { useAgeGateContext, isFeatureAvailable } from '../src/context/AgeGateContext';
 
 interface PeerVeteran {
   id: string;
