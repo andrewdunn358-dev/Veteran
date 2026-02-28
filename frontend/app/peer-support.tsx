@@ -554,6 +554,109 @@ export default function PeerSupport() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'bottom']}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
       
+      {/* Age Restriction Screen - shown for under-18 users */}
+      {isAgeVerified && isUnder18 && !canMakePeerCalls && (
+        <View style={{ flex: 1, padding: 24, justifyContent: 'center', alignItems: 'center' }}>
+          {/* Header */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', position: 'absolute', top: 16, left: 0 }}>
+            <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginRight: 12 }}>
+              <Ionicons name="arrow-back" size={24} color={colors.textSecondary} />
+            </TouchableOpacity>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text }}>Peer Support</Text>
+          </View>
+          
+          <View style={{ alignItems: 'center', maxWidth: 340 }}>
+            <View style={{ 
+              width: 80, 
+              height: 80, 
+              borderRadius: 40, 
+              backgroundColor: '#fef3c7', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              marginBottom: 24
+            }}>
+              <Ionicons name="shield-checkmark" size={40} color="#f59e0b" />
+            </View>
+            
+            <Text style={{ 
+              fontSize: 22, 
+              fontWeight: '700', 
+              color: colors.text, 
+              textAlign: 'center',
+              marginBottom: 12
+            }}>
+              Extra Protection Active
+            </Text>
+            
+            <Text style={{ 
+              fontSize: 16, 
+              color: colors.textSecondary, 
+              textAlign: 'center',
+              lineHeight: 24,
+              marginBottom: 32
+            }}>
+              {getRestrictionMessage('direct_peer_calls')}
+            </Text>
+            
+            {/* Alternative Options */}
+            <View style={{ width: '100%', gap: 12 }}>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: colors.primary,
+                  borderRadius: 12,
+                  padding: 16,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8
+                }}
+                onPress={() => router.push('/home')}
+              >
+                <Ionicons name="chatbubbles" size={22} color="#ffffff" />
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#ffffff' }}>Chat with AI Battle Buddies</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#16a34a',
+                  borderRadius: 12,
+                  padding: 16,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8
+                }}
+                onPress={() => router.push('/crisis-support')}
+              >
+                <Ionicons name="call" size={22} color="#ffffff" />
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#ffffff' }}>Contact Support Staff</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={{
+                  backgroundColor: colors.card,
+                  borderRadius: 12,
+                  padding: 16,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  borderWidth: 1,
+                  borderColor: colors.border
+                }}
+                onPress={() => router.back()}
+              >
+                <Ionicons name="arrow-back" size={22} color={colors.textSecondary} />
+                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text }}>Go Back</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+      
+      {/* Main Content - only shown if not age-restricted */}
+      {(!isAgeVerified || !isUnder18 || canMakePeerCalls) && (
+        <>
       {/* Waiting for Support Screen - shown when user clicked "Call a Supporter" from safeguarding */}
       {isWaitingForSupport && !showCallModal && (
         <View style={[styles.waitingContainer, { backgroundColor: colors.background }]}>
