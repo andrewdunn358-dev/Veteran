@@ -412,5 +412,118 @@ Score Range    Risk Level    Action
 
 ---
 
-*Document Version: 2.0*
-*Last Updated: February 2026*
+*Document Version: 2.1*
+*Last Updated: December 2025*
+
+---
+
+## Clinical Safety Governance System
+
+### Overview
+
+NHS DCB0129-aligned governance infrastructure for clinical safety monitoring and compliance.
+
+### Hazard Register
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Pre-populated Hazards** | 7 core hazards (H1-H7) | ✅ Live |
+| **Risk Scoring** | Severity × Likelihood calculation | ✅ Live |
+| **Status Tracking** | Active/Mitigated/Under Review/Closed | ✅ Live |
+| **CSO Review** | Clinical Safety Officer sign-off | ✅ Live |
+| **Audit Trail** | All changes logged | ✅ Live |
+
+**Core Hazards:**
+| ID | Hazard | Severity |
+|----|--------|----------|
+| H1 | AI fails to detect suicidal ideation | Catastrophic |
+| H2 | AI over-escalates benign content | Minor |
+| H3 | Staff miss urgent alert | Major |
+| H4 | Under-18 falsely declares 18+ | Moderate |
+| H5 | Peer messaging abuse | Moderate |
+| H6 | System outage during crisis | Major |
+| H7 | AI safety drift after update | Major |
+
+### Safeguarding KPIs
+
+| Metric | Target | Description |
+|--------|--------|-------------|
+| High-risk response | < 15 mins | Time to staff acknowledgement |
+| Imminent risk response | < 5 mins | Time to user contact |
+| SLA compliance | > 90% | Cases within target times |
+| False positive rate | < 15% | Incorrectly escalated cases |
+
+### Incident Management
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Incident Logging** | Record safety events | ✅ Live |
+| **Severity Levels** | Level 1/2/3 classification | ✅ Live |
+| **Email Notifications** | Auto-notify CSO + Admin | ✅ Live |
+| **Investigation Workflow** | Open → Investigating → Resolved | ✅ Live |
+| **Resolution Tracking** | Document outcomes | ✅ Live |
+
+### Peer Moderation
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Report Queue** | User-submitted reports | ✅ Live |
+| **Action Options** | Warning/Suspend/Ban | ✅ Live |
+| **User Status** | Track warnings/suspensions | ✅ Live |
+| **Block Feature** | User-to-user blocking | ✅ Live |
+
+### CSO Approvals
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Approval Requests** | Changes requiring CSO sign-off | ✅ Live |
+| **Email Alerts** | Notify CSO of pending approvals | ✅ Live |
+| **Audit Trail** | All decisions logged | ✅ Live |
+
+**Changes Requiring CSO Approval:**
+- Risk threshold modifications
+- Trigger word updates
+- Escalation rule changes
+- Hazard closures
+- Annual safeguarding sign-off
+
+### Audit & Export
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Governance Audit Log** | All governance events recorded | ✅ Live |
+| **Data Export** | JSON export for compliance | ✅ Live |
+| **KPI Reports** | Period-based analytics | ✅ Live |
+| **Privacy Protection** | No chat content in exports | ✅ Live |
+
+### Email Notification System
+
+| Trigger | Recipients | Priority |
+|---------|------------|----------|
+| Level 3 Incident | CSO + Admin | Immediate |
+| Level 2 Incident | CSO + Admin | Within shift |
+| Level 1 Incident | Admin | Next review |
+| CSO Approval Request | CSO | Within 48 hours |
+
+**Configuration:**
+- CSO Email: Configurable via Admin Settings
+- Admin Email: Configurable via Admin Settings
+- Currently set to: `admin@radiocheck.me`
+
+---
+
+## Samaritans AI Policy Compliance
+
+Radio Check's AI safety system has been designed to align with the Samaritans' policy briefing on AI and suicide prevention.
+
+| Compliance Area | Status | Implementation |
+|-----------------|--------|----------------|
+| Refuse to provide harmful instructions | ✅ Complete | Hard-coded in AI prompts |
+| Avoid glorifying or romanticizing suicide | ✅ Complete | Prompt guardrails |
+| Redirect to crisis support | ✅ Complete | Auto-resources in responses |
+| Human escalation pathway | ✅ Complete | Safeguarding popup + staff |
+| Age-appropriate safeguards | ✅ Complete | Age gate + enhanced monitoring |
+| Session-aware monitoring | ✅ Complete | Multi-message trend analysis |
+| Dependency detection | ✅ Complete | Over-reliance warnings |
+| Audit logging | ✅ Complete | Governance audit system |
+| Qualified human oversight | ✅ Complete | CSO role + approval workflow |
