@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '../src/context/AuthContext';
 import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
 import { FavoritesProvider } from '../src/context/FavoritesContext';
+import { AgeGateProvider } from '../src/context/AgeGateContext';
 
 function AppContent() {
   const { theme, colors } = useTheme();
@@ -43,11 +44,13 @@ function AppContent() {
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <FavoritesProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-      </FavoritesProvider>
+      <AgeGateProvider>
+        <FavoritesProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </FavoritesProvider>
+      </AgeGateProvider>
     </ThemeProvider>
   );
 }
