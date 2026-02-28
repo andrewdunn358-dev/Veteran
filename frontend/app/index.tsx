@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAgeGateContext } from '../src/context/AgeGateContext';
+import AgeGateModal from '../src/components/AgeGateModal';
 
 // Local images
 const NEW_LOGO = require('../assets/images/logo.png');
@@ -17,6 +19,11 @@ export default function SplashScreen() {
   const router = useRouter();
   const [showCookieNotice, setShowCookieNotice] = useState(false);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [showAgeGateModal, setShowAgeGateModal] = useState(false);
+  const [hasCheckedModals, setHasCheckedModals] = useState(false);
+  
+  // Age gate context
+  const { isAgeVerified, isLoading: ageLoading, setDateOfBirth } = useAgeGateContext();
 
   const checkCookieConsent = async () => {
     try {
@@ -42,9 +49,19 @@ export default function SplashScreen() {
     }
   };
   
+  // Check if age gate should be shown after other modals are closed
+  useEffect(() => {
+    if (!ageLoading && !showCookieNotice && !showPermissionModal && hasCheckedModals) {
+      if (!isAgeVerified) {
+        setShowAgeGateModal(true);
+      }
+    }
+  }, [ageLoading, isAgeVerified, showCookieNotice, showPermissionModal, hasCheckedModals]);
+  
   useEffect(() => {
     checkCookieConsent();
     checkPermissions();
+    setHasCheckedModals(true);
   }, []);
 
   const handleAllowPermissions = async () => {
