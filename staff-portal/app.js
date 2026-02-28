@@ -3513,3 +3513,114 @@ async function loadTriggerPhrases() {
     }
 }
 
+
+// ============================================================================
+// INCIDENT REPORTING & GOVERNANCE
+// ============================================================================
+
+// Open Incident Report Modal
+function openIncidentReportModal() {
+    document.getElementById('incident-modal').style.display = 'flex';
+    document.getElementById('incident-title').value = '';
+    document.getElementById('incident-level').value = '';
+    document.getElementById('incident-description').value = '';
+    document.getElementById('incident-session').value = '';
+}
+
+// Close Incident Report Modal
+function closeIncidentModal() {
+    document.getElementById('incident-modal').style.display = 'none';
+}
+
+// Submit Incident Report
+async function submitIncidentReport() {
+    const title = document.getElementById('incident-title').value.trim();
+    const level = document.getElementById('incident-level').value;
+    const description = document.getElementById('incident-description').value.trim();
+    const sessionId = document.getElementById('incident-session').value.trim();
+    
+    if (!title || !level || !description) {
+        showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_URL}/api/governance/incidents`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: title,
+                level: level,
+                description: description,
+                related_session_id: sessionId || null
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to submit incident');
+        }
+        
+        const data = await response.json();
+        showNotification(`Incident ${data.incident_number} reported successfully`, 'success');
+        closeIncidentModal();
+        
+    } catch (error) {
+        console.error('Error submitting incident:', error);
+        showNotification('Failed to submit incident report', 'error');
+    }
+}
+
+// Open Peer Report Modal
+function openPeerReportModal() {
+    document.getElementById('peer-report-modal').style.display = 'flex';
+    document.getElementById('peer-reported-user').value = '';
+    document.getElementById('peer-report-reason').value = '';
+    document.getElementById('peer-report-details').value = '';
+}
+
+// Close Peer Report Modal
+function closePeerReportModal() {
+    document.getElementById('peer-report-modal').style.display = 'none';
+}
+
+// Submit Peer Report
+async function submitPeerReport() {
+    const reportedUser = document.getElementById('peer-reported-user').value.trim();
+    const reason = document.getElementById('peer-report-reason').value;
+    const details = document.getElementById('peer-report-details').value.trim();
+    
+    if (!reportedUser || !reason || !details) {
+        showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_URL}/api/governance/peer-reports`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                reported_user_id: reportedUser,
+                reporter_user_id: currentUser?.email || 'staff',
+                reason: reason,
+                details: details
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to submit report');
+        }
+        
+        showNotification('Peer concern reported successfully. Admin will review.', 'success');
+        closePeerReportModal();
+        
+    } catch (error) {
+        console.error('Error submitting peer report:', error);
+        showNotification('Failed to submit peer report', 'error');
+    }
+}
