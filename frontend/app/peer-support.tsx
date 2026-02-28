@@ -968,6 +968,8 @@ export default function PeerSupport() {
           </View>
         </View>
       </Modal>
+        </>
+      )}
     </SafeAreaView>
   );
 }
