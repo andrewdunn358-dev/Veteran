@@ -60,16 +60,34 @@ async def disconnect(sid):
     if sid in connected_users:
         user_id = connected_users[sid].get('user_id')
         current_room = connected_users[sid].get('current_room')
+        user_type = connected_users[sid].get('user_type')
         
         # Notify chat room if user was in one
         if current_room:
-            logger.info(f"User {user_id} disconnected while in chat room {current_room}")
+            logger.info(f"User {user_id} (type: {user_type}) disconnected while in chat room {current_room}")
+            
+            user_name = user_info.get('name', 'User') if user_info else 'User'
+            
+            # Emit to the room
             await sio.emit('user_left_chat', {
                 'room_id': current_room,
                 'user_id': user_id,
                 'reason': 'disconnected',
-                'user_name': user_info.get('name', 'User') if user_info else 'User'
+                'user_name': user_name
             }, room=current_room)
+            
+            # Also emit to all connected staff (in case they're not in the room)
+            # This is a backup to ensure staff see when users disconnect
+            if user_type == 'user':
+                for staff_sid, staff_info in connected_users.items():
+                    if staff_sid != sid and staff_info.get('user_type') in ['counsellor', 'peer', 'admin']:
+                        logger.info(f"Also notifying staff {staff_info.get('user_id')} about user disconnect")
+                        await sio.emit('user_left_chat', {
+                            'room_id': current_room,
+                            'user_id': user_id,
+                            'reason': 'disconnected',
+                            'user_name': user_name
+                        }, to=staff_sid)
         
         if user_id and user_id in user_to_socket:
             del user_to_socket[user_id]
