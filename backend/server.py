@@ -3838,6 +3838,152 @@ async def resolve_safeguarding_alert(
         logging.error(f"Error resolving safeguarding alert: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to resolve safeguarding alert")
 
+# ============ SAFEGUARDING MONITORING ENDPOINTS ============
+
+@api_router.get("/safeguarding/monitor")
+async def get_safeguarding_monitor(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get real-time safeguarding monitoring data.
+    Shows AI analysis results WITHOUT message content.
+    Staff only - for testing and improving the system.
+    """
+    if current_user.role not in ["admin", "counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Staff only")
+    
+    try:
+        # Get recent safeguarding events (last 24 hours)
+        cutoff = datetime.utcnow() - timedelta(hours=24)
+        
+        # Get alerts with analysis data but redact message content
+        alerts = await db.safeguarding_alerts.find(
+            {"created_at": {"$gte": cutoff.isoformat()}},
+            {"_id": 0}
+        ).sort("created_at", -1).to_list(100)
+        
+        # Process alerts to show analysis without content
+        monitoring_data = []
+        for alert in alerts:
+            monitoring_data.append({
+                "id": alert.get("id"),
+                "timestamp": alert.get("created_at"),
+                "risk_level": alert.get("risk_level"),
+                "score": alert.get("score"),
+                "triggered_indicators": alert.get("triggered_indicators", []),
+                "session_id": alert.get("session_id", "")[:20] + "...",  # Partial for privacy
+                "status": alert.get("status"),
+                "ai_response_type": alert.get("ai_response_type", "unknown"),
+                # Count only, not content
+                "message_length": len(alert.get("triggering_message", "")) if alert.get("triggering_message") else 0
+            })
+        
+        # Get session risk history summary (without message content)
+        session_summaries = []
+        for session_id, history in list(session_risk_history.items())[-20:]:
+            if history:
+                latest = history[-1]
+                session_summaries.append({
+                    "session_id": session_id[:20] + "...",
+                    "message_count": len(history),
+                    "latest_score": latest.get("score", 0),
+                    "latest_triggers": [t["indicator"] for t in latest.get("triggered", [])]
+                })
+        
+        return {
+            "recent_alerts": monitoring_data,
+            "active_sessions": session_summaries,
+            "total_sessions_tracked": len(session_risk_history),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logging.error(f"Error getting safeguarding monitor: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get monitoring data")
+
+@api_router.get("/safeguarding/triggers")
+async def get_safeguarding_triggers(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get all safeguarding trigger phrases and their weights.
+    Staff only - for reviewing and improving the system.
+    """
+    if current_user.role not in ["admin", "counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Staff only")
+    
+    return {
+        "red_indicators": {
+            "description": "Immediate escalation - any single match = RED alert",
+            "threshold_info": "Any match triggers RED regardless of score",
+            "triggers": [
+                {"phrase": k, "weight": v, "level": "RED"} 
+                for k, v in sorted(RED_INDICATORS.items(), key=lambda x: -x[1])
+            ]
+        },
+        "amber_indicators": {
+            "description": "High risk indicators - stackable weights",
+            "threshold_info": "Score >= 80 = AMBER, Score >= 120 = RED",
+            "triggers": [
+                {"phrase": k, "weight": v, "level": "AMBER"} 
+                for k, v in sorted(AMBER_INDICATORS.items(), key=lambda x: -x[1])
+            ]
+        },
+        "modifiers": {
+            "description": "Context modifiers - add weight when combined with other indicators",
+            "threshold_info": "Applied on top of other indicators",
+            "triggers": [
+                {"phrase": k, "weight": v, "level": "MODIFIER"} 
+                for k, v in sorted(MODIFIER_PATTERNS.items(), key=lambda x: -x[1])
+            ]
+        },
+        "scoring_rules": {
+            "GREEN": "Score < 40",
+            "YELLOW": "Score 40-79",
+            "AMBER": "Score 80-119 OR 2+ AMBER indicators",
+            "RED": "Score >= 120 OR any RED indicator match"
+        },
+        "total_triggers": {
+            "red": len(RED_INDICATORS),
+            "amber": len(AMBER_INDICATORS),
+            "modifiers": len(MODIFIER_PATTERNS)
+        }
+    }
+
+@api_router.post("/safeguarding/test")
+async def test_safeguarding_phrase(
+    test_input: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Test a phrase against the safeguarding system.
+    Staff only - for testing trigger sensitivity.
+    Returns analysis result without storing or alerting.
+    """
+    if current_user.role not in ["admin", "counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Staff only")
+    
+    phrase = test_input.get("phrase", "")
+    if not phrase:
+        raise HTTPException(status_code=400, detail="Phrase required")
+    
+    # Run analysis without creating alerts
+    result = calculate_safeguarding_score(phrase, f"test_{current_user.id}")
+    
+    # Clean up test session history
+    test_session_key = f"test_{current_user.id}"
+    if test_session_key in session_risk_history:
+        del session_risk_history[test_session_key]
+    
+    return {
+        "phrase_length": len(phrase),
+        "score": result["score"],
+        "risk_level": result["risk_level"],
+        "is_red_flag": result["is_red_flag"],
+        "triggered_indicators": result["triggered_indicators"],
+        "would_create_alert": result["risk_level"] in ["AMBER", "RED"],
+        "note": "This is a test - no alert was created"
+    }
+
 # ============ STAFF NOTES ENDPOINTS ============
 
 @api_router.post("/notes")
