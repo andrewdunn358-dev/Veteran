@@ -1,6 +1,6 @@
 # Radio Check - Complete Feature Documentation
 
-## Version 2.0 | February 2026
+## Version 2.1 | December 2025
 
 ---
 
@@ -11,6 +11,7 @@ Radio Check is a comprehensive mental health and peer support platform for UK mi
 1. **User Application** - Veteran-facing mobile and web app
 2. **Staff Portal** - Support staff interface
 3. **Admin Portal** - Administrative management system
+4. **Governance System** - Clinical safety & compliance infrastructure
 
 ---
 
