@@ -178,7 +178,7 @@ export default function CrisisSupport() {
         </View>
 
         {/* SSAFA */}
-        <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20, marginBottom: 24, borderWidth: 1, borderColor: colors.border }}>
+        <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 }}>
             <Ionicons name="people" size={28} color="#7c3aed" />
             <View style={{ marginLeft: 16, flex: 1 }}>
@@ -193,6 +193,25 @@ export default function CrisisSupport() {
           >
             <Ionicons name="call" size={24} color="#ffffff" />
             <Text style={{ fontSize: 16, fontWeight: '600', color: '#ffffff' }}>0800 731 4880</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* East Durham Veterans Trust */}
+        <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20, marginBottom: 24, borderWidth: 1, borderColor: colors.border }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 }}>
+            <Ionicons name="home" size={28} color="#0891b2" />
+            <View style={{ marginLeft: 16, flex: 1 }}>
+              <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 4 }}>East Durham Veterans Trust</Text>
+              <Text style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 20 }}>Local North East support with counselling, peer groups, housing and benefits help. Mon-Fri 9am-4pm.</Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={{ flexDirection: 'row', backgroundColor: '#0891b2', borderRadius: 8, padding: 16, alignItems: 'center', justifyContent: 'center', gap: 8 }}
+            onPress={() => handleCall('01915815677')}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="call" size={24} color="#ffffff" />
+            <Text style={{ fontSize: 16, fontWeight: '600', color: '#ffffff' }}>0191 581 5677</Text>
           </TouchableOpacity>
         </View>
 
