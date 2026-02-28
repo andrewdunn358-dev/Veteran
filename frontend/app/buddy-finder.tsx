@@ -16,6 +16,8 @@ import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../src/config/api';
+import { useAgeGateContext, isFeatureAvailable } from '../src/context/AgeGateContext';
+import AgeRestrictedBanner from '../src/components/AgeRestrictedBanner';
 
 interface BuddyProfile {
   id: string;
