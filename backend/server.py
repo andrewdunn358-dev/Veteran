@@ -4409,6 +4409,45 @@ async def buddy_chat(request: BuddyChatRequest, req: Request):
         
         logging.info(f"Safeguarding check - Session: {request.sessionId[:12]}, Score: {risk_data['score']}, Level: {risk_level}")
         
+        # === ENHANCED SAFETY LAYER (wraps around persona, doesn't replace it) ===
+        # This adds contextual analysis, dependency detection, and session tracking
+        enhanced_safety = analyze_message_safety(
+            message=request.message,
+            session_id=request.sessionId,
+            user_id=request.sessionId,  # Anonymous users use session as ID
+            character=character,
+            is_under_18=getattr(request, 'is_under_18', False)
+        )
+        
+        # Check for hard fail-safe (method requests, validation of suicidal intent)
+        if enhanced_safety.get("hard_failsafe_triggered"):
+            logging.warning(f"HARD FAILSAFE TRIGGERED - Session: {request.sessionId[:12]}")
+            # Return immediate safety response - block normal AI response
+            return BuddyChatResponse(
+                reply=enhanced_safety.get("safety_response", 
+                    "I care about you, and I'm not able to help with that. Please call Samaritans on 116 123 or in an emergency, call 999. A real person is available to talk right now."),
+                sessionId=request.sessionId,
+                character=character,
+                characterName=char_config["name"],
+                characterAvatar=char_config["avatar"],
+                safeguardingTriggered=True,
+                safeguardingAlertId=None,
+                riskLevel="RED",
+                riskScore=999
+            )
+        
+        # Upgrade risk level if enhanced analysis detects higher risk
+        enhanced_risk = enhanced_safety.get("risk_level", "LOW")
+        if enhanced_risk in ["HIGH", "IMMINENT"] and risk_level not in ["RED"]:
+            risk_level = "RED" if enhanced_risk == "IMMINENT" else "AMBER"
+            should_escalate = True
+            logging.info(f"Enhanced safety upgraded risk to {risk_level}")
+        elif enhanced_risk == "MEDIUM" and risk_level == "GREEN":
+            risk_level = "YELLOW"
+        
+        # Get safety wrapper text (appended to persona response, not replacing)
+        safety_wrapper = enhanced_safety.get("safety_wrapper")
+        
         # === Knowledge Base Integration ===
         # Fetch relevant verified information to enhance the response
         knowledge_context = await get_knowledge_context(request.message)
