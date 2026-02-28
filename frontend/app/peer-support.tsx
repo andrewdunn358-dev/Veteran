@@ -25,6 +25,11 @@ export default function PeerSupport() {
   const router = useRouter();
   const params = useLocalSearchParams<{ alertId?: string; preferredType?: string; sessionId?: string }>();
   const { colors, isDark } = useTheme();
+  
+  // Age gate context - for restricting direct peer calls
+  const { isUnder18, isAgeVerified } = useAgeGateContext();
+  const canMakePeerCalls = isFeatureAvailable('direct_peer_calls', isUnder18);
+  
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
