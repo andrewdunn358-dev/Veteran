@@ -4490,7 +4490,8 @@ async def buddy_chat(request: BuddyChatRequest, req: Request):
         # If safeguarding triggered (RED or AMBER), create alert and send notification
         if should_escalate:
             # Get conversation history for context (last 10 exchanges)
-            conversation_history = session["history"][-20:] if "history" in session else []
+            # Capture FULL conversation history for case management and handoff
+            conversation_history = session.get("history", [])
             
             alert = SafeguardingAlert(
                 session_id=request.sessionId,
