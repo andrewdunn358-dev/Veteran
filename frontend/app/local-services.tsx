@@ -405,6 +405,42 @@ export default function LocalServicesPage() {
           </View>
         )}
 
+        {/* Name Search Results */}
+        {nameSearchResults.length > 0 && (
+          <View style={styles.resultsSection}>
+            <Text style={styles.resultsTitle}>
+              Search Results ({nameSearchResults.length})
+            </Text>
+            {nameSearchResults.map((service, index) => (
+              <TouchableOpacity 
+                key={index}
+                style={styles.serviceCard}
+                onPress={() => Linking.openURL(service.url)}
+              >
+                <View style={styles.serviceInfo}>
+                  <Text style={styles.serviceName}>{service.name}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                    <View style={styles.coverageBadge}>
+                      <Text style={styles.coverageBadgeText}>{service.region}</Text>
+                    </View>
+                    <TouchableOpacity 
+                      style={styles.servicePhone}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        Linking.openURL(`tel:${service.phone.replace(/\s/g, '')}`);
+                      }}
+                    >
+                      <Ionicons name="call" size={14} color="#10b981" />
+                      <Text style={styles.servicePhoneText}>{service.phone}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
         {/* National Services (always shown) */}
         <View style={styles.nationalSection}>
           <Text style={styles.sectionTitle}>National Veteran Services</Text>
