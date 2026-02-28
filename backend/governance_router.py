@@ -461,6 +461,9 @@ async def create_incident(incident: IncidentCreate, created_by: str = "system"):
         )
         await db.governance_audit.insert_one(audit_entry.dict())
         
+        # Send email notification to CSO/Admin based on incident level
+        await send_incident_notification(incident_dict)
+        
         incident_dict.pop("_id", None)
         return incident_dict
     except Exception as e:
