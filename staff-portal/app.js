@@ -1370,9 +1370,14 @@ function renderSafeguardingAlerts(alerts) {
         }
         
         // Add contact buttons - Call (WebRTC) only
-        // Note: Chat button removed as it requires user to initiate chat request first
-        actions += '<button class="btn btn-info" onclick="initiateStaffCall(\'' + alert.id + '\', \'' + alert.session_id + '\')">' +
+        // Note: User must be connected for calls. If they're only chatting with AI, 
+        // they won't be reachable until they request support
+        actions += '<button class="btn btn-info" onclick="initiateStaffCall(\'' + alert.id + '\', \'' + alert.session_id + '\')" title="Note: User must be connected to receive calls">' +
             '<i class="fas fa-phone-alt"></i> Call User</button>';
+        
+        // Add SMS/notification option placeholder for when Twilio is ready
+        actions += '<button class="btn btn-outline btn-small" onclick="showSendNotificationModal(\'' + alert.session_id + '\')" title="Send notification to user\'s device">' +
+            '<i class="fas fa-bell"></i></button>';
         
         actions += '<button class="btn btn-success" onclick="resolveSafeguardingAlert(\'' + alert.id + '\')"><i class="fas fa-check"></i> Resolve</button>';
         
