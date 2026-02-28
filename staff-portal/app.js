@@ -647,6 +647,26 @@ function setupLiveChatRequestListeners() {
         
         showNotification('A veteran wants to talk! Click to call them.', 'success');
     });
+    
+    // Global listener for user leaving chat (works even when not in a chat room)
+    socket.off('user_left_chat');
+    socket.on('user_left_chat', function(data) {
+        console.log('=== USER LEFT CHAT (Global Listener) ===');
+        console.log('Data:', data);
+        
+        var userName = data.user_name || data.name || 'The user';
+        var reason = data.reason === 'disconnected' ? ' (connection lost)' : '';
+        var message = userName + ' has left the chat' + reason;
+        
+        // Always show notification
+        showNotification(message, 'warning');
+        
+        // Add system message to chat window if open
+        var chatMessages = document.getElementById('livechat-messages');
+        if (chatMessages) {
+            appendSystemMessage(message);
+        }
+    });
 }
 
 // Show banner for incoming chat request
