@@ -654,8 +654,8 @@ export default function PeerSupport() {
         </View>
       )}
       
-      {/* Main Content - only shown if not age-restricted */}
-      {(!isAgeVerified || !isUnder18 || canMakePeerCalls) && (
+      {/* Main Content - only shown if not age-restricted and not loading */}
+      {!isAgeLoading && (!isAgeVerified || !isUnder18 || canMakePeerCalls) && (
         <>
       {/* Waiting for Support Screen - shown when user clicked "Call a Supporter" from safeguarding */}
       {isWaitingForSupport && !showCallModal && (
