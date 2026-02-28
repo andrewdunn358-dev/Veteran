@@ -3319,6 +3319,7 @@ class SiteSettings(BaseModel):
     site_name: Optional[str] = "Veterans Support"
     peer_registration_notification_email: Optional[str] = None  # Email to notify when someone registers for peer support
     admin_notification_email: Optional[str] = None  # Email for safeguarding alerts
+    cso_email: Optional[str] = None  # Clinical Safety Officer email for governance notifications
 
 @api_router.get("/settings")
 async def get_settings():
