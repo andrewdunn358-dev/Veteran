@@ -218,14 +218,24 @@ export default function CrisisSupport() {
               <Text style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 20 }}>Armed Forces charity supporting serving personnel, veterans and their families since 1885.</Text>
             </View>
           </View>
-          <TouchableOpacity
-            style={{ flexDirection: 'row', backgroundColor: '#7c3aed', borderRadius: 8, padding: 16, alignItems: 'center', justifyContent: 'center', gap: 8 }}
-            onPress={() => handleCall('08007314880')}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="call" size={24} color="#ffffff" />
-            <Text style={{ fontSize: 16, fontWeight: '600', color: '#ffffff' }}>0800 731 4880</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <TouchableOpacity
+              style={{ flex: 1, flexDirection: 'row', backgroundColor: '#7c3aed', borderRadius: 8, padding: 16, alignItems: 'center', justifyContent: 'center', gap: 8 }}
+              onPress={() => handleCall('08007314880')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="call" size={24} color="#ffffff" />
+              <Text style={{ fontSize: 16, fontWeight: '600', color: '#ffffff' }}>0800 731 4880</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ flexDirection: 'row', backgroundColor: colors.surfaceHover, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderColor: colors.border }}
+              onPress={() => handleWebsite('https://www.ssafa.org.uk')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="globe-outline" size={18} color={colors.textSecondary} />
+              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textSecondary }}>Website</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* East Durham Veterans Trust */}
