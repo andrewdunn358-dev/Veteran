@@ -1822,6 +1822,10 @@ async function initiateStaffCall(alertId, sessionId) {
     }
 }
 
+// Show notification modal for users not connected
+function showSendNotificationModal(sessionId) {
+    showNotification('Push notifications coming soon with Twilio integration. For now, the user must request support to receive calls.', 'info');
+}
 
 
 // Resolve Safeguarding Alert
