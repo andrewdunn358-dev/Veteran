@@ -105,7 +105,14 @@ class ShareCaseRequest(BaseModel):
 async def get_user_with_role_check(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """Get current user and verify they're a counsellor or admin"""
     user = await get_current_user(credentials)
-    if user["role"] not in ["admin", "counsellor", "staff"]:
+    # Convert User model to dict if necessary
+    if hasattr(user, 'dict'):
+        user = user.dict() if callable(user.dict) else dict(user)
+    elif hasattr(user, '__dict__'):
+        user = vars(user)
+    
+    role = user.get("role", "")
+    if role not in ["admin", "counsellor", "staff"]:
         raise HTTPException(status_code=403, detail="Only counsellors and admins can access case management")
     return user
 
