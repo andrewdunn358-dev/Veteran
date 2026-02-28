@@ -51,6 +51,10 @@ export default function BuddyFinderPage() {
   const [regions, setRegions] = useState<string[]>([]);
   const [branches, setBranches] = useState<string[]>([]);
   
+  // Age gate check
+  const { isUnder18, isLoading: ageLoading, isAgeVerified } = useAgeGateContext();
+  const canAccessFeature = isFeatureAvailable('peer_matching', isUnder18);
+  
   // Message modal state
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedBuddy, setSelectedBuddy] = useState<BuddyProfile | null>(null);
