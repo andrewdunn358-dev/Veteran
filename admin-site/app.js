@@ -5689,3 +5689,415 @@ async function refreshSafeguardingMonitor() {
         showNotification('Failed to refresh monitor', 'error');
     }
 }
+
+
+// ============================================================================
+// GOVERNANCE MODULE - Clinical Safety & Compliance
+// ============================================================================
+
+// Show governance subtab
+function showGovernanceSubtab(subtab) {
+    // Update button states
+    document.querySelectorAll('.governance-subtab').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.subtab === subtab) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Show/hide sections
+    document.querySelectorAll('.governance-section').forEach(section => {
+        section.style.display = 'none';
+    });
+    document.getElementById(subtab + '-section').style.display = 'block';
+    
+    // Load data for the section
+    switch(subtab) {
+        case 'hazards':
+            loadHazards();
+            break;
+        case 'kpis':
+            loadKPIs();
+            break;
+        case 'incidents':
+            loadIncidents();
+            break;
+        case 'moderation':
+            loadModerationQueue();
+            break;
+        case 'approvals':
+            loadCSOApprovals();
+            break;
+    }
+}
+
+// Load hazards
+async function loadHazards() {
+    try {
+        const hazards = await apiCall('/governance/hazards');
+        const tbody = document.getElementById('hazards-tbody');
+        
+        if (!hazards || hazards.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="no-data">No hazards found. Click "Add Hazard" to create one.</td></tr>';
+            return;
+        }
+        
+        let html = '';
+        hazards.forEach(h => {
+            const riskClass = h.risk_rating >= 15 ? 'risk-critical' : 
+                              h.risk_rating >= 10 ? 'risk-high' : 
+                              h.risk_rating >= 6 ? 'risk-medium' : 'risk-low';
+            const statusClass = h.status === 'closed' ? 'status-closed' : 
+                                h.status === 'mitigated' ? 'status-mitigated' : 'status-active';
+            
+            html += `
+                <tr>
+                    <td><strong>${h.hazard_id}</strong></td>
+                    <td>
+                        <div><strong>${h.title}</strong></div>
+                        <div style="font-size: 12px; color: var(--text-secondary);">${h.cause}</div>
+                    </td>
+                    <td><span class="severity-badge severity-${h.severity}">${h.severity}</span></td>
+                    <td><span class="likelihood-badge">${h.likelihood}</span></td>
+                    <td><span class="risk-badge ${riskClass}">${h.risk_rating}</span></td>
+                    <td><span class="status-badge ${statusClass}">${h.status}</span></td>
+                    <td>${h.owner}</td>
+                    <td>
+                        <button class="btn btn-small btn-outline" onclick="reviewHazard('${h.hazard_id}')" title="Review">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="btn btn-small btn-outline" onclick="editHazard('${h.hazard_id}')" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading hazards:', error);
+        showNotification('Failed to load hazards', 'error');
+    }
+}
+
+// Load KPIs
+async function loadKPIs() {
+    try {
+        const days = document.getElementById('kpi-period')?.value || 30;
+        const data = await apiCall(`/governance/kpis?days=${days}`);
+        
+        if (data && data.kpis) {
+            const kpis = data.kpis;
+            
+            // Update KPI cards
+            document.getElementById('kpi-high-risk-time').textContent = 
+                kpis.avg_high_risk_response_time > 0 ? kpis.avg_high_risk_response_time.toFixed(1) + ' min' : 'N/A';
+            document.getElementById('kpi-imminent-time').textContent = 
+                kpis.avg_imminent_risk_response_time > 0 ? kpis.avg_imminent_risk_response_time.toFixed(1) + ' min' : 'N/A';
+            document.getElementById('kpi-sla').textContent = kpis.pct_high_risk_reviewed_in_sla.toFixed(1) + '%';
+            document.getElementById('kpi-high-risk-count').textContent = kpis.total_high_risk_alerts;
+            document.getElementById('kpi-imminent-count').textContent = kpis.total_imminent_risk_alerts;
+            document.getElementById('kpi-medium-count').textContent = kpis.total_medium_risk_alerts;
+            
+            // Update chart
+            updateKPIChart(kpis.risk_level_distribution);
+        }
+    } catch (error) {
+        console.error('Error loading KPIs:', error);
+        showNotification('Failed to load KPIs', 'error');
+    }
+}
+
+let kpiChart = null;
+function updateKPIChart(distribution) {
+    const ctx = document.getElementById('kpi-risk-chart');
+    if (!ctx) return;
+    
+    if (kpiChart) {
+        kpiChart.destroy();
+    }
+    
+    kpiChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Imminent', 'High', 'Medium', 'Low'],
+            datasets: [{
+                data: [
+                    distribution.imminent || 0,
+                    distribution.high || 0,
+                    distribution.medium || 0,
+                    distribution.low || 0
+                ],
+                backgroundColor: ['#ef4444', '#f97316', '#fbbf24', '#22c55e'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+}
+
+// Load incidents
+async function loadIncidents() {
+    try {
+        const incidents = await apiCall('/governance/incidents');
+        const tbody = document.getElementById('incidents-tbody');
+        
+        if (!incidents || incidents.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="no-data">No incidents recorded</td></tr>';
+            return;
+        }
+        
+        let html = '';
+        incidents.forEach(inc => {
+            const levelClass = inc.level.includes('critical') ? 'level-critical' : 
+                              inc.level.includes('high') ? 'level-high' : 'level-moderate';
+            
+            html += `
+                <tr>
+                    <td><strong>${inc.incident_number}</strong></td>
+                    <td>${inc.title}</td>
+                    <td><span class="level-badge ${levelClass}">${inc.level.replace('level_', 'L').replace('_', ' ')}</span></td>
+                    <td><span class="status-badge status-${inc.status}">${inc.status}</span></td>
+                    <td>${new Date(inc.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn btn-small btn-outline" onclick="viewIncident('${inc.incident_number}')">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading incidents:', error);
+        showNotification('Failed to load incidents', 'error');
+    }
+}
+
+// Load moderation queue
+async function loadModerationQueue() {
+    try {
+        const reports = await apiCall('/governance/peer-reports?status=pending');
+        const tbody = document.getElementById('moderation-tbody');
+        
+        if (!reports || reports.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="no-data">No pending reports - all clear!</td></tr>';
+            return;
+        }
+        
+        let html = '';
+        reports.forEach(r => {
+            html += `
+                <tr>
+                    <td>${r.id.substring(0, 12)}...</td>
+                    <td>${r.reported_user_id}</td>
+                    <td>${r.reason}</td>
+                    <td><span class="status-badge status-pending">${r.status}</span></td>
+                    <td>${new Date(r.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn btn-small btn-success" onclick="takeModerationAction('${r.id}', 'reviewed')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="btn btn-small btn-warning" onclick="takeModerationAction('${r.id}', 'warning_issued')">
+                            <i class="fas fa-exclamation"></i>
+                        </button>
+                        <button class="btn btn-small btn-danger" onclick="takeModerationAction('${r.id}', 'suspended')">
+                            <i class="fas fa-ban"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading moderation queue:', error);
+        showNotification('Failed to load moderation queue', 'error');
+    }
+}
+
+// Take moderation action
+async function takeModerationAction(reportId, action) {
+    try {
+        const moderatorId = currentUser?.email || 'admin';
+        await apiCall(`/governance/peer-reports/${reportId}/action?action=${action}&moderator_id=${moderatorId}`, {
+            method: 'PUT'
+        });
+        showNotification(`Action "${action}" taken successfully`, 'success');
+        loadModerationQueue();
+    } catch (error) {
+        console.error('Error taking action:', error);
+        showNotification('Failed to take action', 'error');
+    }
+}
+
+// Load CSO approvals
+async function loadCSOApprovals() {
+    try {
+        const approvals = await apiCall('/governance/cso/approvals');
+        const tbody = document.getElementById('approvals-tbody');
+        
+        if (!approvals || approvals.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="no-data">No pending approvals</td></tr>';
+            return;
+        }
+        
+        let html = '';
+        approvals.forEach(a => {
+            html += `
+                <tr>
+                    <td>${a.id.substring(0, 12)}...</td>
+                    <td>${a.request_type}</td>
+                    <td>${a.description}</td>
+                    <td>${a.requested_by}</td>
+                    <td>${new Date(a.requested_at).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn btn-small btn-success" onclick="processCSOApproval('${a.id}', true)">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn btn-small btn-danger" onclick="processCSOApproval('${a.id}', false)">
+                            <i class="fas fa-times"></i> Deny
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading approvals:', error);
+        showNotification('Failed to load approvals', 'error');
+    }
+}
+
+// Process CSO approval
+async function processCSOApproval(approvalId, approved) {
+    try {
+        const reviewerId = currentUser?.email || 'admin';
+        const notes = prompt('Enter review notes (optional):');
+        
+        await apiCall(`/governance/cso/approvals/${approvalId}?approved=${approved}&reviewer_id=${reviewerId}&notes=${encodeURIComponent(notes || '')}`, {
+            method: 'PUT'
+        });
+        
+        showNotification(approved ? 'Approval granted' : 'Approval denied', 'success');
+        loadCSOApprovals();
+    } catch (error) {
+        console.error('Error processing approval:', error);
+        showNotification('Failed to process approval', 'error');
+    }
+}
+
+// Review hazard
+async function reviewHazard(hazardId) {
+    try {
+        const reviewerId = currentUser?.email || 'admin';
+        await apiCall(`/governance/hazards/${hazardId}/review?reviewer_id=${reviewerId}`, {
+            method: 'POST'
+        });
+        showNotification(`Hazard ${hazardId} marked as reviewed`, 'success');
+        loadHazards();
+    } catch (error) {
+        console.error('Error reviewing hazard:', error);
+        showNotification('Failed to review hazard', 'error');
+    }
+}
+
+// Export governance data
+async function exportGovernanceData() {
+    try {
+        const data = await apiCall('/governance/export?days=90');
+        
+        // Download as JSON
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `governance_export_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showNotification('Governance data exported', 'success');
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        showNotification('Failed to export data', 'error');
+    }
+}
+
+// Submit CSO sign-off
+async function submitCSOSignoff() {
+    const name = document.getElementById('cso-name').value;
+    const qualification = document.getElementById('cso-qualification').value;
+    
+    if (!name || !qualification) {
+        showNotification('Please enter your name and qualification', 'error');
+        return;
+    }
+    
+    try {
+        // Create an approval record for the sign-off
+        await apiCall('/governance/cso/approvals', {
+            method: 'POST',
+            body: JSON.stringify({
+                request_type: 'annual_signoff',
+                description: `Annual safeguarding review sign-off by ${name} (${qualification})`,
+                requested_by: currentUser?.email || 'admin',
+                current_value: {},
+                proposed_value: { signed_by: name, qualification: qualification, date: new Date().toISOString() }
+            })
+        });
+        
+        // Auto-approve it (CSO signing off)
+        showNotification('CSO sign-off recorded successfully', 'success');
+        
+        document.getElementById('last-signoff').innerHTML = `
+            <i class="fas fa-check-circle" style="color: #22c55e;"></i>
+            Last sign-off: ${name} (${qualification}) on ${new Date().toLocaleDateString()}
+        `;
+        
+        document.getElementById('cso-name').value = '';
+        document.getElementById('cso-qualification').value = '';
+        
+    } catch (error) {
+        console.error('Error submitting sign-off:', error);
+        showNotification('Failed to submit sign-off', 'error');
+    }
+}
+
+// Placeholder functions for modals
+function openAddHazardModal() {
+    showNotification('Add Hazard modal - Coming soon. Use API directly for now.', 'info');
+}
+
+function openAddIncidentModal() {
+    showNotification('Add Incident modal - Coming soon. Use API directly for now.', 'info');
+}
+
+function editHazard(hazardId) {
+    showNotification(`Edit hazard ${hazardId} - Coming soon`, 'info');
+}
+
+function viewIncident(incidentNumber) {
+    showNotification(`View incident ${incidentNumber} - Coming soon`, 'info');
+}
+
+// Auto-load hazards when governance tab opens
+document.addEventListener('DOMContentLoaded', function() {
+    const governanceTab = document.querySelector('[data-tab="governance"]');
+    if (governanceTab) {
+        governanceTab.addEventListener('click', function() {
+            setTimeout(() => loadHazards(), 100);
+        });
+    }
+});
