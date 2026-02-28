@@ -175,6 +175,12 @@ async def register(sid, data):
     name = data.get('name', 'Unknown')
     status = data.get('status', 'available')
     
+    # Cancel any pending disconnect notification for this user (they reconnected!)
+    if user_id in pending_disconnects:
+        pending_disconnects[user_id].cancel()
+        logger.info(f"Cancelled pending disconnect for {user_id} - user reconnected")
+        del pending_disconnects[user_id]
+    
     # Store connection info
     connected_users[sid] = {
         'user_id': user_id,
