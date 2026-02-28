@@ -5545,3 +5545,147 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// ============ SAFEGUARDING MONITOR FUNCTIONS ============
+
+async function testSafeguardingPhrase() {
+    var phraseInput = document.getElementById('test-phrase');
+    var resultEl = document.getElementById('test-result');
+    
+    if (!phraseInput || !phraseInput.value.trim()) {
+        showToast('Please enter a phrase to test', 'warning');
+        return;
+    }
+    
+    try {
+        var data = await apiCall('/safeguarding/test', {
+            method: 'POST',
+            body: JSON.stringify({ phrase: phraseInput.value })
+        });
+        
+        var levelClass = data.risk_level.toLowerCase();
+        var triggers = data.triggered_indicators.map(function(t) {
+            return '<span class="trigger-badge ' + t.level.toLowerCase() + '">' + t.indicator + ' (+' + t.weight + ')</span>';
+        }).join(' ');
+        
+        var html = '<div class="test-result-card ' + levelClass + '">';
+        html += '<div class="result-header">';
+        html += '<span class="risk-badge ' + levelClass + '">' + data.risk_level + '</span>';
+        html += '<span class="score">Score: ' + data.score + '</span>';
+        html += data.would_create_alert ? '<span class="alert-badge">Would create alert</span>' : '<span class="no-alert-badge">No alert</span>';
+        html += '</div>';
+        if (triggers) {
+            html += '<div class="triggers">' + triggers + '</div>';
+        } else {
+            html += '<p class="no-triggers">No triggers matched</p>';
+        }
+        html += '</div>';
+        
+        resultEl.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Error testing phrase:', error);
+        showToast('Failed to test phrase', 'error');
+    }
+}
+
+async function loadTriggerPhrases() {
+    try {
+        var data = await apiCall('/safeguarding/triggers');
+        
+        var triggerEl = document.getElementById('trigger-phrases');
+        if (!triggerEl) return;
+        
+        var html = '';
+        
+        // RED indicators
+        html += '<div class="trigger-section red">';
+        html += '<h5>RED Indicators (' + data.red_indicators.triggers.length + ') - ' + data.red_indicators.threshold_info + '</h5>';
+        html += '<div class="trigger-pills">';
+        data.red_indicators.triggers.slice(0, 30).forEach(function(t) {
+            html += '<span class="trigger-pill red">' + t.phrase + ' (+' + t.weight + ')</span>';
+        });
+        if (data.red_indicators.triggers.length > 30) {
+            html += '<span class="more-badge">+' + (data.red_indicators.triggers.length - 30) + ' more</span>';
+        }
+        html += '</div></div>';
+        
+        // AMBER indicators
+        html += '<div class="trigger-section amber">';
+        html += '<h5>AMBER Indicators (' + data.amber_indicators.triggers.length + ') - ' + data.amber_indicators.threshold_info + '</h5>';
+        html += '<div class="trigger-pills">';
+        data.amber_indicators.triggers.slice(0, 30).forEach(function(t) {
+            html += '<span class="trigger-pill amber">' + t.phrase + ' (+' + t.weight + ')</span>';
+        });
+        if (data.amber_indicators.triggers.length > 30) {
+            html += '<span class="more-badge">+' + (data.amber_indicators.triggers.length - 30) + ' more</span>';
+        }
+        html += '</div></div>';
+        
+        // Modifiers
+        html += '<div class="trigger-section modifier">';
+        html += '<h5>Modifiers (' + data.modifiers.triggers.length + ') - ' + data.modifiers.threshold_info + '</h5>';
+        html += '<div class="trigger-pills">';
+        data.modifiers.triggers.forEach(function(t) {
+            html += '<span class="trigger-pill modifier">' + t.phrase + ' (+' + t.weight + ')</span>';
+        });
+        html += '</div></div>';
+        
+        // Scoring rules
+        html += '<div class="scoring-rules">';
+        html += '<h5>Scoring Rules</h5>';
+        html += '<ul>';
+        Object.entries(data.scoring_rules).forEach(function([level, rule]) {
+            html += '<li><span class="risk-badge ' + level.toLowerCase() + '">' + level + '</span> ' + rule + '</li>';
+        });
+        html += '</ul></div>';
+        
+        triggerEl.innerHTML = html;
+        showToast('Trigger phrases loaded', 'success');
+        
+    } catch (error) {
+        console.error('Error loading triggers:', error);
+        showToast('Failed to load trigger phrases', 'error');
+    }
+}
+
+async function refreshSafeguardingMonitor() {
+    try {
+        var data = await apiCall('/safeguarding/monitor');
+        
+        var activityEl = document.getElementById('monitor-activity');
+        if (!activityEl) return;
+        
+        if (data.recent_alerts.length === 0) {
+            activityEl.innerHTML = '<p class="no-data">No safeguarding alerts in the last 24 hours</p>';
+            showToast('No recent activity', 'info');
+            return;
+        }
+        
+        var html = '<div class="activity-list">';
+        data.recent_alerts.forEach(function(alert) {
+            var levelClass = alert.risk_level.toLowerCase();
+            var triggers = alert.triggered_indicators.map(function(t) {
+                return '<span class="trigger-badge ' + t.level.toLowerCase() + '">' + t.indicator + ' (+' + t.weight + ')</span>';
+            }).join(' ');
+            
+            html += '<div class="activity-item ' + levelClass + '">';
+            html += '<div class="activity-header">';
+            html += '<span class="risk-badge ' + levelClass + '">' + alert.risk_level + '</span>';
+            html += '<span class="score">Score: ' + alert.score + '</span>';
+            html += '<span class="status-badge ' + alert.status + '">' + alert.status + '</span>';
+            html += '<span class="timestamp">' + new Date(alert.timestamp).toLocaleString() + '</span>';
+            html += '</div>';
+            html += '<div class="triggers">' + (triggers || '<em>No specific triggers</em>') + '</div>';
+            html += '</div>';
+        });
+        html += '</div>';
+        
+        activityEl.innerHTML = html;
+        showToast('Monitor refreshed - ' + data.recent_alerts.length + ' alerts', 'success');
+        
+    } catch (error) {
+        console.error('Error refreshing monitor:', error);
+        showToast('Failed to refresh monitor', 'error');
+    }
+}
