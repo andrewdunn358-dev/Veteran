@@ -129,6 +129,38 @@ function setupSocketHandlers() {
         showIncomingChatRequest(data);
     });
     
+    // Chat request confirmed - staff accepted and room is ready
+    socket.on('chat_request_confirmed', (data) => {
+        console.log('=== CHAT REQUEST CONFIRMED ===');
+        console.log('Chat confirmed data:', data);
+        
+        var roomId = data.room_id;
+        var userId = data.user_id;
+        
+        if (roomId) {
+            // Set current room globally
+            window.currentChatRoom = roomId;
+            
+            // Open the live chat modal with this room
+            if (typeof showLiveChatModal === 'function') {
+                console.log('Opening live chat modal for room:', roomId);
+                showLiveChatModal(roomId);
+            } else if (typeof joinLiveChat === 'function') {
+                console.log('Joining live chat room:', roomId);
+                joinLiveChat(roomId);
+            } else {
+                console.log('Live chat functions not available, switching to Live Chat tab');
+                // Fallback: switch to Live Chat tab and reload chats
+                if (typeof switchTab === 'function') {
+                    switchTab('livechat');
+                    if (typeof loadLiveChats === 'function') {
+                        setTimeout(function() { loadLiveChats(false); }, 500);
+                    }
+                }
+            }
+        }
+    });
+    
     // Incoming call
     socket.on('incoming_call', async (data) => {
         console.log('Incoming call:', data);
