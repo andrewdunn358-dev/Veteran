@@ -640,6 +640,7 @@
             
             // Load data for the tab (functions defined in app.js)
             if (tabId === 'alerts' && typeof loadSafeguardingAlerts === 'function') loadSafeguardingAlerts();
+            if (tabId === 'cases' && typeof loadCases === 'function') loadCases();
             if (tabId === 'callbacks' && typeof loadCallbacks === 'function') loadCallbacks();
             if (tabId === 'rota') {
                 if (typeof loadShifts === 'function') loadShifts();
