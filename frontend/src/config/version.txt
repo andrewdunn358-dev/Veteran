@@ -1,0 +1,15 @@
+VERSION CHECK FILE
+==================
+Created: Sun Mar 1 2026 21:55 UTC
+Purpose: Verify Vercel is deploying latest code
+
+If you see this file at:
+https://app.radiocheck.me/_expo/static/version.txt
+or in your Vercel build logs, then deployment is working.
+
+CURRENT VALUES IN ai-characters.ts:
+- doris.name = "Rachel" (NOT Doris)
+- doris.id = "doris" (internal ID unchanged)
+
+BUILD TIMESTAMP: 1772402100
+VERIFICATION CODE: RACHEL-CHECK-2026
