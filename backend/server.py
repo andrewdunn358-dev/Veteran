@@ -4433,12 +4433,13 @@ async def buddy_chat(request: BuddyChatRequest, req: Request):
     if not request.message or not request.sessionId:
         raise HTTPException(status_code=400, detail="Invalid request")
     
-    # Validate character
+    # Validate character - get config from database or fallback to hardcoded
     character = request.character.lower()
-    if character not in AI_CHARACTERS:
-        character = "tommy"
+    char_config = await get_character_config(character)
     
-    char_config = AI_CHARACTERS[character]
+    # If character not found, default to tommy
+    if char_config.get("source") == "fallback" and character not in AI_CHARACTERS:
+        character = "tommy"
     
     try:
         session = get_or_create_buddy_session(request.sessionId, character)
