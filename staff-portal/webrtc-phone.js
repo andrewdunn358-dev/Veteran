@@ -116,6 +116,19 @@ function setupSocketHandlers() {
         console.log('Reconnected to signaling server');
     });
     
+    // Incoming chat request - someone wants to chat with staff
+    socket.on('incoming_chat_request', (data) => {
+        console.log('Incoming chat request:', data);
+        
+        // Play alert sound
+        if (typeof playAlertSound === 'function') {
+            playAlertSound();
+        }
+        
+        // Show chat request notification
+        showIncomingChatRequest(data);
+    });
+    
     // Incoming call
     socket.on('incoming_call', async (data) => {
         console.log('Incoming call:', data);
