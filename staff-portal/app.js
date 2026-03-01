@@ -471,6 +471,12 @@ async function updateMyStatus(newStatus) {
         
         myProfile.status = newStatus;
         updateStatusUI(newStatus);
+        
+        // Also update Socket.IO status so chat requests work
+        if (typeof window.webRTCPhone !== 'undefined' && window.webRTCPhone.updateStatus) {
+            window.webRTCPhone.updateStatus(newStatus);
+        }
+        
         showNotification('Status updated to ' + newStatus);
         
     } catch (error) {
