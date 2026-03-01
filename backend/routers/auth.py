@@ -243,11 +243,12 @@ async def login(credentials: UserLogin):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
-    # Check if user has required fields
-    if "hashed_password" not in user:
+    # Check for password hash (support both field names for backwards compatibility)
+    password_hash = user.get("hashed_password") or user.get("password_hash")
+    if not password_hash:
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
-    if not verify_password(credentials.password, user["hashed_password"]):
+    if not verify_password(credentials.password, password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
     # Ensure user has an ID (generate if missing for legacy users)
