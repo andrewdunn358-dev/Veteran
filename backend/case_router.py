@@ -45,6 +45,7 @@ class CreateCaseRequest(BaseModel):
     """Request to create a case from safeguarding alert"""
     safeguarding_alert_id: str
     initial_notes: Optional[str] = None
+    user_name: Optional[str] = None
 
 class AddSessionRequest(BaseModel):
     """Request to add a triage session note"""
