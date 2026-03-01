@@ -5979,6 +5979,11 @@ if PORTAL_PATH.exists():
 if ADMIN_PATH.exists():
     app.mount("/admin", StaticFiles(directory=str(ADMIN_PATH), html=True), name="admin-site")
 
+# Mount static files for uploaded avatars
+STATIC_AVATARS_PATH = Path(__file__).parent / "static" / "avatars"
+STATIC_AVATARS_PATH.mkdir(parents=True, exist_ok=True)
+app.mount("/static/avatars", StaticFiles(directory=str(STATIC_AVATARS_PATH)), name="avatars")
+
 # Create ASGI app that combines FastAPI and Socket.IO
 # Store original FastAPI app
 _fastapi_app = app
