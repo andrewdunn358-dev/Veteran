@@ -6461,6 +6461,18 @@ async function loadAIPersonas() {
     }
 }
 
+// Helper to resolve avatar URLs - prepend API URL if path is relative
+function resolveAvatarUrl(avatarPath) {
+    if (!avatarPath) return '';
+    // If it's already an absolute URL, return as-is
+    if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
+        return avatarPath;
+    }
+    // If it's a relative path, prepend the API base URL
+    // CONFIG.API_URL is defined in config.js (e.g., https://veterans-support-api.onrender.com)
+    return `${CONFIG.API_URL}${avatarPath}`;
+}
+
 function renderPersonasGrid() {
     const grid = document.getElementById('personas-grid');
     
