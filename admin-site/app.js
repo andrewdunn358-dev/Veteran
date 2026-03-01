@@ -6532,11 +6532,7 @@ function renderPersonasGrid() {
     }).join('');
 }
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text || '';
-    return div.innerHTML;
-}
+// escapeHtml defined earlier - DO NOT DUPLICATE
 
 function openAddPersonaModal() {
     const form = document.getElementById('persona-form');
