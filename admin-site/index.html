@@ -397,6 +397,44 @@
                 <div id="cms-list-view" class="cms-grid" style="display: none;"></div>
             </div>
 
+            <!-- AI Personas Tab -->
+            <div id="ai-personas-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2>AI Personas Management</h2>
+                    <div class="tab-actions">
+                        <button class="btn btn-secondary" onclick="seedPersonasFromCode()">
+                            <i class="fas fa-download"></i> Import from Code
+                        </button>
+                        <button class="btn btn-primary" onclick="openAddPersonaModal()">
+                            <i class="fas fa-plus"></i> Create New Persona
+                        </button>
+                    </div>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Manage AI Battle Buddies - edit personalities, update prompts, and create new AI companions. Changes take effect immediately.
+                </p>
+                
+                <!-- Character Source Notice -->
+                <div id="personas-source-notice" class="card" style="margin-bottom: 20px; background: var(--warning-bg); border: 1px solid var(--warning-border);">
+                    <div class="card-body" style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-info-circle" style="color: var(--warning-color); font-size: 20px;"></i>
+                        <div>
+                            <strong style="color: var(--warning-color);">Characters loaded from code</strong>
+                            <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-muted);">
+                                Click "Import from Code" to copy all hardcoded characters to the database, then you can edit them freely.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Personas Grid -->
+                <div id="personas-grid" class="personas-grid">
+                    <div class="loading-placeholder">
+                        <i class="fas fa-spinner fa-spin"></i> Loading AI Personas...
+                    </div>
+                </div>
+            </div>
+
             <!-- Beta Testing Tab -->
             <div id="beta-tab" class="tab-content">
                 <div class="tab-header">
