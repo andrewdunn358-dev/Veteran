@@ -6601,10 +6601,13 @@ function editPersona(personaId) {
 }
 
 function closePersonaModal() {
-    document.getElementById('persona-modal').classList.add('hidden');
+    const modal = document.getElementById('persona-modal');
+    if (modal) modal.classList.add('hidden');
     // Reset file input
-    document.getElementById('persona-avatar-file').value = '';
-    document.getElementById('avatar-upload-status').textContent = '';
+    const fileInput = document.getElementById('persona-avatar-file');
+    const statusEl = document.getElementById('avatar-upload-status');
+    if (fileInput) fileInput.value = '';
+    if (statusEl) statusEl.textContent = '';
 }
 
 function updateAvatarPreview(url) {
