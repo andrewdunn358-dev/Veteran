@@ -938,6 +938,89 @@ function stopRingtone() {
     }
 }
 
+// Show incoming chat request notification
+function showIncomingChatRequest(data) {
+    console.log('Showing incoming chat request:', data);
+    
+    // Create or get the chat request banner
+    var banner = document.getElementById('incoming-chat-banner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'incoming-chat-banner';
+        banner.style.cssText = 'position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 20px 30px; border-radius: 16px; box-shadow: 0 10px 40px rgba(37, 99, 235, 0.4); z-index: 10000; text-align: center; animation: pulse 2s infinite;';
+        document.body.appendChild(banner);
+        
+        // Add animation
+        var style = document.createElement('style');
+        style.textContent = '@keyframes pulse { 0%, 100% { box-shadow: 0 10px 40px rgba(37, 99, 235, 0.4); } 50% { box-shadow: 0 10px 60px rgba(37, 99, 235, 0.7); } }';
+        document.head.appendChild(style);
+    }
+    
+    var reasonText = data.reason || 'Someone needs to chat';
+    var userName = data.user_name || 'A veteran';
+    
+    banner.innerHTML = '<div style="font-size: 24px; margin-bottom: 8px;">💬 Incoming Chat Request</div>' +
+        '<div style="font-size: 16px; margin-bottom: 8px;"><strong>' + userName + '</strong></div>' +
+        '<div style="font-size: 14px; opacity: 0.9; margin-bottom: 16px;">' + reasonText + '</div>' +
+        '<div style="display: flex; gap: 12px; justify-content: center;">' +
+            '<button onclick="acceptChatRequest(\'' + data.request_id + '\', \'' + data.user_id + '\', \'' + userName.replace(/'/g, "\\'") + '\')" style="background: #22c55e; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;"><i class="fas fa-comments"></i> Accept Chat</button>' +
+            '<button onclick="dismissChatRequest()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">Dismiss</button>' +
+        '</div>';
+    
+    banner.style.display = 'block';
+    
+    // Store request data globally for accepting
+    window.pendingChatRequest = data;
+}
+
+// Accept a chat request
+function acceptChatRequest(requestId, userId, userName) {
+    console.log('Accepting chat request:', requestId);
+    
+    if (!socket || !socket.connected) {
+        console.error('Socket not connected');
+        return;
+    }
+    
+    // Emit accept event
+    socket.emit('accept_chat_request', {
+        request_id: requestId,
+        user_id: userId,
+        staff_id: currentUser.id,
+        staff_name: currentUser.name || 'Staff',
+        staff_type: currentUser.role
+    });
+    
+    // Hide banner
+    dismissChatRequest();
+    
+    // Show notification
+    if (typeof showNotification === 'function') {
+        showNotification('Chat request accepted. Opening chat...', 'success');
+    }
+    
+    // Switch to live chat tab if it exists
+    var liveChatTab = document.querySelector('[data-tab="dashboard"]');
+    if (liveChatTab && typeof switchTab === 'function') {
+        // Stay on dashboard where live chats are shown
+        switchTab('dashboard');
+    }
+}
+
+// Dismiss chat request banner
+function dismissChatRequest() {
+    var banner = document.getElementById('incoming-chat-banner');
+    if (banner) {
+        banner.style.display = 'none';
+    }
+    window.pendingChatRequest = null;
+}
+
+// Expose functions globally
+window.acceptChatRequest = acceptChatRequest;
+window.dismissChatRequest = dismissChatRequest;
+
+
 // Export for use
 window.webRTCPhone = {
     init: initWebRTCPhone,
