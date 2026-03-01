@@ -2,7 +2,7 @@
  * Unified AI Chat Component
  * 
  * A single, theme-aware chat component that works with all AI characters.
- * Characters are configured in /src/config/ai-characters.ts
+ * Characters are now fetched from the database via API.
  * 
  * Usage: Navigate to /unified-chat/[characterId] e.g., /unified-chat/hugo
  */
@@ -29,7 +29,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../src/context/ThemeContext';
 import { API_URL } from '../src/config/api';
-import { getCharacter, AICharacter } from '../src/config/ai-characters';
+import { getCharacter as getStaticCharacter, AICharacter } from '../src/config/ai-characters';
+import { getCharacter as getAPICharacter } from '../src/services/characterService';
 import AIConsentModal from '../src/components/AIConsentModal';
 import { useAgeGateContext } from '../src/context/AgeGateContext';
 
