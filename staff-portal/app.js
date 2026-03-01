@@ -3352,7 +3352,27 @@ document.addEventListener('DOMContentLoaded', function() {
             loadSwapRequests();
         }
     }, 2000);
+    
+    // Load rota data when rota tab is clicked
+    var rotaTab = document.querySelector('[data-tab="rota"]');
+    if (rotaTab) {
+        rotaTab.addEventListener('click', function() {
+            loadRotaData();
+        });
+    }
 });
+
+// Load all rota data (shifts + swaps)
+function loadRotaData() {
+    loadShifts();
+    loadSwapRequests();
+}
+
+// Open swap request modal
+function openSwapRequestModal() {
+    // For now, show alert - full modal implementation would go here
+    alert('To request cover for a shift, click on the shift in the calendar and use the "Request Cover" button.');
+}
 
 
 // ============ SAFEGUARDING MONITOR FUNCTIONS ============
