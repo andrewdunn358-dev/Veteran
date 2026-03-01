@@ -2597,8 +2597,54 @@ async function loadSettings() {
             // Default logo - use local asset
             logoImg.src = 'logo.png';
         }
+        
+        // Load email settings
+        const adminEmail = document.getElementById('admin-notification-email');
+        const csoEmail = document.getElementById('cso-email');
+        const peerEmail = document.getElementById('peer-registration-email');
+        
+        if (adminEmail) adminEmail.value = siteSettings.admin_notification_email || '';
+        if (csoEmail) csoEmail.value = siteSettings.cso_email || '';
+        if (peerEmail) peerEmail.value = siteSettings.peer_registration_notification_email || '';
     } catch (error) {
         console.error('Error loading settings:', error);
+    }
+}
+
+async function saveEmailSettings() {
+    const adminEmail = document.getElementById('admin-notification-email').value;
+    const csoEmail = document.getElementById('cso-email').value;
+    const peerEmail = document.getElementById('peer-registration-email').value;
+    const statusDiv = document.getElementById('email-settings-status');
+    
+    try {
+        await apiCall('/settings', {
+            method: 'PUT',
+            body: JSON.stringify({
+                admin_notification_email: adminEmail,
+                cso_email: csoEmail,
+                peer_registration_notification_email: peerEmail
+            })
+        });
+        
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = 'rgba(22, 163, 74, 0.2)';
+        statusDiv.style.color = '#22c55e';
+        statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Email settings saved successfully!';
+        
+        // Update local settings
+        siteSettings.admin_notification_email = adminEmail;
+        siteSettings.cso_email = csoEmail;
+        siteSettings.peer_registration_notification_email = peerEmail;
+        
+        showNotification('Email settings saved successfully!', 'success');
+    } catch (error) {
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = 'rgba(220, 38, 38, 0.2)';
+        statusDiv.style.color = '#ef4444';
+        statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Failed to save: ' + error.message;
+        
+        showNotification('Failed to save email settings: ' + error.message, 'error');
     }
 }
 
