@@ -1283,8 +1283,9 @@ async function sendChatMessage() {
     
     try {
         // Also emit via Socket.IO for real-time delivery
-        if (window.webrtcSocket && window.webrtcSocket.connected) {
-            window.webrtcSocket.emit('chat_message', {
+        var wsocket = window.webRTCPhone && window.webRTCPhone.socket;
+        if (wsocket && wsocket.connected) {
+            wsocket.emit('chat_message', {
                 room_id: currentChatRoom,
                 message: text,
                 sender_id: currentUser.id,
