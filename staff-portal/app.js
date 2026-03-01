@@ -2234,29 +2234,29 @@ async function escalateCase(caseId) {
 
 // Edit/create safety plan
 async function editSafetyPlan(caseId) {
-    var content = '<div style="padding: 20px;">' +
+    var content = '<div style="padding: 20px; background: #ffffff;">' +
         '<form id="safety-plan-form" onsubmit="return submitSafetyPlan(event, \'' + caseId + '\')">' +
-            '<p style="color: var(--text-muted); margin-bottom: 16px;">Create or update the safety plan for this case.</p>' +
-            '<div class="form-group">' +
-                '<label>Warning Signs (one per line)</label>' +
-                '<textarea id="sp-warning-signs" rows="3" placeholder="What signs indicate crisis?..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);"></textarea>' +
+            '<p style="color: #6b7280; margin-bottom: 16px;">Create or update the safety plan for this case.</p>' +
+            '<div class="form-group" style="margin-bottom: 16px;">' +
+                '<label style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Warning Signs (one per line)</label>' +
+                '<textarea id="sp-warning-signs" rows="3" placeholder="What signs indicate crisis?..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; background: #f9fafb;"></textarea>' +
             '</div>' +
-            '<div class="form-group">' +
-                '<label>Coping Strategies (one per line)</label>' +
-                '<textarea id="sp-coping" rows="3" placeholder="Internal coping strategies..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);"></textarea>' +
+            '<div class="form-group" style="margin-bottom: 16px;">' +
+                '<label style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Coping Strategies (one per line)</label>' +
+                '<textarea id="sp-coping" rows="3" placeholder="Internal coping strategies..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; background: #f9fafb;"></textarea>' +
             '</div>' +
-            '<div class="form-group">' +
-                '<label>Reasons for Living (one per line)</label>' +
-                '<textarea id="sp-reasons" rows="3" placeholder="What keeps them going..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);"></textarea>' +
+            '<div class="form-group" style="margin-bottom: 16px;">' +
+                '<label style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Reasons for Living (one per line)</label>' +
+                '<textarea id="sp-reasons" rows="3" placeholder="What keeps them going..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; background: #f9fafb;"></textarea>' +
             '</div>' +
-            '<div style="display: flex; gap: 12px; margin-top: 16px;">' +
-                '<button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Safety Plan</button>' +
-                '<button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>' +
+            '<div style="display: flex; gap: 12px; margin-top: 20px;">' +
+                '<button type="submit" class="btn btn-primary" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer;"><i class="fas fa-save"></i> Save Safety Plan</button>' +
+                '<button type="button" class="btn btn-outline" onclick="goBackToCase(\'' + caseId + '\')" style="background: #f3f4f6; color: #374151; padding: 12px 24px; border-radius: 8px; border: 1px solid #d1d5db; cursor: pointer;"><i class="fas fa-arrow-left"></i> Back to Case</button>' +
             '</div>' +
         '</form>' +
     '</div>';
     
-    openGenericModal('Safety Plan', content);
+    openGenericModal('Safety Plan', content, { isSubModal: true });
 }
 
 // Submit safety plan
