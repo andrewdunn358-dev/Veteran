@@ -6625,27 +6625,19 @@ async function savePersona(event) {
     }
     
     try {
-        let response;
         if (isNew) {
-            response = await fetchWithAuth('/api/ai-characters', {
+            await apiCall('/ai-characters', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
         } else {
             // Don't send ID in update payload
             const updateData = { ...data };
             delete updateData.id;
-            response = await fetchWithAuth(`/api/ai-characters/${personaId}`, {
+            await apiCall(`/ai-characters/${personaId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updateData)
             });
-        }
-        
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || 'Failed to save persona');
         }
         
         showNotification(isNew ? 'Persona created successfully!' : 'Persona updated successfully!', 'success');
@@ -6663,14 +6655,9 @@ async function deletePersona(personaId, personaName) {
     }
     
     try {
-        const response = await fetchWithAuth(`/api/ai-characters/${personaId}`, {
+        await apiCall(`/ai-characters/${personaId}`, {
             method: 'DELETE'
         });
-        
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || 'Failed to delete persona');
-        }
         
         showNotification('Persona deleted successfully', 'success');
         loadAIPersonas();
@@ -6686,16 +6673,10 @@ async function seedPersonasFromCode() {
     }
     
     try {
-        const response = await fetchWithAuth('/api/ai-characters/seed-from-hardcoded', {
+        const data = await apiCall('/ai-characters/seed-from-hardcoded', {
             method: 'POST'
         });
         
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || 'Failed to seed personas');
-        }
-        
-        const data = await response.json();
         showNotification(`Imported ${data.seeded} personas (${data.skipped} already existed)`, 'success');
         loadAIPersonas();
     } catch (error) {
@@ -6703,4 +6684,5 @@ async function seedPersonasFromCode() {
         showNotification(error.message || 'Failed to import personas', 'error');
     }
 }
+
 
