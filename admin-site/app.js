@@ -6442,8 +6442,7 @@ async function loadAIPersonas() {
     grid.innerHTML = '<div class="loading-placeholder"><i class="fas fa-spinner fa-spin"></i> Loading AI Personas...</div>';
     
     try {
-        const response = await fetchWithAuth('/api/ai-characters/admin/all');
-        const data = await response.json();
+        const data = await apiCall('/ai-characters/admin/all');
         
         aiPersonas = data.characters || [];
         personasSource = data.source || 'unknown';
