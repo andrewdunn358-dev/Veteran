@@ -92,7 +92,7 @@ export default function CrisisSupport() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text }}>AI Battle Buddies</Text>
-              <Text style={{ fontSize: 14, color: colors.textSecondary }}>Chat with Tommy or Doris - available 24/7</Text>
+              <Text style={{ fontSize: 14, color: colors.textSecondary }}>Chat with Tommy or Rachel - available 24/7</Text>
             </View>
             <View style={{ backgroundColor: colors.primary, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
               <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>24/7</Text>
