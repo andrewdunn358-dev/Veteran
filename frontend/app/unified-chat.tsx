@@ -58,31 +58,49 @@ export default function UnifiedAIChat() {
   // Age gate context - for enhanced safeguarding
   const { isUnder18 } = useAgeGateContext();
   
-  // Character state - loaded from API
+  // Character state - loaded from API with static fallback
   const [character, setCharacter] = useState<AICharacter | null>(null);
   const [characterLoading, setCharacterLoading] = useState(true);
   
-  // Load character from API on mount
+  // Load character on mount - prioritize static config (always has all fields), merge with API if available
   useEffect(() => {
     async function loadCharacter() {
       setCharacterLoading(true);
       try {
-        // Try API first
-        const apiChar = await getAPICharacter(characterId);
-        if (apiChar) {
-          setCharacter(apiChar);
-          console.log('[Chat] Loaded character from API:', apiChar.name);
-        } else {
-          // Fallback to static config
-          const staticChar = getStaticCharacter(characterId);
+        // Always start with static config (has all required fields)
+        const staticChar = getStaticCharacter(characterId);
+        
+        // Try to get API data to merge (for admin-edited fields like name)
+        try {
+          const apiChar = await getAPICharacter(characterId);
+          if (apiChar) {
+            // Merge: API values override static, but keep static as fallback for missing fields
+            const mergedChar: AICharacter = {
+              ...staticChar,
+              ...apiChar,
+              // Ensure critical fields use static fallback if API doesn't have them
+              welcomeMessage: apiChar.welcomeMessage || staticChar.welcomeMessage,
+              accentColor: apiChar.accentColor || staticChar.accentColor,
+              consentKey: apiChar.consentKey || staticChar.consentKey,
+              role: apiChar.role || staticChar.role,
+              systemPrompt: apiChar.systemPrompt || staticChar.systemPrompt,
+            };
+            setCharacter(mergedChar);
+            console.log('[Chat] Loaded character (API + static merge):', mergedChar.name);
+          } else {
+            setCharacter(staticChar);
+            console.log('[Chat] Using static character:', staticChar.name);
+          }
+        } catch (apiError) {
+          // API failed, use static
+          console.log('[Chat] API unavailable, using static character:', staticChar.name);
           setCharacter(staticChar);
-          console.log('[Chat] Using static character:', staticChar?.name);
         }
       } catch (error) {
         console.error('[Chat] Error loading character:', error);
-        // Fallback to static
-        const staticChar = getStaticCharacter(characterId);
-        setCharacter(staticChar);
+        // Last resort fallback
+        const fallback = getStaticCharacter('hugo');
+        setCharacter(fallback);
       } finally {
         setCharacterLoading(false);
       }
@@ -90,14 +108,19 @@ export default function UnifiedAIChat() {
     loadCharacter();
   }, [characterId]);
   
-  // Create dynamic styles
-  const styles = useMemo(() => createStyles(colors, isDark, character.accentColor), [colors, isDark, character.accentColor]);
+  // Get accent color safely (use default while loading)
+  const accentColor = character?.accentColor || DEFAULT_ACCENT_COLOR;
+  
+  // Create dynamic styles with safe accent color
+  const styles = useMemo(() => createStyles(colors, isDark, accentColor), [colors, isDark, accentColor]);
   
   const scrollViewRef = useRef<ScrollView>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionId] = useState(() => `${character.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+  
+  // Session ID - use characterId for stability since character may not be loaded yet
+  const [sessionId] = useState(() => `${characterId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   
   // Auth state
   const [showEmailModal, setShowEmailModal] = useState(false);
