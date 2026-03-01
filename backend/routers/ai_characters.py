@@ -21,8 +21,8 @@ db = None
 get_current_user = None
 AI_CHARACTERS_FALLBACK = None
 
-# Directory for storing uploaded avatars
-AVATAR_UPLOAD_DIR = "/app/backend/static/avatars"
+# Directory for storing uploaded avatars - use relative path that works on any host
+AVATAR_UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "avatars")
 
 def set_dependencies(database, current_user_func, fallback_characters):
     """Set database and auth dependencies from main server"""
@@ -31,8 +31,11 @@ def set_dependencies(database, current_user_func, fallback_characters):
     get_current_user = current_user_func
     AI_CHARACTERS_FALLBACK = fallback_characters
     
-    # Ensure avatar upload directory exists
-    os.makedirs(AVATAR_UPLOAD_DIR, exist_ok=True)
+    # Ensure avatar upload directory exists (wrap in try/except for read-only environments)
+    try:
+        os.makedirs(AVATAR_UPLOAD_DIR, exist_ok=True)
+    except PermissionError:
+        logging.warning(f"Cannot create avatar upload directory: {AVATAR_UPLOAD_DIR}. Avatar uploads will be disabled.")
 
 
 # ============================================================================
