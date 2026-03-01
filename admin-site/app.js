@@ -6472,7 +6472,7 @@ function renderPersonasGrid() {
     grid.innerHTML = aiPersonas.map(persona => {
         const isEnabled = persona.is_enabled !== false;
         const isHardcoded = persona.is_hardcoded === true;
-        const avatarUrl = persona.avatar || '';
+        const avatarUrl = resolveAvatarUrl(persona.avatar);
         const promptPreview = (persona.prompt || '').substring(0, 150);
         
         return `
