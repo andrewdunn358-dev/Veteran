@@ -1216,7 +1216,7 @@ AI_CHARACTERS = {
         "avatar": f"{AVATAR_BASE_URL}/tommy.png"
     },
     "doris": {
-        "name": "Doris",
+        "name": "Rachel",
         "prompt": DORIS_SYSTEM_PROMPT,
         "avatar": f"{AVATAR_BASE_URL}/doris.png"
     },
