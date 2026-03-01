@@ -1282,6 +1282,18 @@ async function sendChatMessage() {
     if (!text || !currentChatRoom) return;
     
     try {
+        // Also emit via Socket.IO for real-time delivery
+        if (window.webrtcSocket && window.webrtcSocket.connected) {
+            window.webrtcSocket.emit('chat_message', {
+                room_id: currentChatRoom,
+                message: text,
+                sender_id: currentUser.id,
+                sender_name: currentUser.name,
+                sender_type: currentUser.role || 'counsellor'
+            });
+        }
+        
+        // Also persist to database via REST API
         await apiCall('/live-chat/rooms/' + currentChatRoom + '/messages', {
             method: 'POST',
             body: JSON.stringify({ text: text, sender: 'staff' })
