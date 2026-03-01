@@ -21,10 +21,14 @@
     }
 })();
 
-// State
-let token = localStorage.getItem('staff_token');
-let currentUser = JSON.parse(localStorage.getItem('staff_user') || 'null');
-let myProfile = null;
+// State - check if already declared by inline JS in index.html
+if (typeof token === 'undefined') {
+    var token = localStorage.getItem('staff_token');
+}
+if (typeof currentUser === 'undefined') {
+    var currentUser = JSON.parse(localStorage.getItem('staff_user') || 'null');
+}
+var myProfile = null;
 
 // Session timeout - 2 hours of inactivity
 const SESSION_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
