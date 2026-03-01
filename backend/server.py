@@ -1272,7 +1272,7 @@ else:
 db = client[os.environ.get('DB_NAME', 'veterans_support')]
 
 # Create the main app
-app = FastAPI()
+app = FastAPI(redirect_slashes=True)
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer()
 
