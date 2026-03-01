@@ -283,3 +283,4 @@ export const getCrisisCharacters = (): AICharacter[] => {
 export const getSelfCareCharacters = (): AICharacter[] => {
   return [AI_CHARACTERS.hugo, AI_CHARACTERS.bob, AI_CHARACTERS.margie].filter(Boolean);
 };
+// Force rebuild Sun Mar  1 21:47:27 UTC 2026
