@@ -349,6 +349,64 @@ export default function LiveChat() {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   };
 
+  // Report user to moderation queue
+  const handleReport = async () => {
+    if (!reportReason.trim()) {
+      Alert.alert('Error', 'Please provide a reason for the report');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API_URL}/api/governance/peer-reports`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reported_user_id: staffName || 'unknown_staff',
+          reporter_id: userId,
+          report_type: 'inappropriate_behaviour',
+          description: reportReason,
+          context: {
+            room_id: roomId,
+            last_messages: messages.slice(-5).map(m => ({
+              sender: m.sender,
+              text: m.text.substring(0, 200)
+            }))
+          }
+        })
+      });
+      
+      if (response.ok) {
+        Alert.alert('Report Submitted', 'Thank you for your report. Our team will review it.');
+        setShowReportModal(false);
+        setReportReason('');
+      } else {
+        Alert.alert('Error', 'Failed to submit report. Please try again.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to submit report. Please try again.');
+    }
+  };
+
+  // Block user
+  const handleBlock = () => {
+    Alert.alert(
+      'Block User',
+      'Are you sure you want to block this user? You will no longer be able to chat with them.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Block', 
+          style: 'destructive',
+          onPress: async () => {
+            // End chat and go back
+            handleEndChat();
+            Alert.alert('User Blocked', 'You have blocked this user.');
+          }
+        }
+      ]
+    );
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
