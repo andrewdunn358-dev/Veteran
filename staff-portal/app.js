@@ -335,27 +335,39 @@ async function initPortal() {
     
     var role = currentUser.role;
     
-    // Set header info
-    document.getElementById('user-name').textContent = 'Welcome, ' + currentUser.name;
-    document.getElementById('portal-title').textContent = 
-        role === 'counsellor' ? 'Counsellor Portal' : 
-        role === 'peer' ? 'Peer Support Portal' : 'Staff Portal';
+    // Set header info (with null checks)
+    var userName = document.getElementById('user-name');
+    if (userName) userName.textContent = 'Welcome, ' + currentUser.name;
+    
+    var portalTitle = document.getElementById('portal-title');
+    if (portalTitle) {
+        portalTitle.textContent = 
+            role === 'counsellor' ? 'Counsellor Portal' : 
+            role === 'peer' ? 'Peer Support Portal' : 'Staff Portal';
+    }
     
     // Set role badge
     var badge = document.getElementById('user-role-badge');
-    badge.textContent = role.charAt(0).toUpperCase() + role.slice(1);
-    badge.className = 'role-badge role-' + role;
+    if (badge) {
+        badge.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+        badge.className = 'role-badge role-' + role;
+    }
     
-    // Show/hide sections based on role
-    // Panic ALERTS section - counsellors and admins see alerts FROM peers
-    document.getElementById('panic-section').style.display = 
-        (role === 'counsellor' || role === 'admin') ? 'block' : 'none';
-    // Safeguarding section - ALL staff should see safeguarding alerts
-    document.getElementById('safeguarding-section').style.display = 
-        (role === 'counsellor' || role === 'admin' || role === 'peer') ? 'block' : 'none';
-    // Panic BUTTON - only peers can trigger panic to counsellors
-    document.getElementById('panic-button-section').style.display = 
-        role === 'peer' ? 'block' : 'none';
+    // Show/hide sections based on role (with null checks)
+    var panicSection = document.getElementById('panic-section');
+    if (panicSection) {
+        panicSection.style.display = (role === 'counsellor' || role === 'admin') ? 'block' : 'none';
+    }
+    
+    var safeguardingSection = document.getElementById('safeguarding-section');
+    if (safeguardingSection) {
+        safeguardingSection.style.display = (role === 'counsellor' || role === 'admin' || role === 'peer') ? 'block' : 'none';
+    }
+    
+    var panicButtonSection = document.getElementById('panic-button-section');
+    if (panicButtonSection) {
+        panicButtonSection.style.display = role === 'peer' ? 'block' : 'none';
+    }
     
     // Load profile to get current status
     await loadMyProfile();
