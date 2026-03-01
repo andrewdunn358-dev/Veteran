@@ -1008,6 +1008,61 @@
                 </div>
             </div>
         </div>
+        
+        <!-- ROTA TAB -->
+        <div id="tab-rota" class="tab-pane">
+            <div class="tab-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2><i class="fas fa-calendar-alt"></i> My Shifts & Rota</h2>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-outline btn-sm" onclick="loadRotaData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="openSwapRequestModal()">
+                        <i class="fas fa-exchange-alt"></i> Request Cover
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Calendar View -->
+            <div id="rota-calendar" class="rota-calendar" style="background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                <div id="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <button class="btn btn-outline btn-sm" onclick="prevMonth()"><i class="fas fa-chevron-left"></i></button>
+                    <h3 id="calendar-month" style="margin: 0;">Loading...</h3>
+                    <button class="btn btn-outline btn-sm" onclick="nextMonth()"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div id="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
+                    <!-- Calendar days populated by JS -->
+                </div>
+            </div>
+            
+            <!-- My Upcoming Shifts -->
+            <div class="rota-section" style="background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 16px 0;"><i class="fas fa-clock"></i> My Upcoming Shifts</h3>
+                <div id="my-shifts-list">
+                    <p style="color: var(--text-muted); text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Loading shifts...</p>
+                </div>
+            </div>
+            
+            <!-- Available Swap Requests -->
+            <div class="rota-section" style="background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 8px 0;">
+                    <i class="fas fa-hand-paper"></i> Cover Requests
+                    <span id="swap-count" class="tab-badge" style="margin-left: 8px;">0</span>
+                </h3>
+                <p style="color: var(--text-muted); margin-bottom: 16px; font-size: 14px;">Other staff members looking for cover</p>
+                <div id="available-swaps">
+                    <p style="color: var(--text-muted); text-align: center; padding: 20px;"><i class="fas fa-check-circle"></i> No cover requests</p>
+                </div>
+            </div>
+            
+            <!-- My Swap Requests -->
+            <div class="rota-section" style="background: var(--card); border-radius: 12px; padding: 20px;">
+                <h3 style="margin: 0 0 16px 0;"><i class="fas fa-paper-plane"></i> My Cover Requests</h3>
+                <div id="my-swap-requests">
+                    <p style="color: var(--text-muted); text-align: center; padding: 20px;">You haven't requested any cover</p>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Case Detail Modal -->
