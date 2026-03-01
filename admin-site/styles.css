@@ -3137,3 +3137,201 @@ body {
 .btn-danger:hover {
     background: #dc2626;
 }
+
+
+
+/* ===================================
+   AI PERSONAS MANAGEMENT STYLES
+   =================================== */
+
+.personas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.persona-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.persona-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.persona-card.disabled {
+    opacity: 0.6;
+}
+
+.persona-card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg-card) 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.persona-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--border-color);
+    border: 3px solid white;
+    box-shadow: var(--shadow);
+}
+
+.persona-avatar-placeholder {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    border: 3px solid white;
+    box-shadow: var(--shadow);
+}
+
+.persona-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.persona-info h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.persona-info h3 .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.persona-info h3 .badge.hardcoded {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.persona-info h3 .badge.database {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.persona-info .persona-id {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: monospace;
+    margin-top: 2px;
+}
+
+.persona-info .persona-description {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+.persona-card-body {
+    padding: 16px 20px;
+}
+
+.persona-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.persona-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.persona-meta-item i {
+    color: var(--primary);
+    width: 16px;
+}
+
+.persona-prompt-preview {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: monospace;
+    max-height: 60px;
+    overflow: hidden;
+    position: relative;
+}
+
+.persona-prompt-preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(transparent, var(--bg-primary));
+}
+
+.persona-card-actions {
+    display: flex;
+    gap: 8px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-primary);
+}
+
+.persona-card-actions .btn {
+    flex: 1;
+}
+
+/* Status toggle in persona card */
+.persona-status-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+/* Loading placeholder */
+.loading-placeholder {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 16px;
+}
+
+.loading-placeholder i {
+    display: block;
+    font-size: 32px;
+    margin-bottom: 12px;
+    color: var(--primary);
+}
+
+/* Warning backgrounds */
+.card[style*="warning"] {
+    --warning-bg: #fffbeb;
+    --warning-border: #fcd34d;
+    --warning-color: #b45309;
+}
