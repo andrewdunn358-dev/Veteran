@@ -6586,8 +6586,16 @@ function editPersona(personaId) {
     document.getElementById('persona-avatar').value = persona.avatar || '';
     document.getElementById('persona-prompt').value = persona.prompt || '';
     
-    // Update avatar preview
+    // Update avatar preview and placeholder
     updateAvatarPreview(persona.avatar);
+    const placeholder = document.getElementById('avatar-placeholder');
+    if (placeholder) {
+        placeholder.textContent = (persona.name || '?')[0].toUpperCase();
+    }
+    
+    // Reset file input
+    document.getElementById('persona-avatar-file').value = '';
+    document.getElementById('avatar-upload-status').textContent = '';
     
     document.getElementById('persona-modal').classList.remove('hidden');
 }
