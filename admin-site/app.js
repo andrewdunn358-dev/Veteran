@@ -5618,7 +5618,7 @@ function showModal(title, content) {
     modalContainer.style.display = 'flex';
 }
 
-function closeModal() {
+function closeSafeguardingModal() {
     const modal = document.getElementById('safeguarding-modal');
     if (modal) {
         modal.style.display = 'none';
