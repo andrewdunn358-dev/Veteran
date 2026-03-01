@@ -366,18 +366,6 @@ export default function UnifiedAIChat() {
     setCallbackName('');
   };
 
-  // Show consent modal
-  if (showAIConsent) {
-    return (
-      <AIConsentModal
-        visible={showAIConsent}
-        onAccept={handleAcceptConsent}
-        onDecline={() => router.back()}
-        characterName={character.name}
-      />
-    );
-  }
-
   // Show loading while character is being fetched
   if (characterLoading || !character) {
     return (
@@ -385,6 +373,19 @@ export default function UnifiedAIChat() {
         <ActivityIndicator size="large" color={colors.primary} />
         <Text style={{ color: colors.text, marginTop: 16 }}>Loading...</Text>
       </SafeAreaView>
+    );
+  }
+
+  // Show consent modal (only after character is fully loaded)
+  if (showAIConsent) {
+    console.log('[Chat] Showing consent modal for:', character.name);
+    return (
+      <AIConsentModal
+        visible={showAIConsent}
+        onAccept={handleAcceptConsent}
+        onDecline={() => router.back()}
+        characterName={character.name}
+      />
     );
   }
 
