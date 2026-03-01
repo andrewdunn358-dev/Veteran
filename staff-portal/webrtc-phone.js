@@ -171,6 +171,45 @@ function setupSocketHandlers() {
         }
     });
     
+    // Real-time chat messages
+    socket.on('new_chat_message', (data) => {
+        console.log('New chat message received via socket');
+        var staffUser = window.currentUser || {};
+        // Only process if we're in a chat and message is not from us
+        if (window.currentChatRoom && data.room_id === window.currentChatRoom && data.sender_id !== staffUser.id) {
+            // Add message to the live chat modal
+            var messagesDiv = document.getElementById('livechat-messages');
+            if (messagesDiv) {
+                var msgHtml = '<div class="chat-message user">' +
+                    '<span class="msg-sender">' + (data.sender_name || 'User') + '</span>' +
+                    '<span class="msg-text">' + (typeof escapeHtml === 'function' ? escapeHtml(data.message) : data.message) + '</span>' +
+                    '<span class="msg-time">' + new Date(data.timestamp).toLocaleTimeString() + '</span>' +
+                '</div>';
+                messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+    });
+    
+    // User left chat notification
+    socket.on('user_left_chat', (data) => {
+        console.log('User left chat:', data);
+        if (window.currentChatRoom && data.room_id === window.currentChatRoom) {
+            if (typeof showNotification === 'function') {
+                showNotification(data.user_name + ' has left the chat', 'info');
+            }
+            // Add system message
+            var messagesDiv = document.getElementById('livechat-messages');
+            if (messagesDiv) {
+                var msgHtml = '<div class="chat-message system">' +
+                    '<span class="msg-text" style="font-style: italic; color: #666;">' + (data.user_name || 'User') + ' has left the chat</span>' +
+                '</div>';
+                messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+    });
+    
     // Incoming call
     socket.on('incoming_call', async (data) => {
         console.log('Incoming call:', data);
