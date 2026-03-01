@@ -873,7 +873,9 @@ function renderSafeguardingAlerts(alerts) {
             historyHtml +
             '<div class="card-time"><i class="fas fa-clock"></i> ' + new Date(alert.created_at).toLocaleString() + '</div>' +
             (alert.acknowledged_by ? '<div class="card-ack"><i class="fas fa-user-check"></i> Acknowledged by ' + alert.acknowledged_by + '</div>' : '') +
-            '<div class="card-actions">' + actions + '</div>' +
+            '<div class="card-actions">' + actions + 
+                '<button class="btn btn-primary" onclick="createCaseFromSafeguardingAlert(\'' + alert.id + '\', \'' + escapeHtml(alert.session_id || '').replace(/'/g, "\\'") + '\', \'' + escapeHtml(alert.triggering_message || '').replace(/'/g, "\\'").substring(0, 100) + '\', \'' + (alert.risk_level || 'AMBER') + '\')"><i class="fas fa-folder-plus"></i> Create Case</button>' +
+            '</div>' +
         '</div>';
     }).join('');
     
