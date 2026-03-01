@@ -44,14 +44,16 @@ function AppContent() {
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <AgeGateProvider>
-        <FavoritesProvider>
-          <AuthProvider>
-            <AppContent />
-          </AuthProvider>
-        </FavoritesProvider>
-      </AgeGateProvider>
-    </ThemeProvider>
+    <SiteGateProvider>
+      <ThemeProvider>
+        <AgeGateProvider>
+          <FavoritesProvider>
+            <AuthProvider>
+              <AppContent />
+            </AuthProvider>
+          </FavoritesProvider>
+        </AgeGateProvider>
+      </ThemeProvider>
+    </SiteGateProvider>
   );
 }
