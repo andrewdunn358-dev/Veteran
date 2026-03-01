@@ -2284,11 +2284,11 @@ async function submitSafetyPlan(event, caseId) {
 
 // Create referral
 async function createReferral(caseId) {
-    var content = '<div style="padding: 20px;">' +
+    var content = '<div style="padding: 20px; background: #ffffff;">' +
         '<form id="referral-form" onsubmit="return submitReferral(event, \'' + caseId + '\')">' +
-            '<div class="form-group">' +
-                '<label>Service Type</label>' +
-                '<select id="referral-service-type" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">' +
+            '<div class="form-group" style="margin-bottom: 16px;">' +
+                '<label style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Service Type</label>' +
+                '<select id="referral-service-type" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; background: #f9fafb;">' +
                     '<option value="nhs_mental_health">NHS Mental Health</option>' +
                     '<option value="crisis_team">Crisis Team</option>' +
                     '<option value="gp">GP</option>' +
@@ -2296,30 +2296,30 @@ async function createReferral(caseId) {
                     '<option value="other">Other</option>' +
                 '</select>' +
             '</div>' +
-            '<div class="form-group">' +
-                '<label>Service Name</label>' +
-                '<input type="text" id="referral-service-name" required placeholder="e.g., Local NHS IAPT..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">' +
+            '<div class="form-group" style="margin-bottom: 16px;">' +
+                '<label style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Service Name</label>' +
+                '<input type="text" id="referral-service-name" required placeholder="e.g., Local NHS IAPT..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; background: #f9fafb;">' +
             '</div>' +
-            '<div class="form-group">' +
-                '<label>Urgency</label>' +
-                '<select id="referral-urgency" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">' +
+            '<div class="form-group" style="margin-bottom: 16px;">' +
+                '<label style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Urgency</label>' +
+                '<select id="referral-urgency" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; background: #f9fafb;">' +
                     '<option value="routine">Routine</option>' +
                     '<option value="urgent">Urgent</option>' +
                     '<option value="emergency">Emergency</option>' +
                 '</select>' +
             '</div>' +
-            '<div class="form-group">' +
-                '<label>Notes</label>' +
-                '<textarea id="referral-notes" rows="3" placeholder="Additional information..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);"></textarea>' +
+            '<div class="form-group" style="margin-bottom: 16px;">' +
+                '<label style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Notes</label>' +
+                '<textarea id="referral-notes" rows="3" placeholder="Additional information..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; background: #f9fafb;"></textarea>' +
             '</div>' +
-            '<div style="display: flex; gap: 12px; margin-top: 16px;">' +
-                '<button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Create Referral</button>' +
-                '<button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>' +
+            '<div style="display: flex; gap: 12px; margin-top: 20px;">' +
+                '<button type="submit" class="btn btn-primary" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer;"><i class="fas fa-paper-plane"></i> Create Referral</button>' +
+                '<button type="button" class="btn btn-outline" onclick="goBackToCase(\'' + caseId + '\')" style="background: #f3f4f6; color: #374151; padding: 12px 24px; border-radius: 8px; border: 1px solid #d1d5db; cursor: pointer;"><i class="fas fa-arrow-left"></i> Back to Case</button>' +
             '</div>' +
         '</form>' +
     '</div>';
     
-    openGenericModal('Create Referral', content);
+    openGenericModal('Create Referral', content, { isSubModal: true });
 }
 
 // Submit referral
