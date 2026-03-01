@@ -6403,3 +6403,302 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+
+// =========================================
+// AI PERSONAS MANAGEMENT
+// =========================================
+
+let aiPersonas = [];
+let personasSource = 'unknown';
+
+// Load AI Personas when tab is opened
+document.addEventListener('DOMContentLoaded', function() {
+    const personasTab = document.querySelector('[data-tab="ai-personas"]');
+    if (personasTab) {
+        personasTab.addEventListener('click', function() {
+            setTimeout(() => loadAIPersonas(), 100);
+        });
+    }
+    
+    // Avatar preview on URL change
+    document.getElementById('persona-avatar')?.addEventListener('input', function(e) {
+        updateAvatarPreview(e.target.value);
+    });
+    
+    // Enabled toggle label
+    document.getElementById('persona-enabled')?.addEventListener('change', function(e) {
+        document.getElementById('persona-status-label').textContent = e.target.checked ? 'Enabled' : 'Disabled';
+    });
+});
+
+async function loadAIPersonas() {
+    const grid = document.getElementById('personas-grid');
+    const notice = document.getElementById('personas-source-notice');
+    
+    grid.innerHTML = '<div class="loading-placeholder"><i class="fas fa-spinner fa-spin"></i> Loading AI Personas...</div>';
+    
+    try {
+        const response = await fetchWithAuth('/api/ai-characters/admin/all');
+        const data = await response.json();
+        
+        aiPersonas = data.characters || [];
+        personasSource = data.source || 'unknown';
+        
+        // Show/hide source notice
+        if (personasSource === 'fallback' || personasSource === 'hardcoded') {
+            notice.style.display = 'block';
+        } else {
+            notice.style.display = 'none';
+        }
+        
+        renderPersonasGrid();
+    } catch (error) {
+        console.error('Error loading personas:', error);
+        grid.innerHTML = '<div class="loading-placeholder"><i class="fas fa-exclamation-triangle"></i> Failed to load personas. Please try again.</div>';
+    }
+}
+
+function renderPersonasGrid() {
+    const grid = document.getElementById('personas-grid');
+    
+    if (aiPersonas.length === 0) {
+        grid.innerHTML = '<div class="loading-placeholder"><i class="fas fa-robot"></i> No AI personas found. Click "Create New Persona" to add one.</div>';
+        return;
+    }
+    
+    grid.innerHTML = aiPersonas.map(persona => {
+        const isEnabled = persona.is_enabled !== false;
+        const isHardcoded = persona.is_hardcoded === true;
+        const avatarUrl = persona.avatar || '';
+        const promptPreview = (persona.prompt || '').substring(0, 150);
+        
+        return `
+            <div class="persona-card ${!isEnabled ? 'disabled' : ''}" data-id="${persona.id}">
+                <div class="persona-card-header">
+                    ${avatarUrl 
+                        ? `<img src="${avatarUrl}" alt="${persona.name}" class="persona-avatar" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                           <div class="persona-avatar-placeholder" style="display:none;">${(persona.name || 'A')[0].toUpperCase()}</div>`
+                        : `<div class="persona-avatar-placeholder">${(persona.name || 'A')[0].toUpperCase()}</div>`
+                    }
+                    <div class="persona-info">
+                        <h3>
+                            ${persona.name || 'Unnamed'}
+                            <span class="badge ${isHardcoded ? 'hardcoded' : 'database'}">${isHardcoded ? 'Code' : 'DB'}</span>
+                        </h3>
+                        <div class="persona-id">ID: ${persona.id}</div>
+                        <div class="persona-description">${persona.description || 'No description'}</div>
+                    </div>
+                </div>
+                <div class="persona-card-body">
+                    <div class="persona-meta">
+                        <div class="persona-meta-item">
+                            <i class="fas fa-tags"></i> ${persona.category || 'general'}
+                        </div>
+                        <div class="persona-meta-item">
+                            <i class="fas fa-sort-numeric-up"></i> Order: ${persona.order ?? 0}
+                        </div>
+                        <div class="persona-meta-item">
+                            <i class="fas fa-${isEnabled ? 'eye' : 'eye-slash'}"></i> ${isEnabled ? 'Enabled' : 'Disabled'}
+                        </div>
+                    </div>
+                    ${promptPreview ? `<div class="persona-prompt-preview">${escapeHtml(promptPreview)}...</div>` : ''}
+                </div>
+                <div class="persona-card-actions">
+                    <button class="btn btn-secondary btn-small" onclick="editPersona('${persona.id}')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    ${!isHardcoded ? `
+                        <button class="btn btn-danger btn-small" onclick="deletePersona('${persona.id}', '${escapeHtml(persona.name)}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    ` : `
+                        <button class="btn btn-outline btn-small" disabled title="Hardcoded characters cannot be deleted">
+                            <i class="fas fa-lock"></i> Protected
+                        </button>
+                    `}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text || '';
+    return div.innerHTML;
+}
+
+function openAddPersonaModal() {
+    const form = document.getElementById('persona-form');
+    form.reset();
+    
+    document.getElementById('persona-modal-title').innerHTML = '<i class="fas fa-plus"></i> Create New AI Persona';
+    document.getElementById('persona-submit-btn').innerHTML = '<i class="fas fa-plus"></i> Create Persona';
+    document.getElementById('persona-is-new').value = 'true';
+    document.getElementById('persona-char-id').disabled = false;
+    document.getElementById('persona-enabled').checked = true;
+    document.getElementById('persona-status-label').textContent = 'Enabled';
+    document.getElementById('persona-order').value = aiPersonas.length + 1;
+    
+    // Clear avatar preview
+    document.getElementById('avatar-preview-img').style.display = 'none';
+    
+    document.getElementById('persona-modal').classList.remove('hidden');
+}
+
+function editPersona(personaId) {
+    const persona = aiPersonas.find(p => p.id === personaId);
+    if (!persona) {
+        showNotification('Persona not found', 'error');
+        return;
+    }
+    
+    document.getElementById('persona-modal-title').innerHTML = `<i class="fas fa-edit"></i> Edit: ${persona.name}`;
+    document.getElementById('persona-submit-btn').innerHTML = '<i class="fas fa-save"></i> Save Changes';
+    document.getElementById('persona-is-new').value = 'false';
+    
+    // Fill form
+    document.getElementById('persona-id').value = persona.id;
+    document.getElementById('persona-char-id').value = persona.id;
+    document.getElementById('persona-char-id').disabled = true; // Can't change ID
+    document.getElementById('persona-name').value = persona.name || '';
+    document.getElementById('persona-description').value = persona.description || '';
+    document.getElementById('persona-bio').value = persona.bio || '';
+    document.getElementById('persona-category').value = persona.category || 'general';
+    document.getElementById('persona-order').value = persona.order ?? 0;
+    document.getElementById('persona-enabled').checked = persona.is_enabled !== false;
+    document.getElementById('persona-status-label').textContent = persona.is_enabled !== false ? 'Enabled' : 'Disabled';
+    document.getElementById('persona-avatar').value = persona.avatar || '';
+    document.getElementById('persona-prompt').value = persona.prompt || '';
+    
+    // Update avatar preview
+    updateAvatarPreview(persona.avatar);
+    
+    document.getElementById('persona-modal').classList.remove('hidden');
+}
+
+function closePersonaModal() {
+    document.getElementById('persona-modal').classList.add('hidden');
+}
+
+function updateAvatarPreview(url) {
+    const img = document.getElementById('avatar-preview-img');
+    if (url && url.trim()) {
+        img.src = url;
+        img.style.display = 'block';
+        img.onerror = () => { img.style.display = 'none'; };
+    } else {
+        img.style.display = 'none';
+    }
+}
+
+async function savePersona(event) {
+    event.preventDefault();
+    
+    const isNew = document.getElementById('persona-is-new').value === 'true';
+    const personaId = document.getElementById('persona-char-id').value.toLowerCase().trim();
+    
+    const data = {
+        id: personaId,
+        name: document.getElementById('persona-name').value.trim(),
+        description: document.getElementById('persona-description').value.trim(),
+        bio: document.getElementById('persona-bio').value.trim() || null,
+        prompt: document.getElementById('persona-prompt').value.trim(),
+        avatar: document.getElementById('persona-avatar').value.trim() || null,
+        category: document.getElementById('persona-category').value,
+        order: parseInt(document.getElementById('persona-order').value) || 0,
+        is_enabled: document.getElementById('persona-enabled').checked
+    };
+    
+    // Validation
+    if (!data.id || !data.name || !data.prompt) {
+        showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    if (!/^[a-z0-9_-]+$/.test(data.id)) {
+        showNotification('Character ID must be lowercase letters, numbers, underscores, or hyphens only', 'error');
+        return;
+    }
+    
+    try {
+        let response;
+        if (isNew) {
+            response = await fetchWithAuth('/api/ai-characters', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        } else {
+            // Don't send ID in update payload
+            const updateData = { ...data };
+            delete updateData.id;
+            response = await fetchWithAuth(`/api/ai-characters/${personaId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateData)
+            });
+        }
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to save persona');
+        }
+        
+        showNotification(isNew ? 'Persona created successfully!' : 'Persona updated successfully!', 'success');
+        closePersonaModal();
+        loadAIPersonas();
+    } catch (error) {
+        console.error('Error saving persona:', error);
+        showNotification(error.message || 'Failed to save persona', 'error');
+    }
+}
+
+async function deletePersona(personaId, personaName) {
+    if (!confirm(`Are you sure you want to delete "${personaName}"? This cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetchWithAuth(`/api/ai-characters/${personaId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to delete persona');
+        }
+        
+        showNotification('Persona deleted successfully', 'success');
+        loadAIPersonas();
+    } catch (error) {
+        console.error('Error deleting persona:', error);
+        showNotification(error.message || 'Failed to delete persona', 'error');
+    }
+}
+
+async function seedPersonasFromCode() {
+    if (!confirm('This will import all hardcoded characters into the database. You can then edit them freely. Continue?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetchWithAuth('/api/ai-characters/seed-from-hardcoded', {
+            method: 'POST'
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to seed personas');
+        }
+        
+        const data = await response.json();
+        showNotification(`Imported ${data.seeded} personas (${data.skipped} already existed)`, 'success');
+        loadAIPersonas();
+    } catch (error) {
+        console.error('Error seeding personas:', error);
+        showNotification(error.message || 'Failed to import personas', 'error');
+    }
+}
+
