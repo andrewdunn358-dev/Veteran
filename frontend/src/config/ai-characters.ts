@@ -274,7 +274,7 @@ export const getAllCharacters = (): AICharacter[] => {
   return Object.values(AI_CHARACTERS);
 };
 
-// Get characters for crisis support (Tommy & Doris)
+// Get characters for crisis support (Tommy & Rachel)
 export const getCrisisCharacters = (): AICharacter[] => {
   return [AI_CHARACTERS.tommy, AI_CHARACTERS.doris].filter(Boolean);
 };
