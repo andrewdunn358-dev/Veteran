@@ -1279,19 +1279,30 @@ async function sendChatMessage() {
     var input = document.getElementById('livechat-input');
     var text = input.value.trim();
     
-    if (!text || !currentChatRoom) return;
+    console.log('sendChatMessage called, text:', text, 'room:', currentChatRoom);
+    
+    if (!text || !currentChatRoom) {
+        console.log('No text or no room, aborting');
+        return;
+    }
     
     try {
-        // Also emit via Socket.IO for real-time delivery
+        // Emit via Socket.IO for real-time delivery
         var wsocket = window.webRTCPhone && window.webRTCPhone.socket;
+        console.log('Socket available:', !!wsocket, 'Connected:', wsocket && wsocket.connected);
+        
         if (wsocket && wsocket.connected) {
-            wsocket.emit('chat_message', {
+            var messageData = {
                 room_id: currentChatRoom,
                 message: text,
                 sender_id: currentUser.id,
                 sender_name: currentUser.name,
                 sender_type: currentUser.role || 'counsellor'
-            });
+            };
+            console.log('Emitting chat_message:', messageData);
+            wsocket.emit('chat_message', messageData);
+        } else {
+            console.error('Socket not connected!');
         }
         
         // Also persist to database via REST API
@@ -1304,12 +1315,14 @@ async function sendChatMessage() {
         
         // Add message to UI immediately
         var messagesDiv = document.getElementById('livechat-messages');
-        messagesDiv.innerHTML += '<div class="chat-message staff">' +
-            '<span class="msg-sender">You</span>' +
-            '<span class="msg-text">' + escapeHtml(text) + '</span>' +
-            '<span class="msg-time">' + new Date().toLocaleTimeString() + '</span>' +
-        '</div>';
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        if (messagesDiv) {
+            messagesDiv.innerHTML += '<div class="chat-message staff">' +
+                '<span class="msg-sender">You</span>' +
+                '<span class="msg-text">' + escapeHtml(text) + '</span>' +
+                '<span class="msg-time">' + new Date().toLocaleTimeString() + '</span>' +
+            '</div>';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
         
     } catch (error) {
         console.error('Error sending message:', error);
