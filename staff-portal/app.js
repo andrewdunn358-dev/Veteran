@@ -21,18 +21,16 @@
     }
 })();
 
-// State - check if already declared by inline JS in index.html
-if (typeof token === 'undefined') {
-    var token = localStorage.getItem('staff_token');
+// State - use window.* to avoid redeclaration with inline JS
+// token and currentUser are declared in index.html inline script
+if (typeof window.myProfile === 'undefined') {
+    window.myProfile = null;
 }
-if (typeof currentUser === 'undefined') {
-    var currentUser = JSON.parse(localStorage.getItem('staff_user') || 'null');
-}
-var myProfile = null;
+var myProfile = window.myProfile;
 
 // Session timeout - 2 hours of inactivity
-const SESSION_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
-let inactivityTimer = null;
+var SESSION_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
+var inactivityTimer = null;
 let lastActivityTime = Date.now();
 
 // Check if session has expired on page load
