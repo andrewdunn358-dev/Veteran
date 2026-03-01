@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Alert,
+  Modal,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
