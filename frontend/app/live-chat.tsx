@@ -343,7 +343,7 @@ export default function LiveChat() {
         user_id: userId
       });
     }
-    router.replace('/home');
+    safeGoBack(router, '/peer-support');
   };
 
   const scrollToBottom = () => {
