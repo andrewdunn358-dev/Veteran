@@ -2326,13 +2326,16 @@ function openResetPasswordModal(userId, userName) {
         </div>
         <form id="reset-password-form" class="modal-body">
             <input type="hidden" name="userId" value="${userId}">
+            <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+                <i class="fas fa-info-circle"></i> Password must be at least 8 characters and cannot match any of the last 3 passwords used.
+            </p>
             <div class="form-group">
                 <label>New Password *</label>
-                <input type="password" name="newPassword" required minlength="8" placeholder="Minimum 8 characters">
+                <input type="password" name="newPassword" id="new-password" required minlength="8" placeholder="Minimum 8 characters" autocomplete="new-password">
             </div>
             <div class="form-group">
                 <label>Confirm Password *</label>
-                <input type="password" name="confirmPassword" required minlength="8" placeholder="Re-enter password">
+                <input type="password" name="confirmPassword" id="confirm-password" required minlength="8" placeholder="Re-enter password" autocomplete="new-password">
             </div>
         </form>
         <div class="modal-footer">
