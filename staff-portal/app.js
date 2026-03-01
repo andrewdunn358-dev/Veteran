@@ -2033,7 +2033,7 @@ async function loadMorningReviewQueue() {
     if (!container) return;
     
     try {
-        var queue = await apiCall('/cases/morning-review-queue');
+        var queue = await apiCall('/cases/morning-queue');
         var queueBadge = document.getElementById('review-queue-count');
         
         if (queueBadge) {
