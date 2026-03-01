@@ -1,7 +1,7 @@
 # Radio Check - Mental Health Veterans Support Platform
 
 ## Product Requirements Document (PRD)
-**Version 3.0 | December 2025**
+**Version 3.1 | March 2026**
 
 ---
 
