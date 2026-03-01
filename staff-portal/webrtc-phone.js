@@ -173,12 +173,22 @@ function setupSocketHandlers() {
     
     // Real-time chat messages
     socket.on('new_chat_message', (data) => {
-        console.log('New chat message received via socket');
+        console.log('New chat message received via socket:', data);
+        console.log('Current room:', window.currentChatRoom, 'Message room:', data.room_id);
         var staffUser = window.currentUser || {};
+        console.log('Staff ID:', staffUser.id, 'Sender ID:', data.sender_id);
+        
         // Only process if we're in a chat and message is not from us
-        if (window.currentChatRoom && data.room_id === window.currentChatRoom && data.sender_id !== staffUser.id) {
+        if (window.currentChatRoom && data.room_id === window.currentChatRoom) {
+            // Skip our own messages (we already show them locally)
+            if (data.sender_id === staffUser.id) {
+                console.log('Skipping own message');
+                return;
+            }
+            
             // Add message to the live chat modal
             var messagesDiv = document.getElementById('livechat-messages');
+            console.log('Messages div found:', !!messagesDiv);
             if (messagesDiv) {
                 var msgHtml = '<div class="chat-message user">' +
                     '<span class="msg-sender">' + (data.sender_name || 'User') + '</span>' +
@@ -187,7 +197,12 @@ function setupSocketHandlers() {
                 '</div>';
                 messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                console.log('Message added to UI');
+            } else {
+                console.error('livechat-messages div not found!');
             }
+        } else {
+            console.log('Message ignored - room mismatch or no current room');
         }
     });
     
