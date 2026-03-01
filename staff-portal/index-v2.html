@@ -1986,10 +1986,280 @@
             }
         }
         
-        // Placeholder functions
-        function openSafetyPlanEditor() { alert('Safety plan editor - coming soon'); }
-        function openReferralForm() { alert('Referral form - coming soon'); }
-        function updateReferralStatus() { alert('Update status - coming soon'); }
+        // Safety Plan Editor
+        function openSafetyPlanEditor() {
+            const sp = currentCase.safety_plan || {};
+            const content = document.getElementById('case-modal-content');
+            
+            content.innerHTML = `
+                <h3 style="margin-bottom: 20px;">Safety Plan</h3>
+                <form id="safety-plan-form">
+                    <div class="form-group">
+                        <label>Warning Signs (one per line)</label>
+                        <textarea id="sp-warning-signs" rows="3" placeholder="What signs do I notice when things are getting tough?">${(sp.warning_signs || []).join('\\n')}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Internal Coping Strategies (one per line)</label>
+                        <textarea id="sp-coping" rows="3" placeholder="Things I can do to help myself feel better...">${(sp.internal_coping || []).join('\\n')}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>People & Places That Help Distract Me (one per line)</label>
+                        <textarea id="sp-distractions" rows="3" placeholder="People I can call, places I can go...">${(sp.distractions || []).join('\\n')}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Support People</label>
+                        <div id="sp-support-people">
+                            ${(sp.support_people || []).map((p, i) => `
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                    <input type="text" placeholder="Name" value="${escapeHtml(p.name || '')}" class="sp-person-name">
+                                    <input type="text" placeholder="Phone" value="${escapeHtml(p.phone || '')}" class="sp-person-phone">
+                                </div>
+                            `).join('')}
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <input type="text" placeholder="Name" class="sp-person-name">
+                                <input type="text" placeholder="Phone" class="sp-person-phone">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="addSupportPerson()">
+                            <i class="fas fa-plus"></i> Add Person
+                        </button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Reasons for Living (one per line)</label>
+                        <textarea id="sp-reasons" rows="3" placeholder="Things worth living for...">${(sp.reasons_for_living || []).join('\\n')}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Making My Environment Safer (one per line)</label>
+                        <textarea id="sp-environment" rows="3" placeholder="Steps to make my environment safer...">${(sp.environment_safety || []).join('\\n')}</textarea>
+                    </div>
+                    
+                    <div style="background: var(--bg); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <strong>Crisis Contacts (Always Available)</strong>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
+                            • Samaritans: 116 123 (24/7)<br>
+                            • Emergency Services: 999<br>
+                            • Veterans Gateway: 0808 802 1212
+                        </p>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                        <button type="button" class="btn btn-outline" onclick="switchModalTab('overview')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Safety Plan
+                        </button>
+                    </div>
+                </form>
+            `;
+            
+            document.getElementById('safety-plan-form').addEventListener('submit', saveSafetyPlan);
+        }
+        
+        function addSupportPerson() {
+            const container = document.getElementById('sp-support-people');
+            const div = document.createElement('div');
+            div.style.cssText = 'display: flex; gap: 8px; margin-bottom: 8px;';
+            div.innerHTML = `
+                <input type="text" placeholder="Name" class="sp-person-name">
+                <input type="text" placeholder="Phone" class="sp-person-phone">
+            `;
+            container.appendChild(div);
+        }
+        
+        async function saveSafetyPlan(e) {
+            e.preventDefault();
+            
+            // Collect support people
+            const names = document.querySelectorAll('.sp-person-name');
+            const phones = document.querySelectorAll('.sp-person-phone');
+            const supportPeople = [];
+            names.forEach((nameInput, i) => {
+                const name = nameInput.value.trim();
+                const phone = phones[i]?.value.trim() || '';
+                if (name) supportPeople.push({ name, phone });
+            });
+            
+            const safetyPlan = {
+                warning_signs: document.getElementById('sp-warning-signs').value.split('\\n').filter(s => s.trim()),
+                internal_coping: document.getElementById('sp-coping').value.split('\\n').filter(s => s.trim()),
+                distractions: document.getElementById('sp-distractions').value.split('\\n').filter(s => s.trim()),
+                support_people: supportPeople,
+                reasons_for_living: document.getElementById('sp-reasons').value.split('\\n').filter(s => s.trim()),
+                environment_safety: document.getElementById('sp-environment').value.split('\\n').filter(s => s.trim()),
+                professionals: []
+            };
+            
+            try {
+                await apiFetch(`/api/cases/${currentCase.id}/safety-plan`, {
+                    method: 'PUT',
+                    body: JSON.stringify(safetyPlan)
+                });
+                
+                alert('Safety plan saved!');
+                openCase(currentCase.id); // Refresh
+            } catch (err) {
+                alert('Error saving safety plan: ' + err.message);
+            }
+        }
+        
+        // Referral Form
+        function openReferralForm() {
+            const content = document.getElementById('case-modal-content');
+            
+            content.innerHTML = `
+                <h3 style="margin-bottom: 20px;">Create Referral</h3>
+                <form id="referral-form">
+                    <div class="form-group">
+                        <label>Referral Service *</label>
+                        <select id="ref-service" required>
+                            <option value="">Select a service...</option>
+                            <optgroup label="Op COURAGE">
+                                <option value="op_courage_ne|Op COURAGE North East|Op COURAGE">Op COURAGE North East</option>
+                                <option value="op_courage_nw|Op COURAGE North West|Op COURAGE">Op COURAGE North West</option>
+                                <option value="op_courage_yh|Op COURAGE Yorkshire & Humber|Op COURAGE">Op COURAGE Yorkshire & Humber</option>
+                                <option value="op_courage_em|Op COURAGE East Midlands|Op COURAGE">Op COURAGE East Midlands</option>
+                                <option value="op_courage_wm|Op COURAGE West Midlands|Op COURAGE">Op COURAGE West Midlands</option>
+                                <option value="op_courage_lon|Op COURAGE London|Op COURAGE">Op COURAGE London</option>
+                                <option value="op_courage_se|Op COURAGE South East|Op COURAGE">Op COURAGE South East</option>
+                                <option value="op_courage_sw|Op COURAGE South West|Op COURAGE">Op COURAGE South West</option>
+                                <option value="op_courage_ee|Op COURAGE East of England|Op COURAGE">Op COURAGE East of England</option>
+                            </optgroup>
+                            <optgroup label="NHS">
+                                <option value="nhs_iapt|NHS IAPT|NHS">NHS IAPT</option>
+                                <option value="nhs_cmht|NHS Community Mental Health Team|NHS">NHS Community Mental Health Team</option>
+                            </optgroup>
+                            <optgroup label="Charities">
+                                <option value="combat_stress|Combat Stress|Charity">Combat Stress</option>
+                                <option value="help_for_heroes|Help for Heroes|Charity">Help for Heroes</option>
+                                <option value="ssafa|SSAFA|Charity">SSAFA</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Urgency *</label>
+                        <select id="ref-urgency" required>
+                            <option value="routine">Routine (4-6 weeks)</option>
+                            <option value="urgent">Urgent (within 2 weeks)</option>
+                            <option value="emergency">Emergency (immediate)</option>
+                        </select>
+                    </div>
+                    
+                    <div style="background: var(--bg); padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <strong>User Information for Referral</strong>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">This information will be included in the handoff summary.</p>
+                        
+                        <div class="form-group">
+                            <label>User's Name (optional until referral)</label>
+                            <input type="text" id="ref-user-name" placeholder="Full name" value="${escapeHtml(currentCase.user_name || '')}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Contact Details</label>
+                            <input type="text" id="ref-user-contact" placeholder="Phone or email" value="${escapeHtml(currentCase.user_contact || '')}">
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                            <div class="form-group">
+                                <label>Service Branch</label>
+                                <select id="ref-branch">
+                                    <option value="">Unknown</option>
+                                    <option value="Army">Army</option>
+                                    <option value="Royal Navy">Royal Navy</option>
+                                    <option value="RAF">RAF</option>
+                                    <option value="Royal Marines">Royal Marines</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Service Dates</label>
+                                <input type="text" id="ref-service-dates" placeholder="e.g. 2005-2015">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Referral Notes</label>
+                        <textarea id="ref-notes" rows="4" placeholder="Additional information for the receiving service..."></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                        <button type="button" class="btn btn-outline" onclick="switchModalTab('overview')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Create Referral
+                        </button>
+                    </div>
+                </form>
+            `;
+            
+            document.getElementById('referral-form').addEventListener('submit', createReferral);
+        }
+        
+        async function createReferral(e) {
+            e.preventDefault();
+            
+            const serviceVal = document.getElementById('ref-service').value;
+            if (!serviceVal) {
+                alert('Please select a referral service');
+                return;
+            }
+            
+            const [serviceId, serviceName, serviceType] = serviceVal.split('|');
+            
+            const referralData = {
+                service_id: serviceId,
+                service_name: serviceName,
+                service_type: serviceType,
+                urgency: document.getElementById('ref-urgency').value,
+                notes: document.getElementById('ref-notes').value,
+                user_name: document.getElementById('ref-user-name').value || null,
+                user_contact: document.getElementById('ref-user-contact').value || null,
+                service_info: {}
+            };
+            
+            const branch = document.getElementById('ref-branch').value;
+            const dates = document.getElementById('ref-service-dates').value;
+            if (branch) referralData.service_info.branch = branch;
+            if (dates) referralData.service_info.service_dates = dates;
+            
+            try {
+                await apiFetch(`/api/cases/${currentCase.id}/referral`, {
+                    method: 'POST',
+                    body: JSON.stringify(referralData)
+                });
+                
+                alert('Referral created! Case moved to Monitoring status.');
+                openCase(currentCase.id); // Refresh
+            } catch (err) {
+                alert('Error creating referral: ' + err.message);
+            }
+        }
+        
+        async function updateReferralStatus() {
+            const newStatus = prompt('Update status to:\\n- submitted\\n- acknowledged\\n- waiting\\n- engaged\\n- transferred');
+            if (!newStatus) return;
+            
+            const validStatuses = ['submitted', 'acknowledged', 'waiting', 'engaged', 'transferred'];
+            if (!validStatuses.includes(newStatus)) {
+                alert('Invalid status. Please use one of: ' + validStatuses.join(', '));
+                return;
+            }
+            
+            try {
+                await apiFetch(`/api/cases/${currentCase.id}/referral/status?status=${newStatus}`, {
+                    method: 'PATCH'
+                });
+                
+                alert('Referral status updated to: ' + newStatus);
+                openCase(currentCase.id);
+            } catch (err) {
+                alert('Error updating status: ' + err.message);
+            }
+        }
+        
         function joinChat(roomId) { alert('Join chat - coming soon'); }
     </script>
 </body>
