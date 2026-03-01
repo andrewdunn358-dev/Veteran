@@ -1,185 +1,180 @@
 <analysis>**original_problem_statement:**
-The user wants to build Radio Check, a mental health and peer support application for veterans. The project includes a React web application, a Python FastAPI backend, and web portals for Admin and Staff. The core goal is to provide immediate, reliable real-time support (audio calls and text chat) to users.
+The user wants to build Radio Check, a mental health and peer support application for veterans. The project includes a React web application, a Python FastAPI backend, and web portals for Admin and Staff. The core goal is to provide immediate, reliable real-time support (audio calls and text chat) to users, wrapped in a comprehensive, multi-layered AI safety and clinical governance system.
 
-A major requirement is to implement a comprehensive, multi-layered AI safety system. This system must operate as a safety layer that wraps around the existing AI personas without altering their personalities. It should replace the simple keyword-based safeguarding with contextual crisis detection, introduce safeguards against over-reliance on the AI, add an age gate, protect against safety erosion in long conversations, and provide formal safety logging for governance.
-
-Most recently, the user requested a comprehensive, NHS-aligned Clinical Safety & Governance infrastructure upgrade. This includes implementing a Clinical Safety Officer (CSO) role, a Hazard Log, Safeguarding KPIs, Automated Decision Transparency logging, a Peer Moderation Framework, an Incident Management Module, and audit export capabilities.
+Most recently, the user provided a detailed service definition and requested a comprehensive **Case Management System** for triage counsellors, based on a triage-and-bridge model. This system should support a workflow from AI-flagged overnight alerts to structured triage sessions, safety planning, and formal handoffs to external services like the NHS. The user also requested a fix for the admin password reset functionality to add complexity and history checks and asked the agent to implement all other pending tasks from the backlog.
 
 **PRODUCT REQUIREMENTS**
 - A working staff rota/calendar system with shift swap capabilities.
-- A fully functional Content Management System (CMS) that allows editing of all app content.
-- A beta testing feedback survey system.
-- Generation of compliance documents as downloadable PDFs from the admin portal.
-- A robust, multi-layered safeguarding system (contextual detection, dependency monitoring, age-gate, safety erosion protection, formal logging).
+- A fully functional Content Management System (CMS) that allows editing of all app content, including AI Personas.
+- A robust, multi-layered safeguarding system (contextual detection, dependency monitoring, age-gate, formal logging).
 - A full Clinical Safety & Governance infrastructure (CSO role, Hazard Log, KPIs, Incident Management).
-- Implementation of push notifications, mood tracking, and other core support features.
-- Distinct, well-defined AI personas for peer support.
-- A reliable WebRTC and live chat system for user-to-staff communication.
+- A **Case Management System** for counsellors, including a Morning Review Queue for overnight alerts, structured triage notes, safety plans, and referral tracking.
+- A redesigned, tabbed Staff Portal to house the new Case Management features.
+- Secure password policies, including complexity and reuse prevention.
+- Implementation of Twilio for browser-to-phone calls, peer moderation tools, and advanced safeguarding flows (request claiming).
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application with a React/Expo frontend, a FastAPI backend, and static HTML/JS/CSS admin and staff portals. The agent has implemented a new advanced AI safety layer ().
+A full-stack application with a React/Expo frontend and a FastAPI backend. The static  and  provide interfaces for administrative and staff functions.
 
-In this session, the agent implemented two major features:
-1.  **Age Gate**: A frontend modal prompts users for their Date of Birth on first launch, which is stored locally. For under-18s, features like peer matching are disabled, and the backend applies a higher risk sensitivity multiplier to AI chat analysis.
-2.  **Governance & Safety Infrastructure**: A comprehensive system was added, including backend models and API endpoints () for managing Hazards, KPIs, and Incidents. The admin portal was updated with a new Governance section to manage these items. The staff portal was updated with an incident reporting feature. Email notifications for new incidents and CSO approvals have been partially implemented.
-
-The local services search feature was also significantly enhanced to search by postcode, town, or organization name, fixing a previous bug.
+In this session, the agent implemented a broad range of features and fixes as part of a large user-requested batch of work:
+1.  **Case Management System (Backend):** New database models () and API endpoints () were created to support creating and managing user cases, including a morning review queue for overnight alerts.
+2.  **Password Security Enhancement:** The admin password reset feature was overhauled. The backend now enforces password complexity (8 chars, upper/lower case, no username) and prevents the reuse of the last 3 passwords. The admin portal UI was updated to require password confirmation.
+3.  **Age Gate Critical Bug Fix:** A major bug in  was fixed. Previously, under-18 users could bypass the restriction and access peer-to-peer support. This has been corrected and verified with the testing agent.
+4.  **Full Conversation History:** The safeguarding system in  was updated to save the *entire* conversation history when an alert is triggered, not just the last 20 messages, providing full context for case reviews.
+5.  **Staff Portal V2 (Layout):** A new tabbed HTML5 layout () was created to replace the old single-page design, but the JavaScript to power its new features is not yet implemented.
+6.  **Admin Portal Features:** The admin portal was enhanced with a UI to manage system email settings and a Compliance checker to validate AI safeguarding features against a checklist.
+7.  **Peer Moderation UI:** Report and Block buttons were added to the peer-to-peer chat UI ().
+8.  **Other Fixes:** A bug with the  endpoint was fixed, and website links were added to the crisis support page.
 
 **Last working item**:
-- **Last item agent was working**: The agent was implementing email notifications for the new governance system. Specifically, it was adding logic to  to send an email via Resend when a new incident is created or when a change requires CSO approval.
-- **Status**: IN PROGRESS
-- **Agent Testing Done**: N
-- **Which testing method agent to use?**: backend testing agent. The agent should create a test that calls the  endpoint and verifies that the email sending function is triggered. This may require mocking the Resend API call and checking logs for confirmation.
-- **User Testing Done**: N
+-   **Last item agent was working**: The agent was executing a large batch of user-requested tasks (do everything). It had just created the backend models and API router for a CMS to manage AI Personas and was continuing to work through the long list of pending items in the background.
+-   **Status**: IN PROGRESS
+-   **Agent Testing Done**: Y (for individual components like the password reset and age gate fix)
+-   **Which testing method agent to use?**: both. A  is needed to verify the multiple UI changes in the Admin, Staff, and main app portals. A  is needed for the new CMS and safeguarding flow changes.
+-   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
-- **Issue 1: Production CORS/500 error on  (P2)**: From a previous handoff, this issue has not been addressed.
-- **Issue 2: Safeguarding history shows incorrect character name (P2)**: From a previous handoff, this remains unverified.
-- **Issue 3: Alert Appears Before User Choice (P2)**: The safeguarding alert sometimes appears on the staff portal before the user has chosen to Call or Chat. This has not been addressed.
-- **Issue 4: Direct peer-to-peer call failure (P1)**: User reported that direct calls to staff from the user app fail silently. The agent added UI feedback, but this fix is pending user verification.
-- **Issue 5: user left chat notification bug (P1)**: The agent implemented a grace period to prevent false notifications. This fix is pending user verification.
-- **Issue 6: Call in use error in chat modal (P1)**: The agent implemented a more robust fix. This is pending user verification.
+-   **Issue 1: Safeguarding history shows incorrect character name (P2)**: From a previous handoff, remains unverified.
+-   **Issue 2: Alert Appears Before User Choice (P2)**: Safeguarding alert sometimes appears on the staff portal before the user has chosen to Call or Chat. Not addressed.
+-   **Issue 3: Direct peer-to-peer call failure (P1)**: UI feedback added, but pending user verification.
+-   **Issue 4: user left chat notification bug (P1)**: Grace period implemented, but pending user verification.
+-   **Issue 5: Call in use error in chat modal (P1)**: Fix implemented, but pending user verification.
 
 **Issues Detail**:
-- **Issue 1: Production CORS/500 error on **
-    - **Attempted fixes**: None.
-    - **Next debug checklist**:
-        1.  Examine the backend logs on Render for the full error traceback when  is called.
-        2.  Check the CORS configuration in  to ensure the production frontend URL is properly allowed.
-        3.  Review the code for the  endpoint to identify potential logic errors.
-    - **Why fix this issue and what will be achieved with the fix?**: This endpoint is likely related to the beta testing feedback system, and fixing it is necessary for that feature to work correctly in production.
-    - **Status**: NOT STARTED
-    - **Is recurring issue?**: Y
-    - **Should Test frontend/backend/both after fix?**: Backend
-    - **Blocked on other issue**: None
+All issues are pending user verification or have not been started. No new debugging information was gathered in this session.
 
 **In progress Task List**:
-- **Task 1: Complete Governance Email Notifications (P0)**
-    - **Where to resume**: The logic for sending emails is being added to . The next steps are to add a setting for the CSO's email address in the database (similar to how  was handled), ensure the new incidents and CSO approval requests trigger the emails, and update the  to document this notification flow.
-    - **What will be achieved with this?**: Key personnel (Admins, CSOs) will be immediately notified of critical events like new incidents, ensuring timely review and action.
-    - **Status**: IN PROGRESS
-    - **Should Test frontend/backend/both after fix?**: Backend
-    - **Blocked on something**: No.
+-   **Task 1: Complete Staff Portal V2 and Case Management UI (P0)**
+    -   **Where to resume**: The new tabbed layout exists in , but the JavaScript in  is outdated. The next step is to completely overhaul  to power the new tabs: Dashboard (Morning Review Queue), My Cases (CRUD operations on cases), Safety Plan editor, and Referral Form.
+    -   **What will be achieved with this?**: A fully functional, modern case management system for triage counsellors, realizing the user's detailed service model.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: Both
+    -   **Blocked on something**: No.
 
-- **Task 2: Implement Peer Moderation System (P1)**
-    - **Where to resume**: The user requested a full peer moderation framework. While the backend concepts exist, the frontend implementation is missing. The next step is to add Report and Block buttons to the peer-to-peer chat interface. When a user is reported, the message and context should be sent to the moderation queue endpoint ().
-    - **What will be achieved with this?**: Fulfills the Online Safety Act prepared requirement by allowing users to report abuse and giving admins a system to review and action these reports.
-    - **Status**: IN PROGRESS
-    - **Should Test frontend/backend/both after fix?**: Both
-    - **Blocked on something**: No.
+-   **Task 2: Complete Full CMS Control for AI Personas (P1)**
+    -   **Where to resume**: The backend API () and models exist. The next steps are to:
+        1.  Modify the  endpoint in  to load AI personas from the  database collection instead of the hardcoded dictionary.
+        2.  Add a new UI section to the  to allow admins to create, read, update, and delete AI personas using the new CMS endpoints.
+    -   **What will be achieved with this?**: Decouples AI personas from the codebase, allowing admins to manage them dynamically.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: Both
+    -   **Blocked on something**: No.
+
+-   **Task 3: Implement Safeguarding Flow - Phase 2 (Request Claiming) (P1)**
+    -   **Where to resume**: This task has not been started. It requires modifying the WebSocket logic. When a staff member accepts a safeguarding request, an event must be broadcast to all other connected staff members to dismiss the notification on their UIs.
+    -   **What will be achieved with this?**: Prevents multiple staff from responding to the same user alert, improving efficiency.
+    -   **Status**: NOT STARTED
+    -   **Should Test frontend/backend/both after fix?**: Both
+    -   **Blocked on something**: No.
 
 **Upcoming and Future Tasks**
-**Upcoming Tasks**:
--   **(P0) Twilio Integration**: Implement browser-to-phone calling for staff as a last resort option.
--   **(P1) Safeguarding Flow - Phase 2 (Request Claiming)**: Implement the Request Claiming feature, where if one staff member accepts a request, it is dismissed for all others.
--   **(P1) Safeguarding Flow - Phase 3**: Implement the Staff Busy fallback screen on the user's side if no staff are available.
--   **(P1) Round Robin or Priority Routing**: Implement a more advanced staff notification system.
--   **(P1) Full CMS Control**: Migrate hardcoded AI Character personas and Crisis Numbers from  into the CMS database.
--   **(P2) Create Peer Behaviour Guide**: Create a markdown document that can be shared with peer supporters, outlining behaviour standards.
--   **(P2) Admin UI for Settings**: Add a field in the admin portal to manage the  and the new .
-
-**Future Tasks**:
--   Convert the Expo-based web app to a pure React framework like Next.js.
--   Mood Tracker Journal.
--   Implement a true visual page builder (GrapesJS).
--   Add Appointment Booking, Secure Messaging, Achievement Badges, CBT courses.
--   Add Welsh Language Support.
+-   **Upcoming Tasks**:
+    -   **(P0) Twilio Integration**: Implement browser-to-phone calling as a last resort option for staff. This is a high-priority feature requiring the  subagent.
+    -   **(P1) Safeguarding Flow - Phase 3**: Implement the Staff Busy fallback screen on the user's side if no staff are available (partially done, needs verification).
+    -   **(P2) Create Peer Behaviour Guide**: Create a markdown document outlining behaviour standards for peer supporters.
+-   **Future Tasks**:
+    -   Convert the Expo-based web app to a pure React framework like Next.js.
+    -   Mood Tracker Journal.
+    -   GrapesJS visual page builder.
+    -   Appointment Booking, Secure Messaging, Achievement Badges, CBT courses.
+    -   Welsh Language Support.
 
 **Completed work in this session**
--   **Age Gate Implementation**: A full age-gate system was implemented, including a frontend modal for DOB entry, local storage of age status, restricted features for under-18s, and a backend risk multiplier for underage users.
--   **Governance & Safety Infrastructure**: Implemented the backend APIs, database models, and Admin Portal UI for a Hazard Register, KPI Dashboard, and Incident Management system.
--   **Incident Reporting for Staff**: Added an Incident Report button and modal to the Staff Portal.
--   **Local Services Search Enhancement**: Fixed a critical bug in postcode mapping and enhanced the search to work by postcode, town, or organization name.
--   **Content Updates**: Added East Durham Veterans Trust to the crisis support page and organizations database.
--   **Configuration**: Set the peer support registration email address in the database.
--   **Documentation**: Created several new documents, including a Governance Operational Guide, a Staff/Peer Briefing, and an updated AI Safeguarding document with a Samaritans compliance scorecard. Tidied up the  directory.
+-   **Case Management System Backend**: Created APIs and DB models for cases, triage notes, and the morning review queue.
+-   **Password Security Overhaul**: Implemented password confirmation, complexity rules, and reuse prevention for the admin password reset feature.
+-   **Critical Age Gate Bug Fix**: Correctly implemented and verified the restriction preventing under-18s from accessing peer support.
+-   **Full Conversation History**: Enhanced the safeguarding system to capture the entire conversation history for better case review.
+-   **Admin Portal Features**: Added an email settings manager and an AI safeguarding compliance checker.
+-   **Peer Moderation UI**: Added Report/Block buttons to the peer chat interface.
+-   **Documentation**: Created  and updated other feature documents.
+-   **UI/UX Improvements**: Added website links to the crisis page and improved the Staff Busy indicator.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: Render cron job failure**: Status of the backend cron job for shift reminders is still unknown.
--   **Issue 2: Inconsistent User Creation UI**: UI in the React Native admin app differs from the static web admin portal.
+-   **Render cron job failure**: The status of the backend cron job for shift reminders is still unknown.
+-   **Inconsistent User Creation UI**: UI in the React Native admin app differs from the static web admin portal.
 
 **Known issue recurrence from previous fork**
-- The stability of the WebRTC/signaling flow remains a persistent problem. Multiple fixes have been implemented but are all pending user verification in their production environment.
+-   The stability of the WebRTC/signaling flow remains a persistent problem. Multiple fixes have been implemented but are all pending user verification in their production environment.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Governance as Code**: The session implemented a full clinical governance and safety framework directly into the application's backend and admin UI, creating auditable logs and role-based controls.
--   **Local Storage for Privacy**: The Age Gate feature stores the user's Date of Birth on the client-side ( in React Native Web) to enhance privacy, rather than persisting it on the server.
--   **Dynamic Risk Scoring**: The  now uses the  flag passed from the frontend to apply a dynamic risk multiplier (1.3x) for underage users.
--   **Static Site Deployment Constraint**: A key challenge is that the agent cannot test UI changes to the  and  as they are static sites manually deployed by the user to a separate hosting environment (20i). Changes are made blind and require user feedback to verify.
+-   **Case Management System**: A new system designed for the user's specific triage-and-bridge workflow, featuring a Morning Review Queue to handle overnight AI-flagged alerts.
+-   **Password Hashing & History**: Using  for salting/hashing and storing an array of recent password hashes in the user document to prevent reuse.
+-   **Tabbed Static Site UI**: The  is being redesigned with a modern tabbed layout () to organize features, but the corresponding JavaScript logic is not yet complete.
+-   **Dynamic Compliance Checklist**: A feature in the admin portal that uses JavaScript to check the status of implemented safeguarding features against a predefined list of compliance requirements.
 
 **key DB schema**
--   **New Collections**: , , , , .
--   ** collection**: Updated with a  field. A  is planned.
--   ** collection**: New entry added for East Durham Veterans Trust.
-
-**changes in tech stack**
-- No new technologies were added. The existing stack (React/Expo, FastAPI, MongoDB, Resend) was extended.
+-   **New Collections**: , .
+-   ** collection**: Updated to include a  field to store recent password hashes.
+-   ****: The  field now stores the entire conversation array, not just the last 20 messages.
 
 **All files of reference**
--   **Governance**: , , , , 
--   **Age Gate**: , , , 
--   **Search**: 
--   **Incident Reporting**: , 
+-   **Case Management**: , , 
+-   **Password Security**: , 
+-   **Age Gate Fix**: 
+-   **Peer Moderation**: 
+-   **CMS Backend**: , 
 
 **Areas that need refactoring**:
--   : This file now contains complex logic for mapping postcodes and towns to regions, plus two different search result displays. This logic could be extracted into separate utility functions or hooks to improve readability.
--    and : These monolithic vanilla JavaScript files are becoming increasingly large and difficult to maintain. They would benefit from being broken down into smaller, feature-specific modules.
+-   : This monolithic vanilla JavaScript file is completely outdated and cannot power the new . It needs to be rewritten or significantly refactored to handle the tabbed interface and the new Case Management API calls.
 
 **key api endpoints**
--   **New Governance Endpoints (all under )**:
-    -   : , 
-    -   : 
-    -   : 
-    -   : , 
+-   **New Case Management Endpoints ()**:
     -   : 
     -   : , 
     -   : , 
     -   : 
--   **Modified Core Endpoints**:
-    -   : Now accepts an optional  field in the request body.
+    -   : 
+-   **New CMS Endpoints ()**:
+    -   : , 
+    -   : , 
+-   **Modified Auth Endpoint ()**:
+    -   : Now enforces complexity and history checks.
 
 **Critical Info for New Agent**
--   **PRIORITY #1 is completing the Governance features**, specifically finishing the email notification implementation that is currently in progress.
--   **Admin/Staff Portal Deployment is MANUAL**: This remains the biggest challenge. Changes to the static  and  are not testable in the preview environment. The user must manually upload the files to their 20i hosting. You must clearly instruct the user to do this to verify UI changes in those portals.
--   **WebRTC/Chat Bugs are Pending User Verification**: Several fixes for real-time communication bugs were implemented in a previous session. The user has not yet confirmed if these are resolved in their production environment. Do not re-investigate them unless the user reports they are still failing.
+-   **PRIORITY #1 is completing the Staff Portal V2 integration.** The new  file is ready, but it is useless without updating  to power the new tabbed layout and integrate with the Case Management APIs.
+-   The user initiated a do everything task. You are in the middle of this large batch of work. Your primary goal is to continue systematically through the  and .
+-   **Admin/Staff Portal Deployment is MANUAL**. The user must manually upload the  and  files to their 20i hosting. You must clearly instruct the user to do this to verify UI changes, specifically renaming  to  in their production environment.
+-   The user has approved a detailed plan for the Case Management system. Adhere to those requirements (tabbed layout, access controls, soft-cap on sessions, etc.).
 
 **documents and test reports created in this job**
+-    (New)
 -    (Updated)
--    (New)
--    (New)
+-    (From Age Gate fix)
+-    (From Age Gate fix verification)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **Request for Local Search Fix**: User reported the postcode search was not in-depth enough and didn't find EDV. (Status: Completed)
-2.  **Request to Add Org**: User asked to add East Durham veterans trust to the crisis page. (Status: Completed)
-3.  **Request for Staff/Peer Briefing**: User asked for clarification on how staff/peers report incidents and requested briefing guides. (Status: Completed)
-4.  **Confirmation of Need for Input**: User asked if input is needed from peers or counsellors for the new governance system. (Status: Answered, Docs created)
-5.  **Major Governance Request**: User provided a comprehensive 7-point plan to implement an NHS-aligned governance and safety infrastructure. (Status: In Progress)
-6.  **Confirmation of Email Address**: User specified that peer registration emails should go to . (Status: Completed)
-7.  **Query about Peer Registration Email**: User asked where peer support registration emails are sent. (Status: Answered)
-8.  **Request to update docs**: User requested to compare the app's features against a Samaritans policy briefing and update the documentation. (Status: Completed)
-9.  **Incident Notification Query**: User asked who actions reported incidents. (Status: In Progress - led to implementation of email notifications).
+1.  **User**: Asks agent to continue working on all pending tasks and provide updated documentation at the end. Also requests a compliance lookup feature in the admin portal. (Status: In Progress)
+2.  **User**: Confirms the agent should proceed with the plan. (Status: Completed)
+3.  **User**: Confirms passwords should be salted. (Status: Completed, agent confirmed bcrypt is used)
+4.  **User**: Reports a bug in admin password reset: no confirmation field, modal doesn't close, and no password complexity. (Status: Completed)
+5.  **User**: Asks about  and the staff portal redesign. (Implicitly handled by agent's plan)
+6.  **User**: Provides detailed requirements for the Case Management system, including human hours, anonymity levels, access controls, and confirms the need for a tabbed layout in the staff portal. (Status: In Progress)
+7.  **User**: Asks the agent to re-ask the questions for the case management system. (Status: Completed)
+8.  **User**: Asks if the full conversation is recorded when a safeguarding alert is triggered. (Status: Completed, agent confirmed and implemented the change)
+9.  **User**: Provides additional context on the app's hybrid model (24/7 AI + human hours) and how it affects case management. (Status: Acknowledged)
+10. **User**: Provides the core service definition and user journey, prompting the agent to recommend a case management system. (Status: Completed)
 
 **Project Health Check:**
--   **Broken**: The core WebRTC and live chat features remain fragile and have fixes pending user verification. The stability is dependent on a complex manual deployment process across three hosting providers.
+-   **Broken**: The staff portal is in a transitional state. The new  exists, but the JavaScript () to make it functional has not been written, so the case management features are inaccessible.
 -   **Mocked**: No features are currently mocked.
 
 **3rd Party Integrations**
 -   **ExpressTURN**: For WebRTC NAT traversal.
 -   **OpenAI GPT-4**: For AI chat personas.
--   **Resend**: For email notifications (usage expanded in this session).
+-   **Resend**: For email notifications.
 -   **Expo Push Notifications**: Infrastructure exists but is not fully implemented.
 -   **Twilio**: (Pending Integration) For external calling.
 
 **Testing status**
--   **Testing agent used after significant changes**: NO
+-   **Testing agent used after significant changes**: YES (for the critical age gate bug fix).
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: []
--   **Known regressions**: The real-time features (chat/calls) are prone to regression.
+-   **Known regressions**: The real-time features (chat/calls) are prone to regression and have multiple fixes pending user verification in their production environment.
 
 **Credentials to test flow:**
 -   **Admin User**:
@@ -193,4 +188,4 @@ The local services search feature was also significantly enhanced to search by p
     -   Auth Token: 
 
 **What agent forgot to execute**
-- The agent successfully addressed all major user requests from this session. Older, lower-priority tasks from the initial handoff (e.g., Request Claiming, Round Robin routing) were correctly deferred in favor of the large, high-priority governance implementation. No critical tasks were forgotten.</analysis>
+- The agent successfully initiated work on all major user requests from this session. The key is that many are in progress and not yet complete, which is expected given the large scope. Nothing was explicitly forgotten, but the  overhaul is the most critical piece left undone.</analysis>
