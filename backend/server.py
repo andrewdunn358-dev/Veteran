@@ -4260,7 +4260,7 @@ async def get_ai_characters():
             },
             {
                 "id": "doris", 
-                "name": "Doris",
+                "name": "Rachel",
                 "description": "A nurturing, compassionate presence who creates a safe space to talk.",
                 "avatar": AI_CHARACTERS["doris"]["avatar"]
             },
