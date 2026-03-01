@@ -519,6 +519,19 @@ export default function UnifiedAIChat() {
                   Would you like to speak with a real person right now?
                 </Text>
                 
+                {/* Staff Availability Notice */}
+                {!isCheckingAvailability && !staffAvailable && (
+                  <View style={{ backgroundColor: '#fef3c7', borderRadius: 12, padding: 12, marginVertical: 8, borderLeftWidth: 4, borderLeftColor: '#f59e0b' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                      <FontAwesome5 name="clock" size={14} color="#b45309" />
+                      <Text style={{ color: '#b45309', fontWeight: '700', marginLeft: 8 }}>Outside Operating Hours</Text>
+                    </View>
+                    <Text style={{ color: '#92400e', fontSize: 13 }}>
+                      Human support: Mon-Fri 9am-5pm. Your message will be reviewed when we're back. For immediate help, call Samaritans on 116 123 (24/7).
+                    </Text>
+                  </View>
+                )}
+                
                 <View style={{ gap: 12, marginVertical: 16 }}>
                   {/* Call a Supporter Button */}
                   <TouchableOpacity
