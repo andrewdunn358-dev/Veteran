@@ -2342,7 +2342,8 @@ async function submitReferral(event, caseId) {
     try {
         await apiCall('/cases/' + caseId + '/referrals', 'POST', data);
         showNotification('Referral created successfully', 'success');
-        closeModal();
+        // Go back to case details
+        goBackToCase(caseId);
         loadCases();
     } catch (error) {
         console.error('Error creating referral:', error);
