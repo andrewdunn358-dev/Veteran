@@ -6614,6 +6614,8 @@ function updateAvatarPreview(url) {
     const img = document.getElementById('avatar-preview-img');
     const placeholder = document.getElementById('avatar-placeholder');
     
+    if (!img) return; // Guard against missing elements
+    
     if (url && url.trim()) {
         // Resolve relative URLs
         const resolvedUrl = resolveAvatarUrl(url);
