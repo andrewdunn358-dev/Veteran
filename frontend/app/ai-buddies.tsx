@@ -122,7 +122,7 @@ export default function AIBuddies() {
       <View style={styles.disclaimer}>
         <FontAwesome5 name="info-circle" size={14} color="#64748b" />
         <Text style={styles.disclaimerText}>
-          Tommy and Doris are AI companions. They cannot provide medical advice or replace human support. 
+          Tommy and Rachel are AI companions. They cannot provide medical advice or replace human support. 
           If you need to speak to a real person, use the options below.
         </Text>
       </View>
