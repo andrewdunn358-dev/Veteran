@@ -1,36 +1,14 @@
 // Staff Portal - Radio Check Veterans Support
 // For Counsellors and Peer Supporters
 
-// Check for token in URL (for auto-login from mobile app)
-(function checkUrlToken() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlToken = urlParams.get('token');
-    
-    if (urlToken) {
-        console.log('Token found in URL, setting up auto-login...');
-        // Store the token
-        localStorage.setItem('staff_token', urlToken);
-        localStorage.setItem('staff_token_time', Date.now().toString());
-        localStorage.setItem('staff_last_activity', Date.now().toString());
-        
-        // Remove token from URL for security (don't want it in browser history)
-        const cleanUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-        
-        // Token is set, page will auto-redirect to home on load
-    }
-})();
-
-// State - use window.* to avoid redeclaration with inline JS
-// token and currentUser are declared in index.html inline script
-if (typeof window.myProfile === 'undefined') {
-    window.myProfile = null;
-}
-var myProfile = window.myProfile;
+// State
+let token = localStorage.getItem('staff_token');
+let currentUser = JSON.parse(localStorage.getItem('staff_user') || 'null');
+let myProfile = null;
 
 // Session timeout - 2 hours of inactivity
-var SESSION_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
-var inactivityTimer = null;
+const SESSION_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
+let inactivityTimer = null;
 let lastActivityTime = Date.now();
 
 // Check if session has expired on page load
@@ -150,7 +128,7 @@ function updateSoundButton() {
 }
 
 // Initialize
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', function() {
     // Setup activity tracking for session timeout
     setupActivityListeners();
     
@@ -162,34 +140,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Session still valid - initialize portal
         resetInactivityTimer();
         initPortal();
-    } else if (token && !currentUser) {
-        // Token exists but no user data (e.g., came from app redirect)
-        // Fetch user profile using the token
-        console.log('Token found but no user data - fetching profile...');
-        try {
-            const response = await fetch(BACKEND_URL + '/api/auth/me', {
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (response.ok) {
-                const userData = await response.json();
-                console.log('User data fetched:', userData);
-                currentUser = userData;
-                localStorage.setItem('staff_user', JSON.stringify(currentUser));
-                resetInactivityTimer();
-                initPortal();
-            } else {
-                console.error('Failed to fetch user profile:', response.status);
-                // Invalid token - clear and show login
-                logout(true);
-            }
-        } catch (error) {
-            console.error('Error fetching user profile:', error);
-            logout(true);
-        }
     } else {
         showScreen('login-screen');
     }
@@ -241,13 +191,6 @@ async function apiCall(endpoint, options) {
     var data = await response.json();
     
     if (!response.ok) {
-        // If token is invalid/expired, force re-login
-        if (response.status === 401) {
-            console.warn('Token invalid or expired, forcing re-login');
-            logout(true);
-            showNotification('Session expired. Please log in again.', 'error');
-            throw new Error('Session expired');
-        }
         throw new Error(data.detail || 'Request failed');
     }
     
@@ -284,7 +227,7 @@ async function handleLogin(e) {
         }
         
         // Save auth
-        token = data.token;
+        token = data.access_token;
         currentUser = data.user;
         localStorage.setItem('staff_token', token);
         localStorage.setItem('staff_user', JSON.stringify(currentUser));
@@ -337,39 +280,27 @@ async function initPortal() {
     
     var role = currentUser.role;
     
-    // Set header info (with null checks)
-    var userName = document.getElementById('user-name');
-    if (userName) userName.textContent = 'Welcome, ' + currentUser.name;
-    
-    var portalTitle = document.getElementById('portal-title');
-    if (portalTitle) {
-        portalTitle.textContent = 
-            role === 'counsellor' ? 'Counsellor Portal' : 
-            role === 'peer' ? 'Peer Support Portal' : 'Staff Portal';
-    }
+    // Set header info
+    document.getElementById('user-name').textContent = 'Welcome, ' + currentUser.name;
+    document.getElementById('portal-title').textContent = 
+        role === 'counsellor' ? 'Counsellor Portal' : 
+        role === 'peer' ? 'Peer Support Portal' : 'Staff Portal';
     
     // Set role badge
     var badge = document.getElementById('user-role-badge');
-    if (badge) {
-        badge.textContent = role.charAt(0).toUpperCase() + role.slice(1);
-        badge.className = 'role-badge role-' + role;
-    }
+    badge.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+    badge.className = 'role-badge role-' + role;
     
-    // Show/hide sections based on role (with null checks)
-    var panicSection = document.getElementById('panic-section');
-    if (panicSection) {
-        panicSection.style.display = (role === 'counsellor' || role === 'admin') ? 'block' : 'none';
-    }
-    
-    var safeguardingSection = document.getElementById('safeguarding-section');
-    if (safeguardingSection) {
-        safeguardingSection.style.display = (role === 'counsellor' || role === 'admin' || role === 'peer') ? 'block' : 'none';
-    }
-    
-    var panicButtonSection = document.getElementById('panic-button-section');
-    if (panicButtonSection) {
-        panicButtonSection.style.display = role === 'peer' ? 'block' : 'none';
-    }
+    // Show/hide sections based on role
+    // Panic ALERTS section - counsellors and admins see alerts FROM peers
+    document.getElementById('panic-section').style.display = 
+        (role === 'counsellor' || role === 'admin') ? 'block' : 'none';
+    // Safeguarding section - ALL staff should see safeguarding alerts
+    document.getElementById('safeguarding-section').style.display = 
+        (role === 'counsellor' || role === 'admin' || role === 'peer') ? 'block' : 'none';
+    // Panic BUTTON - only peers can trigger panic to counsellors
+    document.getElementById('panic-button-section').style.display = 
+        role === 'peer' ? 'block' : 'none';
     
     // Load profile to get current status
     await loadMyProfile();
@@ -389,7 +320,6 @@ async function initPortal() {
         loadPanicAlerts();
         loadSafeguardingAlerts(false); // Initial load, no sound
         loadLiveChats(false); // Initial load, no sound
-        loadScreeningSubmissions(); // Load screening submissions
         startAlertPolling(); // Start real-time polling for safeguarding
         startLiveChatPolling(); // Start real-time polling for live chats
         updateSoundButton(); // Update sound toggle button
@@ -397,7 +327,6 @@ async function initPortal() {
         // Show sections
         document.getElementById('livechat-section').style.display = 'block';
         document.getElementById('safeguarding-section').style.display = 'block';
-        document.getElementById('screening-section').style.display = 'block';
     }
     
     // Auto-refresh every 30 seconds for callbacks/notes
@@ -406,7 +335,6 @@ async function initPortal() {
         loadNotes();
         if (role === 'counsellor' || role === 'admin' || role === 'peer') {
             loadPanicAlerts();
-            loadScreeningSubmissions(); // Also refresh screening submissions
             // Note: Safeguarding and live chats are polled separately with sound support
         }
     }, 30000);
@@ -440,11 +368,6 @@ async function initializeWebRTCPhone() {
         
         if (success) {
             console.log('WebRTC Phone initialized for:', currentUser.name);
-            
-            // Setup live chat request listeners after a short delay to ensure socket is connected
-            setTimeout(function() {
-                setupLiveChatRequestListeners();
-            }, 2000);
         }
         
     } catch (error) {
@@ -452,359 +375,6 @@ async function initializeWebRTCPhone() {
         updatePhoneStatusUI('error');
         alert('WebRTC Phone Error: ' + error.message);
     }
-}
-
-// Setup listeners for incoming live chat requests
-function setupLiveChatRequestListeners() {
-    if (typeof webRTCPhone === 'undefined' || !webRTCPhone.socket) {
-        console.warn('WebRTC socket not available for chat request listeners');
-        return;
-    }
-    
-    var socket = webRTCPhone.socket;
-    console.log('Setting up live chat request listeners on socket');
-    
-    // Listen for incoming chat requests from users (when they click "Talk to Someone")
-    socket.off('incoming_chat_request'); // Remove any existing listener
-    socket.on('incoming_chat_request', function(data) {
-        console.log('Received incoming chat request:', data);
-        
-        // Store the chat request data globally so we can link it to safeguarding alerts
-        window.pendingChatRequest = data;
-        
-        // Function to check for matching safeguarding alert
-        function checkForMatchingAlert() {
-            // Check if there's a safeguarding alert for this user - if so, link them
-            // Use the correct CSS class: .safeguarding-card (not .safeguarding-alert-card)
-            var safeguardingCards = document.querySelectorAll('.safeguarding-card');
-            var linkedToAlert = false;
-            
-            console.log('Found safeguarding cards:', safeguardingCards.length);
-            console.log('Incoming request data - session_id:', data.session_id, 'user_id:', data.user_id, 'alert_id:', data.alert_id);
-            
-            safeguardingCards.forEach(function(card) {
-                // Check if the alert is for the same user using data-session-id attribute
-                var cardSessionId = card.getAttribute('data-session-id') || '';
-                var incomingSessionId = data.session_id || '';  // Use the session_id from the request
-                var incomingUserId = data.user_id || '';
-                
-                console.log('Checking match - Card session:', cardSessionId, 'Request session:', incomingSessionId, 'User ID:', incomingUserId);
-                
-                // Try multiple matching strategies
-                var isMatch = false;
-                
-                // Strategy 1: Direct session ID match (most reliable)
-                if (cardSessionId && incomingSessionId && cardSessionId === incomingSessionId) {
-                    isMatch = true;
-                    console.log('Match via direct session ID');
-                }
-                // Strategy 2: Session ID contains match (e.g., "tommy-1234567890-abc" matches "tommy-1234567890-abc")
-                else if (cardSessionId && incomingSessionId) {
-                    var cardParts = cardSessionId.split('-');
-                    var sessionParts = incomingSessionId.split('-');
-                    
-                    // Check if character and timestamp match (first two parts)
-                    if (cardParts.length >= 2 && sessionParts.length >= 2) {
-                        if (cardParts[0] === sessionParts[0] && cardParts[1] === sessionParts[1]) {
-                            isMatch = true;
-                            console.log('Match via character+timestamp');
-                        }
-                    }
-                    
-                    // Also check if one contains the other
-                    if (!isMatch && (cardSessionId.includes(incomingSessionId) || incomingSessionId.includes(cardSessionId))) {
-                        isMatch = true;
-                        console.log('Match via contains');
-                    }
-                }
-                // Strategy 3: Fallback - match via user_id if it contains session parts
-                else if (cardSessionId && incomingUserId) {
-                    var cardParts = cardSessionId.split('-');
-                    var userParts = incomingUserId.split('_');
-                    
-                    if (userParts.length > 1 && cardSessionId.includes(userParts[1])) {
-                        isMatch = true;
-                        console.log('Match via user_id fallback');
-                    } else if (cardParts.length > 0 && incomingUserId.includes(cardParts[0])) {
-                        isMatch = true;
-                        console.log('Match via card_parts fallback');
-                    }
-                }
-                
-                if (isMatch) {
-                    console.log('Match found! Linking chat request to safeguarding alert');
-                    linkedToAlert = true;
-                    
-                    // Re-render the safeguarding alerts to show the indicator
-                    loadSafeguardingAlerts(false);
-                    
-                    // Scroll to the alert card
-                    setTimeout(function() {
-                        var updatedCard = document.querySelector('[data-alert-id="' + card.getAttribute('data-alert-id') + '"]');
-                        if (updatedCard) {
-                            updatedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }
-                    }, 300);
-                    
-                    // Play alert sound
-                    playAlertSound();
-                    
-                    showNotification('User wants to chat! See the safeguarding alert below.', 'success');
-                }
-            });
-            
-            return linkedToAlert;
-        }
-        
-        // First check - immediate
-        var linkedToAlert = checkForMatchingAlert();
-        
-        // If not linked yet, wait 1.5 seconds and try again (safeguarding alerts may be loading)
-        if (!linkedToAlert) {
-            console.log('No immediate match - waiting for safeguarding alerts to load...');
-            
-            setTimeout(function() {
-                // Check if pending request still exists (wasn't handled yet)
-                if (!window.pendingChatRequest || window.pendingChatRequest.request_id !== data.request_id) {
-                    console.log('Pending request no longer valid - skipping delayed check');
-                    return;
-                }
-                
-                // Try again
-                linkedToAlert = checkForMatchingAlert();
-                
-                if (!linkedToAlert) {
-                    console.log('Still no matching safeguarding alert found, showing chat banner');
-                    
-                    // Check if there's already an urgent safeguarding alert modal open
-                    var urgentModal = document.getElementById('urgent-alert-modal');
-                    if (urgentModal) {
-                        console.log('Safeguarding modal already open - storing request for later');
-                        showNotification('User clicked "Talk to Someone" - use the Chat button in the alert', 'info');
-                        return;
-                    }
-                    
-                    // Play alert sound
-                    playAlertSound();
-                    
-                    // Show notification banner
-                    showIncomingChatRequestBanner(data);
-                }
-            }, 1500);  // Wait 1.5 seconds for safeguarding alerts to potentially load
-        }
-    });
-    
-    // Listen for when another staff member takes a chat request
-    socket.off('chat_request_taken');
-    socket.on('chat_request_taken', function(data) {
-        console.log('Chat request taken by:', data.accepted_by);
-        // Hide the banner if it's still showing
-        dismissIncomingChatBanner();
-        showNotification('Chat request taken by ' + data.accepted_by, 'info');
-    });
-    
-    // Listen for chat request confirmation (when we accept)
-    socket.off('chat_request_confirmed');
-    socket.on('chat_request_confirmed', function(data) {
-        console.log('=== CHAT REQUEST CONFIRMED ===');
-        console.log('chat_request_confirmed received:', data);
-        console.log('room_id:', data.room_id);
-        // Join the chat room
-        console.log('Calling joinLiveChat with room_id:', data.room_id);
-        joinLiveChat(data.room_id);
-    });
-    
-    // Listen for chat request expired (user disconnected before staff could accept)
-    socket.off('chat_request_expired');
-    socket.on('chat_request_expired', function(data) {
-        console.log('=== CHAT REQUEST EXPIRED ===');
-        console.log('chat_request_expired received:', data);
-        showNotification('Chat request expired: ' + (data.reason || 'User disconnected'), 'warning');
-        dismissIncomingChatBanner();
-    });
-    
-    // Listen for new safeguarding alerts (real-time notification)
-    socket.off('new_safeguarding_alert');
-    socket.on('new_safeguarding_alert', function(data) {
-        // Don't log full alert data for privacy - only log risk level
-        console.log('New safeguarding alert received - level:', data.risk_level);
-        
-        // Play alert sound
-        playAlertSound();
-        
-        // Immediately reload safeguarding alerts to show the new one
-        loadSafeguardingAlerts(true);
-        
-        // Show urgent alert modal for RED alerts
-        if (data.risk_level === 'RED') {
-            showNotification('URGENT: New RED-level safeguarding alert!', 'error');
-        } else if (data.risk_level === 'AMBER') {
-            showNotification('New safeguarding alert received', 'warning');
-        }
-    });
-    
-    // Listen for incoming call requests (when user chooses "Call a Supporter")
-    socket.off('incoming_call_request');
-    socket.on('incoming_call_request', function(data) {
-        console.log('Incoming call request received:', data);
-        
-        // Play alert sound
-        playAlertSound();
-        
-        // Store the call request
-        window.pendingCallRequest = data;
-        
-        // Show call request banner
-        showIncomingCallRequestBanner(data);
-        
-        // Also reload safeguarding alerts in case one matches
-        loadSafeguardingAlerts(true);
-        
-        showNotification('A veteran wants to talk! Click to call them.', 'success');
-    });
-    
-    // Global listener for user leaving chat (works even when not in a chat room)
-    socket.off('user_left_chat');
-    socket.on('user_left_chat', function(data) {
-        console.log('=== USER LEFT CHAT (Global Listener) ===');
-        console.log('Data:', data);
-        
-        var userName = data.user_name || data.name || 'The user';
-        var reason = data.reason === 'disconnected' ? ' (connection lost)' : '';
-        var message = userName + ' has left the chat' + reason;
-        
-        // Always show notification
-        showNotification(message, 'warning');
-        
-        // Add system message to chat window if open
-        var chatMessages = document.getElementById('livechat-messages');
-        if (chatMessages) {
-            appendSystemMessage(message);
-        }
-    });
-}
-
-// Show banner for incoming chat request
-function showIncomingChatRequestBanner(data) {
-    var existingBanner = document.getElementById('incoming-chat-banner');
-    if (existingBanner) existingBanner.remove();
-    
-    var banner = document.createElement('div');
-    banner.id = 'incoming-chat-banner';
-    banner.className = 'incoming-chat-banner';
-    banner.innerHTML = 
-        '<div class="banner-content">' +
-            '<i class="fas fa-comments"></i>' +
-            '<div class="banner-text">' +
-                '<strong>' + escapeHtml(data.user_name || 'A veteran') + '</strong> is requesting to chat' +
-                '<span class="banner-reason">' + escapeHtml(data.reason || 'Requested human support') + '</span>' +
-            '</div>' +
-            '<div class="banner-actions">' +
-                '<button class="btn btn-success" onclick="acceptIncomingChatRequest(\'' + data.request_id + '\', \'' + data.user_id + '\')">' +
-                    '<i class="fas fa-check"></i> Accept' +
-                '</button>' +
-                '<button class="btn btn-secondary" onclick="dismissIncomingChatBanner()">' +
-                    '<i class="fas fa-times"></i> Dismiss' +
-                '</button>' +
-            '</div>' +
-        '</div>';
-    
-    document.body.appendChild(banner);
-    
-    // Auto-dismiss after 60 seconds
-    setTimeout(function() {
-        dismissIncomingChatBanner();
-    }, 60000);
-}
-
-// Accept incoming chat request
-// Accept incoming chat request
-function acceptIncomingChatRequest(requestId, userId) {
-    console.log('=== ACCEPT CHAT REQUEST ===');
-    console.log('acceptIncomingChatRequest called with requestId:', requestId, 'userId:', userId);
-    console.log('webRTCPhone defined:', typeof webRTCPhone !== 'undefined');
-    console.log('webRTCPhone.socket:', webRTCPhone?.socket);
-    console.log('webRTCPhone.socket.connected:', webRTCPhone?.socket?.connected);
-    
-    if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket) {
-        console.log('Emitting accept_chat_request event...');
-        
-        webRTCPhone.socket.emit('accept_chat_request', {
-            request_id: requestId,
-            user_id: userId
-        });
-        
-        console.log('accept_chat_request event emitted, waiting for chat_request_confirmed...');
-        
-        dismissIncomingChatBanner();
-        showNotification('Accepting chat request...', 'info');
-    } else {
-        console.error('Socket not available!');
-        showNotification('Socket not connected. Please refresh the page.', 'error');
-    }
-}
-
-// Dismiss incoming chat banner
-function dismissIncomingChatBanner() {
-    var banner = document.getElementById('incoming-chat-banner');
-    if (banner) banner.remove();
-}
-
-// Show banner for incoming call request (when user chooses "Call a Supporter")
-function showIncomingCallRequestBanner(data) {
-    var existingBanner = document.getElementById('incoming-call-request-banner');
-    if (existingBanner) existingBanner.remove();
-    
-    var banner = document.createElement('div');
-    banner.id = 'incoming-call-request-banner';
-    banner.className = 'incoming-call-banner';
-    banner.innerHTML = 
-        '<div class="banner-content call-request">' +
-            '<i class="fas fa-phone-alt"></i>' +
-            '<div class="banner-text">' +
-                '<strong>' + escapeHtml(data.user_name || 'A veteran') + '</strong> wants to speak to someone' +
-                '<span class="banner-reason">They are ready to receive your call</span>' +
-            '</div>' +
-            '<div class="banner-actions">' +
-                '<button class="btn btn-success" onclick="callUserFromRequest(\'' + data.user_id + '\')">' +
-                    '<i class="fas fa-phone"></i> Call Now' +
-                '</button>' +
-                '<button class="btn btn-secondary" onclick="dismissIncomingCallBanner()">' +
-                    '<i class="fas fa-times"></i> Dismiss' +
-                '</button>' +
-            '</div>' +
-        '</div>';
-    
-    document.body.appendChild(banner);
-    
-    // Auto-dismiss after 60 seconds
-    setTimeout(function() {
-        dismissIncomingCallBanner();
-    }, 60000);
-}
-
-// Call user from incoming call request
-function callUserFromRequest(userId) {
-    if (!webRTCPhone || !webRTCPhone.isRegistered) {
-        showNotification('WebRTC phone not connected. Please wait...', 'error');
-        return;
-    }
-    
-    console.log('Calling user from request:', userId);
-    showNotification('Calling user...', 'info');
-    
-    // Initiate the call
-    makeOutboundCall(userId);
-    
-    // Dismiss the banner
-    dismissIncomingCallBanner();
-}
-
-// Dismiss incoming call request banner
-function dismissIncomingCallBanner() {
-    var banner = document.getElementById('incoming-call-request-banner');
-    if (banner) banner.remove();
-    window.pendingCallRequest = null;
 }
 
 // Update phone status in UI
@@ -1111,8 +681,8 @@ async function loadSafeguardingAlerts(isPolling) {
                 // Play sound for new alerts
                 playAlertSound();
                 
-                // Show notification banner and modal for RED alerts
-                showNewAlertBanner(newAlerts.length, newAlerts);
+                // Show notification banner
+                showNewAlertBanner(newAlerts.length);
                 
                 // Highlight new alert cards
                 newAlerts.forEach(function(a) {
@@ -1143,7 +713,7 @@ async function loadSafeguardingAlerts(isPolling) {
 }
 
 // Show new alert notification banner
-function showNewAlertBanner(count, newAlerts) {
+function showNewAlertBanner(count) {
     var banner = document.getElementById('new-alert-banner');
     if (!banner) {
         banner = document.createElement('div');
@@ -1155,112 +725,10 @@ function showNewAlertBanner(count, newAlerts) {
     banner.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + count + ' NEW SAFEGUARDING ALERT' + (count > 1 ? 'S' : '') + ' <button onclick="dismissAlertBanner()">View</button>';
     banner.classList.add('show');
     
-    // DISABLED: Don't show the urgent modal popup anymore
-    // The modal was appearing before users made their choice, causing confusion.
-    // Staff will now see alerts via:
-    // 1. The banner notification at top
-    // 2. The alert list on the left side
-    // 3. Call/Chat request banners ONLY when user is ready
-    // if (newAlerts && newAlerts.length > 0) {
-    //     var redAlert = newAlerts.find(function(a) { return a.risk_level === 'RED'; });
-    //     if (redAlert) {
-    //         showUrgentAlertModal(redAlert);
-    //     }
-    // }
-    
-    // Auto-dismiss banner after 10 seconds
+    // Auto-dismiss after 10 seconds
     setTimeout(function() {
         banner.classList.remove('show');
     }, 10000);
-}
-
-// Show urgent alert modal for RED-level alerts
-function showUrgentAlertModal(alert) {
-    var existingModal = document.getElementById('urgent-alert-modal');
-    if (existingModal) existingModal.remove();
-    
-    var location = alert.geo_city && alert.geo_country ? alert.geo_city + ', ' + alert.geo_country : 'Unknown location';
-    var triggers = alert.triggered_indicators ? alert.triggered_indicators.join(', ') : 'Unknown';
-    
-    var modal = document.createElement('div');
-    modal.id = 'urgent-alert-modal';
-    modal.className = 'urgent-alert-modal';
-    modal.innerHTML = 
-        '<div class="urgent-alert-content">' +
-            '<div class="urgent-alert-header">' +
-                '<i class="fas fa-exclamation-circle"></i>' +
-                '<h2>URGENT: Safeguarding Alert</h2>' +
-            '</div>' +
-            '<div class="urgent-alert-body">' +
-                '<div class="alert-risk-badge risk-red">RED RISK - Score: ' + (alert.risk_score || 0) + '</div>' +
-                '<div class="alert-info-grid">' +
-                    '<div class="alert-info-item">' +
-                        '<span class="label">Session:</span>' +
-                        '<span class="value">' + (alert.session_id || 'Unknown').substring(0, 20) + '...</span>' +
-                    '</div>' +
-                    '<div class="alert-info-item">' +
-                        '<span class="label">AI Character:</span>' +
-                        '<span class="value">' + (alert.character || 'Unknown') + '</span>' +
-                    '</div>' +
-                    '<div class="alert-info-item">' +
-                        '<span class="label">Location:</span>' +
-                        '<span class="value">' + location + '</span>' +
-                    '</div>' +
-                    '<div class="alert-info-item">' +
-                        '<span class="label">ISP:</span>' +
-                        '<span class="value">' + (alert.geo_isp || 'Unknown') + '</span>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="alert-triggers">' +
-                    '<span class="label">Triggered Keywords:</span>' +
-                    '<span class="triggers">' + triggers + '</span>' +
-                '</div>' +
-                '<div class="alert-message">' +
-                    '<span class="label">Message:</span>' +
-                    '<p>' + (alert.triggering_message || 'No message recorded') + '</p>' +
-                '</div>' +
-            '</div>' +
-            '<div class="urgent-alert-actions">' +
-                '<p class="action-prompt">The user is seeing support options. If they request to talk, be ready to respond.</p>' +
-                '<div class="action-buttons">' +
-                    '<button class="btn btn-info btn-lg" onclick="initiateStaffCall(\'' + alert.id + '\', \'' + alert.session_id + '\'); closeUrgentModal();">' +
-                        '<i class="fas fa-phone-alt"></i> Call User' +
-                    '</button>' +
-                '</div>' +
-                '<div class="action-buttons" style="margin-top: 12px;">' +
-                    '<button class="btn btn-success" onclick="takeAlertAction(\'' + alert.id + '\', \'acknowledge\')">' +
-                        '<i class="fas fa-hand-paper"></i> I\'m Monitoring This' +
-                    '</button>' +
-                    '<button class="btn btn-secondary" onclick="closeUrgentModal()">' +
-                        'Dismiss' +
-                    '</button>' +
-                '</div>' +
-            '</div>' +
-        '</div>';
-    
-    document.body.appendChild(modal);
-    
-    // Pulse sound continues until acknowledged
-    playAlertSound();
-}
-
-function closeUrgentModal() {
-    var modal = document.getElementById('urgent-alert-modal');
-    if (modal) modal.remove();
-}
-
-async function takeAlertAction(alertId, action) {
-    try {
-        if (action === 'acknowledge') {
-            await apiCall('/safeguarding-alerts/' + alertId + '/acknowledge', { method: 'PATCH' });
-            showNotification('You are now monitoring this alert', 'success');
-        }
-        closeUrgentModal();
-        loadSafeguardingAlerts(false);
-    } catch (error) {
-        console.error('Error taking alert action:', error);
-        showNotification('Error: ' + error.message, 'error');
-    }
 }
 
 function dismissAlertBanner() {
@@ -1306,121 +774,14 @@ function renderSafeguardingAlerts(alerts) {
     }
     
     container.innerHTML = alerts.map(function(alert) {
-        // Check if there's a pending chat/call request for this user
-        var pendingRequest = window.pendingChatRequest;
-        var hasPendingRequest = false;
-        
-        if (pendingRequest && alert.session_id) {
-            var requestSessionId = pendingRequest.session_id || '';  // The session ID from the chat request
-            var requestUserId = pendingRequest.user_id || '';
-            var alertSessionId = alert.session_id || '';
-            
-            console.log('renderSafeguardingAlerts - checking match:', {
-                requestSessionId: requestSessionId,
-                requestUserId: requestUserId,
-                alertSessionId: alertSessionId
-            });
-            
-            // Try multiple matching strategies
-            // Strategy 1: Direct session ID match (most reliable)
-            if (requestSessionId && alertSessionId === requestSessionId) {
-                hasPendingRequest = true;
-                console.log('Match via direct session_id');
-            }
-            // Strategy 2: Check if session IDs share the same character and timestamp
-            else if (requestSessionId && alertSessionId) {
-                var requestParts = requestSessionId.split('-');
-                var alertParts = alertSessionId.split('-');
-                
-                if (requestParts.length >= 2 && alertParts.length >= 2) {
-                    if (requestParts[0] === alertParts[0] && requestParts[1] === alertParts[1]) {
-                        hasPendingRequest = true;
-                        console.log('Match via character+timestamp');
-                    }
-                }
-                
-                // Also check contains
-                if (!hasPendingRequest && (alertSessionId.includes(requestSessionId) || requestSessionId.includes(alertSessionId))) {
-                    hasPendingRequest = true;
-                    console.log('Match via contains');
-                }
-            }
-            // Strategy 3: Fallback - match via user_id
-            else if (requestUserId && alertSessionId) {
-                var userParts = requestUserId.split('_');
-                var sessionParts = alertSessionId.split('-');
-                
-                if (userParts.length > 1 && alertSessionId.includes(userParts[1])) {
-                    hasPendingRequest = true;
-                    console.log('Match via user_id fallback');
-                } else if (sessionParts.length > 0 && requestUserId.includes(sessionParts[0])) {
-                    hasPendingRequest = true;
-                    console.log('Match via session_parts fallback');
-                }
-            }
-        }
-        
-        // User request indicator (shown prominently at top of card)
-        var userRequestHtml = '';
-        if (hasPendingRequest) {
-            userRequestHtml = '<div class="user-request-indicator">' +
-                '<div class="request-pulse"></div>' +
-                '<i class="fas fa-hand-paper"></i> ' +
-                '<strong>User is requesting support!</strong>' +
-                '<div class="request-actions">' +
-                    '<button class="btn btn-success btn-sm" onclick="acceptPendingChatFromAlert(\'' + alert.id + '\')">' +
-                        '<i class="fas fa-comments"></i> Accept Chat' +
-                    '</button>' +
-                    '<button class="btn btn-info btn-sm" onclick="initiateStaffCall(\'' + alert.id + '\', \'' + alert.session_id + '\')">' +
-                        '<i class="fas fa-phone-alt"></i> Call Instead' +
-                    '</button>' +
-                '</div>' +
-            '</div>';
-        }
-        
         var actions = '';
         if (alert.status === 'active') {
             actions = '<button class="btn btn-warning" onclick="acknowledgeSafeguardingAlert(\'' + alert.id + '\')"><i class="fas fa-hand-paper"></i> Acknowledge</button>';
         }
-        
-        // Add contact buttons - Call (WebRTC) only
-        // Note: User must be connected for calls. If they're only chatting with AI, 
-        // they won't be reachable until they request support
-        actions += '<button class="btn btn-info" onclick="initiateStaffCall(\'' + alert.id + '\', \'' + alert.session_id + '\')" title="Note: User must be connected to receive calls">' +
-            '<i class="fas fa-phone-alt"></i> Call User</button>';
-        
-        // Add SMS/notification option placeholder for when Twilio is ready
-        actions += '<button class="btn btn-outline btn-small" onclick="showSendNotificationModal(\'' + alert.session_id + '\')" title="Send notification to user\'s device">' +
-            '<i class="fas fa-bell"></i></button>';
-        
         actions += '<button class="btn btn-success" onclick="resolveSafeguardingAlert(\'' + alert.id + '\')"><i class="fas fa-check"></i> Resolve</button>';
         
-        // Get proper character name from the characters mapping
-        var characterNames = {
-            'tommy': 'Tommy',
-            'doris': 'Doris',
-            'bob': 'Bob',
-            'finch': 'Finch',
-            'margie': 'Margie',
-            'hugo': 'Hugo',
-            'rita': 'Rita',
-            'catherine': 'Catherine',
-            'sentry': 'Finch'
-        };
-        var characterIcons = {
-            'tommy': 'fa-user',
-            'doris': 'fa-user-circle',
-            'bob': 'fa-user-tie',
-            'finch': 'fa-balance-scale',
-            'margie': 'fa-heart',
-            'hugo': 'fa-compass',
-            'rita': 'fa-users',
-            'catherine': 'fa-brain',
-            'sentry': 'fa-balance-scale'
-        };
-        var characterIcon = characterIcons[alert.character] || 'fa-robot';
-        var characterName = characterNames[alert.character] || alert.character || 'AI';
-        
+        var characterIcon = alert.character === 'tommy' ? 'fa-user' : 'fa-user-circle';
+        var characterName = alert.character === 'tommy' ? 'Tommy' : 'Doris';
         
         // Risk level styling
         var riskLevel = alert.risk_level || 'AMBER';
@@ -1491,8 +852,7 @@ function renderSafeguardingAlerts(alerts) {
             '</div>';
         }
         
-        return '<div class="card safeguarding-card ' + alert.status + ' risk-' + riskClass + '" data-alert-id="' + alert.id + '" data-session-id="' + (alert.session_id || '') + '">' +
-            userRequestHtml +
+        return '<div class="card safeguarding-card ' + alert.status + ' risk-' + riskClass + '" data-alert-id="' + alert.id + '">' +
             '<div class="card-header">' +
                 '<span class="card-name"><i class="fas ' + characterIcon + '"></i> Chat with ' + characterName + '</span>' +
                 '<span class="risk-badge" style="background-color:' + riskBadgeColor + '">' + riskLevel + ' (' + riskScore + ')</span>' +
@@ -1560,33 +920,6 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Accept pending chat request from a safeguarding alert
-function acceptPendingChatFromAlert(alertId) {
-    var pendingRequest = window.pendingChatRequest;
-    if (!pendingRequest || !pendingRequest.request_id) {
-        showNotification('No pending chat request found', 'error');
-        return;
-    }
-    
-    console.log('Accepting pending chat from alert:', alertId, 'request:', pendingRequest.request_id);
-    
-    // Accept the chat request using the existing function
-    acceptIncomingChatRequest(pendingRequest.request_id, pendingRequest.user_id);
-    
-    // Clear the pending request
-    window.pendingChatRequest = null;
-    
-    // Remove the indicator from the card
-    var card = document.querySelector('[data-alert-id="' + alertId + '"]');
-    if (card) {
-        var indicator = card.querySelector('.user-request-indicator');
-        if (indicator) indicator.remove();
-    }
-    
-    // Auto-acknowledge the safeguarding alert
-    acknowledgeSafeguardingAlert(alertId);
-}
-
 // Acknowledge Safeguarding Alert
 async function acknowledgeSafeguardingAlert(id) {
     try {
@@ -1597,250 +930,6 @@ async function acknowledgeSafeguardingAlert(id) {
         showNotification('Failed: ' + error.message, 'error');
     }
 }
-
-
-// ============ STAFF-INITIATED CONTACT ============
-
-// Initiate staff chat with a user from a safeguarding alert
-async function initiateStaffChat(alertId, sessionId) {
-    try {
-        showNotification('Looking for active chat room...', 'info');
-        
-        // Check if there's a pending chat request from this user
-        var pendingRequest = window.pendingChatRequest;
-        if (pendingRequest && pendingRequest.user_id) {
-            // Accept the pending chat request instead of creating a new room
-            console.log('Found pending chat request, accepting:', pendingRequest.request_id);
-            acceptIncomingChatRequest(pendingRequest.request_id, pendingRequest.user_id);
-            window.pendingChatRequest = null; // Clear it
-            await acknowledgeSafeguardingAlert(alertId);
-            return;
-        }
-        
-        // First, check if there's already an active live chat room for this alert or session
-        var roomsResponse = await fetch(CONFIG.API_URL + '/api/live-chat/rooms', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        });
-        
-        var rooms = await roomsResponse.json();
-        
-        // Find a room that matches this alert or session
-        var existingRoom = rooms.find(function(room) {
-            return room.status === 'active' && (
-                room.safeguarding_alert_id === alertId ||
-                room.ai_session_id === sessionId ||
-                (sessionId && room.ai_session_id && room.ai_session_id.includes(sessionId.split('-')[0]))
-            );
-        });
-        
-        if (existingRoom) {
-            // Join the existing room
-            showNotification('Found active chat room - joining...', 'success');
-            joinLiveChat(existingRoom.id);
-            await acknowledgeSafeguardingAlert(alertId);
-            return;
-        }
-        
-        // No existing room - check if there are any active rooms waiting for staff
-        var waitingRooms = rooms.filter(function(room) {
-            return room.status === 'active' && !room.staff_id;
-        });
-        
-        if (waitingRooms.length > 0) {
-            // Join the most recent waiting room
-            var latestRoom = waitingRooms.sort(function(a, b) {
-                return new Date(b.created_at) - new Date(a.created_at);
-            })[0];
-            
-            showNotification('Joining waiting user...', 'success');
-            joinLiveChat(latestRoom.id);
-            await acknowledgeSafeguardingAlert(alertId);
-            return;
-        }
-        
-        // No existing room found - try to reach user via Socket.IO
-        // The user might still be connected from the safeguarding alert
-        if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket) {
-            showNotification('User not in chat yet. Sending chat invite...', 'info');
-            
-            // Send a chat invite to the user (if they're still connected)
-            webRTCPhone.socket.emit('staff_chat_invite', {
-                session_id: sessionId,
-                staff_id: currentUser.id,
-                staff_name: currentUser.name,
-                alert_id: alertId
-            });
-            
-            // Wait briefly for a response, then create room anyway
-            setTimeout(async function() {
-                // Create a room and wait for user to connect
-                try {
-                    var response = await fetch(CONFIG.API_URL + '/api/live-chat/rooms', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + token
-                        },
-                        body: JSON.stringify({
-                            staff_id: currentUser.id,
-                            staff_name: currentUser.name,
-                            staff_type: currentUser.role,
-                            safeguarding_alert_id: alertId,
-                            ai_session_id: sessionId
-                        })
-                    });
-                    
-                    var data = await response.json();
-                    
-                    if (response.ok) {
-                        showNotification('Chat room created - waiting for user to connect...', 'info');
-                        joinLiveChat(data.room_id);
-                        await acknowledgeSafeguardingAlert(alertId);
-                    }
-                } catch (e) {
-                    console.error('Error creating room:', e);
-                }
-            }, 1000);
-            
-            return;
-        }
-        
-        // Fallback: Create room via API
-        showNotification('Creating chat room - user will need to connect...', 'info');
-        
-        var response = await fetch(CONFIG.API_URL + '/api/live-chat/rooms', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify({
-                staff_id: currentUser.id,
-                staff_name: currentUser.name,
-                staff_type: currentUser.role,
-                safeguarding_alert_id: alertId,
-                ai_session_id: sessionId
-            })
-        });
-        
-        var data = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(data.detail || 'Failed to create chat room');
-        }
-        
-        // Join the chat room
-        joinLiveChat(data.room_id);
-        
-        // Auto-acknowledge the safeguarding alert
-        await acknowledgeSafeguardingAlert(alertId);
-        
-    } catch (error) {
-        showNotification('Failed to initiate chat: ' + error.message, 'error');
-    }
-}
-
-// Initiate staff WebRTC call to a user from a safeguarding alert
-async function initiateStaffCall(alertId, sessionId) {
-    try {
-        // Check if WebRTC phone is available and registered
-        if (!webRTCPhone || !webRTCPhone.isRegistered) {
-            showNotification('WebRTC phone not connected. Please wait for connection...', 'error');
-            return;
-        }
-        
-        showNotification('Looking for user connection...', 'info');
-        
-        // PRIORITY 1: Check if there's a pending chat request from this user (most reliable)
-        // The pending chat request has the user's current Socket.IO ID
-        var pendingRequest = window.pendingChatRequest;
-        if (pendingRequest && pendingRequest.user_id) {
-            // Check if the pending request matches this safeguarding alert
-            var requestSessionId = pendingRequest.session_id || '';
-            if (requestSessionId === sessionId || 
-                (requestSessionId && sessionId && requestSessionId.includes(sessionId.split('-')[0]))) {
-                console.log('Using user_id from pending chat request:', pendingRequest.user_id);
-                showNotification('Found user - calling now...', 'info');
-                makeOutboundCall(pendingRequest.user_id);
-                await acknowledgeSafeguardingAlert(alertId);
-                return;
-            }
-        }
-        
-        // PRIORITY 2: Check for an active live chat room with this user
-        var roomsResponse = await fetch(CONFIG.API_URL + '/api/live-chat/rooms', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        });
-        
-        var rooms = await roomsResponse.json();
-        
-        // Find a room that matches this alert or session
-        var existingRoom = rooms.find(function(room) {
-            return room.status === 'active' && (
-                room.safeguarding_alert_id === alertId ||
-                room.ai_session_id === sessionId ||
-                (sessionId && room.ai_session_id && room.ai_session_id.includes(sessionId.split('-')[0]))
-            );
-        });
-        
-        // Also check for any waiting rooms
-        if (!existingRoom) {
-            var waitingRooms = rooms.filter(function(room) {
-                return room.status === 'active' && !room.staff_id;
-            });
-            if (waitingRooms.length > 0) {
-                existingRoom = waitingRooms.sort(function(a, b) {
-                    return new Date(b.created_at) - new Date(a.created_at);
-                })[0];
-            }
-        }
-        
-        // Get the user ID to call - either from the room or use the session ID directly
-        var targetUserId = null;
-        
-        if (existingRoom && existingRoom.user_session_id) {
-            targetUserId = existingRoom.user_session_id;
-        } else if (existingRoom && existingRoom.user_id) {
-            targetUserId = existingRoom.user_id;
-        } else if (sessionId) {
-            // Try using the session ID directly - user might still be connected
-            targetUserId = sessionId;
-        }
-        
-        if (!targetUserId) {
-            showNotification('User is not connected. They need to be in the app to receive calls.', 'warning');
-            
-            // Ask if they want to open chat instead
-            if (confirm('Cannot call user - they are not connected.\n\nWould you like to open a chat room instead? The user will see it when they return to the app.')) {
-                await initiateStaffChat(alertId, sessionId);
-            }
-            return;
-        }
-        
-        // Initiate WebRTC call to the user
-        console.log('Initiating WebRTC call to user:', targetUserId);
-        showNotification('Calling user via WebRTC...', 'info');
-        
-        // Use the makeOutboundCall function
-        makeOutboundCall(targetUserId);
-        
-        // Auto-acknowledge the safeguarding alert
-        await acknowledgeSafeguardingAlert(alertId);
-        
-    } catch (error) {
-        showNotification('Failed to initiate call: ' + error.message, 'error');
-    }
-}
-
-// Show notification modal for users not connected
-function showSendNotificationModal(sessionId) {
-    showNotification('Push notifications coming soon with Twilio integration. For now, the user must request support to receive calls.', 'info');
-}
-
 
 // Resolve Safeguarding Alert
 async function resolveSafeguardingAlert(id) {
@@ -1857,152 +946,6 @@ async function resolveSafeguardingAlert(id) {
     } catch (error) {
         showNotification('Failed: ' + error.message, 'error');
     }
-}
-
-// ============ SCREENING SUBMISSIONS ============
-
-// Load Screening Submissions (PHQ-9, GAD-7 results sent by users)
-async function loadScreeningSubmissions() {
-    try {
-        var submissions = await apiCall('/safeguarding/screening-submissions');
-        var pending = submissions.filter(function(s) { 
-            return s.status === 'pending' || s.status === 'reviewed'; 
-        });
-        
-        renderScreeningSubmissions(pending);
-        var pendingCount = submissions.filter(function(s) { return s.status === 'pending'; }).length;
-        document.getElementById('screening-count').textContent = pendingCount || '';
-        
-        // Add visual indicator for high severity
-        var section = document.getElementById('screening-section');
-        var highSeverity = pending.filter(function(s) { return s.severity === 'high'; });
-        if (highSeverity.length > 0) {
-            section.classList.add('has-urgent');
-        } else {
-            section.classList.remove('has-urgent');
-        }
-        
-    } catch (error) {
-        console.error('Error loading screening submissions:', error);
-    }
-}
-
-// Render Screening Submissions
-function renderScreeningSubmissions(submissions) {
-    var container = document.getElementById('screening-list');
-    
-    if (submissions.length === 0) {
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-clipboard-check"></i><p>No pending screening results</p></div>';
-        return;
-    }
-    
-    container.innerHTML = submissions.map(function(sub) {
-        // Parse the details to extract score info
-        var detailsLines = sub.details.split('\n');
-        var scoreInfo = detailsLines.find(function(l) { return l.includes('Score:'); }) || '';
-        var levelInfo = detailsLines.find(function(l) { return l.includes('Level:'); }) || '';
-        var userMessage = detailsLines.find(function(l) { return l.includes('User Message:'); }) || '';
-        
-        // Severity badge color
-        var severityColor = sub.severity === 'high' ? '#dc2626' : (sub.severity === 'medium' ? '#f59e0b' : '#22c55e');
-        var severityIcon = sub.severity === 'high' ? 'exclamation-triangle' : (sub.severity === 'medium' ? 'exclamation-circle' : 'info-circle');
-        
-        // Status badge
-        var statusBadge = sub.status === 'pending' ? 
-            '<span class="badge warning"><i class="fas fa-clock"></i> Pending</span>' :
-            '<span class="badge info"><i class="fas fa-eye"></i> Reviewed</span>';
-        
-        // Action buttons
-        var actions = '';
-        if (sub.status === 'pending') {
-            actions = '<button class="btn btn-info btn-sm" onclick="markScreeningReviewed(\'' + sub.id + '\')"><i class="fas fa-eye"></i> Mark Reviewed</button>';
-        }
-        actions += '<button class="btn btn-success btn-sm" onclick="markScreeningContacted(\'' + sub.id + '\')"><i class="fas fa-phone"></i> Contacted</button>';
-        actions += '<button class="btn btn-primary btn-sm" onclick="resolveScreening(\'' + sub.id + '\')"><i class="fas fa-check"></i> Resolve</button>';
-        
-        // Time formatting
-        var timeAgo = formatTimeAgo(new Date(sub.created_at));
-        
-        return '<div class="card screening-card ' + (sub.severity === 'high' ? 'urgent' : '') + '">' +
-            '<div class="card-header">' +
-                '<div class="card-title">' +
-                    '<i class="fas fa-clipboard-check" style="color:' + severityColor + '"></i> ' +
-                    '<strong>' + escapeHtml(sub.user_name || 'Anonymous') + '</strong>' +
-                '</div>' +
-                statusBadge +
-            '</div>' +
-            '<div class="card-body">' +
-                '<div class="screening-info">' +
-                    '<span class="badge" style="background-color:' + severityColor + '"><i class="fas fa-' + severityIcon + '"></i> ' + sub.severity.toUpperCase() + ' SEVERITY</span>' +
-                    '<span class="screening-time"><i class="fas fa-clock"></i> ' + timeAgo + '</span>' +
-                '</div>' +
-                '<div class="screening-details">' +
-                    '<p><strong>' + scoreInfo + '</strong></p>' +
-                    '<p>' + levelInfo + '</p>' +
-                    (userMessage && userMessage !== 'User Message: No additional message provided.' ? 
-                        '<div class="user-message"><i class="fas fa-quote-left"></i> ' + escapeHtml(userMessage.replace('User Message: ', '')) + '</div>' : '') +
-                '</div>' +
-                (sub.assigned_to_name ? '<div class="assigned-to"><i class="fas fa-user"></i> Assigned to: ' + escapeHtml(sub.assigned_to_name) + '</div>' : '') +
-                (sub.staff_notes ? '<div class="staff-notes"><i class="fas fa-sticky-note"></i> Notes: ' + escapeHtml(sub.staff_notes) + '</div>' : '') +
-            '</div>' +
-            '<div class="card-actions">' + actions + '</div>' +
-        '</div>';
-    }).join('');
-}
-
-// Mark screening as reviewed
-async function markScreeningReviewed(id) {
-    try {
-        await apiCall('/safeguarding/screening-submissions/' + id + '/status?status=reviewed&assigned_to=' + encodeURIComponent(currentUser.id) + '&assigned_to_name=' + encodeURIComponent(currentUser.name), { method: 'PATCH' });
-        showNotification('Marked as reviewed');
-        loadScreeningSubmissions();
-    } catch (error) {
-        showNotification('Failed: ' + error.message, 'error');
-    }
-}
-
-// Mark screening as contacted
-async function markScreeningContacted(id) {
-    var notes = prompt('Contact notes (optional - how did you contact them?):');
-    
-    try {
-        var url = '/safeguarding/screening-submissions/' + id + '/status?status=contacted';
-        if (notes) {
-            url += '&notes=' + encodeURIComponent(notes);
-        }
-        await apiCall(url, { method: 'PATCH' });
-        showNotification('Marked as contacted');
-        loadScreeningSubmissions();
-    } catch (error) {
-        showNotification('Failed: ' + error.message, 'error');
-    }
-}
-
-// Resolve screening submission
-async function resolveScreening(id) {
-    var notes = prompt('Resolution notes (optional - what was the outcome?):');
-    
-    try {
-        var url = '/safeguarding/screening-submissions/' + id + '/status?status=resolved';
-        if (notes) {
-            url += '&notes=' + encodeURIComponent(notes);
-        }
-        await apiCall(url, { method: 'PATCH' });
-        showNotification('Screening resolved');
-        loadScreeningSubmissions();
-    } catch (error) {
-        showNotification('Failed: ' + error.message, 'error');
-    }
-}
-
-// Format time ago helper
-function formatTimeAgo(date) {
-    var seconds = Math.floor((new Date() - date) / 1000);
-    
-    if (seconds < 60) return 'Just now';
-    if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
-    if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
-    return Math.floor(seconds / 86400) + ' days ago';
 }
 
 // ============ LIVE CHAT FUNCTIONALITY ============
@@ -2158,12 +1101,8 @@ function getWaitingTime(createdAt) {
 
 // Join Live Chat
 async function joinLiveChat(roomId) {
-    console.log('=== JOIN LIVE CHAT ===');
-    console.log('joinLiveChat called with roomId:', roomId);
-    
     try {
         // First, join the chat room (assign this staff member)
-        console.log('Calling API: /live-chat/rooms/' + roomId + '/join');
         await apiCall('/live-chat/rooms/' + roomId + '/join', {
             method: 'POST',
             body: JSON.stringify({
@@ -2172,10 +1111,7 @@ async function joinLiveChat(roomId) {
             })
         });
         
-        console.log('API call successful, setting currentChatRoom to:', roomId);
         currentChatRoom = roomId;
-        
-        console.log('Calling showLiveChatModal...');
         showLiveChatModal(roomId);
         showNotification('You have joined the chat', 'success');
         
@@ -2184,7 +1120,6 @@ async function joinLiveChat(roomId) {
         
     } catch (error) {
         console.error('Error joining chat:', error);
-        console.error('Error details:', error.message, error.stack);
         if (error.message && error.message.includes('already has a staff member')) {
             showNotification('This chat has already been taken by another staff member', 'error');
             loadLiveChats(false); // Refresh list
@@ -2195,35 +1130,13 @@ async function joinLiveChat(roomId) {
 }
 
 // Show Live Chat Modal
-var currentChatUserId = null;  // Store the user ID for calling from chat
-
 async function showLiveChatModal(roomId) {
     // Get room messages
     try {
         var response = await apiCall('/live-chat/rooms/' + roomId + '/messages');
         var messages = response.messages || [];
         
-        // Try to get the user's session ID from the room info or pending request
-        currentChatUserId = null;
-        
-        // Check if there's room info with user_session_id
-        try {
-            var roomInfo = await apiCall('/live-chat/rooms/' + roomId);
-            if (roomInfo && roomInfo.user_session_id) {
-                currentChatUserId = roomInfo.user_session_id;
-            }
-        } catch (e) {
-            console.log('Could not get room info:', e);
-        }
-        
-        // Fallback: check pending chat request
-        if (!currentChatUserId && window.pendingChatRequest && window.pendingChatRequest.user_id) {
-            currentChatUserId = window.pendingChatRequest.user_id;
-        }
-        
-        console.log('Chat modal - user ID for calls:', currentChatUserId);
-        
-        // Create modal HTML with Call button
+        // Create modal HTML
         var modalHtml = '<div class="livechat-modal" id="livechat-modal">' +
             '<div class="livechat-modal-content">' +
                 '<div class="livechat-modal-header">' +
@@ -2247,9 +1160,6 @@ async function showLiveChatModal(roomId) {
                     '</button>' +
                 '</div>' +
                 '<div class="livechat-actions">' +
-                    '<button class="btn btn-success" onclick="callUserFromChat()">' +
-                        '<i class="fas fa-phone-alt"></i> Call User' +
-                    '</button>' +
                     '<button class="btn btn-warning" onclick="endLiveChat(\'' + roomId + '\')">' +
                         '<i class="fas fa-phone-slash"></i> End Chat' +
                     '</button>' +
@@ -2260,10 +1170,7 @@ async function showLiveChatModal(roomId) {
         // Add modal to page
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         
-        // Join chat room via Socket.IO for real-time messaging
-        joinChatRoomSocket(roomId);
-        
-        // Also start polling as backup
+        // Start polling for new messages
         startChatPolling(roomId);
         
         // Focus input
@@ -2277,142 +1184,6 @@ async function showLiveChatModal(roomId) {
         console.error('Error opening chat:', error);
         showNotification('Failed to open chat', 'error');
     }
-}
-
-// Join chat room via Socket.IO
-function joinChatRoomSocket(roomId) {
-    // Use the WebRTC phone socket if available
-    if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket) {
-        console.log('Joining chat room via Socket.IO:', roomId);
-        
-        webRTCPhone.socket.emit('join_chat_room', {
-            room_id: roomId,
-            user_id: currentUser.id,
-            user_type: currentUser.role,
-            name: currentUser.name
-        });
-        
-        // Mark Socket.IO as connected for chat - disable polling
-        socketChatConnected = true;
-        
-        // Listen for incoming chat messages (backend emits 'new_chat_message')
-        webRTCPhone.socket.off('new_chat_message'); // Remove any existing listener
-        webRTCPhone.socket.on('new_chat_message', function(data) {
-            // Don't log message content for privacy
-            console.log('Received chat message via Socket.IO - room:', data.room_id, 'from:', data.sender_type);
-            if (data.room_id === currentChatRoom && data.sender_id !== currentUser.id) {
-                appendChatMessage(data.message, data.sender_name, data.sender_type, data.timestamp);
-            }
-        });
-        
-        // Listen for user joining
-        webRTCPhone.socket.off('user_joined_chat');
-        webRTCPhone.socket.on('user_joined_chat', function(data) {
-            console.log('User joined chat:', data);
-            if (data.room_id === currentChatRoom) {
-                showNotification(data.name + ' joined the chat', 'info');
-            }
-        });
-        
-        // Listen for user leaving
-        webRTCPhone.socket.off('user_left_chat');
-        webRTCPhone.socket.on('user_left_chat', function(data) {
-            try {
-                console.log('User left chat:', data);
-                console.log('currentChatRoom:', currentChatRoom);
-                console.log('Match check:', data.room_id === currentChatRoom);
-                
-                // Show notification if in the same room OR if we have an active chat modal open
-                var chatModalOpen = document.getElementById('livechat-modal') !== null;
-                console.log('Chat modal open:', chatModalOpen);
-                
-                // Always show notification if room matches or modal is open
-                if (data.room_id === currentChatRoom || chatModalOpen) {
-                    var userName = data.user_name || data.name || 'The user';
-                    var reason = '';
-                    if (data.reason === 'disconnected') {
-                        reason = ' (connection lost)';
-                    } else if (data.reason === 'left') {
-                        reason = '';
-                    }
-                    
-                    var message = userName + ' has left the chat' + reason;
-                    console.log('Showing notification:', message);
-                    
-                    // Show notification
-                    showNotification(message, 'warning');
-                    
-                    // Add system message to chat window
-                    if (document.getElementById('livechat-messages')) {
-                        appendSystemMessage(message);
-                    }
-                    
-                    console.log('Notification shown successfully');
-                } else {
-                    console.log('NOT showing notification - no room match and no modal open');
-                }
-            } catch (err) {
-                console.error('Error in user_left_chat handler:', err);
-                // Still try to show notification even if error
-                showNotification('User has left the chat', 'warning');
-            }
-        });
-        
-    } else {
-        console.log('WebRTC socket not available, using polling only');
-    }
-}
-
-// Leave chat room via Socket.IO
-function leaveChatRoomSocket() {
-    // Reset socket chat connected flag
-    socketChatConnected = false;
-    
-    if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket && currentChatRoom) {
-        webRTCPhone.socket.emit('leave_chat_room', {
-            room_id: currentChatRoom,
-            user_id: currentUser.id
-        });
-        
-        // Remove listeners
-        webRTCPhone.socket.off('new_chat_message');
-        webRTCPhone.socket.off('user_joined_chat');
-        webRTCPhone.socket.off('user_left_chat');
-    }
-}
-
-// Append a chat message to the UI
-function appendChatMessage(text, senderName, senderType, timestamp) {
-    var messagesDiv = document.getElementById('livechat-messages');
-    if (!messagesDiv) return;
-    
-    var isStaff = senderType === 'counsellor' || senderType === 'peer' || senderType === 'admin';
-    var displayName = isStaff ? senderName : 'User';
-    var time = timestamp ? new Date(timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
-    
-    messagesDiv.innerHTML += '<div class="chat-message ' + (isStaff ? 'staff' : 'user') + '">' +
-        '<span class="msg-sender">' + escapeHtml(displayName) + '</span>' +
-        '<span class="msg-text">' + escapeHtml(text) + '</span>' +
-        '<span class="msg-time">' + time + '</span>' +
-    '</div>';
-    
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-// Append a system message to the chat UI (for join/leave notifications)
-function appendSystemMessage(text) {
-    var messagesDiv = document.getElementById('livechat-messages');
-    if (!messagesDiv) return;
-    
-    var time = new Date().toLocaleTimeString();
-    
-    messagesDiv.innerHTML += '<div class="chat-message system">' +
-        '<span class="msg-text" style="color: #888; font-style: italic; text-align: center; width: 100%;">' + 
-        escapeHtml(text) + ' (' + time + ')' +
-        '</span>' +
-    '</div>';
-    
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
 // Handle Enter key in chat input
@@ -2430,18 +1201,6 @@ async function sendChatMessage() {
     if (!text || !currentChatRoom) return;
     
     try {
-        // Send via Socket.IO for real-time delivery
-        if (typeof webRTCPhone !== 'undefined' && webRTCPhone.socket) {
-            webRTCPhone.socket.emit('chat_message', {
-                room_id: currentChatRoom,
-                message: text,
-                sender_id: currentUser.id,
-                sender_name: currentUser.name,
-                sender_type: currentUser.role
-            });
-        }
-        
-        // Also save to API for persistence
         await apiCall('/live-chat/rooms/' + currentChatRoom + '/messages', {
             method: 'POST',
             body: JSON.stringify({ text: text, sender: 'staff' })
@@ -2464,68 +1223,17 @@ async function sendChatMessage() {
     }
 }
 
-// Track if Socket.IO is handling chat messages
-var socketChatConnected = false;
-
-// Start polling for new messages (only as fallback when Socket.IO fails)
+// Start polling for new messages
 function startChatPolling(roomId) {
-    // Only use polling as a fallback if Socket.IO isn't working
-    if (socketChatConnected) {
-        console.log('Socket.IO connected - skipping polling');
-        return;
-    }
-    
-    if (chatPollingInterval) {
-        clearInterval(chatPollingInterval);
-    }
-    
-    console.log('Starting chat polling as fallback for room:', roomId);
-    
     chatPollingInterval = setInterval(async function() {
-        // Skip polling if Socket.IO is now connected
-        if (socketChatConnected) {
-            console.log('Socket.IO now connected - stopping polling');
-            clearInterval(chatPollingInterval);
-            chatPollingInterval = null;
-            return;
-        }
-        
         try {
             var response = await apiCall('/live-chat/rooms/' + roomId + '/messages');
             updateChatMessages(response.messages || []);
         } catch (error) {
             console.log('Chat polling error:', error);
         }
-    }, 5000);  // Increased from 3s to 5s to reduce interference
+    }, 3000);
 }
-
-// Call user from within the chat modal
-function callUserFromChat() {
-    if (!currentChatUserId) {
-        showNotification('Unable to call - user connection ID not available', 'error');
-        return;
-    }
-    
-    // Check if WebRTC phone is available
-    if (!webRTCPhone || !webRTCPhone.isRegistered) {
-        showNotification('WebRTC phone not connected. Please wait for connection...', 'error');
-        return;
-    }
-    
-    // Check if already in a call - if so, try to cleanup stale state first
-    if (webRTCPhone.currentCallId) {
-        console.log('Call state exists, attempting cleanup before new call');
-        // Force cleanup of any stale call state
-        webRTCPhone.cleanupCall();
-    }
-    
-    console.log('Calling user from chat:', currentChatUserId);
-    showNotification('Calling user...', 'info');
-    
-    // Initiate the call
-    makeOutboundCall(currentChatUserId);
-}
-
 
 // Update chat messages in modal
 function updateChatMessages(messages) {
@@ -2546,9 +1254,6 @@ function updateChatMessages(messages) {
 
 // Close Live Chat Modal
 function closeLiveChatModal() {
-    // Leave Socket.IO room
-    leaveChatRoomSocket();
-    
     if (chatPollingInterval) {
         clearInterval(chatPollingInterval);
         chatPollingInterval = null;
@@ -2901,14 +1606,10 @@ function addDayCell(container, date, isCurrentMonth, today) {
     var isToday = date.getTime() === today.getTime();
     var isSelected = dateString === selectedCalendarDate;
     
-    // Find shifts for this day - check both user_id and staff_id for compatibility
+    // Find shifts for this day
     var dayShifts = calendarShifts.filter(function(s) { return s.date === dateString; });
-    var hasMyShift = dayShifts.some(function(s) { 
-        return (s.user_id === currentUser.id) || (s.staff_id === currentUser.id); 
-    });
-    var hasOtherShifts = dayShifts.some(function(s) { 
-        return (s.user_id !== currentUser.id) && (s.staff_id !== currentUser.id); 
-    });
+    var hasMyShift = dayShifts.some(function(s) { return s.staff_id === currentUser.id; });
+    var hasOtherShifts = dayShifts.some(function(s) { return s.staff_id !== currentUser.id; });
     
     var cell = document.createElement('div');
     cell.className = 'calendar-day';
@@ -2965,9 +1666,8 @@ function showSelectedDayShifts(dateString) {
     }
     
     shiftsContainer.innerHTML = dayShifts.map(function(shift) {
-        // Use user_id and user_name from API response
-        var isMyShift = (shift.user_id === currentUser.id) || (shift.staff_id === currentUser.id);
-        var name = isMyShift ? 'You' : (shift.user_name || shift.staff_name || 'Staff Member');
+        var isMyShift = shift.staff_id === currentUser.id;
+        var name = isMyShift ? 'You' : (shift.staff_name || 'Staff');
         
         var actionsHtml = '';
         if (isMyShift) {
@@ -3048,20 +1748,8 @@ async function saveShift() {
         return;
     }
     
-    if (!currentUser || !currentUser.id) {
-        showNotification('You must be logged in to add shifts', 'error');
-        return;
-    }
-    
     try {
-        // Include user_id, user_name, and user_email as query parameters
-        var queryParams = new URLSearchParams({
-            user_id: currentUser.id,
-            user_name: currentUser.name || '',
-            user_email: currentUser.email || ''
-        });
-        
-        var response = await apiCall('/shifts?' + queryParams.toString(), {
+        var response = await apiCall('/shifts', {
             method: 'POST',
             body: JSON.stringify({
                 date: date,
@@ -3131,12 +1819,16 @@ async function loadTeamOnDuty() {
     container.innerHTML = '<p class="loading-text">Loading team...</p>';
     
     try {
-        // Load shifts and staff using apiCall
-        const [shifts, counsellors, peers] = await Promise.all([
-            apiCall('/shifts/'),
-            apiCall('/counsellors'),
-            apiCall('/peer-supporters')
+        // Load shifts and staff
+        const [shiftsRes, counsellorsRes, peersRes] = await Promise.all([
+            fetch(`${API_URL}/api/shifts/`, { headers: getAuthHeaders() }),
+            fetch(`${API_URL}/api/counsellors`, { headers: getAuthHeaders() }),
+            fetch(`${API_URL}/api/peer-supporters`, { headers: getAuthHeaders() })
         ]);
+        
+        const shifts = await shiftsRes.json();
+        const counsellors = await counsellorsRes.json();
+        const peers = await peersRes.json();
         
         // Combine staff
         teamCache.staff = [
@@ -3232,432 +1924,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 1500);
 });
-
-// ===========================================
-// Swap Request Functions (Staff Portal)
-// ===========================================
-
-let swapData = {
-    pending: [],
-    myRequests: []
-};
-
-async function loadSwapRequests() {
-    const container = document.getElementById('available-swaps');
-    const countBadge = document.getElementById('swap-count');
-    
-    // Skip if elements don't exist
-    if (!container) return;
-    
-    try {
-        const currentUser = JSON.parse(localStorage.getItem('staff_user') || '{}');
-        
-        const swaps = await apiCall('/shift-swaps/pending');
-        
-        // Filter out user's own requests
-        swapData.pending = swaps.filter(s => s.requester_id !== currentUser.id);
-        
-        if (countBadge) countBadge.textContent = swapData.pending.length;
-        
-        if (swapData.pending.length === 0) {
-            container.innerHTML = '<p class="no-swaps-text"><i class="fas fa-check-circle"></i> No cover requests available</p>';
-            return;
-        }
-        
-        container.innerHTML = swapData.pending.map(swap => `
-            <div class="swap-item">
-                <div class="swap-item-header">
-                    <div class="swap-item-info">
-                        <h4>${escapeHtml(swap.requester_name)} needs cover</h4>
-                        <p>${swap.reason || 'No reason provided'}</p>
-                    </div>
-                </div>
-                <div class="swap-item-details">
-                    <span><i class="fas fa-calendar"></i>${swap.shift_date}</span>
-                    <span><i class="fas fa-clock"></i>${swap.shift_start} - ${swap.shift_end}</span>
-                </div>
-                <div class="swap-item-actions">
-                    <button class="btn btn-primary" onclick="acceptSwapRequest('${swap.id}')">
-                        <i class="fas fa-hand-paper"></i> I Can Cover
-                    </button>
-                </div>
-            </div>
-        `).join('');
-        
-    } catch (error) {
-        console.error('Error loading swap requests:', error);
-        container.innerHTML = '<p class="no-swaps-text">Failed to load cover requests</p>';
-    }
-}
-
-async function acceptSwapRequest(swapId) {
-    const currentUser = JSON.parse(localStorage.getItem('staff_user') || '{}');
-    
-    if (!currentUser.id || !currentUser.name) {
-        showNotification('Please log in to accept cover requests', 'error');
-        return;
-    }
-    
-    if (!confirm('Are you sure you want to cover this shift? This will be sent to admin for approval.')) {
-        return;
-    }
-    
-    try {
-        await apiCall(`/shift-swaps/${swapId}/accept`, {
-            method: 'POST',
-            body: JSON.stringify({
-                request_id: swapId,
-                responder_id: currentUser.id,
-                responder_name: currentUser.name
-            })
-        });
-        
-        showNotification('Cover accepted! Waiting for admin approval.', 'success');
-        loadSwapRequests();
-    } catch (error) {
-        console.error('Error accepting swap:', error);
-        showNotification(error.message || 'Failed to accept cover request', 'error');
-    }
-}
-
-async function requestCover(shiftId) {
-    const currentUser = JSON.parse(localStorage.getItem('staff_user') || '{}');
-    const reason = prompt('Reason for requesting cover (optional):');
-    
-    if (reason === null) return; // Cancelled
-    
-    try {
-        await apiCall('/shift-swaps/request', {
-            method: 'POST',
-            body: JSON.stringify({
-                shift_id: shiftId,
-                requester_id: currentUser.id,
-                requester_name: currentUser.name,
-                reason: reason || null
-            })
-        });
-        
-        showNotification('Cover request sent to all staff!', 'success');
-        loadSwapRequests();
-    } catch (error) {
-        console.error('Error requesting cover:', error);
-        showNotification('Failed to request cover', 'error');
-    }
-}
-
-// Load swap requests on portal load
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        if (!document.getElementById('login-screen').classList.contains('active')) {
-            loadSwapRequests();
-        }
-    }, 2000);
-    
-    // Load rota data when rota tab is clicked
-    var rotaTab = document.querySelector('[data-tab="rota"]');
-    if (rotaTab) {
-        rotaTab.addEventListener('click', function() {
-            loadRotaData();
-        });
-    }
-});
-
-// Load all rota data (shifts + swaps)
-function loadRotaData() {
-    loadShifts();
-    loadSwapRequests();
-}
-
-// Open swap request modal
-function openSwapRequestModal() {
-    // For now, show alert - full modal implementation would go here
-    alert('To request cover for a shift, click on the shift in the calendar and use the "Request Cover" button.');
-}
-
-
-// ============ SAFEGUARDING MONITOR FUNCTIONS ============
-
-function toggleSafeguardingMonitor() {
-    var monitor = document.getElementById('safeguarding-monitor');
-    if (monitor) {
-        var isVisible = monitor.style.display !== 'none';
-        monitor.style.display = isVisible ? 'none' : 'block';
-        if (!isVisible) {
-            refreshMonitor();
-        }
-    }
-}
-
-async function refreshMonitor() {
-    try {
-        var response = await fetch(CONFIG.API_URL + '/api/safeguarding/monitor', {
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
-            }
-        });
-        
-        if (!response.ok) throw new Error('Failed to load monitor data');
-        
-        var data = await response.json();
-        
-        var activityEl = document.getElementById('monitor-activity');
-        if (!activityEl) return;
-        
-        if (data.recent_alerts.length === 0) {
-            activityEl.innerHTML = '<p class="no-data">No recent alerts in the last 24 hours</p>';
-            return;
-        }
-        
-        var html = '<div class="activity-list">';
-        data.recent_alerts.forEach(function(alert) {
-            var levelClass = alert.risk_level.toLowerCase();
-            var triggers = alert.triggered_indicators.map(function(t) {
-                return '<span class="trigger-badge ' + t.level.toLowerCase() + '">' + t.indicator + ' (+' + t.weight + ')</span>';
-            }).join(' ');
-            
-            html += '<div class="activity-item ' + levelClass + '">';
-            html += '<div class="activity-header">';
-            html += '<span class="risk-badge ' + levelClass + '">' + alert.risk_level + '</span>';
-            html += '<span class="score">Score: ' + alert.score + '</span>';
-            html += '<span class="timestamp">' + new Date(alert.timestamp).toLocaleString() + '</span>';
-            html += '</div>';
-            html += '<div class="triggers">' + triggers + '</div>';
-            html += '</div>';
-        });
-        html += '</div>';
-        
-        activityEl.innerHTML = html;
-        
-    } catch (error) {
-        console.error('Error refreshing monitor:', error);
-        showNotification('Failed to load monitor data', 'error');
-    }
-}
-
-async function testSafeguardingPhrase() {
-    var phraseInput = document.getElementById('test-phrase');
-    var resultEl = document.getElementById('test-result');
-    
-    if (!phraseInput || !phraseInput.value.trim()) {
-        showNotification('Please enter a phrase to test', 'warning');
-        return;
-    }
-    
-    try {
-        var response = await fetch(CONFIG.API_URL + '/api/safeguarding/test', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ phrase: phraseInput.value })
-        });
-        
-        if (!response.ok) throw new Error('Test failed');
-        
-        var data = await response.json();
-        
-        var levelClass = data.risk_level.toLowerCase();
-        var triggers = data.triggered_indicators.map(function(t) {
-            return '<span class="trigger-badge ' + t.level.toLowerCase() + '">' + t.indicator + ' (+' + t.weight + ')</span>';
-        }).join(' ');
-        
-        var html = '<div class="test-result-card ' + levelClass + '">';
-        html += '<div class="result-header">';
-        html += '<span class="risk-badge ' + levelClass + '">' + data.risk_level + '</span>';
-        html += '<span class="score">Score: ' + data.score + '</span>';
-        html += data.would_create_alert ? '<span class="alert-badge">Would create alert</span>' : '<span class="no-alert-badge">No alert</span>';
-        html += '</div>';
-        if (triggers) {
-            html += '<div class="triggers">' + triggers + '</div>';
-        } else {
-            html += '<p class="no-triggers">No triggers matched</p>';
-        }
-        html += '</div>';
-        
-        resultEl.innerHTML = html;
-        
-    } catch (error) {
-        console.error('Error testing phrase:', error);
-        showNotification('Failed to test phrase', 'error');
-    }
-}
-
-async function loadTriggerPhrases() {
-    try {
-        var response = await fetch(CONFIG.API_URL + '/api/safeguarding/triggers', {
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
-            }
-        });
-        
-        if (!response.ok) throw new Error('Failed to load triggers');
-        
-        var data = await response.json();
-        
-        var triggerEl = document.getElementById('trigger-phrases');
-        if (!triggerEl) return;
-        
-        var html = '';
-        
-        // RED indicators
-        html += '<div class="trigger-section red">';
-        html += '<h5>RED Indicators (' + data.red_indicators.triggers.length + ') - ' + data.red_indicators.threshold_info + '</h5>';
-        html += '<div class="trigger-pills">';
-        data.red_indicators.triggers.slice(0, 20).forEach(function(t) {
-            html += '<span class="trigger-pill red">' + t.phrase + ' (+' + t.weight + ')</span>';
-        });
-        if (data.red_indicators.triggers.length > 20) {
-            html += '<span class="more-badge">+' + (data.red_indicators.triggers.length - 20) + ' more</span>';
-        }
-        html += '</div></div>';
-        
-        // AMBER indicators
-        html += '<div class="trigger-section amber">';
-        html += '<h5>AMBER Indicators (' + data.amber_indicators.triggers.length + ') - ' + data.amber_indicators.threshold_info + '</h5>';
-        html += '<div class="trigger-pills">';
-        data.amber_indicators.triggers.slice(0, 20).forEach(function(t) {
-            html += '<span class="trigger-pill amber">' + t.phrase + ' (+' + t.weight + ')</span>';
-        });
-        if (data.amber_indicators.triggers.length > 20) {
-            html += '<span class="more-badge">+' + (data.amber_indicators.triggers.length - 20) + ' more</span>';
-        }
-        html += '</div></div>';
-        
-        // Modifiers
-        html += '<div class="trigger-section modifier">';
-        html += '<h5>Modifiers (' + data.modifiers.triggers.length + ') - ' + data.modifiers.threshold_info + '</h5>';
-        html += '<div class="trigger-pills">';
-        data.modifiers.triggers.forEach(function(t) {
-            html += '<span class="trigger-pill modifier">' + t.phrase + ' (+' + t.weight + ')</span>';
-        });
-        html += '</div></div>';
-        
-        // Scoring rules
-        html += '<div class="scoring-rules">';
-        html += '<h5>Scoring Rules</h5>';
-        html += '<ul>';
-        Object.entries(data.scoring_rules).forEach(function([level, rule]) {
-            html += '<li><span class="risk-badge ' + level.toLowerCase() + '">' + level + '</span> ' + rule + '</li>';
-        });
-        html += '</ul></div>';
-        
-        triggerEl.innerHTML = html;
-        
-    } catch (error) {
-        console.error('Error loading triggers:', error);
-        showNotification('Failed to load trigger phrases', 'error');
-    }
-}
-
-
-// ============================================================================
-// INCIDENT REPORTING & GOVERNANCE
-// ============================================================================
-
-// Open Incident Report Modal
-function openIncidentReportModal() {
-    document.getElementById('incident-modal').style.display = 'flex';
-    document.getElementById('incident-title').value = '';
-    document.getElementById('incident-level').value = '';
-    document.getElementById('incident-description').value = '';
-    document.getElementById('incident-session').value = '';
-}
-
-// Close Incident Report Modal
-function closeIncidentModal() {
-    document.getElementById('incident-modal').style.display = 'none';
-}
-
-// Submit Incident Report
-async function submitIncidentReport() {
-    const title = document.getElementById('incident-title').value.trim();
-    const level = document.getElementById('incident-level').value;
-    const description = document.getElementById('incident-description').value.trim();
-    const sessionId = document.getElementById('incident-session').value.trim();
-    
-    if (!title || !level || !description) {
-        showNotification('Please fill in all required fields', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${API_URL}/api/governance/incidents`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                title: title,
-                level: level,
-                description: description,
-                related_session_id: sessionId || null
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to submit incident');
-        }
-        
-        const data = await response.json();
-        showNotification(`Incident ${data.incident_number} reported successfully`, 'success');
-        closeIncidentModal();
-        
-    } catch (error) {
-        console.error('Error submitting incident:', error);
-        showNotification('Failed to submit incident report', 'error');
-    }
-}
-
-// Open Peer Report Modal
-function openPeerReportModal() {
-    document.getElementById('peer-report-modal').style.display = 'flex';
-    document.getElementById('peer-reported-user').value = '';
-    document.getElementById('peer-report-reason').value = '';
-    document.getElementById('peer-report-details').value = '';
-}
-
-// Close Peer Report Modal
-function closePeerReportModal() {
-    document.getElementById('peer-report-modal').style.display = 'none';
-}
-
-// Submit Peer Report
-async function submitPeerReport() {
-    const reportedUser = document.getElementById('peer-reported-user').value.trim();
-    const reason = document.getElementById('peer-report-reason').value;
-    const details = document.getElementById('peer-report-details').value.trim();
-    
-    if (!reportedUser || !reason || !details) {
-        showNotification('Please fill in all required fields', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${API_URL}/api/governance/peer-reports`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                reported_user_id: reportedUser,
-                reporter_user_id: currentUser?.email || 'staff',
-                reason: reason,
-                details: details
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to submit report');
-        }
-        
-        showNotification('Peer concern reported successfully. Admin will review.', 'success');
-        closePeerReportModal();
-        
-    } catch (error) {
-        console.error('Error submitting peer report:', error);
-        showNotification('Failed to submit peer report', 'error');
-    }
-}
