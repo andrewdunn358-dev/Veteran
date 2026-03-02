@@ -839,12 +839,26 @@ async def accept_chat_request(sid, data):
     
     logger.info(f"=== ACCEPT CHAT REQUEST ===")
     logger.info(f"accept_chat_request: request_id={request_id}, requester_user_id={requester_user_id}")
+    
+    # Check if this request has already been claimed
+    if request_id in claimed_chat_requests:
+        logger.warning(f"accept_chat_request: Request {request_id} already claimed")
+        await sio.emit('chat_request_already_claimed', {
+            'request_id': request_id,
+            'message': 'This chat has already been taken by another staff member'
+        }, to=sid)
+        return
+    
+    # Mark as claimed immediately to prevent race conditions
+    claimed_chat_requests.add(request_id)
+    
     logger.info(f"accept_chat_request: user_to_socket keys: {list(user_to_socket.keys())}")
     
     staff_info = connected_users.get(sid, {})
     
     if staff_info.get('user_type') not in ['counsellor', 'peer']:
         logger.warning(f"accept_chat_request: Staff type not valid: {staff_info.get('user_type')}")
+        claimed_chat_requests.discard(request_id)  # Release the claim
         return
     
     # Find the requester's socket
@@ -854,6 +868,7 @@ async def accept_chat_request(sid, data):
     
     if not requester_sid:
         logger.warning(f"accept_chat_request: User {requester_user_id} not found in user_to_socket")
+        claimed_chat_requests.discard(request_id)  # Release the claim
         await sio.emit('chat_request_expired', {
             'request_id': request_id,
             'reason': 'User no longer connected'
