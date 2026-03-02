@@ -186,6 +186,15 @@ function setupSocketHandlers() {
         }
     });
     
+    // Handle case where staff tries to accept an already-claimed request
+    socket.on('chat_request_already_claimed', (data) => {
+        console.log('=== CHAT REQUEST ALREADY CLAIMED ===');
+        dismissChatRequest();
+        if (typeof showNotification === 'function') {
+            showNotification('This chat has already been taken by another staff member', 'warning');
+        }
+    });
+    
     // Real-time chat messages
     socket.on('new_chat_message', (data) => {
         console.log('New chat message received via socket:', data);
