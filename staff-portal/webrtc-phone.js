@@ -171,6 +171,20 @@ function setupSocketHandlers() {
         }
     });
     
+    // Chat request claimed by another staff member
+    socket.on('chat_request_claimed', (data) => {
+        console.log('=== CHAT REQUEST CLAIMED BY ANOTHER STAFF ===');
+        console.log('Claimed by:', data.claimed_by);
+        
+        // Dismiss the chat request banner if it's for this request
+        if (currentChatRequest && currentChatRequest.request_id === data.request_id) {
+            dismissChatRequest();
+            if (typeof showNotification === 'function') {
+                showNotification('Chat taken by ' + data.claimed_by, 'info');
+            }
+        }
+    });
+    
     // Real-time chat messages
     socket.on('new_chat_message', (data) => {
         console.log('New chat message received via socket:', data);
