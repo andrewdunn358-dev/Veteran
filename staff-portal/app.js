@@ -1241,7 +1241,7 @@ async function showLiveChatModal(roomId) {
                     }).join('') +
                 '</div>' +
                 '<div class="livechat-input">' +
-                    '<input type="text" id="livechat-input" placeholder="Type your message..." onkeypress="handleChatKeypress(event)">' +
+                    '<input type="text" id="livechat-input-dynamic" placeholder="Type your message..." onkeypress="handleChatKeypress(event)">' +
                     '<button class="btn btn-primary" onclick="sendChatMessage()">' +
                         '<i class="fas fa-paper-plane"></i>' +
                     '</button>' +
