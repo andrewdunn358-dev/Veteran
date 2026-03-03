@@ -2892,7 +2892,7 @@ async def create_counsellor(
 @api_router.get("/counsellors", response_model=List[Counsellor])
 async def get_counsellors(current_user: User = Depends(get_current_user)):
     """Get all counsellors - Requires authentication (admin, counsellor, or peer)"""
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Access denied. Staff only.")
     counsellors = await db.counsellors.find().to_list(1000)
     # Decrypt sensitive fields when retrieving
@@ -2925,7 +2925,7 @@ async def get_available_counsellors():
 @api_router.get("/counsellors/{counsellor_id}", response_model=Counsellor)
 async def get_counsellor(counsellor_id: str, current_user: User = Depends(get_current_user)):
     """Get a specific counsellor - Requires authentication"""
-    if current_user.role not in ["admin", "counsellor"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor"]:
         raise HTTPException(status_code=403, detail="Access denied")
     counsellor = await db.counsellors.find_one({"id": counsellor_id})
     if not counsellor:
@@ -3002,7 +3002,7 @@ async def create_peer_supporter(
 @api_router.get("/peer-supporters", response_model=List[PeerSupporter])
 async def get_peer_supporters(current_user: User = Depends(get_current_user)):
     """Get all peer supporters - Requires authentication (admin, counsellor, or peer)"""
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Access denied. Staff only.")
     peers = await db.peer_supporters.find().to_list(1000)
     # Decrypt sensitive fields when retrieving
@@ -3031,7 +3031,7 @@ async def get_available_peer_supporters():
 @api_router.get("/peer-supporters/{peer_id}", response_model=PeerSupporter)
 async def get_peer_supporter(peer_id: str, current_user: User = Depends(get_current_user)):
     """Get a specific peer supporter - Requires authentication"""
-    if current_user.role not in ["admin", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "peer"]:
         raise HTTPException(status_code=403, detail="Access denied")
     peer = await db.peer_supporters.find_one({"id": peer_id})
     if not peer:
@@ -3774,7 +3774,7 @@ async def send_panic_alert_to_counsellors(alert: dict):
     
     try:
         # Get all counsellors AND admins for urgent alerts
-        staff_users = await db.users.find({"role": {"$in": ["counsellor", "admin"]}}).to_list(100)
+        staff_users = await db.users.find({"role": {"$in": ["counsellor", "supervisor", "admin"]}}).to_list(100)
         
         if not staff_users:
             logging.error("No counsellors or admins found to notify about panic alert!")
@@ -3847,7 +3847,7 @@ async def get_panic_alerts(
     status: Optional[str] = None
 ):
     """Get panic alerts (all staff can view)"""
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Only staff can view panic alerts")
     
     try:
@@ -3867,7 +3867,7 @@ async def acknowledge_panic_alert(
     current_user: User = Depends(get_current_user)
 ):
     """Acknowledge a panic alert"""
-    if current_user.role not in ["admin", "counsellor"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor"]:
         raise HTTPException(status_code=403, detail="Only counsellors and admins can acknowledge alerts")
     
     try:
@@ -3897,7 +3897,7 @@ async def resolve_panic_alert(
     current_user: User = Depends(get_current_user)
 ):
     """Resolve a panic alert"""
-    if current_user.role not in ["admin", "counsellor"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor"]:
         raise HTTPException(status_code=403, detail="Only counsellors and admins can resolve alerts")
     
     try:
@@ -3923,7 +3923,7 @@ async def get_safeguarding_alerts(
     current_user: User = Depends(get_current_user)
 ):
     """Get safeguarding alerts - all staff can view"""
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Only staff can view safeguarding alerts")
     
     try:
@@ -3943,7 +3943,7 @@ async def get_safeguarding_alert(
     current_user: User = Depends(get_current_user)
 ):
     """Get a single safeguarding alert by ID"""
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Only staff can view safeguarding alerts")
     
     try:
@@ -3965,7 +3965,7 @@ async def acknowledge_safeguarding_alert(
     current_user: User = Depends(get_current_user)
 ):
     """Acknowledge a safeguarding alert"""
-    if current_user.role not in ["admin", "counsellor"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor"]:
         raise HTTPException(status_code=403, detail="Only counsellors and admins can acknowledge safeguarding alerts")
     
     try:
@@ -3996,7 +3996,7 @@ async def resolve_safeguarding_alert(
     current_user: User = Depends(get_current_user)
 ):
     """Resolve a safeguarding alert with optional notes"""
-    if current_user.role not in ["admin", "counsellor"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor"]:
         raise HTTPException(status_code=403, detail="Only counsellors and admins can resolve safeguarding alerts")
     
     try:
@@ -4029,7 +4029,7 @@ async def get_safeguarding_monitor(
     Shows AI analysis results WITHOUT message content.
     Staff only - for testing and improving the system.
     """
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Staff only")
     
     try:
@@ -4088,7 +4088,7 @@ async def get_safeguarding_triggers(
     Get all safeguarding trigger phrases and their weights.
     Staff only - for reviewing and improving the system.
     """
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Staff only")
     
     return {
@@ -4139,7 +4139,7 @@ async def test_safeguarding_phrase(
     Staff only - for testing trigger sensitivity.
     Returns analysis result without storing or alerting.
     """
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Staff only")
     
     phrase = test_input.get("phrase", "")
@@ -4172,7 +4172,7 @@ async def create_note(
     current_user: User = Depends(get_current_user)
 ):
     """Create a new note (staff only)"""
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Only staff can create notes")
     
     try:
@@ -4200,7 +4200,7 @@ async def get_notes(
     include_shared: bool = True
 ):
     """Get notes - own notes + notes shared with me (admins see all)"""
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Only staff can view notes")
     
     try:
@@ -4236,7 +4236,7 @@ async def get_note(
     current_user: User = Depends(get_current_user)
 ):
     """Get a specific note"""
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Only staff can view notes")
     
     try:
@@ -4314,13 +4314,13 @@ async def get_staff_users(
     current_user: User = Depends(get_current_user)
 ):
     """Get list of staff users for sharing notes"""
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Only staff can view staff list")
     
     try:
         # Get all staff users (for note sharing dropdown)
         staff = await db.users.find(
-            {"role": {"$in": ["admin", "counsellor", "peer"]}},
+            {"role": {"$in": ["admin", "supervisor", "counsellor", "peer"]}},
             {"_id": 0, "id": 1, "name": 1, "role": 1}
         ).to_list(100)
         return staff
@@ -5470,7 +5470,7 @@ async def get_concerns(
     current_user: User = Depends(get_current_user)
 ):
     """Get all concerns (staff only)"""
-    if current_user.role not in ["admin", "counsellor"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor"]:
         raise HTTPException(status_code=403, detail="Only admins and counsellors can view concerns")
     
     try:
@@ -5492,7 +5492,7 @@ async def update_concern_status(
     current_user: User = Depends(get_current_user)
 ):
     """Update concern status (staff only)"""
-    if current_user.role not in ["admin", "counsellor"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor"]:
         raise HTTPException(status_code=403, detail="Only admins and counsellors can update concerns")
     
     try:
@@ -5868,7 +5868,7 @@ async def staff_join_live_chat(room_id: str, join_data: StaffJoinChat, current_u
     """Staff member joins a live chat room"""
     logging.info(f"staff_join_live_chat: room_id={room_id}, staff_id={join_data.staff_id}")
     
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Only staff can join chat rooms")
     
     # Check in-memory first
@@ -5978,7 +5978,7 @@ async def end_live_chat_room(room_id: str):
 @api_router.get("/live-chat/rooms")
 async def get_active_chat_rooms(current_user: User = Depends(get_current_user)):
     """Get all active chat rooms for staff (staff only)"""
-    if current_user.role not in ["admin", "counsellor", "peer"]:
+    if current_user.role not in ["admin", "supervisor", "counsellor", "peer"]:
         raise HTTPException(status_code=403, detail="Only staff can view chat rooms")
     
     rooms = await db.live_chat_rooms.find(

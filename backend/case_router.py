@@ -113,8 +113,8 @@ async def get_user_with_role_check(credentials: HTTPAuthorizationCredentials = D
         user = vars(user)
     
     role = user.get("role", "")
-    if role not in ["admin", "counsellor", "staff"]:
-        raise HTTPException(status_code=403, detail="Only counsellors and admins can access case management")
+    if role not in ["admin", "supervisor", "counsellor", "staff"]:
+        raise HTTPException(status_code=403, detail="Only counsellors, supervisors and admins can access case management")
     return user
 
 

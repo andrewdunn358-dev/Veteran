@@ -137,6 +137,88 @@ body {
 .btn-block { width: 100%; }
 .btn-small { padding: 8px 14px; font-size: 13px; }
 
+/* Tabs Container */
+.tabs-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.tab:hover {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.tab.active {
+    background: var(--primary);
+    color: white;
+}
+
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.tab-badge.warning {
+    background: var(--warning);
+    color: white;
+}
+
+.tab-badge.danger {
+    background: var(--danger);
+    color: white;
+}
+
+.tab-badge.info {
+    background: #0ea5e9;
+    color: white;
+}
+
+.tab-badge.hidden {
+    display: none;
+}
+
+/* Tab Panes */
+.tab-content {
+    padding: 0;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
 .btn-primary {
     background: var(--primary);
     color: white;
