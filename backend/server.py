@@ -4611,6 +4611,117 @@ async def resolve_escalation(
 
 # ============ AI BATTLE BUDDIES CHAT ENDPOINTS ============
 
+# Pydantic models for AI chat tracking
+class AIChatSessionStart(BaseModel):
+    session_id: str
+    character_id: str
+    user_agent: Optional[str] = None
+
+class AIChatMessageLog(BaseModel):
+    session_id: str
+    character_id: str
+    message_count: int
+
+@api_router.post("/ai-chat/session/start")
+async def start_ai_chat_session(data: AIChatSessionStart):
+    """Log the start of an AI chat session"""
+    session_data = {
+        "id": data.session_id,
+        "character_id": data.character_id,
+        "started_at": datetime.utcnow(),
+        "last_message_at": datetime.utcnow(),
+        "message_count": 0,
+        "user_agent": data.user_agent,
+        "status": "active"
+    }
+    
+    # Upsert - update if exists, create if not
+    await db.ai_chat_sessions.update_one(
+        {"id": data.session_id},
+        {"$set": session_data},
+        upsert=True
+    )
+    
+    return {"status": "started", "session_id": data.session_id}
+
+@api_router.post("/ai-chat/session/message")
+async def log_ai_chat_message(data: AIChatMessageLog):
+    """Log a message in an AI chat session"""
+    await db.ai_chat_sessions.update_one(
+        {"id": data.session_id},
+        {
+            "$set": {
+                "last_message_at": datetime.utcnow(),
+                "message_count": data.message_count,
+                "character_id": data.character_id
+            },
+            "$setOnInsert": {
+                "id": data.session_id,
+                "started_at": datetime.utcnow(),
+                "status": "active"
+            }
+        },
+        upsert=True
+    )
+    
+    return {"status": "logged"}
+
+@api_router.post("/ai-chat/session/end")
+async def end_ai_chat_session(session_id: str):
+    """Mark an AI chat session as ended"""
+    await db.ai_chat_sessions.update_one(
+        {"id": session_id},
+        {"$set": {"status": "ended", "ended_at": datetime.utcnow()}}
+    )
+    return {"status": "ended"}
+
+@api_router.get("/ai-chat/stats")
+async def get_ai_chat_stats(days: int = 7):
+    """Get AI chat statistics for the admin dashboard"""
+    cutoff = datetime.utcnow() - timedelta(days=days)
+    
+    # Get session counts by character
+    pipeline = [
+        {"$match": {"started_at": {"$gte": cutoff}}},
+        {"$group": {
+            "_id": "$character_id",
+            "total_sessions": {"$sum": 1},
+            "total_messages": {"$sum": "$message_count"},
+            "avg_messages": {"$avg": "$message_count"}
+        }},
+        {"$sort": {"total_sessions": -1}}
+    ]
+    
+    by_character = await db.ai_chat_sessions.aggregate(pipeline).to_list(20)
+    
+    # Get total counts
+    total_sessions = await db.ai_chat_sessions.count_documents({"started_at": {"$gte": cutoff}})
+    total_messages_result = await db.ai_chat_sessions.aggregate([
+        {"$match": {"started_at": {"$gte": cutoff}}},
+        {"$group": {"_id": None, "total": {"$sum": "$message_count"}}}
+    ]).to_list(1)
+    total_messages = total_messages_result[0]["total"] if total_messages_result else 0
+    
+    # Get daily trend
+    daily_pipeline = [
+        {"$match": {"started_at": {"$gte": cutoff}}},
+        {"$group": {
+            "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$started_at"}},
+            "sessions": {"$sum": 1},
+            "messages": {"$sum": "$message_count"}
+        }},
+        {"$sort": {"_id": 1}}
+    ]
+    daily_trend = await db.ai_chat_sessions.aggregate(daily_pipeline).to_list(30)
+    
+    return {
+        "period_days": days,
+        "total_sessions": total_sessions,
+        "total_messages": total_messages,
+        "by_character": by_character,
+        "daily_trend": daily_trend
+    }
+
 def get_or_create_buddy_session(session_id: str, character: str) -> Dict[str, Any]:
     """Get or create an AI Battle Buddy chat session"""
     now = datetime.utcnow()

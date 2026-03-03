@@ -327,6 +327,49 @@ export default function UnifiedAIChat() {
     }
   }, [messages]);
 
+  // Track AI chat session start
+  const trackSessionStart = async () => {
+    try {
+      await fetch(`${API_URL}/api/ai-chat/session/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionId,
+          character_id: characterId,
+          user_agent: Platform.OS
+        }),
+      });
+    } catch (error) {
+      // Silent fail - tracking shouldn't break chat
+      console.log('Session tracking error:', error);
+    }
+  };
+
+  // Track message count
+  const trackMessage = async (messageCount: number) => {
+    try {
+      await fetch(`${API_URL}/api/ai-chat/session/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionId,
+          character_id: characterId,
+          message_count: messageCount
+        }),
+      });
+    } catch (error) {
+      // Silent fail
+      console.log('Message tracking error:', error);
+    }
+  };
+
+  // Start tracking when session loads
+  useEffect(() => {
+    if (hasLoadedSession && character) {
+      trackSessionStart();
+    }
+  }, [hasLoadedSession, character]);
+
   const handleSendMessage = async () => {
     if (!inputText.trim() || isLoading || !character) return;
 
@@ -369,7 +412,13 @@ export default function UnifiedAIChat() {
         timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, buddyMessage]);
+      setMessages(prev => {
+        const newMessages = [...prev, buddyMessage];
+        // Track message count (user messages only)
+        const userMessageCount = newMessages.filter(m => m.sender === 'user').length;
+        trackMessage(userMessageCount);
+        return newMessages;
+      });
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: Message = {

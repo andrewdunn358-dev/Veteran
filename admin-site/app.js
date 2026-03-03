@@ -834,6 +834,9 @@ async function loadLogsData() {
         document.getElementById('stat-escalations').textContent = logsData.safeguarding.length + logsData.screening.filter(s => s.status === 'pending').length;
         document.getElementById('stat-panic').textContent = logsData.panic.length;
         
+        // Load AI Chat stats
+        loadAIChatStats();
+        
         // Render charts
         renderActivityTrendChart(logsData.calls, logsData.chats, logsData.safeguarding);
         renderContactTypeChart(logsData.calls);
@@ -849,6 +852,41 @@ async function loadLogsData() {
 // Chart instances for cleanup
 let activityTrendChart = null;
 let contactTypeChart = null;
+
+// AI Chat Stats
+async function loadAIChatStats() {
+    try {
+        const stats = await apiCall('/ai-chat/stats?days=7');
+        
+        // Update AI chat stat card if it exists
+        const aiChatStat = document.getElementById('stat-ai-chats');
+        if (aiChatStat) {
+            aiChatStat.textContent = stats.total_sessions || 0;
+        }
+        
+        // Update AI messages stat
+        const aiMessagesStat = document.getElementById('stat-ai-messages');
+        if (aiMessagesStat) {
+            aiMessagesStat.textContent = stats.total_messages || 0;
+        }
+        
+        // Update character breakdown if container exists
+        const characterBreakdown = document.getElementById('ai-character-breakdown');
+        if (characterBreakdown && stats.by_character) {
+            characterBreakdown.innerHTML = stats.by_character.map(c => `
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
+                    <span style="text-transform: capitalize; font-weight: 500;">${c._id || 'Unknown'}</span>
+                    <span><strong>${c.total_sessions}</strong> chats / <strong>${c.total_messages}</strong> msgs</span>
+                </div>
+            `).join('') || '<p style="color: var(--text-muted);">No AI chat data yet</p>';
+        }
+        
+        return stats;
+    } catch (error) {
+        console.log('AI Chat stats not available:', error);
+        return null;
+    }
+}
 
 function renderActivityTrendChart(calls, chats, safeguarding) {
     const ctx = document.getElementById('activity-trend-chart');
