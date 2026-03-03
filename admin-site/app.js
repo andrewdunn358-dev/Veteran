@@ -1469,7 +1469,11 @@ function openModal(content) {
 }
 
 function closeModal() {
-    document.getElementById('modal-overlay').classList.add('hidden');
+    const overlay = document.getElementById('modal-overlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+        overlay.style.display = 'none'; // Force hide as backup
+    }
 }
 
 // Delete Confirmation
@@ -3515,7 +3519,9 @@ function openAddStaffModal() {
     `;
     
     document.getElementById('add-staff-form').addEventListener('submit', handleAddStaff);
-    document.getElementById('modal-overlay').classList.remove('hidden');
+    const overlay = document.getElementById('modal-overlay');
+    overlay.classList.remove('hidden');
+    overlay.style.display = 'flex';
 }
 
 // Toggle role-specific fields
