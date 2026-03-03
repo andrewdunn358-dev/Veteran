@@ -69,25 +69,25 @@ var TwilioPhone = (function() {
                 return false;
             }
             
-            // Check if Twilio SDK is loaded
+            // Check if Twilio SDK is loaded (Voice SDK 2.x)
             if (typeof Twilio === 'undefined' || !Twilio.Device) {
                 console.error('Twilio SDK not loaded');
                 updatePhoneUI('unavailable', 'SDK not loaded');
                 return false;
             }
             
-            // Initialize device
+            // Initialize device with Voice SDK 2.x
             device = new Twilio.Device(token, {
-                codecPreferences: ['opus', 'pcmu'],
-                fakeLocalDTMF: true,
-                enableRingingState: true
+                codecPreferences: [Twilio.Device.Codec.Opus, Twilio.Device.Codec.PCMU],
+                allowIncomingWhileBusy: true,
+                logLevel: 1
             });
             
             // Setup event handlers
             setupDeviceEvents();
             
-            // Register the device
-            await device.register();
+            // Register the device (Voice SDK 2.x)
+            device.register();
             
             console.log('Twilio Device initialized successfully');
             return true;
@@ -559,5 +559,12 @@ var TwilioPhone = (function() {
 
 // Global function to call from callback buttons
 function twilioCallUser(phone, name, callbackId) {
-    TwilioPhone.makeCallViaAPI(phone, name, callbackId);
+    // Try Device SDK first (browser-to-phone), fall back to REST API
+    if (TwilioPhone.isReady()) {
+        console.log('Using Twilio Device SDK for call');
+        TwilioPhone.makeCall(phone, name, callbackId);
+    } else {
+        console.log('Device not ready, using REST API (one-way call)');
+        TwilioPhone.makeCallViaAPI(phone, name, callbackId);
+    }
 }
