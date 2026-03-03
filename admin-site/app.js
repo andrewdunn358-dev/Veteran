@@ -5794,7 +5794,7 @@ function showGovernanceSubtab(subtab) {
             loadComplianceStatus();
             break;
         case 'reports':
-            // Reports section - no auto-load needed
+            loadScheduledReports();
             break;
     }
 }
@@ -5944,7 +5944,104 @@ function printReport() {
 }
 
 function exportReportPDF() {
-    showNotification('PDF export coming soon. Use Print for now.', 'info');
+    const period = document.getElementById('report-period-select')?.value || 'weekly';
+    openPDFReport(period);
+}
+
+// Open PDF report in new window
+function openPDFReport(period) {
+    const url = `${CONFIG.API_URL}/governance/summary-report/pdf?period=${period}`;
+    window.open(url, '_blank');
+    showNotification(`Opening ${period} PDF report...`, 'info');
+}
+
+// Email report to specified address
+async function emailReport() {
+    const email = document.getElementById('report-email-input').value.trim();
+    const period = document.getElementById('report-period-select').value;
+    
+    if (!email) {
+        showNotification('Please enter an email address', 'error');
+        return;
+    }
+    
+    if (!email.includes('@')) {
+        showNotification('Please enter a valid email address', 'error');
+        return;
+    }
+    
+    try {
+        showNotification('Sending report...', 'info');
+        const response = await apiCall(`/governance/summary-report/email?email=${encodeURIComponent(email)}&period=${period}`, 'POST');
+        showNotification(`Report sent to ${email}`, 'success');
+        document.getElementById('report-email-input').value = '';
+    } catch (error) {
+        showNotification('Failed to send report: ' + (error.message || error), 'error');
+    }
+}
+
+// Add scheduled report
+async function addScheduledReport() {
+    const email = document.getElementById('schedule-email-input').value.trim();
+    const frequency = document.getElementById('schedule-frequency-select').value;
+    
+    if (!email || !email.includes('@')) {
+        showNotification('Please enter a valid email address', 'error');
+        return;
+    }
+    
+    try {
+        await apiCall(`/governance/scheduled-reports?email=${encodeURIComponent(email)}&frequency=${frequency}&enabled=true`, 'POST');
+        showNotification(`Scheduled ${frequency} reports to ${email}`, 'success');
+        document.getElementById('schedule-email-input').value = '';
+        loadScheduledReports();
+    } catch (error) {
+        showNotification('Failed to create schedule: ' + (error.message || error), 'error');
+    }
+}
+
+// Load scheduled reports list
+async function loadScheduledReports() {
+    const container = document.getElementById('scheduled-reports-list');
+    try {
+        const response = await apiCall('/governance/scheduled-reports');
+        const schedules = response.schedules || [];
+        
+        if (schedules.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-muted); text-align: center; margin: 0;">No scheduled reports configured.</p>';
+            return;
+        }
+        
+        container.innerHTML = schedules.map(s => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 8px;">
+                <div>
+                    <strong style="color: var(--text-primary);">${s.email}</strong>
+                    <span style="color: var(--text-secondary); margin-left: 10px;">
+                        <i class="fas fa-clock"></i> ${s.frequency}
+                    </span>
+                    ${s.enabled ? '<span style="color: #10b981; margin-left: 10px;"><i class="fas fa-check-circle"></i> Active</span>' : '<span style="color: #f59e0b; margin-left: 10px;"><i class="fas fa-pause-circle"></i> Paused</span>'}
+                </div>
+                <button class="btn btn-small btn-danger" onclick="deleteScheduledReport('${s.email}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `).join('');
+    } catch (error) {
+        container.innerHTML = '<p style="color: var(--danger); text-align: center;">Failed to load schedules.</p>';
+    }
+}
+
+// Delete scheduled report
+async function deleteScheduledReport(email) {
+    if (!confirm(`Remove scheduled reports for ${email}?`)) return;
+    
+    try {
+        await apiCall(`/governance/scheduled-reports/${encodeURIComponent(email)}`, 'DELETE');
+        showNotification(`Removed schedule for ${email}`, 'success');
+        loadScheduledReports();
+    } catch (error) {
+        showNotification('Failed to remove schedule', 'error');
+    }
 }
 
 // Load hazards

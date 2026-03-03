@@ -58,12 +58,24 @@ const PRISON_RESOURCES = [
   { name: "Veterans' Gateway", desc: 'First point of contact for veterans', phone: '0808 802 1212', url: 'https://www.veteransgateway.org.uk' },
 ];
 
+// Bereavement Resources
+const BEREAVEMENT_RESOURCES = [
+  { name: 'DMWS', desc: 'Defence Medical Welfare Service - welfare support for those who serve', phone: '01011 736012', url: 'https://dmws.org.uk/' },
+  { name: 'Cruse Bereavement Support', desc: 'Free counselling, peer support & helpline for grief', phone: '0808 808 1677', url: 'https://www.cruse.org.uk' },
+  { name: "Scotty's Little Soldiers", desc: 'Support for children bereaved of a parent who served', url: 'https://www.scottyslittlesoldiers.co.uk' },
+  { name: 'Beyond the Wire', desc: 'Trauma-informed support for armed forces bereaved families', url: 'https://beyondthewire.org.uk' },
+  { name: 'Forces Support', desc: 'Supporting bereaved families of Service Personnel', url: 'https://forcessupport.org.uk' },
+  { name: 'WAY (Widowed & Young)', desc: 'Peer network for those widowed before age 51', url: 'https://www.widowedandyoung.org.uk' },
+  { name: 'SSAFA Bereaved Families', desc: 'Confidential emotional & practical bereavement support', phone: '0800 260 6767', url: 'https://www.ssafa.org.uk/get-help/bereaved-families' },
+  { name: 'ABF The Soldiers Charity', desc: 'Lifetime support for British Army families', phone: '020 7901 8900', url: 'https://soldierscharity.org' },
+];
+
 export default function FamilyFriends() {
   const router = useRouter();
   const { colors, theme } = useTheme();
   const isDark = theme === 'dark';
   const styles = createStyles(colors, isDark);
-  const [view, setView] = useState<'main' | 'concern' | 'resources' | 'signs' | 'addiction' | 'prison'>('main');
+  const [view, setView] = useState<'main' | 'concern' | 'resources' | 'signs' | 'addiction' | 'prison' | 'bereavement'>('main');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Rita AI character state
@@ -277,6 +289,17 @@ export default function FamilyFriends() {
               <View style={styles.actionContent}>
                 <Text style={[styles.actionTitle, { color: colors.text }]}>Support Services</Text>
                 <Text style={[styles.actionDesc, { color: colors.textSecondary }]}>Op Courage, Combat Stress, Men's Sheds & more</Text>
+              </View>
+              <FontAwesome5 name="chevron-right" size={16} color={colors.textSecondary} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]} onPress={() => setView('bereavement')} data-testid="bereavement-card">
+              <View style={[styles.actionIcon, { backgroundColor: colors.background }]}>
+                <FontAwesome5 name="dove" size={24} color="#7c3aed" />
+              </View>
+              <View style={styles.actionContent}>
+                <Text style={[styles.actionTitle, { color: colors.text }]}>Bereavement Support</Text>
+                <Text style={[styles.actionDesc, { color: colors.textSecondary }]}>Military-specific grief & loss support</Text>
               </View>
               <FontAwesome5 name="chevron-right" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
@@ -612,6 +635,75 @@ export default function FamilyFriends() {
           </>
         )}
 
+        {/* Bereavement Support */}
+        {view === 'bereavement' && (
+          <>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Bereavement Support</Text>
+            <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>
+              Specialist support for those who have lost a loved one in the Armed Forces community.
+            </Text>
+
+            <View style={[styles.infoCard, { backgroundColor: isDark ? '#2e1065' : '#faf5ff', borderColor: isDark ? '#7c3aed' : '#ddd6fe' }]}>
+              <FontAwesome5 name="heart" size={18} color="#7c3aed" />
+              <Text style={[styles.infoText, { color: isDark ? '#c4b5fd' : '#5b21b6' }]}>
+                Losing a loved one who served is uniquely challenging. You may be dealing with complex emotions, 
+                military-specific grief, or practical matters like benefits and housing. These organisations understand 
+                what you're going through and are here to help.
+              </Text>
+            </View>
+
+            {BEREAVEMENT_RESOURCES.map((resource, index) => (
+              <TouchableOpacity 
+                key={index}
+                style={[styles.resourceCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                onPress={() => resource.url && Linking.openURL(resource.url)}
+                data-testid={`bereavement-resource-${index}`}
+              >
+                <View style={styles.resourceContent}>
+                  <Text style={[styles.resourceName, { color: colors.text }]}>{resource.name}</Text>
+                  <Text style={[styles.resourceDesc, { color: colors.textSecondary }]}>{resource.desc}</Text>
+                  {resource.phone && (
+                    <TouchableOpacity 
+                      style={styles.resourcePhone}
+                      onPress={() => Linking.openURL(`tel:${resource.phone.replace(/\s/g, '')}`)}
+                    >
+                      <FontAwesome5 name="phone-alt" size={14} color="#16a34a" />
+                      <Text style={styles.resourcePhoneText}>{resource.phone}</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <FontAwesome5 name="external-link-alt" size={14} color="#94a3b8" />
+              </TouchableOpacity>
+            ))}
+
+            <View style={[styles.tipCard, { backgroundColor: isDark ? '#2e1065' : '#faf5ff' }]}>
+              <FontAwesome5 name="child" size={20} color="#7c3aed" />
+              <Text style={[styles.tipText, { color: isDark ? '#c4b5fd' : '#5b21b6' }]}>
+                <Text style={styles.tipBold}>Scotty's Little Soldiers </Text>
+                specialises in supporting children and young people (up to age 25) who have lost a parent 
+                who served in the British Armed Forces.
+              </Text>
+            </View>
+
+            <View style={[styles.dmwsCard, { backgroundColor: isDark ? '#1e3a5f' : '#eff6ff', borderColor: '#3b82f6' }]}>
+              <FontAwesome5 name="hands-helping" size={24} color="#3b82f6" />
+              <Text style={[styles.dmwsTitle, { color: isDark ? '#93c5fd' : '#1e40af' }]}>DMWS</Text>
+              <Text style={[styles.dmwsText, { color: isDark ? '#bfdbfe' : '#1e40af' }]}>
+                The Defence Medical Welfare Service has provided welfare support to those who serve since 1943. 
+                They support serving personnel, reservists, veterans, Armed Forces families, and Blue Light services 
+                with bereavement and end-of-life care.
+              </Text>
+              <TouchableOpacity 
+                style={styles.dmwsLink}
+                onPress={() => Linking.openURL('https://dmws.org.uk/')}
+              >
+                <Text style={styles.dmwsLinkText}>Visit DMWS</Text>
+                <FontAwesome5 name="external-link-alt" size={12} color="#3b82f6" />
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+
         <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
@@ -927,4 +1019,17 @@ const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
   covenantText: { fontSize: 14, color: '#b0c4de', lineHeight: 20 },
   covenantLink: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12 },
   covenantLinkText: { fontSize: 14, color: '#3b82f6', fontWeight: '600' },
+  
+  // DMWS Card (Bereavement section)
+  dmwsCard: {
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+  },
+  dmwsTitle: { fontSize: 20, fontWeight: '700', marginTop: 12, marginBottom: 8 },
+  dmwsText: { fontSize: 14, lineHeight: 22, textAlign: 'center' },
+  dmwsLink: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 16 },
+  dmwsLinkText: { fontSize: 14, color: '#3b82f6', fontWeight: '600' },
 });

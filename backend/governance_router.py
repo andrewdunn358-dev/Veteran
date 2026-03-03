@@ -709,6 +709,316 @@ async def get_summary_report(period: str = "weekly"):
         raise HTTPException(status_code=500, detail="Failed to generate summary report")
 
 
+@governance_router.post("/summary-report/email")
+async def email_summary_report(email: str = Query(...), period: str = Query(default="weekly")):
+    """
+    Generate and email a summary report to specified email address.
+    """
+    try:
+        # Generate the report first
+        report = await get_summary_report(period=period)
+        
+        # Create HTML email content
+        period_label = "Weekly" if period == "weekly" else "Monthly"
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 30px; border-radius: 12px; text-align: center; }}
+                .header h1 {{ margin: 0; }}
+                .header p {{ margin: 10px 0 0 0; opacity: 0.9; }}
+                .card {{ background: #f8fafc; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #6366f1; }}
+                .card h3 {{ margin-top: 0; color: #6366f1; }}
+                .stat {{ display: inline-block; margin: 10px 20px 10px 0; }}
+                .stat-value {{ font-size: 28px; font-weight: bold; color: #333; }}
+                .stat-label {{ font-size: 12px; color: #666; }}
+                .alert-card {{ border-left-color: #ef4444; }}
+                .alert-card h3 {{ color: #ef4444; }}
+                .engagement-card {{ border-left-color: #3b82f6; }}
+                .engagement-card h3 {{ color: #3b82f6; }}
+                .kpi-card {{ border-left-color: #10b981; }}
+                .kpi-card h3 {{ color: #10b981; }}
+                .recommendations {{ background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px 20px; border-radius: 8px; margin: 20px 0; }}
+                .recommendations h4 {{ margin-top: 0; color: #92400e; }}
+                .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Radio Check {period_label} Report</h1>
+                <p>Period: {report['period_start'][:10]} to {report['period_end'][:10]}</p>
+                <p style="font-size: 12px; opacity: 0.7;">Generated: {report['generated_at'][:19].replace('T', ' ')}</p>
+            </div>
+            
+            <div class="card alert-card">
+                <h3>🛡️ Safeguarding Alerts</h3>
+                <div class="stat">
+                    <div class="stat-value">{report['safeguarding']['total_alerts']}</div>
+                    <div class="stat-label">Total Alerts</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" style="color: #ef4444;">{report['safeguarding']['imminent_risk']}</div>
+                    <div class="stat-label">Imminent Risk</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" style="color: #f59e0b;">{report['safeguarding']['high_risk']}</div>
+                    <div class="stat-label">High Risk</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{report['safeguarding']['panic_alerts']}</div>
+                    <div class="stat-label">Panic Alerts</div>
+                </div>
+            </div>
+            
+            <div class="card kpi-card">
+                <h3>📊 Key Performance Indicators</h3>
+                <p><strong>Avg Response Time (High Risk):</strong> {report['kpis'].get('avg_response_time_high', 'N/A')}</p>
+                <p><strong>Avg Response Time (Imminent):</strong> {report['kpis'].get('avg_response_time_imminent', 'N/A')}</p>
+                <p><strong>SLA Compliance:</strong> {report['kpis'].get('high_risk_sla_compliance', 'N/A')}</p>
+            </div>
+            
+            <div class="card engagement-card">
+                <h3>👥 Engagement</h3>
+                <div class="stat">
+                    <div class="stat-value">{report['engagement']['ai_chat_sessions']}</div>
+                    <div class="stat-label">AI Chat Sessions</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{report['engagement']['live_chats']}</div>
+                    <div class="stat-label">Live Chats</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{report['engagement']['callbacks_requested']}</div>
+                    <div class="stat-label">Callbacks Requested</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" style="color: #10b981;">{report['engagement']['callback_completion_rate']}</div>
+                    <div class="stat-label">Completion Rate</div>
+                </div>
+            </div>
+            
+            {"<div class='recommendations'><h4>⚠️ Recommendations</h4><ul>" + "".join(f"<li>{r}</li>" for r in report['recommendations']) + "</ul></div>" if report['recommendations'] else "<div class='card' style='border-left-color: #10b981; background: #d1fae5;'><h3 style='color: #065f46; margin: 0;'>✅ All systems operating within normal parameters</h3></div>"}
+            
+            <div class="footer">
+                <p>This report was automatically generated by Radio Check</p>
+                <p>© Radio Check - Supporting UK Veterans</p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Send email using Resend
+        if not RESEND_API_KEY:
+            raise HTTPException(status_code=500, detail="Email service not configured")
+        
+        sender_email = os.environ.get('SENDER_EMAIL', 'noreply@radiocheck.me')
+        
+        email_response = resend.Emails.send({
+            "from": sender_email,
+            "to": email,
+            "subject": f"Radio Check {period_label} Summary Report - {datetime.now().strftime('%d %b %Y')}",
+            "html": html_content
+        })
+        
+        # Log the email send
+        await db.report_emails.insert_one({
+            "email": email,
+            "period": period,
+            "sent_at": datetime.now(timezone.utc),
+            "email_id": email_response.get('id') if email_response else None
+        })
+        
+        return {
+            "success": True,
+            "message": f"Report sent to {email}",
+            "email_id": email_response.get('id') if email_response else None
+        }
+        
+    except Exception as e:
+        logging.error(f"Error emailing report: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to send report: {str(e)}")
+
+
+@governance_router.get("/summary-report/pdf")
+async def get_report_pdf(period: str = Query(default="weekly")):
+    """
+    Generate a PDF-ready HTML report that can be printed to PDF.
+    Returns HTML optimized for PDF conversion.
+    """
+    try:
+        report = await get_summary_report(period=period)
+        period_label = "Weekly" if period == "weekly" else "Monthly"
+        
+        # Create print-optimized HTML
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Radio Check {period_label} Report</title>
+            <style>
+                @page {{ size: A4; margin: 20mm; }}
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .header {{ background: #4f46e5; color: white; padding: 30px; text-align: center; margin-bottom: 30px; }}
+                .header h1 {{ margin: 0; font-size: 28px; }}
+                .section {{ margin-bottom: 25px; page-break-inside: avoid; }}
+                .section h2 {{ color: #4f46e5; border-bottom: 2px solid #4f46e5; padding-bottom: 10px; }}
+                table {{ width: 100%; border-collapse: collapse; margin: 15px 0; }}
+                th, td {{ padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }}
+                th {{ background: #f3f4f6; font-weight: bold; }}
+                .metric {{ background: #f8fafc; padding: 15px; border-radius: 8px; margin: 10px 0; display: inline-block; width: 22%; text-align: center; }}
+                .metric-value {{ font-size: 32px; font-weight: bold; color: #4f46e5; }}
+                .metric-label {{ font-size: 12px; color: #666; }}
+                .alert {{ background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 15px 0; }}
+                .success {{ background: #d1fae5; border-left: 4px solid #10b981; padding: 15px; margin: 15px 0; }}
+                .footer {{ text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Radio Check {period_label} Summary Report</h1>
+                <p>Period: {report['period_start'][:10]} to {report['period_end'][:10]} ({report['period_days']} days)</p>
+                <p>Generated: {report['generated_at'][:19].replace('T', ' ')} UTC</p>
+            </div>
+            
+            <div class="section">
+                <h2>Safeguarding Overview</h2>
+                <div style="display: flex; justify-content: space-between;">
+                    <div class="metric">
+                        <div class="metric-value">{report['safeguarding']['total_alerts']}</div>
+                        <div class="metric-label">Total Alerts</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" style="color: #ef4444;">{report['safeguarding']['imminent_risk']}</div>
+                        <div class="metric-label">Imminent Risk</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" style="color: #f59e0b;">{report['safeguarding']['high_risk']}</div>
+                        <div class="metric-label">High Risk</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{report['safeguarding']['panic_alerts']}</div>
+                        <div class="metric-label">Panic Alerts</div>
+                    </div>
+                </div>
+                <table>
+                    <tr><th>Risk Level</th><th>Count</th></tr>
+                    <tr><td>Imminent</td><td>{report['safeguarding']['imminent_risk']}</td></tr>
+                    <tr><td>High</td><td>{report['safeguarding']['high_risk']}</td></tr>
+                    <tr><td>Medium</td><td>{report['safeguarding']['medium_risk']}</td></tr>
+                    <tr><td>Low</td><td>{report['safeguarding']['low_risk']}</td></tr>
+                </table>
+            </div>
+            
+            <div class="section">
+                <h2>Key Performance Indicators</h2>
+                <table>
+                    <tr><th>KPI</th><th>Value</th><th>Target</th></tr>
+                    <tr><td>Avg Response Time (High Risk)</td><td>{report['kpis'].get('avg_response_time_high', 'N/A')}</td><td>&lt; 2 hours</td></tr>
+                    <tr><td>Avg Response Time (Imminent)</td><td>{report['kpis'].get('avg_response_time_imminent', 'N/A')}</td><td>&lt; 15 mins</td></tr>
+                    <tr><td>SLA Compliance</td><td>{report['kpis'].get('high_risk_sla_compliance', 'N/A')}</td><td>&gt; 95%</td></tr>
+                </table>
+            </div>
+            
+            <div class="section">
+                <h2>Engagement Metrics</h2>
+                <table>
+                    <tr><th>Metric</th><th>Value</th></tr>
+                    <tr><td>AI Chat Sessions</td><td>{report['engagement']['ai_chat_sessions']}</td></tr>
+                    <tr><td>Live Chats</td><td>{report['engagement']['live_chats']}</td></tr>
+                    <tr><td>Callbacks Requested</td><td>{report['engagement']['callbacks_requested']}</td></tr>
+                    <tr><td>Callbacks Completed</td><td>{report['engagement']['callbacks_completed']}</td></tr>
+                    <tr><td>Completion Rate</td><td>{report['engagement']['callback_completion_rate']}</td></tr>
+                </table>
+            </div>
+            
+            <div class="section">
+                <h2>Recommendations</h2>
+                {"<div class='alert'><ul>" + "".join(f"<li>{r}</li>" for r in report['recommendations']) + "</ul></div>" if report['recommendations'] else "<div class='success'><strong>✓ All systems operating within normal parameters</strong></div>"}
+            </div>
+            
+            <div class="footer">
+                <p><strong>Radio Check - Supporting UK Veterans</strong></p>
+                <p>This report is confidential and intended for governance review only.</p>
+                <p>Report ID: RPT-{datetime.now().strftime('%Y%m%d%H%M%S')}</p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse(content=html_content, media_type="text/html")
+        
+    except Exception as e:
+        logging.error(f"Error generating PDF report: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate PDF report")
+
+
+@governance_router.post("/scheduled-reports")
+async def create_scheduled_report(
+    email: str = Query(..., description="Email to send reports to"),
+    frequency: str = Query(default="weekly", description="weekly or monthly"),
+    enabled: bool = Query(default=True)
+):
+    """
+    Create or update a scheduled report configuration.
+    Reports will be sent automatically based on frequency.
+    """
+    try:
+        # Upsert the schedule
+        result = await db.scheduled_reports.update_one(
+            {"email": email},
+            {"$set": {
+                "email": email,
+                "frequency": frequency,
+                "enabled": enabled,
+                "created_at": datetime.now(timezone.utc),
+                "last_sent": None
+            }},
+            upsert=True
+        )
+        
+        return {
+            "success": True,
+            "message": f"Scheduled {frequency} reports to {email}",
+            "enabled": enabled
+        }
+        
+    except Exception as e:
+        logging.error(f"Error creating scheduled report: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create schedule")
+
+
+@governance_router.get("/scheduled-reports")
+async def get_scheduled_reports():
+    """Get all scheduled report configurations."""
+    try:
+        schedules = await db.scheduled_reports.find({}).to_list(100)
+        for s in schedules:
+            s['_id'] = str(s['_id'])
+        return {"schedules": schedules}
+    except Exception as e:
+        logging.error(f"Error fetching schedules: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch schedules")
+
+
+@governance_router.delete("/scheduled-reports/{email}")
+async def delete_scheduled_report(email: str):
+    """Delete a scheduled report configuration."""
+    try:
+        result = await db.scheduled_reports.delete_one({"email": email})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Schedule not found")
+        return {"success": True, "message": f"Removed schedule for {email}"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error deleting schedule: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete schedule")
+
+
 # ============================================================================
 # PEER MODERATION ENDPOINTS
 # ============================================================================

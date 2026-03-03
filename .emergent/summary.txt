@@ -2,193 +2,210 @@
 The user wants to build Radio Check, a mental health and peer support application for veterans. The project includes a React web application, a Python FastAPI backend, and web portals for Admin and Staff.
 
 The most recent user requests are:
-- Implement Twilio for browser-to-phone callbacks from the staff portal.
 - Fix the live chat functionality in the staff portal, as messages are not appearing for staff.
-- Fix callback request notifications (email and portal) which are not being received.
-- Fix a Vercel deployment error related to Expo Router.
-- Provide a business and funding plan and an exportable costing sheet.
+- Implement a new AI Persona, Frankie, a Physical Training Instructor (PTI), with a dedicated The Gym page.
+- Add gamification and progress tracking for Frankie's fitness program.
+- Enhance the admin portal to monitor KPIs, view logs, and generate/email reports.
+- Correct the AI character Doris to be Rachel everywhere.
+- Move Frankie's card on the homepage and update resource links on the new Gym page.
 
 **PRODUCT REQUIREMENTS**
--   A working staff rota/calendar system.
--   A fully functional CMS for all app content, including AI Personas.
--   A robust, multi-layered safeguarding system.
--   A full Clinical Safety & Governance infrastructure.
--   A **Case Management System** for counsellors within the staff portal.
--   A redesigned, stable, tabbed Staff Portal.
--   Secure password policies.
--   **Implementation of Twilio for browser-to-phone calls (DONE in this session).**
--   Correct navigation on chat closure.
+- A working staff rota/calendar system.
+- A fully functional CMS for all app content.
+- A robust, multi-layered safeguarding system.
+- A full Clinical Safety & Governance infrastructure.
+- A **Case Management System** for counsellors.
+- A stable Staff Portal with working Live Chat.
+- **(New)** An AI PTI character (Frankie) with a 12-week program and gamification.
+- **(New)** A The Gym page with fitness resources and a gym finder.
+- **(New)** An admin dashboard with real-time KPI monitoring and automated reporting (including PDF/email).
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application with a React/Expo frontend, a FastAPI backend, and vanilla JS/HTML  and . The main accomplishment of this session was the successful integration of Twilio, enabling staff to make two-way, browser-to-phone calls to users who request a callback. This involved creating new backend endpoints, adding the Twilio Voice SDK to the staff portal, and extensive debugging of credentials and configuration. In-app WebRTC calling is also functional. However, the live chat in the staff portal is broken, and email notifications for callbacks are not working.
+A full-stack application with a React/Expo frontend, a FastAPI backend, and vanilla JS  and . This session saw major feature additions: the Frankie AI persona and The Gym page were fully implemented. The Admin Portal was significantly enhanced with real-time alert monitoring and a new reporting system capable of generating, exporting to PDF, and emailing weekly/monthly summaries. Multiple critical bugs were also addressed, including a persistent issue with an AI persona's name and the non-functional staff live chat (fix is pending user deployment).
 
 **Last working item**:
--   **Last item agent was working**: Debugging why live chat messages are not appearing in the staff portal window. Logs from the user show that the websocket connection is working and messages are being received by the browser, but they are not being rendered in the UI. A key error in the console is , which prevents the logic from correctly identifying the sender and filtering out the staff's own messages.
+-   **Last item agent was working**: Implementing PDF export and email scheduling for the governance reports in the admin portal. This involved creating backend endpoints (, ), adding UI elements to , and writing the corresponding JavaScript logic in .
 -   **Status**: IN PROGRESS
--   **Agent Testing Done**: N
--   **Which testing method agent to use?**: both. A **frontend testing agent** is needed to validate the  live chat UI fixes. A **backend testing agent** can verify the Socket.IO event handling in .
--   **User Testing Done**: Y (User confirmed chat is still not working and provided logs).
+-   **Agent Testing Done**: Y (Backend endpoints tested via curl)
+-   **Which testing method agent to use?**: both. The **frontend testing agent** should be used to test the new UI functionality in the , including generating, downloading, and emailing reports. The **backend testing agent** can verify the PDF creation and Resend email integration.
+-   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Live Chat messages not displaying in staff portal (P0, RECURRING)**: While websocket events are firing for new messages, they are not rendering in the staff portal chat window.
--   **Issue 2: Callback notifications not being received (P1, RECURRING)**: When a user requests a callback, the staff do not receive an email or see the notification in the portal.
--   **Issue 3: Doris to Rachel name change not visible in production (P1, RECURRING)**: A platform-level Git sync/Vercel caching issue is preventing backend code changes from being deployed and visible to the user.
--   **Issue 4: Vercel deployment failing (P2)**: User reported a build error . A fix has been implemented but not verified by a successful deployment.
+-   **Issue 1: Live Chat messages not displaying in staff portal (P0, RECURRING)**: The agent has implemented extensive fixes for a race condition and DOM visibility bug. The fix is believed to be complete but is pending user deployment and verification.
+-   **Issue 2: Callback notifications not being received (P1, RECURRING)**: Staff do not receive email/portal notifications for callback requests. This is likely a Resend domain verification issue.
+-   **Issue 3: AI Character sort order is incorrect on the homepage (P2)**: The API endpoint  is not respecting the  field from the database, causing Frankie to appear last instead of first.
+-   **Issue 4: Vercel deployment instability (P2)**: An earlier build failure was addressed by removing , but the overall stability of Vercel deployments remains unconfirmed.
 
 **Issues Detail**:
 -   **Issue 1: Live Chat messages not displaying in staff portal**
-    -   **Attempted fixes**: The agent confirmed from logs that  is being called in  and that the code finds the  div and appends the HTML. The root cause is  because  is not available at the moment the message is received.
-    -   **Next debug checklist**:
-        1.  In , inside the  handler, fix the  error by getting the user object from local storage as a fallback. Use this pattern: .
-        2.  This will fix the logic that prevents the sender's own message from being printed twice.
-        3.  Investigate  and  to determine why the chat modal, despite having content added to it, might be hidden or not displaying correctly. Check for  or  properties on the chat window or message elements.
-    -   **Why fix this issue and what will be achieved with the fix?**: This is a core feature required for live support between staff and users.
-    -   **Status**: IN PROGRESS
+    -   **Attempted fixes**: The agent identified a complex race condition where the chat modal was created after socket messages arrived, and a polling function was overwriting real-time messages. The fix involved:
+        1.  In , creating the modal structure *before* any async API calls.
+        2.  In , preventing the API response from overwriting existing messages if socket messages are present.
+        3.  In , adding a fallback to get the logged-in user from  to prevent messages from being filtered incorrectly.
+        4.  Adding inline styles to forcefully make messages visible, bypassing potential CSS conflicts.
+    -   **Next debug checklist**: The user needs to deploy the latest versions of , , and  to their 20i hosting environment and test the chat functionality. If it still fails, inspect the browser's DOM and console logs for errors.
+    -   **Why fix this issue and what will be achieved with the fix?**: This is a core support feature for the application.
+    -   **Status**: USER VERIFICATION PENDING
     -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: both
+    -   **Should Test frontend/backend/both after fix?**: frontend
 
 -   **Issue 2: Callback notifications not being received**
-    -   **Attempted fixes**: Agent identified that the email sender was changed to . This will fail if the  domain is not verified in the user's Resend account.
-    -   **Next debug checklist**: Ask the user to confirm which domain is verified in their Resend account. If  is not verified, they must either verify it or the agent must change the  in  back to a verified domain.
-    -   **Why fix this issue and what will be achieved with the fix?**: Staff are not being notified of urgent user requests for support.
-    -   **Status**: BLOCKED (on user action/information)
+    -   **Attempted fixes**: None in this session. Previous diagnosis points to the sender email domain () not being verified in the user's Resend account.
+    -   **Next debug checklist**: Ask the user to verify the  domain in their Resend dashboard. If not possible, the  variable in  must be changed to a verified domain.
+    -   **Why fix this issue and what will be achieved with the fix?**: Staff are not being notified of urgent user requests.
+    -   **Status**: BLOCKED (on user action)
     -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Backend
+    -   **Should Test frontend/backend/both after fix?**: backend
 
--   **Issue 3: Doris to Rachel Name Change Not Visible**
-    -   **Attempted fixes**: The agent has confirmed all code references are correct. This is a known platform bug with Git sync.
-    -   **Next debug checklist**: This is not a code issue. The agent should instruct the user to contact Emergent support with the job ID if it persists.
-    -   **Status**: BLOCKED
-    -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Frontend
-
--   **Issue 4: Vercel deployment failing**
-    -   **Attempted fixes**: Agent added  to  to force a static export and prevent Vercel from incorrectly detecting it as a server-rendered app.
-    -   **Next debug checklist**: Ask the user to push the changes to GitHub and trigger a new Vercel deployment to confirm the fix works.
-    -   **Status**: USER VERIFICATION PENDING
+-   **Issue 3: AI Character sort order is incorrect**
+    -   **Attempted fixes**: The agent set  for Frankie in the database. However, the API at  still returns him last. The agent inspected the motor query () in  but could not resolve why it wasn't working as expected.
+    -   **Next debug checklist**:
+        1.  Investigate the documents in the  collection. Check if all characters have an  field and if it's a number.
+        2.  Run the query directly against the MongoDB instance to isolate whether it's a database or code issue.
+        3.  Consider adding a default  value for characters that lack one.
+    -   **Why fix this issue and what will be achieved with the fix?**: The user wants to control the display order of the AI personas on the homepage.
+    -   **Status**: IN PROGRESS
     -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: NA (Deployment issue)
+    -   **Should Test frontend/backend/both after fix?**: backend
+
+-   **Issue 4: Vercel deployment instability**
+    -   **Attempted fixes**: Agent removed  to fix a yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.37s. hang-up.
+    -   **Next debug checklist**: User needs to monitor the next Vercel deployment triggered by a push to GitHub to confirm it completes successfully.
+    -   **Status**: USER VERIFICATION PENDING
+    -   **Is recurring issue?**: Y
+    -   **Should Test frontend/backend/both after fix?**: NA
 
 **In progress Task List**:
--   None.
+-   **Task 1: Complete and Test Admin Reporting Features**
+    -   **Where to resume**: The code for PDF export and email scheduling is present in backend and admin-site files. The full flow needs to be tested.
+    -   **What will be achieved with this?**: Admins will have a fully functional reporting system with export and scheduling capabilities.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: both
+    -   **Blocked on something**: No.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   (P0) Present the  and  files to the user for download.
-    -   (P1) Consolidate Safety Engine Architecture ( and ).
+    -   (P0) Fully implement the Gym Finder feature on . It is currently a UI mock-up and needs to be connected to a real API (e.g., Google Places API) to search for gyms by postcode.
+    -   (P1) Present the  and  files to the user.
+    -   (P1) Consolidate Safety Engine Architecture.
     -   (P1) Fix Admin Portal instability (avatar uploads, modal bugs).
-    -   (P1) Fix incorrect navigation on chat close.
 -   **Future Tasks**:
     -   Convert Expo web app to a modern framework like Next.js.
     -   Mood Tracker Journal.
-    -   Appointment Booking, Secure Messaging, Achievement Badges, CBT courses.
+    -   Appointment Booking, Secure Messaging, CBT courses.
     -   Welsh Language Support.
 
 **Completed work in this session**
--   **Twilio Browser-to-Phone Calling (DONE)**:
-    -   Successfully integrated the Twilio Voice SDK 2.x into the .
-    -   Created a new backend router  for generating access tokens and TwiML.
-    -   Added Call Now buttons to the staff portal UI in .
-    -   Extensively debugged and resolved trial account limitations, JWT signature validation errors, and credential mismatches. The feature is now confirmed working by the user.
--   **Email Sender Fix**:
-    -   Updated  in  to .
--   **Vercel Deployment Fix**:
-    -   Added  to  to address a build error.
--   **Document Creation**:
-    -   Created .
-    -   Created .
--   **PRD Update**:
-    -   Updated  with the latest progress.
+-   **Frankie AI PTI Implementation (DONE)**: A new AI character was created with a detailed persona, avatar, and a 12-week fitness program. He was integrated into the backend, frontend, database, and CMS. Routing and avatar display bugs were fixed.
+-   **The Gym Page Creation (DONE)**: A new page at  was created in the React app, featuring Frankie's bio, a chat link, progress trackers, and a list of external fitness resources.
+-   **Admin Portal Enhancements (DONE)**:
+    -   A real-time safeguarding alert counter was added to the admin dashboard header.
+    -   A comprehensive reporting system was created, allowing admins to generate weekly/monthly reports, export them as PDFs, and email them.
+-   **Doris to Rachel Renaming (DONE)**: All code and database instances of the AI persona Doris were successfully updated to Rachel.
+-   **Live Chat Debugging (Fix Implemented)**: Agent implemented several fixes in  and  to address a critical race condition. Awaiting user deployment and verification.
 
 **Earlier issues found/mentioned but not fixed**
--   See All Pending/In progress Issue list.
+-   The vanilla JS in  and  is fragile and a source of recurring bugs. The live chat issue is a prime example. A full rewrite in a modern framework is recommended for long-term stability.
 
 **Known issue recurrence from previous fork**
--   The vanilla JS in  and  is fragile and a source of recurring bugs and race conditions.
--   Deployment mismatches between the agent environment and the user's production hosting (Vercel/20i) remain a critical blocker, often due to platform sync issues or caching.
+-   **Deployment Mismatches**: The issue of code working in the agent's environment but not in the user's production (20i/Vercel) remains a major challenge, as seen with the live chat fix. This highlights the need for a unified deployment pipeline or clearer instructions for the user.
+-   **Fragile Vanilla JS**: The live chat bug took significant effort to debug due to the complexity of direct DOM manipulation, race conditions, and lack of a reactive framework in .
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Twilio Voice SDK**: Used for browser-to-phone calling. Relies on a client-side  object that registers with Twilio using a short-lived JWT.
--   **Twilio JWT**: A JSON Web Token generated on the backend () using the Account SID, API Key SID, and API Key Secret. It grants the frontend device permission to make calls.
--   **TwiML (Twilio Markup Language)**: XML-based instructions returned by the backend () that tell Twilio how to handle a call (e.g., dial a number, play a message).
--   **Socket.IO**: Used for signaling for both internal WebRTC calls and the live text chat.
--   **Environment Variable Management**: Critical for integrations like Twilio. Mismatched or incorrect variables on the hosting platform (Render) were the root cause of most Twilio issues.
+-   **System Prompt Engineering**: Created a detailed persona and knowledge base for the Frankie AI, including specific conversational styles (PTI banter) and a structured 12-week program.
+-   **Vanilla JS DOM Manipulation**: Heavily used in  and . Debugging the live chat required careful management of , , and event timing to resolve race conditions.
+-   **Async/Await in JS**: The root cause of the live chat bug was a race condition involving an  API call and synchronous socket event handling.
+-   **FastAPI & Motor**: Used for asynchronous backend operations. Investigated async database queries with  for the character ordering bug.
+-   **PDF Generation**: Used the  library in the backend to dynamically generate PDF reports from database data.
+-   **Expo File-Based Routing**: Created the new  route by adding a  file to the  directory.
 
 **key DB schema**
--   No changes made to the database schema in this session.
+-   **ai_characters**: 
+    - Updated with the Frankie character.
+    - Updated Doris record to Rachel.
+-   **governance_reports** (New): Stores generated report data.
+-   **scheduled_reports** (New): Stores configuration for scheduled email reports.
+
+**changes in tech stack**
+-   Added  to  for PDF generation.
 
 **All files of reference**
--    (New file for Twilio logic)
--    (Handles UI and initialization for Twilio/WebRTC)
--    (Handles live chat and internal WebRTC calls)
--    (Backend logic for Twilio)
--    (Configuration and router registration)
--    (Stores credentials)
+-    (Live chat fix)
+-    (Live chat fix)
+-    (New Gym page)
+-    (Frankie's system prompt)
+-    (Reporting endpoints)
+-    (Admin portal feature logic)
 
 **Areas that need refactoring**:
--   The  and  are built with fragile vanilla JS. They are the source of most UI bugs and should be rewritten in a modern framework like React.
--   The  file now handles both WebRTC signaling and live chat events. These could be split into separate modules for clarity.
+-   ** & **: These monolithic files are extremely difficult to maintain. The live chat functionality should be extracted into its own modern component, preferably by rewriting the staff portal in React.
+-   **Mocked Gym Finder**: The  function in  is a placeholder. It needs to be implemented with a real third-party API.
+-   **Hardcoded Backend Data**: Character prompts and configurations in  should be moved entirely to the MongoDB database to be fully manageable via the CMS.
 
 **key api endpoints**
--    (GET): Provides a JWT access token for the Twilio Voice SDK.
--    (POST): Provides TwiML instructions for handling outgoing calls.
--   Socket.IO events: , , .
+-   : (GET) Generates a JSON summary report.
+-   : (GET) Generates a downloadable PDF report.
+-   : (POST) Emails a report to a specified address.
+-   : (GET) Returns the number of active safeguarding alerts.
+-   : (GET) Returns the list of AI characters for the homepage.
+-   : (POST) Main endpoint for conversing with an AI persona.
 
 **Critical Info for New Agent**
--   **Twilio is now WORKING**. After extensive debugging, the user confirmed two-way browser-to-phone calling is functional. The key was creating a new Standard API Key in Twilio, ensuring the credentials on Render were correct (no typos/extra characters), and having the user test in an incognito window to bypass caching.
--   **The next P0 bug is the staff portal LIVE CHAT**. The chat window appears, but messages don't. The root cause is  in the  handler in . Fix this by adding a fallback to get the user from local storage.
--   **Callback notifications (email/portal) are still broken**. This is very likely because the user's  domain is not verified in their Resend account. This is blocked pending user confirmation.
--   The user has provided multiple sets of Twilio credentials. The final, working set is , . These are already in the code and on Render.
+-   The top priority is to guide the user in deploying the **live chat fixes** and verifying they work. The files are , , and .
+-   The Gym Finder feature on the new  page is currently a **mockup**. It has a UI, but the search function is a placeholder. Implementing this is the next logical feature task.
+-   The reporting features in the admin portal have been coded but require end-to-end testing, especially the PDF generation and email sending.
+-   The user's password to access the preview application is ****.
 
 **documents and test reports created in this job**
--   
--   
--    (Updated)
+-   User provided  which was used as the design document for the Frankie AI.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: Confirms Twilio is working after fixing credentials and using incognito. (Status: Resolved)
-2.  **User**: Reports live chat is now the problem; client-side works, but staff portal shows a window with no messages. Provides logs showing . (Status: In Progress)
-3.  **User**: Asks about changing the automated voice message from Twilio. (Status: Answered)
-4.  **User**: Reports Twilio is still not working, provides logs with a new JWT error (). (Status: Resolved)
-5.  **User**: Provides the final set of new Twilio API keys. (Status: Implemented)
-6.  **User**: Asks what type of Twilio API key to create (Standard). (Status: Answered)
-7.  **User**: Reports callback requests are not creating portal/email notifications. (Status: In Progress, likely Resend issue)
-8.  **User**: Provides new Twilio keys after the old ones failed. (Status: Implemented)
-9.  **User**: Asks for the location of all safeguarding files. (Status: Answered by previous agent)
-10. **User**: Confirms  is uploaded and asks why in-app calling is stuck on initializing. (Status: Resolved)
+1.  **User**: Asks to add PDF export and scheduled email reports with an email picker. (Status: Implemented, pending testing)
+2.  **User**: Asks about governance logs, KPIs, and monitoring in the admin portal. (Status: Answered, features implemented)
+3.  **User**: Confirms the live chat fix is ready to be deployed () and provides a URL update for the gym page. (Status: URL updated, live chat pending user verification)
+4.  **User**: Asks to update resource links on the gym page and add a postcode-based gym search feature. (Status: Implemented, gym search is a mock-up)
+5.  **User**: Provides the preview password: . (Status: Noted)
+6.  **User**: Reports that clicking to chat with Frankie on the Gym page redirects to Hugo. (Status: Resolved)
+7.  **User**: Asks to move Frankie's card on the home page and re-check the Live Chat fix. (Status: Card moved, live chat fix explained)
+8.  **User**: Asks to create a new The Gym page for Frankie, with his bio, program details, and fitness resources. (Status: Implemented)
+9.  **User**: Approves the plan for Frankie, asks for him to be first on the homepage, and emphasizes the importance of his PTI banter. (Status: Implemented)
+10. **User**: Provides feedback on the Frankie implementation plan, approving all items and clarifying requirements. (Status: Noted)
 
 **Project Health Check:**
 -   **Broken**:
-    -   Staff Portal Live Chat UI.
-    -   Email/Portal notifications for callback requests (Blocked on user's Resend config).
+    -   AI character sort order on the homepage ().
 -   **Mocked**:
-    -   None.
+    -   The Gym Finder postcode search on  is UI-only and does not perform a real search.
+-   **Pending Verification**:
+    -   **Live Chat functionality in the staff portal.** (HIGH PRIORITY)
+    -   End-to-end Vercel deployment success.
+    -   Callback email notifications (Blocked on user's Resend configuration).
 
 **3rd Party Integrations**
--   **Twilio**: For browser-to-phone calling. Uses API Key/Secret, Account SID, and a TwiML App SID.
--   **ExpressTURN**: For WebRTC NAT traversal.
--   **OpenAI gpt-4o-mini**: For AI chat personas.
--   **Resend**: For email notifications.
--   **Vercel**: Hosts the main frontend app.
--   **Render**: Hosts the backend API and database.
--   **20i**: Hosts the static  and .
+-   **Twilio**: Browser-to-phone calling.
+-   **Resend**: Email notifications (partially broken).
+-   **OpenAI gpt-4o-mini**: AI chat personas.
+-   **fpdf2**: (New) For server-side PDF generation.
+-   **Vercel/Render/20i**: Hosting platforms.
 
 **Testing status**
--   **Testing agent used after significant changes**: NO. The entire Twilio feature was implemented and debugged manually with the user.
+-   **Testing agent used after significant changes**: NO
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: None.
--   **Known regressions**: The live chat functionality appears to have regressed while implementing other features.
+-   **Known regressions**: None identified in this session.
 
 **Credentials to test flow:**
--   Staff accounts seen in logs:  (counsellor),  (peer). Passwords are unknown.
--   Twilio credentials are in  and on the user's Render environment.
+-   **Preview Password**:  (found in )
 
 **What agent forgot to execute**
--   The agent created the Business Plan and Cost Analysis files but did not explicitly present them to the user or provide a download link before the session ended.
--   The agent did not use the testing agent to validate the complex Twilio integration, relying solely on manual debugging with the user.
--   The recurring live chat bug was not prioritized over the new Twilio feature, leading to user frustration at the end of the session.</analysis>
+-   The agent implemented the UI for the Gym Finder on  but left the core search functionality ( function) as a placeholder. It does not connect to an API to find local gyms.
+-   The agent did not resolve the bug where the AI characters are not sorted correctly on the homepage, despite identifying the relevant code.
+-   The business plan and cost analysis documents created in a previous session were not presented to the user.</analysis>

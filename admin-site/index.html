@@ -1370,6 +1370,60 @@
                         Generate comprehensive reports for governance review. Reports include KPIs, safeguarding stats, engagement metrics, and recommendations.
                     </p>
                     
+                    <!-- Email Report Section -->
+                    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+                        <h4 style="margin: 0 0 15px 0;"><i class="fas fa-envelope" style="color: #3b82f6;"></i> Email Report</h4>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <input type="email" id="report-email-input" placeholder="Enter email address" 
+                                style="flex: 1; min-width: 250px; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);">
+                            <select id="report-period-select" style="padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);">
+                                <option value="weekly">Weekly Report</option>
+                                <option value="monthly">Monthly Report</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="emailReport()">
+                                <i class="fas fa-paper-plane"></i> Send Report
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- PDF Export Section -->
+                    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+                        <h4 style="margin: 0 0 15px 0;"><i class="fas fa-file-pdf" style="color: #ef4444;"></i> Export PDF</h4>
+                        <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 14px;">
+                            Generate a printable PDF report. Opens in a new window - use browser's Print > Save as PDF.
+                        </p>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-outline" onclick="openPDFReport('weekly')">
+                                <i class="fas fa-download"></i> Weekly PDF
+                            </button>
+                            <button class="btn btn-outline" onclick="openPDFReport('monthly')">
+                                <i class="fas fa-download"></i> Monthly PDF
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Scheduled Reports Section -->
+                    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+                        <h4 style="margin: 0 0 15px 0;"><i class="fas fa-clock" style="color: #10b981;"></i> Scheduled Reports</h4>
+                        <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 14px;">
+                            Set up automatic report delivery. Reports will be sent at the start of each period.
+                        </p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                            <input type="email" id="schedule-email-input" placeholder="Email for scheduled reports"
+                                style="flex: 1; min-width: 250px; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);">
+                            <select id="schedule-frequency-select" style="padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);">
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                            <button class="btn btn-success" onclick="addScheduledReport()">
+                                <i class="fas fa-plus"></i> Add Schedule
+                            </button>
+                        </div>
+                        <div id="scheduled-reports-list" style="margin-top: 15px;">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    
                     <!-- Report Display Area -->
                     <div id="report-display" style="display: none;">
                         <div id="report-loading" style="text-align: center; padding: 40px;">
