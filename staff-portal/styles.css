@@ -234,6 +234,7 @@ body {
 
 .role-counsellor { background: var(--primary-light); color: var(--primary); }
 .role-peer { background: var(--success-light); color: var(--success); }
+.role-supervisor { background: #f3e8ff; color: #7c3aed; }
 .role-admin { background: var(--warning-light); color: var(--warning); }
 
 /* Portal Content */
@@ -3235,3 +3236,27 @@ body {
 .btn-call-twilio i {
     font-size: 14px;
 }
+
+/* Supervisor Section Styles */
+.card.confidential {
+    border-left: 4px solid #dc2626;
+    background: rgba(220, 38, 38, 0.03);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.escalation-tabs .btn.active {
+    background: var(--primary);
+    color: white;
+}
+

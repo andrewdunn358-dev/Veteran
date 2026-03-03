@@ -265,7 +265,7 @@ async def login(credentials: UserLogin):
     )
     
     token = create_access_token({"sub": user_id})
-    redirect = "/staff" if user.get("role") in ["counsellor", "peer_supporter", "staff"] else None
+    redirect = "/staff" if user.get("role") in ["counsellor", "peer_supporter", "staff", "supervisor"] else None
     
     return TokenResponse(
         token=token,

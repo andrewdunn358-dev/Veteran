@@ -1422,7 +1422,7 @@ class UserLogin(BaseModel):
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
-    role: str = Field(..., pattern="^(admin|counsellor|peer)$")
+    role: str = Field(..., pattern="^(admin|supervisor|counsellor|peer)$")
     name: str
     # Optional profile fields - for counsellors/peers
     phone: Optional[str] = None
@@ -2544,8 +2544,8 @@ async def get_unified_staff(current_user: User = Depends(require_role("admin")))
 
 @api_router.post("/admin/fix-missing-profiles")
 async def fix_missing_profiles(current_user: User = Depends(require_role("admin"))):
-    """Create missing profiles for counsellor/peer users that don't have one"""
-    users = await db.users.find({"role": {"$in": ["counsellor", "peer"]}}).to_list(1000)
+    """Create missing profiles for counsellor/peer/supervisor users that don't have one"""
+    users = await db.users.find({"role": {"$in": ["counsellor", "peer", "supervisor"]}}).to_list(1000)
     
     fixed_count = 0
     already_linked = 0
@@ -2602,6 +2602,31 @@ async def fix_missing_profiles(current_user: User = Depends(require_role("admin"
                 await db.peer_supporters.insert_one(peer_data)
                 fixed_count += 1
                 logging.info(f"Created missing peer supporter profile for user {user_id}")
+            else:
+                already_linked += 1
+        
+        elif role == "supervisor":
+            # Supervisors use counsellor profiles with elevated permissions
+            existing = await db.counsellors.find_one({"user_id": user_id})
+            if not existing:
+                supervisor_profile = {
+                    "id": str(uuid.uuid4()),
+                    "name": name,
+                    "specialization": "Clinical Supervision",
+                    "status": "off",
+                    "next_available": None,
+                    "phone": "",
+                    "sms": None,
+                    "whatsapp": None,
+                    "user_id": user_id,
+                    "sip_extension": None,
+                    "sip_password": None,
+                    "created_at": datetime.utcnow()
+                }
+                supervisor_profile = encrypt_document("counsellors", supervisor_profile)
+                await db.counsellors.insert_one(supervisor_profile)
+                fixed_count += 1
+                logging.info(f"Created missing supervisor profile for user {user_id}")
             else:
                 already_linked += 1
     
@@ -4303,6 +4328,287 @@ async def get_staff_users(
         logging.error(f"Error fetching staff users: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch staff users")
 
+# ============ SUPERVISOR & TEAM MANAGEMENT ENDPOINTS ============
+
+# Pydantic models for supervision
+class SupervisionNoteCreate(BaseModel):
+    staff_id: str  # The staff member being supervised
+    wellbeing_notes: Optional[str] = None
+    case_notes: Optional[str] = None
+    action_items: Optional[List[str]] = []
+    next_session_date: Optional[str] = None
+    is_confidential: bool = False
+
+class SupervisionNote(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    supervisor_id: str
+    supervisor_name: str
+    staff_id: str
+    staff_name: str
+    staff_role: str
+    session_date: datetime = Field(default_factory=datetime.utcnow)
+    wellbeing_notes: Optional[str] = None
+    case_notes: Optional[str] = None
+    action_items: List[str] = []
+    next_session_date: Optional[str] = None
+    is_confidential: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class EscalationCreate(BaseModel):
+    subject: str
+    description: str
+    priority: str = "normal"  # normal, high, urgent
+    related_case_id: Optional[str] = None
+
+class Escalation(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    staff_id: str
+    staff_name: str
+    staff_role: str
+    supervisor_id: Optional[str] = None
+    supervisor_name: Optional[str] = None
+    subject: str
+    description: str
+    priority: str = "normal"
+    status: str = "pending"  # pending, acknowledged, in_progress, resolved
+    related_case_id: Optional[str] = None
+    resolution_notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    acknowledged_at: Optional[datetime] = None
+    resolved_at: Optional[datetime] = None
+
+@api_router.get("/supervision/team")
+async def get_team_members(current_user: User = Depends(get_current_user)):
+    """Get team members for supervisor. Supervisors see counsellors and peers."""
+    if current_user.role not in ["supervisor", "admin"]:
+        raise HTTPException(status_code=403, detail="Only supervisors and admins can view team members")
+    
+    # Get all counsellors and peers
+    team = []
+    
+    # Get counsellor users
+    counsellors = await db.users.find({"role": "counsellor"}, {"_id": 0, "password_hash": 0}).to_list(100)
+    for c in counsellors:
+        # Get their profile for status
+        profile = await db.counsellors.find_one({"user_id": c.get("id")}, {"_id": 0})
+        c["status"] = profile.get("status", "unknown") if profile else "unknown"
+        c["specialization"] = profile.get("specialization", "") if profile else ""
+        team.append(c)
+    
+    # Get peer users
+    peers = await db.users.find({"role": "peer"}, {"_id": 0, "password_hash": 0}).to_list(100)
+    for p in peers:
+        profile = await db.peer_supporters.find_one({"user_id": p.get("id")}, {"_id": 0})
+        p["status"] = profile.get("status", "unknown") if profile else "unknown"
+        p["area"] = profile.get("area", "") if profile else ""
+        team.append(p)
+    
+    return team
+
+@api_router.post("/supervision/notes")
+async def create_supervision_note(note: SupervisionNoteCreate, current_user: User = Depends(get_current_user)):
+    """Create a 1:1 supervision note for a staff member"""
+    if current_user.role not in ["supervisor", "admin"]:
+        raise HTTPException(status_code=403, detail="Only supervisors and admins can create supervision notes")
+    
+    # Get the staff member's name and role
+    staff = await db.users.find_one({"id": note.staff_id}, {"_id": 0})
+    if not staff:
+        raise HTTPException(status_code=404, detail="Staff member not found")
+    
+    note_data = {
+        "id": str(uuid.uuid4()),
+        "supervisor_id": current_user.id,
+        "supervisor_name": current_user.name,
+        "staff_id": note.staff_id,
+        "staff_name": staff.get("name", "Unknown"),
+        "staff_role": staff.get("role", "unknown"),
+        "session_date": datetime.utcnow(),
+        "wellbeing_notes": note.wellbeing_notes,
+        "case_notes": note.case_notes,
+        "action_items": note.action_items or [],
+        "next_session_date": note.next_session_date,
+        "is_confidential": note.is_confidential,
+        "created_at": datetime.utcnow()
+    }
+    
+    await db.supervision_notes.insert_one(note_data)
+    note_data.pop("_id", None)
+    
+    return {"message": "Supervision note created successfully", "note": note_data}
+
+@api_router.get("/supervision/notes")
+async def get_supervision_notes(
+    staff_id: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Get supervision notes. Supervisors see their notes, admins see all."""
+    if current_user.role not in ["supervisor", "admin"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    query = {}
+    
+    if current_user.role == "supervisor":
+        # Supervisors only see notes they created
+        query["supervisor_id"] = current_user.id
+    
+    if staff_id:
+        query["staff_id"] = staff_id
+    
+    notes = await db.supervision_notes.find(query, {"_id": 0}).sort("session_date", -1).to_list(100)
+    return notes
+
+@api_router.get("/supervision/notes/{note_id}")
+async def get_supervision_note(note_id: str, current_user: User = Depends(get_current_user)):
+    """Get a specific supervision note"""
+    if current_user.role not in ["supervisor", "admin"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    note = await db.supervision_notes.find_one({"id": note_id}, {"_id": 0})
+    if not note:
+        raise HTTPException(status_code=404, detail="Supervision note not found")
+    
+    # Supervisors can only view their own notes
+    if current_user.role == "supervisor" and note.get("supervisor_id") != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    return note
+
+@api_router.put("/supervision/notes/{note_id}")
+async def update_supervision_note(
+    note_id: str,
+    updates: SupervisionNoteCreate,
+    current_user: User = Depends(get_current_user)
+):
+    """Update a supervision note"""
+    if current_user.role not in ["supervisor", "admin"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    note = await db.supervision_notes.find_one({"id": note_id})
+    if not note:
+        raise HTTPException(status_code=404, detail="Supervision note not found")
+    
+    # Supervisors can only edit their own notes
+    if current_user.role == "supervisor" and note.get("supervisor_id") != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    update_data = {
+        "wellbeing_notes": updates.wellbeing_notes,
+        "case_notes": updates.case_notes,
+        "action_items": updates.action_items or [],
+        "next_session_date": updates.next_session_date,
+        "is_confidential": updates.is_confidential
+    }
+    
+    await db.supervision_notes.update_one({"id": note_id}, {"$set": update_data})
+    return {"message": "Supervision note updated successfully"}
+
+# ============ ESCALATION ENDPOINTS ============
+
+@api_router.post("/escalations")
+async def create_escalation(escalation: EscalationCreate, current_user: User = Depends(get_current_user)):
+    """Create an escalation to supervisor"""
+    if current_user.role not in ["counsellor", "peer"]:
+        raise HTTPException(status_code=403, detail="Only counsellors and peers can create escalations")
+    
+    escalation_data = {
+        "id": str(uuid.uuid4()),
+        "staff_id": current_user.id,
+        "staff_name": current_user.name,
+        "staff_role": current_user.role,
+        "supervisor_id": None,
+        "supervisor_name": None,
+        "subject": escalation.subject,
+        "description": escalation.description,
+        "priority": escalation.priority,
+        "status": "pending",
+        "related_case_id": escalation.related_case_id,
+        "resolution_notes": None,
+        "created_at": datetime.utcnow(),
+        "acknowledged_at": None,
+        "resolved_at": None
+    }
+    
+    await db.escalations.insert_one(escalation_data)
+    escalation_data.pop("_id", None)
+    
+    # TODO: Send notification to supervisors
+    
+    return {"message": "Escalation created successfully", "escalation": escalation_data}
+
+@api_router.get("/escalations")
+async def get_escalations(
+    status: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Get escalations. Staff sees their own, supervisors/admins see all."""
+    query = {}
+    
+    if current_user.role in ["counsellor", "peer"]:
+        # Staff only see their own escalations
+        query["staff_id"] = current_user.id
+    elif current_user.role not in ["supervisor", "admin"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    if status:
+        query["status"] = status
+    
+    escalations = await db.escalations.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return escalations
+
+@api_router.patch("/escalations/{escalation_id}/acknowledge")
+async def acknowledge_escalation(escalation_id: str, current_user: User = Depends(get_current_user)):
+    """Supervisor acknowledges an escalation"""
+    if current_user.role not in ["supervisor", "admin"]:
+        raise HTTPException(status_code=403, detail="Only supervisors and admins can acknowledge escalations")
+    
+    escalation = await db.escalations.find_one({"id": escalation_id})
+    if not escalation:
+        raise HTTPException(status_code=404, detail="Escalation not found")
+    
+    await db.escalations.update_one(
+        {"id": escalation_id},
+        {"$set": {
+            "status": "acknowledged",
+            "supervisor_id": current_user.id,
+            "supervisor_name": current_user.name,
+            "acknowledged_at": datetime.utcnow()
+        }}
+    )
+    
+    return {"message": "Escalation acknowledged"}
+
+@api_router.patch("/escalations/{escalation_id}/resolve")
+async def resolve_escalation(
+    escalation_id: str,
+    resolution_notes: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Supervisor resolves an escalation"""
+    if current_user.role not in ["supervisor", "admin"]:
+        raise HTTPException(status_code=403, detail="Only supervisors and admins can resolve escalations")
+    
+    escalation = await db.escalations.find_one({"id": escalation_id})
+    if not escalation:
+        raise HTTPException(status_code=404, detail="Escalation not found")
+    
+    update_data = {
+        "status": "resolved",
+        "resolved_at": datetime.utcnow()
+    }
+    
+    if resolution_notes:
+        update_data["resolution_notes"] = resolution_notes
+    
+    # If not already acknowledged, mark supervisor now
+    if not escalation.get("supervisor_id"):
+        update_data["supervisor_id"] = current_user.id
+        update_data["supervisor_name"] = current_user.name
+    
+    await db.escalations.update_one({"id": escalation_id}, {"$set": update_data})
+    
+    return {"message": "Escalation resolved"}
+
 # ============ AI BATTLE BUDDIES CHAT ENDPOINTS ============
 
 def get_or_create_buddy_session(session_id: str, character: str) -> Dict[str, Any]:
@@ -5588,7 +5894,7 @@ app.add_middleware(
         "https://veteran.dbty.co.uk",
         "https://www.veteran.dbty.co.uk",
         "https://veterans-support-api.onrender.com",
-        "https://radio-check-app-1.preview.emergentagent.com",
+        "https://radio-check-vet-2.preview.emergentagent.com",
     ],
     allow_origin_regex=r"https://.*\.emergentagent\.com|https://.*\.vercel\.app|https://.*\.onrender\.com|https://.*\.radiocheck\.me",
     allow_methods=["*"],

@@ -220,9 +220,9 @@ async function handleLogin(e) {
             throw new Error(data.detail || 'Invalid credentials');
         }
         
-        // Check role - only allow counsellor, peer, or admin
+        // Check role - only allow counsellor, peer, supervisor, or admin
         var role = data.user.role;
-        if (!['counsellor', 'peer', 'admin'].includes(role)) {
+        if (!['counsellor', 'peer', 'supervisor', 'admin'].includes(role)) {
             throw new Error('Access denied. This portal is for staff only.');
         }
         
@@ -289,7 +289,8 @@ async function initPortal() {
     document.getElementById('user-name').textContent = 'Welcome, ' + currentUser.name;
     document.getElementById('portal-title').textContent = 
         role === 'counsellor' ? 'Counsellor Portal' : 
-        role === 'peer' ? 'Peer Support Portal' : 'Staff Portal';
+        role === 'peer' ? 'Peer Support Portal' : 
+        role === 'supervisor' ? 'Supervisor Portal' : 'Staff Portal';
     
     // Set role badge
     var badge = document.getElementById('user-role-badge');
@@ -297,15 +298,33 @@ async function initPortal() {
     badge.className = 'role-badge role-' + role;
     
     // Show/hide sections based on role
-    // Panic ALERTS section - counsellors and admins see alerts FROM peers
+    // Panic ALERTS section - counsellors, supervisors, and admins see alerts FROM peers
     document.getElementById('panic-section').style.display = 
-        (role === 'counsellor' || role === 'admin') ? 'block' : 'none';
+        (role === 'counsellor' || role === 'supervisor' || role === 'admin') ? 'block' : 'none';
     // Safeguarding section - ALL staff should see safeguarding alerts
     document.getElementById('safeguarding-section').style.display = 
-        (role === 'counsellor' || role === 'admin' || role === 'peer') ? 'block' : 'none';
-    // Panic BUTTON - only peers can trigger panic to counsellors
+        (role === 'counsellor' || role === 'supervisor' || role === 'admin' || role === 'peer') ? 'block' : 'none';
+    // Panic BUTTON - only peers can trigger panic to counsellors/supervisors
     document.getElementById('panic-button-section').style.display = 
         role === 'peer' ? 'block' : 'none';
+    
+    // Show supervisor-specific sections
+    var supervisorSection = document.getElementById('supervisor-section');
+    if (supervisorSection) {
+        supervisorSection.style.display = (role === 'supervisor' || role === 'admin') ? 'block' : 'none';
+    }
+    
+    // Show escalate button for counsellors and peers
+    var escalateSection = document.getElementById('escalate-section');
+    if (escalateSection) {
+        escalateSection.style.display = (role === 'counsellor' || role === 'peer') ? 'block' : 'none';
+    }
+    
+    // Show supervisor tab for supervisors and admins
+    var supervisorTab = document.getElementById('supervisor-tab');
+    if (supervisorTab) {
+        supervisorTab.style.display = (role === 'supervisor' || role === 'admin') ? 'inline-flex' : 'none';
+    }
     
     // Load profile to get current status
     await loadMyProfile();
@@ -337,8 +356,8 @@ async function initPortal() {
     loadCallbacks();
     loadNotes();
     
-    // All staff (counsellors, peers, and admins) can see live chats and safeguarding
-    if (role === 'counsellor' || role === 'admin' || role === 'peer') {
+    // All staff (counsellors, supervisors, peers, and admins) can see live chats and safeguarding
+    if (role === 'counsellor' || role === 'supervisor' || role === 'admin' || role === 'peer') {
         loadPanicAlerts();
         loadSafeguardingAlerts(false); // Initial load, no sound
         loadLiveChats(false); // Initial load, no sound
@@ -351,13 +370,25 @@ async function initPortal() {
         document.getElementById('safeguarding-section').style.display = 'block';
     }
     
+    // Load supervisor-specific data
+    if (role === 'supervisor' || role === 'admin') {
+        loadTeamMembers();
+        loadSupervisionNotes();
+        loadEscalations();
+    }
+    
     // Auto-refresh every 30 seconds for callbacks/notes
     setInterval(function() {
         loadCallbacks();
         loadNotes();
-        if (role === 'counsellor' || role === 'admin' || role === 'peer') {
+        if (role === 'counsellor' || role === 'supervisor' || role === 'admin' || role === 'peer') {
             loadPanicAlerts();
             // Note: Safeguarding and live chats are polled separately with sound support
+        }
+        // Refresh supervisor data
+        if (role === 'supervisor' || role === 'admin') {
+            loadTeamMembers();
+            loadEscalations();
         }
     }, 30000);
 }
@@ -2798,4 +2829,351 @@ async function submitLearningCandidate(conversationId, characterId) {
         console.error('Error submitting learning:', error);
         showNotification('Failed to submit learning', 'error');
     }
+}
+
+
+// ============ SUPERVISOR FUNCTIONALITY ============
+
+var teamMembers = [];
+var escalations = [];
+var supervisionNotes = [];
+var currentEscalationFilter = 'pending';
+
+// Show/hide supervisor tab based on role
+function initSupervisorTab() {
+    var role = currentUser ? currentUser.role : null;
+    var supervisorTab = document.getElementById('supervisor-tab');
+    if (supervisorTab) {
+        supervisorTab.style.display = (role === 'supervisor' || role === 'admin') ? 'inline-flex' : 'none';
+    }
+}
+
+// Load Team Members for supervisor view
+async function loadTeamMembers() {
+    try {
+        teamMembers = await apiCall('/supervision/team');
+        renderTeamMembers();
+    } catch (error) {
+        console.error('Error loading team members:', error);
+        var container = document.getElementById('team-members-list');
+        if (container) {
+            container.innerHTML = '<p style="color: var(--danger); text-align: center; padding: 20px;">Failed to load team: ' + error.message + '</p>';
+        }
+    }
+}
+
+function renderTeamMembers() {
+    var container = document.getElementById('team-members-list');
+    if (!container) return;
+    
+    if (!teamMembers || teamMembers.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>No team members found</p></div>';
+        return;
+    }
+    
+    container.innerHTML = teamMembers.map(function(member) {
+        var statusClass = member.status === 'available' ? 'success' : 
+                         member.status === 'limited' ? 'warning' : 'secondary';
+        var roleIcon = member.role === 'counsellor' ? 'fa-user-md' : 'fa-users';
+        var specialization = member.specialization || member.area || '';
+        
+        return '<div class="card">' +
+            '<div class="card-header">' +
+                '<span class="card-name"><i class="fas ' + roleIcon + '"></i> ' + member.name + '</span>' +
+                '<span class="badge ' + statusClass + '">' + (member.status || 'unknown') + '</span>' +
+            '</div>' +
+            '<div class="card-meta">' +
+                '<span class="badge info">' + member.role + '</span>' +
+                (specialization ? '<span style="color: var(--text-muted); margin-left: 8px;">' + specialization + '</span>' : '') +
+            '</div>' +
+            '<div class="card-actions" style="margin-top: 12px;">' +
+                '<button class="btn btn-small btn-primary" onclick="openSupervisionNoteModal(\'' + member.id + '\', \'' + escapeHtml(member.name) + '\')">' +
+                    '<i class="fas fa-clipboard"></i> Add Note' +
+                '</button>' +
+                '<button class="btn btn-small btn-secondary" onclick="viewMemberNotes(\'' + member.id + '\')">' +
+                    '<i class="fas fa-history"></i> View History' +
+                '</button>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+// Load Escalations
+async function loadEscalations() {
+    try {
+        var query = currentEscalationFilter ? '?status=' + currentEscalationFilter : '';
+        escalations = await apiCall('/escalations' + query);
+        renderEscalations();
+        
+        // Update badge count
+        var pendingCount = escalations.filter(function(e) { return e.status === 'pending'; }).length;
+        var badge = document.getElementById('escalations-count');
+        if (badge) {
+            badge.textContent = pendingCount;
+            badge.style.display = pendingCount > 0 ? 'inline' : 'none';
+        }
+        
+        // Also update supervision tab badge
+        var supervisionBadge = document.getElementById('supervision-badge');
+        if (supervisionBadge) {
+            supervisionBadge.textContent = pendingCount;
+            supervisionBadge.classList.toggle('hidden', pendingCount === 0);
+        }
+    } catch (error) {
+        console.error('Error loading escalations:', error);
+    }
+}
+
+function filterEscalations(status) {
+    currentEscalationFilter = status;
+    
+    // Update filter buttons
+    document.querySelectorAll('.escalation-tabs .btn').forEach(function(btn) {
+        btn.classList.remove('active');
+    });
+    var activeBtn = document.querySelector('.escalation-tabs .btn[data-filter="' + status + '"]');
+    if (activeBtn) activeBtn.classList.add('active');
+    
+    loadEscalations();
+}
+
+function renderEscalations() {
+    var container = document.getElementById('escalations-list');
+    if (!container) return;
+    
+    if (!escalations || escalations.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>No escalations found</p></div>';
+        return;
+    }
+    
+    container.innerHTML = escalations.map(function(esc) {
+        var priorityClass = esc.priority === 'urgent' ? 'danger' : 
+                           esc.priority === 'high' ? 'warning' : 'info';
+        var statusClass = esc.status === 'pending' ? 'warning' : 
+                         esc.status === 'resolved' ? 'success' : 'info';
+        
+        var actions = '';
+        if (esc.status === 'pending') {
+            actions = '<button class="btn btn-small btn-warning" onclick="acknowledgeEscalation(\'' + esc.id + '\')"><i class="fas fa-hand-paper"></i> Acknowledge</button>';
+        }
+        if (esc.status !== 'resolved') {
+            actions += '<button class="btn btn-small btn-success" onclick="resolveEscalation(\'' + esc.id + '\')"><i class="fas fa-check"></i> Resolve</button>';
+        }
+        
+        return '<div class="card">' +
+            '<div class="card-header">' +
+                '<span class="card-name">' + escapeHtml(esc.subject) + '</span>' +
+                '<span class="badge ' + priorityClass + '">' + esc.priority.toUpperCase() + '</span>' +
+            '</div>' +
+            '<div class="card-meta">' +
+                '<span><i class="fas fa-user"></i> From: ' + escapeHtml(esc.staff_name) + ' (' + esc.staff_role + ')</span>' +
+                '<span class="badge ' + statusClass + '">' + esc.status + '</span>' +
+            '</div>' +
+            '<div class="card-message">' + escapeHtml(esc.description) + '</div>' +
+            '<div class="card-time"><i class="fas fa-clock"></i> ' + new Date(esc.created_at).toLocaleString() + '</div>' +
+            (esc.supervisor_name ? '<div style="color: var(--text-muted); font-size: 13px;"><i class="fas fa-user-check"></i> Handled by: ' + escapeHtml(esc.supervisor_name) + '</div>' : '') +
+            (esc.resolution_notes ? '<div style="color: var(--success); font-size: 13px; margin-top: 8px;"><i class="fas fa-sticky-note"></i> Notes: ' + escapeHtml(esc.resolution_notes) + '</div>' : '') +
+            '<div class="card-actions" style="margin-top: 12px;">' + actions + '</div>' +
+        '</div>';
+    }).join('');
+}
+
+async function acknowledgeEscalation(id) {
+    try {
+        await apiCall('/escalations/' + id + '/acknowledge', { method: 'PATCH' });
+        showNotification('Escalation acknowledged', 'success');
+        loadEscalations();
+    } catch (error) {
+        showNotification('Failed: ' + error.message, 'error');
+    }
+}
+
+async function resolveEscalation(id) {
+    var notes = prompt('Resolution notes (optional):');
+    try {
+        var url = '/escalations/' + id + '/resolve';
+        if (notes) url += '?resolution_notes=' + encodeURIComponent(notes);
+        await apiCall(url, { method: 'PATCH' });
+        showNotification('Escalation resolved', 'success');
+        loadEscalations();
+    } catch (error) {
+        showNotification('Failed: ' + error.message, 'error');
+    }
+}
+
+// Load Supervision Notes
+async function loadSupervisionNotes(staffId) {
+    try {
+        var query = staffId ? '?staff_id=' + staffId : '';
+        supervisionNotes = await apiCall('/supervision/notes' + query);
+        renderSupervisionNotes();
+    } catch (error) {
+        console.error('Error loading supervision notes:', error);
+    }
+}
+
+function renderSupervisionNotes() {
+    var container = document.getElementById('supervision-notes-list');
+    if (!container) return;
+    
+    if (!supervisionNotes || supervisionNotes.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-clipboard"></i><p>No supervision notes yet</p></div>';
+        return;
+    }
+    
+    container.innerHTML = supervisionNotes.map(function(note) {
+        var actionItems = note.action_items && note.action_items.length > 0 ?
+            '<div style="margin-top: 8px;"><strong>Actions:</strong> <ul style="margin: 4px 0 0 16px;">' +
+            note.action_items.map(function(a) { return '<li>' + escapeHtml(a) + '</li>'; }).join('') +
+            '</ul></div>' : '';
+        
+        return '<div class="card' + (note.is_confidential ? ' confidential' : '') + '">' +
+            '<div class="card-header">' +
+                '<span class="card-name"><i class="fas fa-user"></i> ' + escapeHtml(note.staff_name) + '</span>' +
+                '<span class="badge info">' + note.staff_role + '</span>' +
+                (note.is_confidential ? '<span class="badge danger" style="margin-left: 8px;"><i class="fas fa-lock"></i> HR</span>' : '') +
+            '</div>' +
+            '<div class="card-time"><i class="fas fa-calendar"></i> Session: ' + new Date(note.session_date).toLocaleDateString() + '</div>' +
+            (note.wellbeing_notes ? '<div style="margin-top: 8px;"><strong>Wellbeing:</strong> ' + escapeHtml(note.wellbeing_notes) + '</div>' : '') +
+            (note.case_notes ? '<div style="margin-top: 8px;"><strong>Cases:</strong> ' + escapeHtml(note.case_notes) + '</div>' : '') +
+            actionItems +
+            (note.next_session_date ? '<div style="margin-top: 8px; color: var(--primary);"><i class="fas fa-calendar-plus"></i> Next session: ' + note.next_session_date + '</div>' : '') +
+            '<div class="card-actions" style="margin-top: 12px;">' +
+                '<button class="btn btn-small btn-secondary" onclick="editSupervisionNote(\'' + note.id + '\')"><i class="fas fa-edit"></i> Edit</button>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+function viewMemberNotes(staffId) {
+    loadSupervisionNotes(staffId);
+}
+
+// Supervision Note Modal
+function openSupervisionNoteModal(staffId, staffName) {
+    // Populate staff dropdown
+    var staffSelect = document.getElementById('supervision-staff-id');
+    if (staffSelect && teamMembers.length > 0) {
+        staffSelect.innerHTML = '<option value="">Select staff member...</option>' +
+            teamMembers.map(function(m) {
+                var selected = m.id === staffId ? 'selected' : '';
+                return '<option value="' + m.id + '" ' + selected + '>' + m.name + ' (' + m.role + ')</option>';
+            }).join('');
+    }
+    
+    // Clear form
+    document.getElementById('supervision-wellbeing').value = '';
+    document.getElementById('supervision-cases').value = '';
+    document.getElementById('supervision-actions').value = '';
+    document.getElementById('supervision-next-date').value = '';
+    document.getElementById('supervision-confidential').checked = false;
+    
+    document.getElementById('supervision-modal').classList.remove('hidden');
+}
+
+function closeSupervisionModal() {
+    document.getElementById('supervision-modal').classList.add('hidden');
+}
+
+async function saveSupervisionNote() {
+
+// ============ ESCALATION FUNCTIONS (For Counsellors/Peers) ============
+
+function openEscalationModal() {
+    document.getElementById('escalation-subject').value = '';
+    document.getElementById('escalation-description').value = '';
+    document.getElementById('escalation-priority').value = 'normal';
+    document.getElementById('escalation-case-id').value = '';
+    document.getElementById('escalation-modal').classList.remove('hidden');
+}
+
+function closeEscalationModal() {
+    document.getElementById('escalation-modal').classList.add('hidden');
+}
+
+async function submitEscalation() {
+    var subject = document.getElementById('escalation-subject').value.trim();
+    var description = document.getElementById('escalation-description').value.trim();
+    var priority = document.getElementById('escalation-priority').value;
+    var caseId = document.getElementById('escalation-case-id').value.trim() || null;
+    
+    if (!subject || !description) {
+        showNotification('Please fill in the subject and description', 'error');
+        return;
+    }
+    
+    try {
+        await apiCall('/escalations', {
+            method: 'POST',
+            body: JSON.stringify({
+                subject: subject,
+                description: description,
+                priority: priority,
+                related_case_id: caseId
+            })
+        });
+        showNotification('Escalation submitted to supervisors', 'success');
+        closeEscalationModal();
+    } catch (error) {
+        showNotification('Failed to submit escalation: ' + error.message, 'error');
+    }
+}
+
+    var staffId = document.getElementById('supervision-staff-id').value;
+    if (!staffId) {
+        showNotification('Please select a staff member', 'error');
+        return;
+    }
+    
+    var actionsText = document.getElementById('supervision-actions').value;
+    var actionItems = actionsText ? actionsText.split('\n').filter(function(a) { return a.trim(); }) : [];
+    
+    var noteData = {
+        staff_id: staffId,
+        wellbeing_notes: document.getElementById('supervision-wellbeing').value || null,
+        case_notes: document.getElementById('supervision-cases').value || null,
+        action_items: actionItems,
+        next_session_date: document.getElementById('supervision-next-date').value || null,
+        is_confidential: document.getElementById('supervision-confidential').checked
+    };
+    
+    try {
+        await apiCall('/supervision/notes', {
+            method: 'POST',
+            body: JSON.stringify(noteData)
+        });
+        showNotification('Supervision note saved', 'success');
+        closeSupervisionModal();
+        loadSupervisionNotes();
+    } catch (error) {
+        showNotification('Failed to save note: ' + error.message, 'error');
+    }
+}
+
+function editSupervisionNote(noteId) {
+    // Find the note
+    var note = supervisionNotes.find(function(n) { return n.id === noteId; });
+    if (!note) return;
+    
+    // Populate form
+    document.getElementById('supervision-staff-id').value = note.staff_id;
+    document.getElementById('supervision-wellbeing').value = note.wellbeing_notes || '';
+    document.getElementById('supervision-cases').value = note.case_notes || '';
+    document.getElementById('supervision-actions').value = (note.action_items || []).join('\n');
+    document.getElementById('supervision-next-date').value = note.next_session_date || '';
+    document.getElementById('supervision-confidential').checked = note.is_confidential || false;
+    
+    // Update modal title
+    document.getElementById('supervision-modal-title').innerHTML = '<i class="fas fa-edit"></i> Edit Supervision Note';
+    
+    document.getElementById('supervision-modal').classList.remove('hidden');
+}
+
+// Initialize supervisor tab visibility after portal loads
+if (typeof initPortal === 'function') {
+    var originalInitPortal = initPortal;
+    initPortal = async function() {
+        await originalInitPortal();
+        initSupervisorTab();
+    };
 }

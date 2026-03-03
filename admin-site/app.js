@@ -472,9 +472,9 @@ function renderUsers() {
         return;
     }
     
-    // Sort users: admins first, then counsellors, then peers
+    // Sort users: admins first, then supervisors, then counsellors, then peers
     const sortedUsers = [...users].sort((a, b) => {
-        const roleOrder = { admin: 0, counsellor: 1, peer: 2 };
+        const roleOrder = { admin: 0, supervisor: 1, counsellor: 2, peer: 3 };
         return (roleOrder[a.role] || 3) - (roleOrder[b.role] || 3);
     });
     
@@ -2144,6 +2144,7 @@ function openEditUserModal(userId) {
                     <label>Role *</label>
                     <select name="role" id="edit-user-role" onchange="toggleEditProfileFields()" ${user.role === 'admin' ? 'disabled' : ''}>
                         <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        <option value="supervisor" ${user.role === 'supervisor' ? 'selected' : ''}>Supervisor</option>
                         <option value="counsellor" ${user.role === 'counsellor' ? 'selected' : ''}>Counsellor</option>
                         <option value="peer" ${user.role === 'peer' ? 'selected' : ''}>Peer Supporter</option>
                     </select>
@@ -3407,6 +3408,7 @@ function openAddStaffModal() {
                     <select name="role" id="staff-role-select" required onchange="toggleRoleFields()">
                         <option value="">Select role...</option>
                         <option value="admin">Admin</option>
+                        <option value="supervisor">Supervisor</option>
                         <option value="counsellor">Counsellor</option>
                         <option value="peer">Peer Supporter</option>
                     </select>
@@ -3473,9 +3475,10 @@ function toggleRoleFields() {
     const peerFields = document.getElementById('peer-fields');
     const profileFields = document.getElementById('profile-fields');
     
-    counsellorFields.style.display = role === 'counsellor' ? 'block' : 'none';
+    // Supervisor uses counsellor fields for now (similar specialization/expertise)
+    counsellorFields.style.display = (role === 'counsellor' || role === 'supervisor') ? 'block' : 'none';
     peerFields.style.display = role === 'peer' ? 'block' : 'none';
-    profileFields.style.display = (role === 'counsellor' || role === 'peer') ? 'block' : 'none';
+    profileFields.style.display = (role === 'counsellor' || role === 'supervisor' || role === 'peer') ? 'block' : 'none';
 }
 
 // Handle Add Staff

@@ -241,6 +241,13 @@
                         <span class="panic-subtext">Click to alert a counsellor</span>
                     </button>
                 </div>
+
+                <!-- Escalate to Supervisor Button (Peers & Counsellors) -->
+                <div id="escalate-section" class="section" style="display: none; margin-top: 12px;">
+                    <button class="btn btn-warning" onclick="openEscalationModal()" style="width: auto; padding: 12px 24px;">
+                        <i class="fas fa-arrow-up"></i> Escalate to Supervisor
+                    </button>
+                </div>
             </div>
 
             <!-- TAB NAVIGATION -->
@@ -268,6 +275,10 @@
                 </button>
                 <button class="tab" data-tab="notes" onclick="switchTab('notes')">
                     <i class="fas fa-sticky-note"></i> Notes
+                </button>
+                <button class="tab supervisor-only" data-tab="supervision" onclick="switchTab('supervision')" id="supervisor-tab" style="display: none;">
+                    <i class="fas fa-user-tie"></i> Supervision
+                    <span id="supervision-badge" class="tab-badge warning hidden">0</span>
                 </button>
             </div>
 
@@ -520,6 +531,55 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- SUPERVISION TAB (Supervisor Only) -->
+                <div id="tab-supervision" class="tab-pane">
+                    <!-- Team Members Overview -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-users"></i> Team Members</h2>
+                            <button class="btn btn-icon btn-secondary" onclick="loadTeamMembers()">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                        <div id="team-members-list" class="cards-list">
+                            <p style="color: var(--text-muted); text-align: center; padding: 40px;">Loading team members...</p>
+                        </div>
+                    </div>
+
+                    <!-- Escalations -->
+                    <div class="section" style="margin-top: 20px;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-exclamation-circle"></i> Escalations</h2>
+                            <span id="escalations-count" class="badge danger hidden">0</span>
+                            <button class="btn btn-icon btn-secondary" onclick="loadEscalations()">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                        <div class="escalation-tabs" style="display: flex; gap: 8px; margin-bottom: 16px;">
+                            <button class="btn btn-small active" onclick="filterEscalations('pending')" data-filter="pending">Pending</button>
+                            <button class="btn btn-small" onclick="filterEscalations('acknowledged')" data-filter="acknowledged">Acknowledged</button>
+                            <button class="btn btn-small" onclick="filterEscalations('resolved')" data-filter="resolved">Resolved</button>
+                            <button class="btn btn-small" onclick="filterEscalations('')" data-filter="">All</button>
+                        </div>
+                        <div id="escalations-list" class="cards-list">
+                            <p style="color: var(--text-muted); text-align: center; padding: 40px;">No pending escalations</p>
+                        </div>
+                    </div>
+
+                    <!-- Supervision Notes -->
+                    <div class="section" style="margin-top: 20px;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-clipboard"></i> 1:1 Supervision Notes</h2>
+                            <button class="btn btn-small btn-primary" onclick="openSupervisionNoteModal()">
+                                <i class="fas fa-plus"></i> New Note
+                            </button>
+                        </div>
+                        <div id="supervision-notes-list" class="cards-list">
+                            <p style="color: var(--text-muted); text-align: center; padding: 40px;">No supervision notes yet</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -616,6 +676,91 @@
         </div>
     </div>
 
+    <!-- Supervision Note Modal -->
+    <div id="supervision-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="supervision-modal-title"><i class="fas fa-clipboard"></i> New Supervision Note</h3>
+                <button class="modal-close" onclick="closeSupervisionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Staff Member</label>
+                    <select id="supervision-staff-id" required>
+                        <option value="">Select staff member...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Wellbeing Notes</label>
+                    <textarea id="supervision-wellbeing" rows="3" placeholder="How is the staff member doing? Any concerns about wellbeing, stress, workload..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Case Discussion Notes</label>
+                    <textarea id="supervision-cases" rows="3" placeholder="Notes about specific cases discussed..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Action Items</label>
+                    <textarea id="supervision-actions" rows="2" placeholder="Enter each action on a new line"></textarea>
+                    <small>One action item per line</small>
+                </div>
+                <div class="form-group">
+                    <label>Next Session Date</label>
+                    <input type="date" id="supervision-next-date">
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="supervision-confidential">
+                        <span>Mark as confidential (HR-sensitive)</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSupervisionModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSupervisionNote()">
+                    <i class="fas fa-save"></i> Save Note
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Escalation Modal -->
+    <div id="escalation-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-arrow-up"></i> Escalate to Supervisor</h3>
+                <button class="modal-close" onclick="closeEscalationModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Subject *</label>
+                    <input type="text" id="escalation-subject" placeholder="Brief summary of the issue" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea id="escalation-description" rows="4" placeholder="Provide details about why you're escalating..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select id="escalation-priority">
+                        <option value="normal">Normal</option>
+                        <option value="high">High - Needs prompt attention</option>
+                        <option value="urgent">Urgent - Immediate action required</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Related Case ID (optional)</label>
+                    <input type="text" id="escalation-case-id" placeholder="Enter case ID if applicable">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEscalationModal()">Cancel</button>
+                <button class="btn btn-warning" onclick="submitEscalation()">
+                    <i class="fas fa-paper-plane"></i> Submit Escalation
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification Toast -->
     <div id="notification" class="notification hidden"></div>
 
@@ -649,6 +794,11 @@
             }
             if (tabId === 'team' && typeof loadTeamOnDuty === 'function') loadTeamOnDuty();
             if (tabId === 'notes' && typeof loadNotes === 'function') loadNotes();
+            if (tabId === 'supervision') {
+                if (typeof loadTeamMembers === 'function') loadTeamMembers();
+                if (typeof loadEscalations === 'function') loadEscalations();
+                if (typeof loadSupervisionNotes === 'function') loadSupervisionNotes();
+            }
         }
     </script>
     <script src="twilio-phone.js"></script>
