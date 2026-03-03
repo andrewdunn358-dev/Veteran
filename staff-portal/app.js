@@ -177,6 +177,13 @@ function showNotification(message, type) {
 // API Call
 async function apiCall(endpoint, options) {
     options = options || {};
+    
+    // Don't make API calls if not logged in (except for login)
+    if (!token && !endpoint.includes('/auth/login')) {
+        console.log('Skipping API call - not logged in:', endpoint);
+        throw new Error('Not authenticated');
+    }
+    
     var headers = { 'Content-Type': 'application/json' };
     if (token) {
         headers['Authorization'] = 'Bearer ' + token;
