@@ -683,6 +683,13 @@ export default function FamilyFriends() {
                 specialises in supporting children and young people (up to age 25) who have lost a parent 
                 who served in the British Armed Forces.
               </Text>
+              <TouchableOpacity 
+                style={[styles.dmwsLink, { backgroundColor: '#7c3aed', marginTop: 12 }]}
+                onPress={() => Linking.openURL('https://www.scottyslittlesoldiers.co.uk')}
+              >
+                <Text style={styles.dmwsLinkText}>Visit Scotty's Little Soldiers</Text>
+                <FontAwesome5 name="external-link-alt" size={12} color="#fff" />
+              </TouchableOpacity>
             </View>
 
             <View style={[styles.dmwsCard, { backgroundColor: isDark ? '#1e3a5f' : '#eff6ff', borderColor: '#3b82f6' }]}>
