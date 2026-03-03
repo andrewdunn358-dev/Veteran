@@ -215,15 +215,18 @@ function setupSocketHandlers() {
             // Add message to the live chat modal
             var messagesDiv = document.getElementById('livechat-messages');
             console.log('Messages div found:', !!messagesDiv);
+            console.log('Messages div parent:', messagesDiv ? messagesDiv.parentElement : null);
+            console.log('Messages div style:', messagesDiv ? window.getComputedStyle(messagesDiv).display : null);
             if (messagesDiv) {
-                var msgHtml = '<div class="chat-message user">' +
-                    '<span class="msg-sender">' + (data.sender_name || 'User') + '</span>' +
-                    '<span class="msg-text">' + (typeof escapeHtml === 'function' ? escapeHtml(data.message) : data.message) + '</span>' +
-                    '<span class="msg-time">' + new Date(data.timestamp).toLocaleTimeString() + '</span>' +
+                var msgHtml = '<div class="chat-message user" style="background:#3b82f6;padding:12px 16px;border-radius:12px;margin:8px 0;color:#fff;">' +
+                    '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.8);">' + (data.sender_name || 'User') + '</div>' +
+                    '<div style="font-size:15px;color:#fff;">' + (typeof escapeHtml === 'function' ? escapeHtml(data.message) : data.message) + '</div>' +
+                    '<div style="font-size:10px;color:rgba(255,255,255,0.6);">' + new Date(data.timestamp).toLocaleTimeString() + '</div>' +
                 '</div>';
                 messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                console.log('Message added to UI');
+                console.log('Message added to UI, innerHTML length:', messagesDiv.innerHTML.length);
+                console.log('Message div children count:', messagesDiv.children.length);
             } else {
                 console.error('livechat-messages div not found!');
             }

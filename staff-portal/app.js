@@ -1347,15 +1347,18 @@ async function sendChatMessage() {
         
         input.value = '';
         
-        // Add message to UI immediately
+        // Add message to UI immediately with inline styles to ensure visibility
         var messagesDiv = document.getElementById('livechat-messages');
+        console.log('Adding staff message, messagesDiv found:', !!messagesDiv);
         if (messagesDiv) {
-            messagesDiv.innerHTML += '<div class="chat-message staff">' +
-                '<span class="msg-sender">You</span>' +
-                '<span class="msg-text">' + escapeHtml(text) + '</span>' +
-                '<span class="msg-time">' + new Date().toLocaleTimeString() + '</span>' +
+            var msgHtml = '<div class="chat-message staff" style="background:#2d3a4d;padding:12px 16px;border-radius:12px;margin:8px 0;align-self:flex-end;max-width:80%;color:#fff;">' +
+                '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.8);">You</div>' +
+                '<div style="font-size:15px;color:#fff;">' + escapeHtml(text) + '</div>' +
+                '<div style="font-size:10px;color:rgba(255,255,255,0.6);">' + new Date().toLocaleTimeString() + '</div>' +
             '</div>';
+            messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            console.log('Staff message added, children count:', messagesDiv.children.length);
         }
         
     } catch (error) {
