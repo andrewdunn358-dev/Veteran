@@ -13,6 +13,7 @@ var TwilioPhone = (function() {
     var callStartTime = null;
     var callTimer = null;
     var isMuted = false;
+    var currentUserRef = null;  // Store user reference
     
     // Configuration
     var config = {
@@ -26,10 +27,28 @@ var TwilioPhone = (function() {
     async function init() {
         console.log('=== Twilio Phone Init ===');
         
-        if (!window.currentUser || !window.currentUser.id) {
+        // Try to get currentUser from window or localStorage
+        var user = window.currentUser;
+        if (!user || !user.id) {
+            // Try localStorage fallback
+            try {
+                var storedUser = localStorage.getItem('staff_user');
+                if (storedUser) {
+                    user = JSON.parse(storedUser);
+                    console.log('Twilio Phone: Using user from localStorage:', user.name);
+                }
+            } catch (e) {
+                console.error('Failed to parse stored user:', e);
+            }
+        }
+        
+        if (!user || !user.id) {
             console.error('Twilio Phone: No current user - waiting for login');
             return false;
         }
+        
+        // Store reference for later use
+        currentUserRef = user;
         
         try {
             // Check if Twilio is configured on the backend
@@ -85,9 +104,27 @@ var TwilioPhone = (function() {
      */
     async function getAccessToken() {
         try {
+            // Use stored reference or get from window/localStorage
+            var user = currentUserRef || window.currentUser;
+            if (!user || !user.id) {
+                try {
+                    var storedUser = localStorage.getItem('staff_user');
+                    if (storedUser) {
+                        user = JSON.parse(storedUser);
+                    }
+                } catch (e) {
+                    console.error('Failed to get user for token:', e);
+                }
+            }
+            
+            if (!user || !user.id) {
+                console.error('No user available for token request');
+                return null;
+            }
+            
             var formData = new FormData();
-            formData.append('staff_id', window.currentUser.id);
-            formData.append('staff_name', window.currentUser.name || 'Staff');
+            formData.append('staff_id', user.id);
+            formData.append('staff_name', user.name || 'Staff');
             
             var response = await fetch(CONFIG.API_URL + config.tokenEndpoint, {
                 method: 'POST',
@@ -204,6 +241,25 @@ var TwilioPhone = (function() {
         
         console.log('Making REST API call to:', phoneNumber);
         
+        // Get user from stored reference, window, or localStorage
+        var user = currentUserRef || window.currentUser;
+        if (!user || !user.id) {
+            try {
+                var storedUser = localStorage.getItem('staff_user');
+                if (storedUser) {
+                    user = JSON.parse(storedUser);
+                }
+            } catch (e) {
+                console.error('Failed to get user:', e);
+            }
+        }
+        
+        if (!user || !user.id) {
+            showNotification('Please log in again to make calls', 'error');
+            console.error('No user found for Twilio call');
+            return;
+        }
+        
         try {
             // Show calling UI
             showCallModal('calling', userName, phoneNumber);
@@ -211,8 +267,8 @@ var TwilioPhone = (function() {
             
             var formData = new FormData();
             formData.append('to_number', phoneNumber);
-            formData.append('staff_id', window.currentUser.id);
-            formData.append('staff_name', window.currentUser.name || 'Staff');
+            formData.append('staff_id', user.id);
+            formData.append('staff_name', user.name || 'Staff');
             formData.append('user_name', userName || 'User');
             if (callbackId) formData.append('callback_id', callbackId);
             
