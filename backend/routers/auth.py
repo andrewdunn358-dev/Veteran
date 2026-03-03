@@ -212,7 +212,7 @@ async def list_all_users():
 
 @router.post("/register", response_model=User)
 async def register_user(user_input: UserCreate, current_user: User = Depends(require_role("admin"))):
-    """Register a new user (admin only)"""
+    """Register a new user (admin only) - also creates staff profile"""
     db = get_database()
     
     # Check if email exists
@@ -221,17 +221,55 @@ async def register_user(user_input: UserCreate, current_user: User = Depends(req
         raise HTTPException(status_code=400, detail="Email already registered")
     
     user_id = str(uuid.uuid4())
+    user_name = user_input.name or f"{user_input.first_name} {user_input.last_name}".strip() or user_input.email.split('@')[0]
     user_data = {
         "id": user_id,
         "email": user_input.email,
         "hashed_password": hash_password(user_input.password),
         "role": user_input.role,
-        "name": user_input.name or f"{user_input.first_name} {user_input.last_name}".strip(),
+        "name": user_name,
         "created_at": datetime.utcnow()
     }
     
     await db.users.insert_one(user_data)
-    return User(id=user_id, email=user_input.email, role=user_input.role, name=user_data["name"])
+    
+    # Auto-create staff profile based on role
+    if user_input.role in ["counsellor", "supervisor"]:
+        profile_data = {
+            "id": str(uuid.uuid4()),
+            "name": user_name,
+            "specialization": user_input.specialization or "General",
+            "status": "off",
+            "next_available": None,
+            "phone": user_input.phone or "",
+            "sms": user_input.sms,
+            "whatsapp": user_input.whatsapp,
+            "user_id": user_id,
+            "sip_extension": None,
+            "sip_password": None,
+            "created_at": datetime.utcnow()
+        }
+        await db.counsellors.insert_one(profile_data)
+        
+    elif user_input.role == "peer":
+        profile_data = {
+            "id": str(uuid.uuid4()),
+            "firstName": user_name,
+            "area": user_input.area or "General",
+            "background": user_input.background or "Veteran",
+            "yearsServed": user_input.yearsServed or "N/A",
+            "status": "unavailable",
+            "phone": user_input.phone or "",
+            "sms": user_input.sms,
+            "whatsapp": user_input.whatsapp,
+            "user_id": user_id,
+            "sip_extension": None,
+            "sip_password": None,
+            "created_at": datetime.utcnow()
+        }
+        await db.peer_supporters.insert_one(profile_data)
+    
+    return User(id=user_id, email=user_input.email, role=user_input.role, name=user_name)
 
 
 @router.post("/login", response_model=TokenResponse)
