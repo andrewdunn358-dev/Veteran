@@ -122,6 +122,9 @@ export default function UnifiedAIChat() {
   // Session ID - use characterId for stability since character may not be loaded yet
   const [sessionId] = useState(() => `${characterId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   
+  // Chat history storage key
+  const chatHistoryKey = `chat_history_${characterId}`;
+  
   // Auth state
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [email, setEmail] = useState('');
@@ -222,6 +225,8 @@ export default function UnifiedAIChat() {
       await AsyncStorage.setItem('ai_chat_consent_date', new Date().toISOString());
       setHasAcceptedConsent(true);
       setShowAIConsent(false);
+      // Load chat history after consent
+      await loadChatHistory();
       setHasLoadedSession(true);
     } catch (error) {
       console.error('Error saving consent:', error);
@@ -229,18 +234,90 @@ export default function UnifiedAIChat() {
       setHasLoadedSession(true);
     }
   };
-
-  // Add welcome message when session loads
-  useEffect(() => {
-    if (hasLoadedSession && messages.length === 0 && character) {
-      const welcomeMessage: Message = {
-        id: 'welcome',
-        text: character.welcomeMessage,
-        sender: 'buddy',
-        timestamp: new Date(),
-      };
-      setMessages([welcomeMessage]);
+  
+  // Load chat history from AsyncStorage
+  const loadChatHistory = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(chatHistoryKey);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Convert timestamp strings back to Date objects
+        const loadedMessages = parsed.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+        if (loadedMessages.length > 0) {
+          setMessages(loadedMessages);
+          return true;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading chat history:', error);
     }
+    return false;
+  };
+  
+  // Save chat history to AsyncStorage
+  const saveChatHistory = async (msgs: Message[]) => {
+    try {
+      // Keep last 50 messages to prevent storage bloat
+      const toSave = msgs.slice(-50);
+      await AsyncStorage.setItem(chatHistoryKey, JSON.stringify(toSave));
+    } catch (error) {
+      console.error('Error saving chat history:', error);
+    }
+  };
+  
+  // Save messages whenever they change (debounced)
+  useEffect(() => {
+    if (messages.length > 0 && hasLoadedSession) {
+      const timer = setTimeout(() => {
+        saveChatHistory(messages);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [messages, hasLoadedSession]);
+  
+  // Clear chat history function
+  const clearChatHistory = async () => {
+    try {
+      await AsyncStorage.removeItem(chatHistoryKey);
+      setMessages([]);
+      // Re-add welcome message
+      if (character) {
+        const welcomeMessage: Message = {
+          id: 'welcome',
+          text: character.welcomeMessage,
+          sender: 'buddy',
+          timestamp: new Date(),
+        };
+        setMessages([welcomeMessage]);
+      }
+    } catch (error) {
+      console.error('Error clearing chat history:', error);
+    }
+  };
+
+  // Add welcome message when session loads (only if no history)
+  useEffect(() => {
+    const initializeChat = async () => {
+      if (hasLoadedSession && character) {
+        // Only add welcome message if no history exists
+        if (messages.length === 0) {
+          const historyLoaded = await loadChatHistory();
+          if (!historyLoaded) {
+            const welcomeMessage: Message = {
+              id: 'welcome',
+              text: character.welcomeMessage,
+              sender: 'buddy',
+              timestamp: new Date(),
+            };
+            setMessages([welcomeMessage]);
+          }
+        }
+      }
+    };
+    initializeChat();
   }, [hasLoadedSession, character?.welcomeMessage]);
 
   // Auto-scroll to bottom
@@ -309,6 +386,13 @@ export default function UnifiedAIChat() {
 
   const clearConversation = async () => {
     if (!character) return;
+    // Clear stored history
+    try {
+      await AsyncStorage.removeItem(chatHistoryKey);
+    } catch (error) {
+      console.error('Error clearing chat history:', error);
+    }
+    // Reset to welcome message
     setMessages([{
       id: 'welcome',
       text: character.welcomeMessage,
