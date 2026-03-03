@@ -353,7 +353,7 @@ async def seed_cms_public(force: bool = False):
     avatar_base = "/images"
     ai_characters = [
         {"title": "Tommy", "description": "Your battle buddy", "bio": "Tommy is your straightforward battle buddy. A no-nonsense mate who tells it like it is, but always has your back.", "image_url": f"{avatar_base}/tommy.png", "route": "/chat/tommy", "order": 1},
-        {"title": "Doris", "description": "Warm support", "bio": "Doris is a nurturing, compassionate presence who creates a safe space to talk.", "image_url": f"{avatar_base}/doris.png", "route": "/chat/doris", "order": 2},
+        {"title": "Rachel", "description": "Warm support", "bio": "Rachel is a nurturing, compassionate presence who creates a safe space to talk.", "image_url": f"{avatar_base}/doris.png", "route": "/chat/doris", "order": 2},
         {"title": "Bob", "description": "Ex-Para peer support", "bio": "Bob is a down-to-earth ex-Para who keeps things real.", "image_url": f"{avatar_base}/bob.png", "route": "/chat/bob", "order": 3},
         {"title": "Finch", "description": "Military law & legal support", "bio": "Finch is a knowledgeable companion with expertise in UK military law.", "image_url": f"{avatar_base}/finch.png", "route": "/chat/sentry", "order": 4},
         {"title": "Margie", "description": "Addiction support", "bio": "Margie specialises in supporting those dealing with all types of addiction.", "image_url": f"{avatar_base}/margie.png", "route": "/chat/margie", "order": 5},

@@ -488,7 +488,7 @@ def get_safety_response_wrapper(
             # Use character-appropriate phrasing
             reminder_templates = {
                 "Tommy": "Look mate, I'm always here for a chat, but speaking with a real person - another veteran perhaps - could be really good for you too.",
-                "Doris": "Dear, I'm glad you feel you can talk to me, but remember there are real people who care too. Our peer supporters are lovely.",
+                "Rachel": "Dear, I'm glad you feel you can talk to me, but remember there are real people who care too. Our peer supporters are lovely.",
                 "Bob": "I appreciate you talking to me, but you know what? Our peer supporters have been through it too - might be worth a chat.",
                 "Finch": "I'm here to support you, but human connection is important. Our staff are trained to help and they're real people who care.",
                 "Margie": "I enjoy our chats, love, but don't forget there are real people here who want to help you too.",
@@ -687,7 +687,7 @@ def analyze_message_safety(
     
     # 6. Get character name for persona-appropriate responses
     character_names = {
-        "tommy": "Tommy", "doris": "Doris", "bob": "Bob",
+        "tommy": "Tommy", "doris": "Rachel", "bob": "Bob",
         "sentry": "Finch", "finch": "Finch", "margie": "Margie",
         "hugo": "Hugo", "rita": "Rita", "catherine": "Catherine"
     }

@@ -23,6 +23,16 @@ Radio Check is a comprehensive mental health and peer support application design
 - **Counsellors**: Licensed mental health professionals
 - **Admins**: System administration
 
+## AI Characters
+- **Tommy** - Battle buddy, straight-talking support
+- **Rachel** (formerly Doris) - Nurturing, compassionate presence
+- **Bob** - Down-to-earth ex-Para
+- **Finch** - Military law expertise
+- **Hugo** - Wellbeing coach
+- **Margie** - Addiction support
+- **Rita** - Family support
+- **Catherine** - Self-care & mindfulness
+
 ## Implemented Features (P0 Complete)
 - [x] AI Chat Personas (Tommy & Rachel)
 - [x] Live Chat with staff
@@ -31,20 +41,21 @@ Radio Check is a comprehensive mental health and peer support application design
 - [x] Case management system
 - [x] Staff rota/availability system
 - [x] WebRTC in-app calling
-- [x] Twilio browser-to-phone calling (completed Dec 2025)
+- [x] Twilio browser-to-phone calling
 - [x] Staff portal with tabbed interface
 - [x] Admin content management system
 - [x] Panic button (peer to counsellor escalation)
 - [x] Session timeout and security
 
-## Current Status (December 2025)
+## Current Status (March 2026)
 
-### Recently Fixed
-- **Live Chat `Staff ID: undefined` bug** - Added localStorage fallback for staff user object in webrtc-phone.js
+### Recently Fixed (This Session)
+- **Rachel/Doris Name Change** - All code and database references updated from "Doris" to "Rachel"
+- **Live Chat Polling Bug** - Disabled polling when socket is connected to prevent message wipe
 
 ### Pending Issues
-- Vercel deployment - lock file conflict resolved, needs redeployment
-- Business Plan and Cost Analysis documents ready for download
+- **Live Chat UI** - Messages not visible in staff portal (code fix ready, needs 20i deployment)
+- **Vercel Build** - Lock file conflict resolved
 
 ## File Structure
 ```
@@ -55,9 +66,9 @@ Radio Check is a comprehensive mental health and peer support application design
 │   ├── server.py      # Main application
 │   └── webrtc_signaling.py    # Socket.IO handlers
 ├── frontend/          # Expo React app
-├── staff-portal/      # Staff interface
-│   ├── app.js         # Main logic
-│   ├── webrtc-phone.js # WebRTC and chat handling
+├── staff-portal/      # Staff interface (needs 20i upload)
+│   ├── app.js         # Main logic (updated)
+│   ├── webrtc-phone.js # WebRTC and chat handling (updated)
 │   └── twilio-phone.js # Twilio SDK integration
 ├── admin-site/        # Admin interface
 └── memory/            # Documentation
@@ -80,3 +91,4 @@ Radio Check is a comprehensive mental health and peer support application design
 ## Testing Notes
 - Staff accounts: sharon@radiocheck.me (counsellor), kev@radiocheck.me (peer)
 - Live chat requires both staff and user to be connected via Socket.IO
+- Rachel character ID is still "doris" internally for backwards compatibility

@@ -410,7 +410,7 @@ def get_character_bio(char_id: str) -> str:
     """Get bio for hardcoded character"""
     bios = {
         "tommy": "Tommy is your straightforward battle buddy. A no-nonsense mate who tells it like it is, but always has your back.",
-        "doris": "Doris is a nurturing, compassionate presence who creates a safe space to talk. Think of her as a warm cuppa on a difficult day.",
+        "doris": "Rachel is a nurturing, compassionate presence who creates a safe space to talk. Think of her as a warm cuppa on a difficult day.",
         "bob": "Bob is a down-to-earth ex-Para who keeps things real. He's been around the block and knows what it's like.",
         "sentry": "Finch is a knowledgeable companion with expertise in UK military law. He provides steady support and practical guidance.",
         "hugo": "Hugo is a 35-year-old wellbeing coach focused on mental health, resilience and daily habits.",
