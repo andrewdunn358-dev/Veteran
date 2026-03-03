@@ -2088,7 +2088,7 @@ BUDDY_SESSION_TIMEOUT_MINUTES = 60
 
 # Resend Configuration
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
-SENDER_EMAIL = os.getenv("SENDER_EMAIL", "noreply@veteran.dbty.co.uk")
+SENDER_EMAIL = os.getenv("SENDER_EMAIL", "noreply@radiocheck.me")
 # URL Configuration for email links
 APP_URL = os.getenv("APP_URL", "https://app.radiocheck.me")  # Main user app
 STAFF_PORTAL_URL = os.getenv("STAFF_PORTAL_URL", "https://staff.radiocheck.me")  # Staff portal
