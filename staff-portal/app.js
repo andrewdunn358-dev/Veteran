@@ -1242,63 +1242,93 @@ async function joinLiveChat(roomId) {
 async function showLiveChatModal(roomId) {
     console.log('showLiveChatModal called with roomId:', roomId);
     
+    // FIRST: Remove any existing modal to prevent duplicates
+    var existingModal = document.getElementById('livechat-modal');
+    if (existingModal) {
+        console.log('Removing existing modal');
+        existingModal.remove();
+    }
+    
     // Set current chat room for message sending
     currentChatRoom = roomId;
     window.currentChatRoom = roomId;
     
-    // Get room messages
+    // Create modal HTML FIRST (before any async calls) so socket messages have a target
+    var modalHtml = '<div class="livechat-modal" id="livechat-modal">' +
+        '<div class="livechat-modal-content">' +
+            '<div class="livechat-modal-header">' +
+                '<h3><i class="fas fa-headset"></i> Live Chat Support</h3>' +
+                '<button class="btn btn-icon" onclick="closeLiveChatModal()"><i class="fas fa-times"></i></button>' +
+            '</div>' +
+            '<div class="livechat-messages" id="livechat-messages" style="min-height:200px;background:#1a2634;padding:20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px;">' +
+                '<div style="color:#64748b;text-align:center;padding:20px;">Loading messages...</div>' +
+            '</div>' +
+            '<div class="livechat-input">' +
+                '<input type="text" id="livechat-input-dynamic" placeholder="Type your message..." onkeypress="handleChatKeypress(event)">' +
+                '<button class="btn btn-primary" onclick="sendChatMessage()">' +
+                    '<i class="fas fa-paper-plane"></i>' +
+                '</button>' +
+            '</div>' +
+            '<div class="livechat-actions">' +
+                '<button class="btn btn-warning" onclick="endLiveChat(\'' + roomId + '\')">' +
+                    '<i class="fas fa-phone-slash"></i> End Chat' +
+                '</button>' +
+            '</div>' +
+        '</div>' +
+    '</div>';
+    
+    // Add modal to page IMMEDIATELY
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    console.log('Modal created, livechat-messages element exists:', !!document.getElementById('livechat-messages'));
+    
+    // Focus input
+    var inputEl = document.getElementById('livechat-input-dynamic');
+    if (inputEl) inputEl.focus();
+    
+    // NOW load existing messages from API (async)
     try {
         var response = await apiCall('/live-chat/rooms/' + roomId + '/messages');
         var messages = response.messages || [];
         
-        // Create modal HTML
-        var modalHtml = '<div class="livechat-modal" id="livechat-modal">' +
-            '<div class="livechat-modal-content">' +
-                '<div class="livechat-modal-header">' +
-                    '<h3><i class="fas fa-headset"></i> Live Chat Support</h3>' +
-                    '<button class="btn btn-icon" onclick="closeLiveChatModal()"><i class="fas fa-times"></i></button>' +
-                '</div>' +
-                '<div class="livechat-messages" id="livechat-messages">' +
-                    messages.map(function(msg) {
-                        var isStaff = msg.sender === 'staff';
-                        return '<div class="chat-message ' + (isStaff ? 'staff' : 'user') + '">' +
-                            '<span class="msg-sender">' + (isStaff ? 'You' : 'User') + '</span>' +
-                            '<span class="msg-text">' + escapeHtml(msg.text) + '</span>' +
-                            '<span class="msg-time">' + new Date(msg.timestamp).toLocaleTimeString() + '</span>' +
-                        '</div>';
-                    }).join('') +
-                '</div>' +
-                '<div class="livechat-input">' +
-                    '<input type="text" id="livechat-input-dynamic" placeholder="Type your message..." onkeypress="handleChatKeypress(event)">' +
-                    '<button class="btn btn-primary" onclick="sendChatMessage()">' +
-                        '<i class="fas fa-paper-plane"></i>' +
-                    '</button>' +
-                '</div>' +
-                '<div class="livechat-actions">' +
-                    '<button class="btn btn-warning" onclick="endLiveChat(\'' + roomId + '\')">' +
-                        '<i class="fas fa-phone-slash"></i> End Chat' +
-                    '</button>' +
-                '</div>' +
-            '</div>' +
-        '</div>';
-        
-        // Add modal to page
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-        
-        // Start polling for new messages
-        startChatPolling(roomId);
-        
-        // Focus input
-        document.getElementById('livechat-input-dynamic').focus();
-        
-        // Scroll to bottom
+        // Update messages div with loaded messages - BUT only if no socket messages arrived yet
         var messagesDiv = document.getElementById('livechat-messages');
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        if (messagesDiv) {
+            // Check if socket messages already arrived (more than just the loading placeholder)
+            var hasSocketMessages = messagesDiv.querySelectorAll('.chat-message').length > 0;
+            
+            if (messages.length > 0 && !hasSocketMessages) {
+                // Only load from API if no real-time messages have arrived
+                messagesDiv.innerHTML = messages.map(function(msg) {
+                    var isStaff = msg.sender === 'staff';
+                    return '<div class="chat-message ' + (isStaff ? 'staff' : 'user') + '" style="background:' + (isStaff ? '#2d3a4d' : '#3b82f6') + ';padding:12px 16px;border-radius:12px;max-width:80%;color:#fff;">' +
+                        '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.8);">' + (isStaff ? 'You' : 'User') + '</div>' +
+                        '<div style="font-size:15px;color:#fff;">' + escapeHtml(msg.text) + '</div>' +
+                        '<div style="font-size:10px;color:rgba(255,255,255,0.6);">' + new Date(msg.timestamp).toLocaleTimeString() + '</div>' +
+                    '</div>';
+                }).join('');
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            } else if (!hasSocketMessages) {
+                // Clear the loading message only if no socket messages yet
+                messagesDiv.innerHTML = '';
+            }
+            // If socket messages exist, don't touch the div - let real-time updates continue
+            console.log('API load complete. Has socket messages:', hasSocketMessages, 'API messages:', messages.length);
+        }
         
     } catch (error) {
-        console.error('Error opening chat:', error);
-        showNotification('Failed to open chat', 'error');
+        console.error('Error loading chat messages:', error);
+        // Don't close modal - just clear the loading message
+        var messagesDiv = document.getElementById('livechat-messages');
+        if (messagesDiv) {
+            var hasSocketMessages = messagesDiv.querySelectorAll('.chat-message').length > 0;
+            if (!hasSocketMessages) {
+                messagesDiv.innerHTML = '';
+            }
+        }
     }
+    
+    // Start polling as fallback (will be skipped if socket connected)
+    startChatPolling(roomId);
 }
 
 // Handle Enter key in chat input
