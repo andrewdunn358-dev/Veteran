@@ -1,0 +1,360 @@
+"""
+Twilio Voice Calling Router
+============================
+Browser-to-phone calling functionality for staff portal.
+Enables staff to call users directly from the browser using Twilio.
+"""
+
+import os
+import logging
+from datetime import datetime
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Form, Request, Depends
+from fastapi.responses import Response
+from pydantic import BaseModel
+from twilio.rest import Client
+from twilio.jwt.access_token import AccessToken
+from twilio.jwt.access_token.grants import VoiceGrant
+from twilio.twiml.voice_response import VoiceResponse, Dial
+from twilio.request_validator import RequestValidator
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/twilio", tags=["twilio"])
+
+# Twilio configuration from environment
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
+TWILIO_API_KEY_SID = os.environ.get('TWILIO_API_KEY_SID')
+TWILIO_API_KEY_SECRET = os.environ.get('TWILIO_API_KEY_SECRET')
+TWILIO_TWIML_APP_SID = os.environ.get('TWILIO_TWIML_APP_SID')
+TWILIO_PHONE_NUMBER = os.environ.get('TWILIO_PHONE_NUMBER', '+447446402523')
+
+# Initialize Twilio client
+twilio_client = None
+if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN:
+    twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    logger.info("Twilio client initialized successfully")
+else:
+    logger.warning("Twilio credentials not configured - calling features disabled")
+
+
+class TokenResponse(BaseModel):
+    """Response model for access token"""
+    token: str
+    identity: str
+    ttl: int
+
+
+class CallResponse(BaseModel):
+    """Response model for call initiation"""
+    call_sid: str
+    status: str
+    to_number: str
+    from_number: str
+
+
+class CallStatusUpdate(BaseModel):
+    """Model for call status updates"""
+    call_sid: str
+    status: str
+    duration: Optional[int] = None
+    timestamp: str
+
+
+# Track active calls for monitoring
+active_calls = {}
+
+
+@router.get("/status")
+async def get_twilio_status():
+    """Check if Twilio is configured and ready"""
+    is_configured = all([
+        TWILIO_ACCOUNT_SID,
+        TWILIO_AUTH_TOKEN,
+        TWILIO_API_KEY_SID,
+        TWILIO_API_KEY_SECRET,
+        TWILIO_TWIML_APP_SID
+    ])
+    
+    return {
+        "configured": is_configured,
+        "phone_number": TWILIO_PHONE_NUMBER if is_configured else None,
+        "features": {
+            "browser_calling": is_configured,
+            "outbound_calls": is_configured
+        }
+    }
+
+
+@router.post("/token", response_model=TokenResponse)
+async def generate_access_token(
+    staff_id: str = Form(...),
+    staff_name: str = Form(default="Staff")
+):
+    """
+    Generate a Twilio access token for browser-based calling.
+    
+    This token allows the staff portal JavaScript to connect to Twilio
+    and make/receive calls directly in the browser.
+    """
+    if not all([TWILIO_ACCOUNT_SID, TWILIO_API_KEY_SID, TWILIO_API_KEY_SECRET, TWILIO_TWIML_APP_SID]):
+        raise HTTPException(
+            status_code=503,
+            detail="Twilio not configured. Please contact administrator."
+        )
+    
+    try:
+        # Create identity from staff_id (must be unique per device)
+        identity = f"staff_{staff_id}"
+        
+        # Create access token with 1 hour TTL
+        token = AccessToken(
+            TWILIO_ACCOUNT_SID,
+            TWILIO_API_KEY_SID,
+            TWILIO_API_KEY_SECRET,
+            identity=identity,
+            ttl=3600  # 1 hour
+        )
+        
+        # Add voice grant for making outbound calls
+        voice_grant = VoiceGrant(
+            outgoing_application_sid=TWILIO_TWIML_APP_SID,
+            incoming_allow=True  # Allow receiving calls too
+        )
+        token.add_grant(voice_grant)
+        
+        logger.info(f"Generated Twilio token for staff: {staff_id}")
+        
+        return TokenResponse(
+            token=token.to_jwt(),
+            identity=identity,
+            ttl=3600
+        )
+        
+    except Exception as e:
+        logger.error(f"Token generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to generate access token")
+
+
+@router.post("/call")
+async def initiate_call(
+    to_number: str = Form(...),
+    staff_id: str = Form(...),
+    staff_name: str = Form(default="Staff"),
+    callback_id: str = Form(default=None),
+    user_name: str = Form(default="User")
+):
+    """
+    Initiate an outbound call from the browser to a phone number.
+    
+    The call will:
+    1. Connect from the staff browser to Twilio
+    2. Twilio calls the user's phone number
+    3. Audio is bridged between browser and phone
+    """
+    if not twilio_client:
+        raise HTTPException(
+            status_code=503,
+            detail="Twilio not configured. Please contact administrator."
+        )
+    
+    # Validate phone number format
+    if not to_number:
+        raise HTTPException(status_code=400, detail="Phone number is required")
+    
+    # Ensure E.164 format
+    clean_number = to_number.strip().replace(" ", "")
+    if not clean_number.startswith("+"):
+        # Assume UK number if no country code
+        if clean_number.startswith("0"):
+            clean_number = "+44" + clean_number[1:]
+        else:
+            clean_number = "+44" + clean_number
+    
+    try:
+        # Create TwiML for the call
+        # This tells Twilio to dial the user's number
+        twiml = VoiceResponse()
+        twiml.say(
+            "Connecting your call. Please wait.",
+            voice="alice",
+            language="en-GB"
+        )
+        
+        dial = Dial(
+            caller_id=TWILIO_PHONE_NUMBER,
+            timeout=30,
+            record="record-from-ringing-dual"  # Record call for quality
+        )
+        dial.number(clean_number)
+        twiml.append(dial)
+        
+        # Initiate the call
+        call = twilio_client.calls.create(
+            from_=TWILIO_PHONE_NUMBER,
+            to=clean_number,
+            twiml=str(twiml),
+            status_callback_event=["initiated", "ringing", "answered", "completed"],
+            status_callback_method="POST"
+        )
+        
+        # Track the call
+        active_calls[call.sid] = {
+            "call_sid": call.sid,
+            "staff_id": staff_id,
+            "staff_name": staff_name,
+            "to_number": clean_number,
+            "user_name": user_name,
+            "callback_id": callback_id,
+            "status": call.status,
+            "started_at": datetime.utcnow().isoformat()
+        }
+        
+        logger.info(f"Call initiated: {call.sid} from {staff_name} to {clean_number}")
+        
+        return {
+            "call_sid": call.sid,
+            "status": call.status,
+            "to_number": clean_number,
+            "from_number": TWILIO_PHONE_NUMBER
+        }
+        
+    except Exception as e:
+        logger.error(f"Call initiation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to initiate call: {str(e)}")
+
+
+@router.post("/voice")
+async def handle_voice_webhook(request: Request):
+    """
+    TwiML webhook endpoint for handling voice calls.
+    
+    This is called by Twilio when:
+    - A browser client initiates an outbound call
+    - Someone calls the Twilio number
+    """
+    try:
+        form_data = await request.form()
+        to_number = form_data.get('To', '')
+        from_number = form_data.get('From', '')
+        call_sid = form_data.get('CallSid', '')
+        
+        logger.info(f"Voice webhook: CallSid={call_sid}, From={from_number}, To={to_number}")
+        
+        response = VoiceResponse()
+        
+        # Check if this is an outbound call (To starts with + and is a phone number)
+        if to_number and to_number.startswith('+') and not to_number.startswith('client:'):
+            # Outbound call to phone number
+            response.say(
+                "Connecting your call now.",
+                voice="alice",
+                language="en-GB"
+            )
+            
+            dial = Dial(
+                caller_id=TWILIO_PHONE_NUMBER,
+                timeout=30
+            )
+            dial.number(to_number)
+            response.append(dial)
+            
+        elif to_number and to_number.startswith('client:'):
+            # Incoming call to a staff member
+            client_id = to_number.replace('client:', '')
+            response.say(
+                "Connecting you to support now.",
+                voice="alice",
+                language="en-GB"
+            )
+            
+            dial = Dial()
+            dial.client(client_id)
+            response.append(dial)
+            
+        else:
+            # Default - incoming call to the Twilio number
+            response.say(
+                "Thank you for calling Radio Check. Please hold while we connect you.",
+                voice="alice",
+                language="en-GB"
+            )
+            # Could route to available staff here
+            response.say(
+                "We're sorry, but all our staff are currently busy. Please try again later or use our app to request a callback.",
+                voice="alice",
+                language="en-GB"
+            )
+        
+        return Response(content=str(response), media_type="application/xml")
+        
+    except Exception as e:
+        logger.error(f"Voice webhook error: {str(e)}")
+        response = VoiceResponse()
+        response.say("An error occurred. Please try again.", voice="alice")
+        return Response(content=str(response), media_type="application/xml")
+
+
+@router.post("/call-status")
+async def handle_call_status(request: Request):
+    """
+    Webhook for call status updates from Twilio.
+    
+    Updates are received as calls progress through states:
+    initiated -> ringing -> answered -> completed
+    """
+    try:
+        form_data = await request.form()
+        call_sid = form_data.get('CallSid', '')
+        call_status = form_data.get('CallStatus', '')
+        call_duration = form_data.get('CallDuration')
+        
+        logger.info(f"Call status update: {call_sid} - {call_status}")
+        
+        # Update tracked call
+        if call_sid in active_calls:
+            active_calls[call_sid]['status'] = call_status
+            if call_duration:
+                active_calls[call_sid]['duration'] = int(call_duration)
+            if call_status in ['completed', 'failed', 'busy', 'no-answer', 'canceled']:
+                active_calls[call_sid]['ended_at'] = datetime.utcnow().isoformat()
+        
+        return {"status": "ok"}
+        
+    except Exception as e:
+        logger.error(f"Call status webhook error: {str(e)}")
+        return {"status": "error", "message": str(e)}
+
+
+@router.get("/active-calls")
+async def get_active_calls():
+    """Get list of currently active calls (for monitoring)"""
+    # Filter to only show active/in-progress calls
+    active = {
+        sid: call for sid, call in active_calls.items()
+        if call.get('status') in ['initiated', 'ringing', 'in-progress', 'answered']
+    }
+    return {"calls": list(active.values()), "count": len(active)}
+
+
+@router.post("/end-call")
+async def end_call(call_sid: str = Form(...)):
+    """End an active call"""
+    if not twilio_client:
+        raise HTTPException(status_code=503, detail="Twilio not configured")
+    
+    try:
+        call = twilio_client.calls(call_sid).update(status='completed')
+        
+        if call_sid in active_calls:
+            active_calls[call_sid]['status'] = 'completed'
+            active_calls[call_sid]['ended_at'] = datetime.utcnow().isoformat()
+        
+        logger.info(f"Call ended: {call_sid}")
+        return {"status": "ended", "call_sid": call_sid}
+        
+    except Exception as e:
+        logger.error(f"Failed to end call: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to end call: {str(e)}")

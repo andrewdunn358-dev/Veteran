@@ -316,6 +316,19 @@ async function initPortal() {
     // Initialize SIP phone if credentials available
     await initializeWebRTCPhone();
     
+    // Initialize Twilio phone for browser-to-phone calling
+    if (typeof TwilioPhone !== 'undefined' && TwilioPhone.init) {
+        TwilioPhone.init().then(function(ready) {
+            if (ready) {
+                console.log('Twilio Phone ready for calling');
+            } else {
+                console.log('Twilio Phone not available');
+            }
+        }).catch(function(err) {
+            console.error('Twilio Phone init error:', err);
+        });
+    }
+    
     // Load data
     loadCallbacks();
     loadNotes();
@@ -529,17 +542,23 @@ function renderCallbacks(containerId, callbacks, isActive) {
     }
     
     container.innerHTML = callbacks.map(function(cb) {
+        // Add call button for active callbacks with phone numbers
+        var callButton = isActive && cb.phone ? 
+            '<button class="btn-call-twilio" onclick="twilioCallUser(\'' + cb.phone + '\', \'' + cb.name.replace(/'/g, "\\'") + '\', \'' + cb.id + '\')" data-testid="call-btn-' + cb.id + '">' +
+            '<i class="fas fa-phone"></i> Call Now</button>' : '';
+        
         var actions = isActive 
-            ? '<button class="btn btn-success" onclick="completeCallback(\'' + cb.id + '\')"><i class="fas fa-check"></i> Complete</button>' +
+            ? callButton +
+              '<button class="btn btn-success" onclick="completeCallback(\'' + cb.id + '\')"><i class="fas fa-check"></i> Complete</button>' +
               '<button class="btn btn-secondary" onclick="releaseCallback(\'' + cb.id + '\')"><i class="fas fa-undo"></i> Release</button>'
             : '<button class="btn btn-primary" onclick="takeCallback(\'' + cb.id + '\')"><i class="fas fa-hand-paper"></i> Take Callback</button>';
         
-        return '<div class="card">' +
+        return '<div class="card" data-testid="callback-card-' + cb.id + '">' +
             '<div class="card-header">' +
                 '<span class="card-name">' + cb.name + '</span>' +
                 '<span class="card-status ' + cb.status + '">' + cb.status.replace('_', ' ') + '</span>' +
             '</div>' +
-            '<div class="card-phone"><i class="fas fa-phone"></i>' + cb.phone + '</div>' +
+            '<div class="card-phone"><i class="fas fa-phone"></i> ' + cb.phone + '</div>' +
             '<div class="card-message">' + (cb.message || 'No message') + '</div>' +
             '<div class="card-time">' + new Date(cb.created_at).toLocaleString() + '</div>' +
             '<div class="card-actions">' + actions + '</div>' +
@@ -607,17 +626,22 @@ function renderPanicAlerts(alerts) {
     
     container.innerHTML = alerts.map(function(alert) {
         var actions = '';
+        // Add call button if phone number available
+        if (alert.user_phone) {
+            actions += '<button class="btn-call-twilio" onclick="twilioCallUser(\'' + alert.user_phone + '\', \'' + (alert.user_name || 'User').replace(/'/g, "\\'") + '\', null)" data-testid="call-alert-' + alert.id + '">' +
+                '<i class="fas fa-phone"></i> Call Now</button>';
+        }
         if (alert.status === 'active') {
-            actions = '<button class="btn btn-warning" onclick="acknowledgeAlert(\'' + alert.id + '\')"><i class="fas fa-hand-paper"></i> Acknowledge</button>';
+            actions += '<button class="btn btn-warning" onclick="acknowledgeAlert(\'' + alert.id + '\')"><i class="fas fa-hand-paper"></i> Acknowledge</button>';
         }
         actions += '<button class="btn btn-success" onclick="resolveAlert(\'' + alert.id + '\')"><i class="fas fa-check"></i> Resolve</button>';
         
-        return '<div class="card alert-card">' +
+        return '<div class="card alert-card" data-testid="alert-card-' + alert.id + '">' +
             '<div class="card-header">' +
                 '<span class="card-name">' + (alert.user_name || 'Peer Supporter') + '</span>' +
                 '<span class="card-status ' + alert.status + '">' + alert.status + '</span>' +
             '</div>' +
-            (alert.user_phone ? '<div class="card-phone"><i class="fas fa-phone"></i>' + alert.user_phone + '</div>' : '') +
+            (alert.user_phone ? '<div class="card-phone"><i class="fas fa-phone"></i> ' + alert.user_phone + '</div>' : '') +
             '<div class="card-message">' + (alert.message || 'Needs immediate assistance') + '</div>' +
             '<div class="card-time">' + new Date(alert.created_at).toLocaleString() + '</div>' +
             '<div class="card-actions">' + actions + '</div>' +

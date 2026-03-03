@@ -5930,7 +5930,8 @@ from routers import (
     staff, organizations, resources, safeguarding, 
     callbacks, live_chat, notes, concerns,
     message_queue, ai_feedback, knowledge_base, compliance,
-    podcasts, data_retention, shift_swaps, documents, surveys
+    podcasts, data_retention, shift_swaps, documents, surveys,
+    twilio_calling
 )
 
 # Core functionality routers
@@ -5957,6 +5958,7 @@ app.include_router(documents.router, prefix="/api")
 app.include_router(surveys.router, prefix="/api")
 app.include_router(data_retention.router)
 app.include_router(shift_swaps.router, prefix="/api")
+app.include_router(twilio_calling.router)  # Twilio browser-to-phone calling
 
 # Clinical Safety Governance routes
 set_governance_db(db)

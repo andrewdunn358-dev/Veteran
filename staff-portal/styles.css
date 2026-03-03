@@ -3007,3 +3007,226 @@ body {
     max-height: 400px;
     overflow-y: auto;
 }
+
+/* ========================================
+   TWILIO PHONE CALLING STYLES
+   ======================================== */
+
+.twilio-call-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10001;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+
+.twilio-call-modal-content {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-radius: 24px;
+    padding: 40px;
+    min-width: 350px;
+    max-width: 450px;
+    text-align: center;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.twilio-call-modal-content.connected {
+    border: 2px solid #22c55e;
+}
+
+.twilio-call-modal-content.calling {
+    border: 2px solid #3b82f6;
+}
+
+.call-header {
+    margin-bottom: 24px;
+}
+
+.call-icon {
+    font-size: 48px;
+    color: #3b82f6;
+    margin-bottom: 16px;
+}
+
+.call-icon.pulsing {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.twilio-call-modal-content.connected .call-icon {
+    color: #22c55e;
+}
+
+.call-status {
+    font-size: 18px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.call-info {
+    margin-bottom: 32px;
+}
+
+.call-user-name {
+    font-size: 28px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 8px;
+}
+
+.call-phone-number {
+    font-size: 16px;
+    color: #64748b;
+    font-family: monospace;
+}
+
+.call-timer {
+    font-size: 42px;
+    font-weight: 700;
+    color: #22c55e;
+    margin-top: 20px;
+    font-family: monospace;
+}
+
+.call-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.call-btn {
+    padding: 14px 28px;
+    border-radius: 50px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.call-btn.end {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.call-btn.end:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+}
+
+.call-btn.mute {
+    background: #334155;
+    color: #f8fafc;
+}
+
+.call-btn.mute:hover {
+    background: #475569;
+}
+
+.call-btn.mute.muted {
+    background: #f59e0b;
+    color: #1e293b;
+}
+
+/* Phone status in header */
+.twilio-phone-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.twilio-status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #64748b;
+}
+
+.twilio-status-indicator.ready {
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+}
+
+.twilio-status-indicator.calling,
+.twilio-status-indicator.in-call {
+    background: #f59e0b;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.twilio-status-indicator.error,
+.twilio-status-indicator.unavailable {
+    background: #ef4444;
+}
+
+.twilio-status-indicator.offline {
+    background: #64748b;
+}
+
+/* Call button in callback cards */
+.btn-call-twilio {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-call-twilio:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+}
+
+.btn-call-twilio:disabled {
+    background: #64748b;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-call-twilio i {
+    font-size: 14px;
+}
