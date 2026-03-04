@@ -843,6 +843,9 @@ async function loadLogsData() {
         // Load AI Chat stats
         loadAIChatStats();
         
+        // Load App Usage stats
+        loadAppUsageStats();
+        
         // Render charts
         renderActivityTrendChart(logsData.calls, logsData.chats, logsData.safeguarding);
         renderContactTypeChart(logsData.calls);
@@ -890,6 +893,64 @@ async function loadAIChatStats() {
         return stats;
     } catch (error) {
         console.log('AI Chat stats not available:', error);
+        return null;
+    }
+}
+
+// App Usage Analytics
+async function loadAppUsageStats() {
+    try {
+        const stats = await apiCall('/analytics/usage');
+        
+        // Update period stats
+        document.getElementById('stat-connected-now').textContent = stats.currently_connected || 0;
+        document.getElementById('stat-7days').textContent = stats['7_days']?.unique_visitors || 0;
+        document.getElementById('stat-30days').textContent = stats['30_days']?.unique_visitors || 0;
+        document.getElementById('stat-6months').textContent = stats['6_months']?.unique_visitors || 0;
+        document.getElementById('stat-12months').textContent = stats['12_months']?.unique_visitors || 0;
+        
+        // Update region breakdown
+        const regionContainer = document.getElementById('region-breakdown');
+        if (regionContainer && stats.regions) {
+            const regions = Object.entries(stats.regions);
+            if (regions.length > 0) {
+                const regionLabels = {
+                    'england': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',
+                    'scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland',
+                    'wales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',
+                    'northern_ireland': '🇬🇧 Northern Ireland',
+                    'other': '🌍 Other'
+                };
+                regionContainer.innerHTML = regions.map(([region, count]) => `
+                    <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: var(--bg-secondary); border-radius: 6px;">
+                        <span>${regionLabels[region] || region}</span>
+                        <strong>${count}</strong>
+                    </div>
+                `).join('');
+            } else {
+                regionContainer.innerHTML = '<div style="color: var(--text-muted);">No region data yet</div>';
+            }
+        }
+        
+        // Update daily trend
+        const trendContainer = document.getElementById('daily-trend');
+        if (trendContainer && stats.daily_trend) {
+            const last7 = stats.daily_trend.slice(-7);
+            if (last7.length > 0) {
+                trendContainer.innerHTML = last7.map(day => `
+                    <div style="display: flex; justify-content: space-between; padding: 4px 8px; background: var(--bg-secondary); border-radius: 4px;">
+                        <span>${day._id}</span>
+                        <span><strong>${day.unique_visitors}</strong> visitors</span>
+                    </div>
+                `).join('');
+            } else {
+                trendContainer.innerHTML = '<div style="color: var(--text-muted);">No data yet</div>';
+            }
+        }
+        
+        return stats;
+    } catch (error) {
+        console.log('App usage stats not available:', error);
         return null;
     }
 }

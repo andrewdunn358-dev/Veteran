@@ -82,12 +82,51 @@ export default function Index() {
           await AsyncStorage.setItem('anonymous_user_id', id);
         }
         setUserId(id);
+        
+        // Track app visit for analytics
+        trackAppVisit(id);
       } catch (e) {
         setUserId('fallback_' + Date.now());
       }
     };
     getOrCreateUserId();
   }, []);
+  
+  // Track app visit for analytics
+  const trackAppVisit = async (sessionId: string) => {
+    try {
+      const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://radio-check-vet-2.preview.emergentagent.com';
+      const region = await AsyncStorage.getItem('user_region'); // Get stored region if available
+      
+      await fetch(`${API_URL}/api/analytics/visit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionId,
+          user_agent: Platform.OS,
+          region: region,
+          referrer: null
+        })
+      });
+      
+      // Set up heartbeat to track active users (every 5 minutes)
+      const heartbeatInterval = setInterval(async () => {
+        try {
+          await fetch(`${API_URL}/api/analytics/heartbeat?session_id=${sessionId}`, {
+            method: 'POST'
+          });
+        } catch (e) {
+          // Silent fail for heartbeat
+        }
+      }, 5 * 60 * 1000); // 5 minutes
+      
+      // Cleanup on unmount
+      return () => clearInterval(heartbeatInterval);
+    } catch (e) {
+      // Silent fail - analytics shouldn't break the app
+      console.log('Analytics tracking error:', e);
+    }
+  };
   
   // Fetch CMS content for the home page
   const { sections, isLoading } = useCMSContent('home');

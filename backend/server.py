@@ -7,6 +7,7 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import hashlib
 from pathlib import Path
 from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional, Dict, Any
@@ -4608,6 +4609,135 @@ async def resolve_escalation(
     await db.escalations.update_one({"id": escalation_id}, {"$set": update_data})
     
     return {"message": "Escalation resolved"}
+
+# ============ APP USAGE ANALYTICS ============
+
+class AppVisit(BaseModel):
+    session_id: str
+    user_agent: Optional[str] = None
+    region: Optional[str] = None  # england, scotland, wales, northern_ireland
+    referrer: Optional[str] = None
+
+@api_router.post("/analytics/visit")
+async def track_app_visit(visit: AppVisit, request: Request):
+    """Track a visit to the app"""
+    # Get client IP
+    client_ip = request.headers.get("X-Forwarded-For", request.client.host if request.client else "unknown")
+    if "," in client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+    
+    visit_data = {
+        "id": str(uuid.uuid4()),
+        "session_id": visit.session_id,
+        "timestamp": datetime.utcnow(),
+        "date": datetime.utcnow().strftime("%Y-%m-%d"),
+        "user_agent": visit.user_agent,
+        "region": visit.region,
+        "referrer": visit.referrer,
+        "ip_hash": hashlib.sha256(client_ip.encode()).hexdigest()[:16],  # Anonymized IP for unique counting
+    }
+    
+    # Upsert - only count unique sessions per day
+    await db.app_visits.update_one(
+        {"session_id": visit.session_id, "date": visit_data["date"]},
+        {"$set": visit_data},
+        upsert=True
+    )
+    
+    # Track active sessions (expires after 30 min of inactivity)
+    await db.active_sessions.update_one(
+        {"session_id": visit.session_id},
+        {"$set": {
+            "session_id": visit.session_id,
+            "last_seen": datetime.utcnow(),
+            "region": visit.region,
+            "user_agent": visit.user_agent
+        }},
+        upsert=True
+    )
+    
+    return {"status": "tracked"}
+
+@api_router.post("/analytics/heartbeat")
+async def analytics_heartbeat(session_id: str):
+    """Keep session alive - call every 5 minutes"""
+    await db.active_sessions.update_one(
+        {"session_id": session_id},
+        {"$set": {"last_seen": datetime.utcnow()}},
+        upsert=True
+    )
+    return {"status": "ok"}
+
+@api_router.get("/analytics/usage")
+async def get_app_usage_stats(current_user: User = Depends(require_role("admin"))):
+    """Get app usage statistics for admin dashboard"""
+    now = datetime.utcnow()
+    
+    # Time periods
+    periods = {
+        "7_days": now - timedelta(days=7),
+        "30_days": now - timedelta(days=30),
+        "6_months": now - timedelta(days=180),
+        "12_months": now - timedelta(days=365),
+    }
+    
+    stats = {}
+    
+    # Get visit counts for each period
+    for period_name, cutoff in periods.items():
+        # Unique visitors (by session)
+        unique_visitors = await db.app_visits.distinct(
+            "session_id",
+            {"timestamp": {"$gte": cutoff}}
+        )
+        
+        # Total visits
+        total_visits = await db.app_visits.count_documents(
+            {"timestamp": {"$gte": cutoff}}
+        )
+        
+        stats[period_name] = {
+            "unique_visitors": len(unique_visitors),
+            "total_visits": total_visits
+        }
+    
+    # Currently connected (active in last 10 minutes)
+    active_cutoff = now - timedelta(minutes=10)
+    active_sessions = await db.active_sessions.find(
+        {"last_seen": {"$gte": active_cutoff}},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    stats["currently_connected"] = len(active_sessions)
+    
+    # Region breakdown (last 30 days)
+    region_pipeline = [
+        {"$match": {"timestamp": {"$gte": periods["30_days"]}, "region": {"$ne": None}}},
+        {"$group": {"_id": "$region", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    region_stats = await db.app_visits.aggregate(region_pipeline).to_list(10)
+    stats["regions"] = {r["_id"]: r["count"] for r in region_stats if r["_id"]}
+    
+    # Daily trend (last 30 days)
+    daily_pipeline = [
+        {"$match": {"timestamp": {"$gte": periods["30_days"]}}},
+        {"$group": {
+            "_id": "$date",
+            "visits": {"$sum": 1},
+            "unique": {"$addToSet": "$session_id"}
+        }},
+        {"$project": {
+            "_id": 1,
+            "visits": 1,
+            "unique_visitors": {"$size": "$unique"}
+        }},
+        {"$sort": {"_id": 1}}
+    ]
+    daily_trend = await db.app_visits.aggregate(daily_pipeline).to_list(31)
+    stats["daily_trend"] = daily_trend
+    
+    return stats
 
 # ============ AI BATTLE BUDDIES CHAT ENDPOINTS ============
 
