@@ -6187,11 +6187,37 @@ function exportReportPDF() {
     openPDFReport(period);
 }
 
-// Open PDF report in new window
-function openPDFReport(period) {
-    const url = `${CONFIG.API_URL}/api/governance/summary-report/pdf?period=${period}`;
-    window.open(url, '_blank');
-    showNotification(`Opening ${period} PDF report...`, 'info');
+// Open PDF report in new window (masked URL)
+async function openPDFReport(period) {
+    try {
+        showNotification(`Generating ${period} PDF report...`, 'info');
+        
+        // Fetch PDF via authenticated request
+        const response = await fetch(`${CONFIG.API_URL}/api/governance/summary-report/pdf?period=${period}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to generate PDF');
+        }
+        
+        // Create blob and open in new tab
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        
+        // Open in new window
+        const newWindow = window.open(blobUrl, '_blank');
+        
+        // Clean up blob URL after a delay
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+        
+        showNotification(`${period} PDF report opened`, 'success');
+    } catch (error) {
+        console.error('PDF generation error:', error);
+        showNotification('Failed to generate PDF: ' + error.message, 'error');
+    }
 }
 
 // Email report to specified address
