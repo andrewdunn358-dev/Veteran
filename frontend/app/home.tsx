@@ -69,6 +69,7 @@ export default function Index() {
   const { colors, theme } = useTheme();
   const styles = createStyles(colors);
   const [showAITeam, setShowAITeam] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [selectedMember, setSelectedMember] = useState<AITeamMember | null>(null);
   const [userId, setUserId] = useState<string>('');
   
@@ -228,39 +229,58 @@ export default function Index() {
             />
           </View>
           <Text style={styles.headerTitle}>Radio Check</Text>
-          <Text style={styles.taglineEnglish}>24/7 Mental Health & Peer Support for UK Veterans</Text>
+          <Text style={styles.taglineEnglish}>24/7 Mental Health & Peer Support</Text>
         </View>
 
-        {/* About Section */}
-        <View style={styles.aboutSection}>
-          <Text style={styles.aboutTitle}>What is Radio Check?</Text>
-          <Text style={styles.aboutText}>
-            Radio Check is a free, confidential mental health and peer support service built by veterans, for veterans. Whether you're struggling right now or just need someone who gets it, we're here for you — day or night.
-          </Text>
-          
-          <View style={styles.featureList}>
-            <View style={styles.featureItem}>
-              <Ionicons name="chatbubbles" size={20} color="#22c55e" />
-              <Text style={styles.featureText}>Talk to real veterans and trained counsellors via live chat</Text>
+        {/* What is Radio Check - Collapsible Card */}
+        <TouchableOpacity 
+          style={styles.aboutCard}
+          onPress={() => setShowAbout(!showAbout)}
+          activeOpacity={0.8}
+        >
+          <View style={styles.aboutCardHeader}>
+            <View style={styles.aboutCardLeft}>
+              <Ionicons name="information-circle" size={24} color="#3b82f6" />
+              <Text style={styles.aboutCardTitle}>What is Radio Check?</Text>
             </View>
-            <View style={styles.featureItem}>
-              <Ionicons name="shield-checkmark" size={20} color="#3b82f6" />
-              <Text style={styles.featureText}>100% confidential — no names, no records, no judgement</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Ionicons name="time" size={20} color="#8b5cf6" />
-              <Text style={styles.featureText}>AI Battle Buddies available 24/7 when humans aren't online</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Ionicons name="fitness" size={20} color="#f59e0b" />
-              <Text style={styles.featureText}>Self-care tools, fitness programmes & practical resources</Text>
-            </View>
+            <Ionicons 
+              name={showAbout ? 'chevron-up' : 'chevron-down'} 
+              size={20} 
+              color={colors.textSecondary} 
+            />
           </View>
+          
+          {showAbout && (
+            <View style={styles.aboutCardContent}>
+              <Text style={styles.aboutText}>
+                Radio Check is a free, confidential mental health and peer support service built for the UK Armed Forces community. Whether you're currently serving, a veteran, or a family member — we're here for you, day or night.
+              </Text>
+              
+              <View style={styles.featureList}>
+                <View style={styles.featureItem}>
+                  <Ionicons name="chatbubbles" size={18} color="#22c55e" />
+                  <Text style={styles.featureText}>Talk to real veterans and trained counsellors via live chat</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="shield-checkmark" size={18} color="#3b82f6" />
+                  <Text style={styles.featureText}>100% confidential — no names, no records, no judgement</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="time" size={18} color="#8b5cf6" />
+                  <Text style={styles.featureText}>AI Battle Buddies available 24/7 when humans aren't online</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="fitness" size={18} color="#f59e0b" />
+                  <Text style={styles.featureText}>Self-care tools, fitness programmes & practical resources</Text>
+                </View>
+              </View>
 
-          <Text style={styles.aboutQuote}>
-            "Radio Check" — because sometimes you just need to know someone's listening.
-          </Text>
-        </View>
+              <Text style={styles.aboutQuote}>
+                "Radio Check" — because sometimes you just need to know someone's listening.
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
 
         {/* Main Menu Cards - CMS Powered */}
         <View style={styles.menuContainer}>
@@ -438,48 +458,63 @@ const createStyles = (colors: any) => StyleSheet.create({
     lineHeight: 22,
     paddingHorizontal: 10,
   },
-  aboutSection: {
+  aboutCard: {
     backgroundColor: colors.surface,
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
+    padding: 16,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  aboutTitle: {
-    fontSize: 20,
-    fontWeight: '700',
+  aboutCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  aboutCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  aboutCardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
     color: colors.text,
-    marginBottom: 12,
+  },
+  aboutCardContent: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
   aboutText: {
-    fontSize: 15,
+    fontSize: 14,
     color: colors.textSecondary,
-    lineHeight: 24,
+    lineHeight: 22,
     marginBottom: 16,
   },
   featureList: {
-    gap: 12,
-    marginBottom: 16,
+    gap: 10,
+    marginBottom: 12,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: 10,
   },
   featureText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 13,
     color: colors.text,
-    lineHeight: 20,
+    lineHeight: 18,
   },
   aboutQuote: {
-    fontSize: 14,
+    fontSize: 13,
     fontStyle: 'italic',
     color: colors.primary,
     textAlign: 'center',
-    marginTop: 8,
-    paddingTop: 16,
+    marginTop: 12,
+    paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
