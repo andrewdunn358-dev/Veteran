@@ -228,7 +228,38 @@ export default function Index() {
             />
           </View>
           <Text style={styles.headerTitle}>Radio Check</Text>
-          <Text style={styles.taglineEnglish}>"Radio Check" fuses real-time peer support with smart AI insight, creating more than just an app — it's a digital hand on your shoulder when it matters most.</Text>
+          <Text style={styles.taglineEnglish}>24/7 Mental Health & Peer Support for UK Veterans</Text>
+        </View>
+
+        {/* About Section */}
+        <View style={styles.aboutSection}>
+          <Text style={styles.aboutTitle}>What is Radio Check?</Text>
+          <Text style={styles.aboutText}>
+            Radio Check is a free, confidential mental health and peer support service built by veterans, for veterans. Whether you're struggling right now or just need someone who gets it, we're here for you — day or night.
+          </Text>
+          
+          <View style={styles.featureList}>
+            <View style={styles.featureItem}>
+              <Ionicons name="chatbubbles" size={20} color="#22c55e" />
+              <Text style={styles.featureText}>Talk to real veterans and trained counsellors via live chat</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Ionicons name="shield-checkmark" size={20} color="#3b82f6" />
+              <Text style={styles.featureText}>100% confidential — no names, no records, no judgement</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Ionicons name="time" size={20} color="#8b5cf6" />
+              <Text style={styles.featureText}>AI Battle Buddies available 24/7 when humans aren't online</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Ionicons name="fitness" size={20} color="#f59e0b" />
+              <Text style={styles.featureText}>Self-care tools, fitness programmes & practical resources</Text>
+            </View>
+          </View>
+
+          <Text style={styles.aboutQuote}>
+            "Radio Check" — because sometimes you just need to know someone's listening.
+          </Text>
         </View>
 
         {/* Main Menu Cards - CMS Powered */}
@@ -400,12 +431,57 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginBottom: 8,
   },
   taglineEnglish: {
-    fontSize: 14,
+    fontSize: 15,
     color: colors.textSecondary,
     textAlign: 'center',
-    fontStyle: 'italic',
-    lineHeight: 20,
+    fontWeight: '500',
+    lineHeight: 22,
     paddingHorizontal: 10,
+  },
+  aboutSection: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  aboutTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 12,
+  },
+  aboutText: {
+    fontSize: 15,
+    color: colors.textSecondary,
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+  featureList: {
+    gap: 12,
+    marginBottom: 16,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  featureText: {
+    flex: 1,
+    fontSize: 14,
+    color: colors.text,
+    lineHeight: 20,
+  },
+  aboutQuote: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: colors.primary,
+    textAlign: 'center',
+    marginTop: 8,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
   menuContainer: {
     gap: 12,
