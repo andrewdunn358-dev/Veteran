@@ -6189,7 +6189,7 @@ function exportReportPDF() {
 
 // Open PDF report in new window
 function openPDFReport(period) {
-    const url = `${CONFIG.API_URL}/governance/summary-report/pdf?period=${period}`;
+    const url = `${CONFIG.API_URL}/api/governance/summary-report/pdf?period=${period}`;
     window.open(url, '_blank');
     showNotification(`Opening ${period} PDF report...`, 'info');
 }
