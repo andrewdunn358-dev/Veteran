@@ -262,6 +262,11 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
     socketRef.current.on('call_request_accepted', (data: any) => {
       console.log('WebRTC: Call request accepted by staff', data);
       // Staff member accepted and will be calling - prepare to receive the call
+      // CRITICAL: Set the call ID ref so acceptCall() can use it
+      if (data.call_id) {
+        currentCallIdRef.current = data.call_id;
+        console.log('WebRTC: Set currentCallIdRef to:', data.call_id);
+      }
       setCallState('ringing');
       setCallInfo({
         callId: data.call_id,

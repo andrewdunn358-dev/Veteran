@@ -152,15 +152,9 @@ function setupSocketHandlers() {
         var userName = data.user_name || 'Veteran';
         
         // Start WebRTC call to the user
-        if (typeof makeCall === 'function') {
-            console.log('Initiating WebRTC call to:', userId);
-            makeCall(userId, userName);
-        } else {
-            console.error('makeCall function not available');
-            if (typeof showNotification === 'function') {
-                showNotification('Unable to initiate call - WebRTC not ready', 'error');
-            }
-        }
+        // Use makeOutboundCall function to initiate the call
+        console.log('Initiating WebRTC call to:', userId);
+        makeOutboundCall(userId);
     });
     
     // Chat request confirmed - staff accepted and room is ready
