@@ -245,6 +245,32 @@ export function useWebRTCCall(): UseWebRTCCallReturn {
       cleanupCall();
     });
 
+    // Handle when no staff are available for safeguarding call
+    socketRef.current.on('human_call_unavailable', (data: any) => {
+      console.log('WebRTC: Human call unavailable', data);
+      showAlert('No Staff Available', data.message || 'No staff members are currently available. Please try again later or request a callback.');
+    });
+
+    // Handle when safeguarding call request is pending
+    socketRef.current.on('human_call_pending', (data: any) => {
+      console.log('WebRTC: Human call pending', data);
+      console.log('Available staff count:', data.available_count);
+      // This is just informational - the user is already waiting
+    });
+
+    // Handle when staff accepts the call request and is about to call
+    socketRef.current.on('call_request_accepted', (data: any) => {
+      console.log('WebRTC: Call request accepted by staff', data);
+      // Staff member accepted and will be calling - prepare to receive the call
+      setCallState('ringing');
+      setCallInfo({
+        callId: data.call_id,
+        peerName: data.staff_name || 'Staff',
+        callType: 'audio',
+        isIncoming: true
+      });
+    });
+
     // Call ringing - store the call ID
     socketRef.current.on('call_ringing', (data: any) => {
       console.log('WebRTC: Call ringing', data);

@@ -417,6 +417,12 @@ async function initializeWebRTCPhone() {
         var backendUrl = CONFIG.API_URL;
         console.log('Backend URL for WebRTC:', backendUrl);
         console.log('Current User:', currentUser);
+        console.log('My Profile:', myProfile);
+        
+        // Use the staff's actual status from their profile, or default to 'available'
+        // This ensures Socket.IO status matches the database status
+        var initialStatus = (myProfile && myProfile.status === 'available') ? 'available' : 'available';
+        console.log('Initial Socket.IO status:', initialStatus);
         
         // Initialize WebRTC phone
         var success = WebRTCPhone.init(
@@ -428,6 +434,15 @@ async function initializeWebRTCPhone() {
         
         if (success) {
             console.log('WebRTC Phone initialized for:', currentUser.name);
+            
+            // After a short delay, sync the Socket.IO status with the profile status
+            // This ensures the staff's availability in Socket.IO matches their profile
+            setTimeout(function() {
+                if (myProfile && myProfile.status && window.webRTCPhone && window.webRTCPhone.updateStatus) {
+                    console.log('Syncing Socket.IO status with profile status:', myProfile.status);
+                    window.webRTCPhone.updateStatus(myProfile.status);
+                }
+            }, 1000);
         }
         
     } catch (error) {

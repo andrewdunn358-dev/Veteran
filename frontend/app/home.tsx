@@ -96,7 +96,7 @@ export default function Index() {
   // Track app visit for analytics
   const trackAppVisit = async (sessionId: string) => {
     try {
-      const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://mental-health-hub-81.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://radio-check-vet-3.preview.emergentagent.com';
       const region = await AsyncStorage.getItem('user_region'); // Get stored region if available
       
       // Get screen dimensions for device type detection
