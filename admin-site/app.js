@@ -5766,7 +5766,8 @@ async function acknowledgeSafeguardingAlert(alertId) {
     try {
         await apiCall(`/safeguarding-alerts/${alertId}/acknowledge`, { method: 'PATCH' });
         showNotification('Alert acknowledged', 'success');
-        loadLogs(); // Refresh the logs view
+        refreshSafeguardingMonitor(); // Refresh the safeguarding view
+        closeModal(); // Close any open modal
     } catch (error) {
         console.error('Error acknowledging alert:', error);
         showNotification('Failed to acknowledge alert', 'error');
@@ -5777,7 +5778,8 @@ async function resolveSafeguardingAlert(alertId) {
     try {
         await apiCall(`/safeguarding-alerts/${alertId}/resolve`, { method: 'PATCH' });
         showNotification('Alert resolved', 'success');
-        loadLogs(); // Refresh the logs view
+        refreshSafeguardingMonitor(); // Refresh the safeguarding view
+        closeModal(); // Close any open modal
     } catch (error) {
         console.error('Error resolving alert:', error);
         showNotification('Failed to resolve alert', 'error');
