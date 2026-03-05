@@ -129,6 +129,40 @@ function setupSocketHandlers() {
         showIncomingChatRequest(data);
     });
     
+    // Incoming call request - someone wants to CALL staff (safeguarding flow)
+    socket.on('incoming_call_request', (data) => {
+        console.log('Incoming CALL request (safeguarding):', data);
+        
+        // Play alert sound
+        if (typeof playAlertSound === 'function') {
+            playAlertSound();
+        }
+        
+        // Show as urgent call request
+        showIncomingCallRequest(data);
+    });
+    
+    // Handle server telling staff to initiate call to user
+    socket.on('initiate_call_to_user', (data) => {
+        console.log('=== INITIATE CALL TO USER ===');
+        console.log('Call data:', data);
+        
+        var callId = data.call_id;
+        var userId = data.user_id;
+        var userName = data.user_name || 'Veteran';
+        
+        // Start WebRTC call to the user
+        if (typeof makeCall === 'function') {
+            console.log('Initiating WebRTC call to:', userId);
+            makeCall(userId, userName);
+        } else {
+            console.error('makeCall function not available');
+            if (typeof showNotification === 'function') {
+                showNotification('Unable to initiate call - WebRTC not ready', 'error');
+            }
+        }
+    });
+    
     // Chat request confirmed - staff accepted and room is ready
     socket.on('chat_request_confirmed', (data) => {
         console.log('=== CHAT REQUEST CONFIRMED ===');
@@ -1096,6 +1130,87 @@ function showIncomingChatRequest(data) {
     
     // Store request data globally for accepting
     window.pendingChatRequest = data;
+}
+
+// Show incoming CALL request (safeguarding flow - urgent)
+function showIncomingCallRequest(data) {
+    console.log('Showing incoming CALL request:', data);
+    
+    // Create or get the call request banner
+    var banner = document.getElementById('incoming-call-banner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'incoming-call-banner';
+        banner.style.cssText = 'position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; padding: 20px 30px; border-radius: 16px; box-shadow: 0 10px 40px rgba(220, 38, 38, 0.5); z-index: 10001; text-align: center; animation: urgentPulse 1s infinite;';
+        document.body.appendChild(banner);
+        
+        // Add urgent animation
+        var style = document.createElement('style');
+        style.textContent = '@keyframes urgentPulse { 0%, 100% { box-shadow: 0 10px 40px rgba(220, 38, 38, 0.5); transform: translateX(-50%) scale(1); } 50% { box-shadow: 0 10px 60px rgba(220, 38, 38, 0.8); transform: translateX(-50%) scale(1.02); } }';
+        document.head.appendChild(style);
+    }
+    
+    var userName = data.user_name || 'A veteran';
+    var alertId = data.alert_id || '';
+    
+    banner.innerHTML = '<div style="font-size: 24px; margin-bottom: 8px;">📞 URGENT: Safeguarding Call Request</div>' +
+        '<div style="font-size: 16px; margin-bottom: 8px;"><strong>' + userName + '</strong> needs to speak with someone</div>' +
+        '<div style="font-size: 14px; opacity: 0.9; margin-bottom: 16px;">Safeguarding alert triggered - immediate support requested</div>' +
+        '<div style="display: flex; gap: 12px; justify-content: center;">' +
+            '<button onclick="acceptCallRequest(\'' + data.request_id + '\', \'' + data.user_id + '\', \'' + userName.replace(/'/g, "\\'") + '\')" style="background: #22c55e; color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 16px;"><i class="fas fa-phone"></i> Accept Call</button>' +
+            '<button onclick="dismissCallRequest()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">Dismiss</button>' +
+        '</div>';
+    
+    banner.style.display = 'block';
+    
+    // Store request data globally
+    window.pendingCallRequest = data;
+    
+    // Play urgent alert sound repeatedly
+    if (typeof playAlertSound === 'function') {
+        playAlertSound();
+        // Play again after 2 seconds for urgency
+        setTimeout(function() { if (typeof playAlertSound === 'function') playAlertSound(); }, 2000);
+    }
+}
+
+// Accept a call request (safeguarding)
+function acceptCallRequest(requestId, userId, userName) {
+    console.log('Accepting CALL request:', requestId);
+    
+    if (!socket || !socket.connected) {
+        console.error('Socket not connected');
+        return;
+    }
+    
+    // Get current user from window or localStorage fallback
+    var staffUser = window.currentUser || JSON.parse(localStorage.getItem('staff_user') || '{}') || {};
+    
+    // Emit accept call request event
+    socket.emit('accept_call_request', {
+        request_id: requestId,
+        user_id: userId,
+        staff_id: staffUser.id || 'unknown',
+        staff_name: staffUser.name || 'Staff',
+        staff_type: staffUser.role || 'counsellor'
+    });
+    
+    // Hide banner
+    dismissCallRequest();
+    
+    // Show notification
+    if (typeof showNotification === 'function') {
+        showNotification('Call request accepted. Initiating call...', 'success');
+    }
+}
+
+// Dismiss call request banner
+function dismissCallRequest() {
+    var banner = document.getElementById('incoming-call-banner');
+    if (banner) {
+        banner.style.display = 'none';
+    }
+    window.pendingCallRequest = null;
 }
 
 // Accept a chat request

@@ -832,6 +832,61 @@ async def request_human_call(sid, data):
 
 
 @sio.event
+async def accept_call_request(sid, data):
+    """
+    Staff accepts a call request (safeguarding flow)
+    Data: {request_id, user_id, staff_id, staff_name, staff_type}
+    """
+    request_id = data.get('request_id')
+    requester_user_id = data.get('user_id')
+    staff_id = data.get('staff_id')
+    staff_name = data.get('staff_name', 'Staff')
+    staff_type = data.get('staff_type', 'counsellor')
+    
+    logger.info(f"=== ACCEPT CALL REQUEST ===")
+    logger.info(f"Staff {staff_name} ({staff_id}) accepting call request {request_id} from user {requester_user_id}")
+    
+    # Find the user's socket
+    user_socket_id = None
+    for socket_id, user in connected_users.items():
+        if user['user_id'] == requester_user_id:
+            user_socket_id = socket_id
+            break
+    
+    if not user_socket_id:
+        logger.warning(f"User {requester_user_id} not found in connected users")
+        await sio.emit('call_request_error', {
+            'request_id': request_id,
+            'error': 'User is no longer connected'
+        }, to=sid)
+        return
+    
+    # Generate a call ID
+    call_id = f"call_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{staff_id[:8] if staff_id else 'staff'}"
+    
+    # Notify the user that their call was accepted - staff will call them
+    await sio.emit('call_request_accepted', {
+        'request_id': request_id,
+        'call_id': call_id,
+        'staff_id': staff_id,
+        'staff_name': staff_name,
+        'staff_type': staff_type,
+        'message': f'{staff_name} is calling you now...'
+    }, to=user_socket_id)
+    
+    # Tell staff to initiate the WebRTC call
+    await sio.emit('initiate_call_to_user', {
+        'request_id': request_id,
+        'call_id': call_id,
+        'user_id': requester_user_id,
+        'user_socket_id': user_socket_id,
+        'user_name': connected_users.get(user_socket_id, {}).get('name', 'Veteran')
+    }, to=sid)
+    
+    logger.info(f"Call request accepted. Call ID: {call_id}, Staff calling user {requester_user_id}")
+
+
+@sio.event
 async def accept_chat_request(sid, data):
     """
     Staff accepts a chat request
