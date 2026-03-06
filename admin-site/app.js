@@ -6022,14 +6022,17 @@ async function acknowledgeSafeguardingAlert(alertId) {
 }
 
 async function resolveSafeguardingAlert(alertId) {
+    console.log('Attempting to resolve alert:', alertId);
     try {
-        await apiCall(`/safeguarding-alerts/${alertId}/resolve`, { method: 'PATCH' });
+        const result = await apiCall(`/safeguarding-alerts/${alertId}/resolve`, { method: 'PATCH' });
+        console.log('Resolve result:', result);
         showNotification('Alert resolved', 'success');
         refreshSafeguardingMonitor(); // Refresh the safeguarding view
+        loadSafeguardingAlerts(); // Also refresh the alerts list
         closeModal(); // Close any open modal
     } catch (error) {
         console.error('Error resolving alert:', error);
-        showNotification('Failed to resolve alert', 'error');
+        showNotification('Failed to resolve alert: ' + error.message, 'error');
     }
 }
 
