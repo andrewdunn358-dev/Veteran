@@ -475,8 +475,14 @@ export default function UnifiedAIChat() {
 
       // Check for safeguarding alert
       if (data.safeguardingTriggered) {
-        setCurrentAlertId(data.safeguardingAlertId);
+        const alertId = data.safeguardingAlertId;
+        setCurrentAlertId(alertId);
         setShowSafeguardingModal(true);
+        // Request GPS location immediately with the alert ID (don't wait for useEffect)
+        if (alertId) {
+          console.log('Safeguarding triggered - requesting GPS location for alert:', alertId);
+          requestUserLocation(alertId);
+        }
       }
 
       const buddyMessage: Message = {
