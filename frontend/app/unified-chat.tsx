@@ -257,6 +257,11 @@ export default function UnifiedAIChat() {
   };
 
   const handleConnectToStaff = () => {
+    // Request GPS location before navigating (don't wait for result)
+    if (currentAlertId) {
+      console.log('Requesting GPS location before chat...');
+      requestUserLocation(currentAlertId);
+    }
     // Close the safeguarding modal first, then navigate to live chat with session context
     setShowSafeguardingModal(false);
     setSafeguardingView('main');
@@ -821,7 +826,12 @@ export default function UnifiedAIChat() {
                   {/* Call a Supporter Button */}
                   <TouchableOpacity
                     style={[styles.safeguardingOption, { backgroundColor: '#dcfce7', borderColor: '#16a34a', borderWidth: 2 }]}
-                    onPress={() => {
+                    onPress={async () => {
+                      // Request GPS location before navigating (don't wait for result)
+                      if (currentAlertId) {
+                        console.log('Requesting GPS location before call...');
+                        requestUserLocation(currentAlertId);
+                      }
                       // Navigate to peer-support for voice call
                       setShowSafeguardingModal(false);
                       router.push({
