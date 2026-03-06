@@ -152,15 +152,31 @@ export default function UnifiedAIChat() {
 
   // Request browser geolocation when safeguarding modal opens
   const requestUserLocation = async (alertId: string) => {
-    if (locationRequested) return; // Only request once per session
+    console.log('=== REQUESTING USER LOCATION ===');
+    console.log('Alert ID:', alertId);
+    console.log('Location already requested:', locationRequested);
+    console.log('Platform:', Platform.OS);
+    console.log('Navigator available:', typeof navigator !== 'undefined');
+    console.log('Geolocation available:', typeof navigator !== 'undefined' && !!navigator.geolocation);
+    
+    if (locationRequested) {
+      console.log('Location already requested, skipping');
+      return;
+    }
     
     // Only works on web platform
-    if (Platform.OS !== 'web' || typeof navigator === 'undefined' || !navigator.geolocation) {
-      console.log('Geolocation not available on this platform');
+    if (Platform.OS !== 'web') {
+      console.log('Not on web platform, skipping geolocation');
+      return;
+    }
+    
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      console.log('Geolocation API not available');
       return;
     }
     
     setLocationRequested(true);
+    console.log('Requesting geolocation permission...');
     
     try {
       navigator.geolocation.getCurrentPosition(
@@ -172,7 +188,7 @@ export default function UnifiedAIChat() {
           
           // Send the GPS coordinates to update the safeguarding alert
           try {
-            await fetch(`${API_URL}/api/safeguarding-alerts/${alertId}/location`, {
+            const response = await fetch(`${API_URL}/api/safeguarding-alerts/${alertId}/location`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -182,13 +198,13 @@ export default function UnifiedAIChat() {
                 location_source: 'gps'
               }),
             });
-            console.log('Safeguarding alert updated with GPS location');
+            console.log('Safeguarding alert updated with GPS location, response:', response.status);
           } catch (err) {
             console.error('Failed to update alert with GPS location:', err);
           }
         },
         (error) => {
-          console.log('Geolocation error or denied:', error.message);
+          console.log('Geolocation error or denied:', error.code, error.message);
           // User denied or error - we fall back to IP geolocation (already handled server-side)
         },
         {

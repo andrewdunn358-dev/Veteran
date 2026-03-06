@@ -176,6 +176,13 @@ function switchTab(tabName) {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // SECURITY: Clear any sensitive data from URL (prevents credential leakage)
+    if (window.location.search.includes('password') || window.location.search.includes('email')) {
+        console.warn('Security: Clearing sensitive parameters from URL');
+        // Remove query string without reloading
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
     // Check session expiry first
     if (checkSessionExpiry()) {
         showScreen('login-screen');
