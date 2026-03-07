@@ -7969,7 +7969,7 @@ async function loadEvents() {
     eventsList.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading events...</p>';
     
     try {
-        let url = `${API_BASE_URL}/api/events/admin/all?include_past=${includePast}`;
+        let url = `${CONFIG.API_URL}/api/events/admin/all?include_past=${includePast}`;
         if (statusFilter) url += `&status=${statusFilter}`;
         
         const response = await fetch(url);
@@ -8098,7 +8098,7 @@ function closeEventModal() {
 // Edit Event
 async function editEvent(eventId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`);
+        const response = await fetch(`${CONFIG.API_URL}/api/events/${eventId}`);
         if (!response.ok) throw new Error('Event not found');
         
         const event = await response.json();
@@ -8143,8 +8143,8 @@ async function handleEventSubmit(e) {
     
     try {
         const url = isEdit 
-            ? `${API_BASE_URL}/api/events/admin/${eventId}`
-            : `${API_BASE_URL}/api/events/admin/create`;
+            ? `${CONFIG.API_URL}/api/events/admin/${eventId}`
+            : `${CONFIG.API_URL}/api/events/admin/create`;
         
         const response = await fetch(url, {
             method: isEdit ? 'PUT' : 'POST',
@@ -8171,7 +8171,7 @@ async function cancelEvent(eventId) {
     if (!confirm('Are you sure you want to cancel this event? This cannot be undone.')) return;
     
     try {
-        const response = await fetch(`${API_BASE_URL}/api/events/admin/${eventId}`, {
+        const response = await fetch(`${CONFIG.API_URL}/api/events/admin/${eventId}`, {
             method: 'DELETE'
         });
         
@@ -8188,7 +8188,7 @@ async function cancelEvent(eventId) {
 // View Event Attendance
 async function viewEventAttendance(eventId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/events/admin/${eventId}/attendance`);
+        const response = await fetch(`${CONFIG.API_URL}/api/events/admin/${eventId}/attendance`);
         if (!response.ok) throw new Error('Failed to load attendance');
         
         const data = await response.json();

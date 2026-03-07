@@ -106,10 +106,12 @@ Files changed:
 ## Pending Issues (P0-P2)
 
 ### P0 - Critical
-- **Deployment Verification**: User needs to deploy latest AgeGateModal.tsx to Vercel to fix iPhone issue
+- **RESOLVED (March 7, 2026)**: Admin Portal Events tab was hidden (`display: none`) - Fixed by removing inline style from `events-tab` div in `admin-site/index.html`
+- **Deployment Verification**: User needs to deploy latest admin-site files (index.html) to 20i hosting
 
 ### P1 - High Priority  
 - AI Character sort order not respecting `order` field from database
+- End-to-end testing of Community Events flow (Admin creates → User joins Jitsi)
 
 ### P2 - Medium Priority
 - End-to-end testing of admin reporting features (PDF export/email)
@@ -132,7 +134,7 @@ Files changed:
 - **Frontend**: Vercel (https://[domain])
 - **Backend**: Render (https://[domain])
 - **Admin/Staff Portals**: 20i hosting
-- **Preview**: https://vet-support-1.preview.emergentagent.com
+- **Preview**: https://community-events-12.preview.emergentagent.com
 
 ## Credentials
 - Preview Password: `radiocheck1358`
