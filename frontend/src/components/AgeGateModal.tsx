@@ -415,56 +415,62 @@ export default function AgeGateModal({ visible, onSubmit, onSkip }: AgeGateModal
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
-        <View style={styles.modal}>
-          <View style={styles.iconContainer}>
-            <Ionicons name="calendar" size={48} color="#3b82f6" />
-          </View>
-          
-          <Text style={styles.title}>Date of Birth</Text>
-          <Text style={styles.description}>
-            We ask for your date of birth to provide age-appropriate support and safeguarding. 
-            Your information stays on your device only.
-          </Text>
-
-          <DatePicker
-            day={day}
-            month={month}
-            year={year}
-            onDayChange={setDay}
-            onMonthChange={setMonth}
-            onYearChange={setYear}
-          />
-
-          {error ? (
-            <View style={styles.errorContainer}>
-              <Ionicons name="alert-circle" size={18} color="#dc2626" />
-              <Text style={styles.errorText}>{error}</Text>
+        <ScrollView 
+          style={styles.modalScrollView}
+          contentContainerStyle={styles.modalScrollContent}
+          showsVerticalScrollIndicator={true}
+          bounces={false}
+        >
+          <View style={styles.modal}>
+            <View style={styles.iconContainer}>
+              <Ionicons name="calendar" size={40} color="#3b82f6" />
             </View>
-          ) : null}
-
-          <View style={styles.privacyNote}>
-            <Ionicons name="shield-checkmark" size={16} color="#22c55e" />
-            <Text style={styles.privacyText}>
-              Your date of birth is stored locally on your device and never shared
+            
+            <Text style={styles.title}>Date of Birth</Text>
+            <Text style={styles.description}>
+              We need your date of birth to provide age-appropriate support.
             </Text>
-          </View>
 
-          <Pressable
-            style={({ pressed }) => [
-              styles.submitButton,
-              pressed && { opacity: 0.8 },
-            ]}
-            onPress={handleSubmit}
-          >
-            <Text style={styles.submitButtonText}>Continue</Text>
-          </Pressable>
+            <DatePicker
+              day={day}
+              month={month}
+              year={year}
+              onDayChange={setDay}
+              onMonthChange={setMonth}
+              onYearChange={setYear}
+            />
 
-          {onSkip && (
-            <Pressable style={styles.skipButton} onPress={onSkip}>
-              <Text style={styles.skipButtonText}>Skip for now</Text>
+            {error ? (
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={18} color="#dc2626" />
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            ) : null}
+
+            <View style={styles.privacyNote}>
+              <Ionicons name="shield-checkmark" size={16} color="#22c55e" />
+              <Text style={styles.privacyText}>
+                Stored locally on your device only
+              </Text>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.submitButton,
+                pressed && { opacity: 0.8 },
+              ]}
+              onPress={handleSubmit}
+            >
+              <Text style={styles.submitButtonText}>Continue</Text>
             </Pressable>
-          )}
-        </View>
+
+            {onSkip && (
+              <Pressable style={styles.skipButton} onPress={onSkip}>
+                <Text style={styles.skipButtonText}>Skip for now</Text>
+              </Pressable>
+            )}
+          </View>
+        </ScrollView>
       </View>
     </Modal>
   );
@@ -476,39 +482,46 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 16,
+  },
+  modalScrollView: {
+    maxHeight: '85%',
+    width: '100%',
+    maxWidth: 400,
+  },
+  modalScrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   modal: {
     backgroundColor: '#ffffff',
-    borderRadius: 24,
-    padding: 28,
+    borderRadius: 20,
+    padding: 20,
     width: '100%',
-    maxWidth: 420,
     alignItems: 'center',
-    maxHeight: '90%',
   },
   iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#eff6ff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
     color: '#1e293b',
-    marginBottom: 12,
+    marginBottom: 8,
     textAlign: 'center',
   },
   description: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#64748b',
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
+    lineHeight: 20,
+    marginBottom: 16,
   },
   datePickerContainer: {
     flexDirection: 'row',
@@ -567,22 +580,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f0fdf4',
-    padding: 12,
+    padding: 10,
     borderRadius: 10,
     gap: 8,
-    marginBottom: 20,
+    marginBottom: 16,
     width: '100%',
   },
   privacyText: {
     color: '#166534',
-    fontSize: 13,
+    fontSize: 12,
     flex: 1,
   },
   submitButton: {
     backgroundColor: '#3b82f6',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 12,
     width: '100%',
     alignItems: 'center',
   },

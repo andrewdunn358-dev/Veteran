@@ -332,20 +332,16 @@ export default function SplashScreen() {
         onSubmit={handleAgeGateSubmit}
       />
 
-      {/* Cookie Notice */}
+      {/* Cookie Notice - Compact inline banner */}
       {showCookieNotice && (
         <View style={styles.cookieNotice}>
           <View style={styles.cookieContent}>
-            <View style={styles.cookieIcon}>
-              <Ionicons name="shield-checkmark" size={24} color="#3b82f6" />
-            </View>
-            <Text style={styles.cookieTitle}>Your Privacy</Text>
+            <Ionicons name="shield-checkmark" size={18} color="#3b82f6" style={{ marginRight: 8 }} />
             <Text style={styles.cookieText}>
-              We use local storage to save your preferences and journal entries on your device. 
-              No personal data is sent to external servers without your consent.
+              We store data on your device only.
             </Text>
             <TouchableOpacity style={styles.cookieAcceptButton} onPress={acceptCookies}>
-              <Text style={styles.cookieAcceptText}>Accept & Continue</Text>
+              <Text style={styles.cookieAcceptText}>OK</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -524,50 +520,32 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#ffffff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: isSmallScreen ? 16 : 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    padding: 12,
+    paddingBottom: 16,
   },
   cookieContent: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  cookieIcon: {
-    width: isSmallScreen ? 40 : 48,
-    height: isSmallScreen ? 40 : 48,
-    borderRadius: 24,
-    backgroundColor: '#eff6ff',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: isSmallScreen ? 8 : 12,
-  },
-  cookieTitle: {
-    fontSize: isSmallScreen ? 16 : 18,
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: 8,
+    flexWrap: 'wrap',
+    gap: 8,
   },
   cookieText: {
-    fontSize: isSmallScreen ? 12 : 14,
+    fontSize: 13,
     color: '#64748b',
-    textAlign: 'center',
-    lineHeight: isSmallScreen ? 18 : 20,
-    marginBottom: isSmallScreen ? 14 : 20,
+    flex: 1,
+    minWidth: 150,
   },
   cookieAcceptButton: {
     backgroundColor: '#0d9488',
-    paddingVertical: isSmallScreen ? 12 : 14,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    width: '100%',
-    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
   },
   cookieAcceptText: {
-    fontSize: isSmallScreen ? 14 : 16,
+    fontSize: 13,
     fontWeight: '600',
     color: '#ffffff',
   },
@@ -577,54 +555,57 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 16,
   },
   permissionModal: {
     backgroundColor: '#ffffff',
-    borderRadius: 24,
-    padding: 28,
+    borderRadius: 20,
+    padding: 20,
     width: '100%',
-    maxWidth: 380,
+    maxWidth: 360,
     alignItems: 'center',
+    maxHeight: '85%',
   },
   permissionIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#eff6ff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 12,
+    flexDirection: 'row',
+    gap: 8,
   },
   permissionTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     color: '#1e293b',
-    marginBottom: 12,
+    marginBottom: 8,
     textAlign: 'center',
   },
   permissionDescription: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#64748b',
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 20,
+    lineHeight: 20,
+    marginBottom: 16,
   },
   permissionFeatures: {
     width: '100%',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   permissionFeature: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 12,
+    gap: 10,
+    marginBottom: 8,
     backgroundColor: '#f0fdf4',
-    padding: 12,
-    borderRadius: 10,
+    padding: 10,
+    borderRadius: 8,
   },
   permissionFeatureText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#166534',
     flex: 1,
   },
@@ -633,31 +614,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#3b82f6',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
     width: '100%',
-    gap: 10,
-    marginBottom: 12,
+    gap: 8,
+    marginBottom: 10,
   },
   permissionAllowText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: '#ffffff',
   },
   permissionSkipButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
   permissionSkipText: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#64748b',
     fontWeight: '500',
   },
   permissionNote: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#94a3b8',
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: 6,
   },
 });

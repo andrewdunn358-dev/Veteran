@@ -18,12 +18,16 @@ Build "Radio Check," a mental health and peer support application for veterans a
 ## What's Been Implemented (March 2026)
 
 ### Session: March 7, 2026
-**iPhone Age Gate Bug Fix**
-- Fixed Age Verification modal not working on iPhones
-- Replaced HTML `<select>` elements with custom iOS-friendly bottom-sheet picker modals
-- Used FlatList with TouchableOpacity options for smooth scrolling on iOS
-- All date fields (Day, Month, Year) now use the new PickerModal component
-- File changed: `frontend/src/components/AgeGateModal.tsx`
+**Safari/iPhone Onboarding Fixes**
+- Fixed Age Gate modal not working on iPhones - replaced HTML `<select>` with iOS-friendly FlatList pickers
+- Fixed cookie consent being cut off on Safari/small viewports - converted to compact inline banner
+- Fixed permissions modal being cut off - made more compact with maxHeight constraint
+- Added ScrollView wrapper to Age Gate modal for scrolling on small screens
+- All modals now fit within Safari's smaller viewport on desktop and mobile
+
+Files changed:
+- `frontend/src/components/AgeGateModal.tsx` - iOS-friendly pickers, ScrollView, compact styles
+- `frontend/app/index.tsx` - Compact cookie banner, compact permissions modal
 
 ### Session: March 6, 2026
 **Location Permission on First Load**
