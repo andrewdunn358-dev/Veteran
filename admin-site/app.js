@@ -8159,7 +8159,7 @@ async function handleEventSubmit(e) {
         
         closeEventModal();
         loadEvents();
-        showToast(isEdit ? 'Event updated successfully!' : 'Event created successfully!', 'success');
+        showNotification(isEdit ? 'Event updated successfully!' : 'Event created successfully!', 'success');
     } catch (error) {
         console.error('Error saving event:', error);
         alert(error.message || 'Failed to save event');
@@ -8178,7 +8178,7 @@ async function cancelEvent(eventId) {
         if (!response.ok) throw new Error('Failed to cancel event');
         
         loadEvents();
-        showToast('Event cancelled', 'info');
+        showNotification('Event cancelled', 'info');
     } catch (error) {
         console.error('Error cancelling event:', error);
         alert('Failed to cancel event');
