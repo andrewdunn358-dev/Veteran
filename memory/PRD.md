@@ -17,6 +17,14 @@ Build "Radio Check," a mental health and peer support application for veterans a
 
 ## What's Been Implemented (March 2026)
 
+### Session: March 7, 2026
+**iPhone Age Gate Bug Fix**
+- Fixed Age Verification modal not working on iPhones
+- Replaced HTML `<select>` elements with custom iOS-friendly bottom-sheet picker modals
+- Used FlatList with TouchableOpacity options for smooth scrolling on iOS
+- All date fields (Day, Month, Year) now use the new PickerModal component
+- File changed: `frontend/src/components/AgeGateModal.tsx`
+
 ### Session: March 6, 2026
 **Location Permission on First Load**
 - Modified `index.tsx` to include location permission alongside microphone in the "Enable Permissions" modal
@@ -51,6 +59,7 @@ Build "Radio Check," a mental health and peer support application for veterans a
 - `frontend/src/context/LocationPermissionContext.tsx` - Location state
 - `frontend/src/components/SafeguardingCallModal.tsx` - In-page call UI
 - `frontend/src/components/ResponsiveWrapper.tsx` - Desktop layout
+- `frontend/src/components/AgeGateModal.tsx` - iOS-friendly date picker
 - `backend/server.py` - FastAPI backend
 
 ## API Endpoints
@@ -62,7 +71,7 @@ Build "Radio Check," a mental health and peer support application for veterans a
 ## Pending Issues (P0-P2)
 
 ### P0 - Critical
-- **Deployment Mismatches**: User environments often out of sync with code. Always confirm deployments before debugging.
+- **Deployment Verification**: User needs to deploy latest AgeGateModal.tsx to Vercel to fix iPhone issue
 
 ### P1 - High Priority  
 - AI Character sort order not respecting `order` field from database

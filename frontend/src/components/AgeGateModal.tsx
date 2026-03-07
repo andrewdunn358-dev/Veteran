@@ -14,7 +14,7 @@
  * - Staff-supervised chat
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,8 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  FlatList,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -33,7 +35,129 @@ interface AgeGateModalProps {
   onSkip?: () => void;
 }
 
-// Date picker component for web
+// Custom picker modal for iOS-friendly selection
+const PickerModal: React.FC<{
+  visible: boolean;
+  title: string;
+  options: { value: string; label: string }[];
+  selectedValue: string;
+  onSelect: (value: string) => void;
+  onClose: () => void;
+}> = ({ visible, title, options, selectedValue, onSelect, onClose }) => {
+  const flatListRef = useRef<FlatList>(null);
+  
+  // Scroll to selected item when modal opens
+  React.useEffect(() => {
+    if (visible && selectedValue && flatListRef.current) {
+      const index = options.findIndex(o => o.value === selectedValue);
+      if (index > 0) {
+        setTimeout(() => {
+          flatListRef.current?.scrollToIndex({ index, animated: false, viewPosition: 0.3 });
+        }, 100);
+      }
+    }
+  }, [visible, selectedValue, options]);
+
+  return (
+    <Modal visible={visible} transparent animationType="slide">
+      <Pressable style={pickerStyles.overlay} onPress={onClose}>
+        <Pressable style={pickerStyles.container} onPress={(e) => e.stopPropagation()}>
+          <View style={pickerStyles.header}>
+            <Text style={pickerStyles.title}>{title}</Text>
+            <TouchableOpacity onPress={onClose} style={pickerStyles.closeButton}>
+              <Ionicons name="close" size={24} color="#64748b" />
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            ref={flatListRef}
+            data={options}
+            keyExtractor={(item) => item.value}
+            style={pickerStyles.list}
+            onScrollToIndexFailed={() => {}}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  pickerStyles.option,
+                  selectedValue === item.value && pickerStyles.optionSelected,
+                ]}
+                onPress={() => {
+                  onSelect(item.value);
+                  onClose();
+                }}
+              >
+                <Text
+                  style={[
+                    pickerStyles.optionText,
+                    selectedValue === item.value && pickerStyles.optionTextSelected,
+                  ]}
+                >
+                  {item.label}
+                </Text>
+                {selectedValue === item.value && (
+                  <Ionicons name="checkmark" size={22} color="#3b82f6" />
+                )}
+              </TouchableOpacity>
+            )}
+          />
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+};
+
+const pickerStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  container: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: Dimensions.get('window').height * 0.6,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  list: {
+    maxHeight: 350,
+  },
+  option: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  optionSelected: {
+    backgroundColor: '#eff6ff',
+  },
+  optionText: {
+    fontSize: 16,
+    color: '#334155',
+  },
+  optionTextSelected: {
+    color: '#3b82f6',
+    fontWeight: '600',
+  },
+});
+
+// Date picker component - works on both web and mobile
 const DatePicker: React.FC<{
   day: string;
   month: string;
@@ -42,6 +166,10 @@ const DatePicker: React.FC<{
   onMonthChange: (val: string) => void;
   onYearChange: (val: string) => void;
 }> = ({ day, month, year, onDayChange, onMonthChange, onYearChange }) => {
+  const [showDayPicker, setShowDayPicker] = useState(false);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [showYearPicker, setShowYearPicker] = useState(false);
+
   const months = [
     { value: '01', label: 'January' },
     { value: '02', label: 'February' },
@@ -70,84 +198,83 @@ const DatePicker: React.FC<{
     return { value: yearVal.toString(), label: yearVal.toString() };
   });
 
-  if (Platform.OS === 'web') {
-    // Web: Use HTML select elements for better UX
-    return (
-      <View style={styles.datePickerContainer}>
-        <View style={styles.datePickerField}>
-          <Text style={styles.datePickerLabel}>Day</Text>
-          <select
-            value={day}
-            onChange={(e) => onDayChange(e.target.value)}
-            style={selectStyle}
-          >
-            <option value="">--</option>
-            {days.map((d) => (
-              <option key={d.value} value={d.value}>
-                {d.label}
-              </option>
-            ))}
-          </select>
-        </View>
-        <View style={styles.datePickerField}>
-          <Text style={styles.datePickerLabel}>Month</Text>
-          <select
-            value={month}
-            onChange={(e) => onMonthChange(e.target.value)}
-            style={selectStyle}
-          >
-            <option value="">--</option>
-            {months.map((m) => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </select>
-        </View>
-        <View style={styles.datePickerField}>
-          <Text style={styles.datePickerLabel}>Year</Text>
-          <select
-            value={year}
-            onChange={(e) => onYearChange(e.target.value)}
-            style={selectStyle}
-          >
-            <option value="">--</option>
-            {years.map((y) => (
-              <option key={y.value} value={y.value}>
-                {y.label}
-              </option>
-            ))}
-          </select>
-        </View>
-      </View>
-    );
-  }
+  const getMonthLabel = (val: string) => months.find(m => m.value === val)?.label || '--';
 
-  // Mobile: Use picker or simple inputs (simplified for this implementation)
+  // Use TouchableOpacity-based picker for better iOS compatibility
   return (
     <View style={styles.datePickerContainer}>
-      <Text style={styles.mobileNotice}>
-        Please enter your date of birth
-      </Text>
-      {/* For mobile, you would use a native date picker here */}
+      {/* Day Picker */}
+      <View style={styles.datePickerField}>
+        <Text style={styles.datePickerLabel}>Day</Text>
+        <TouchableOpacity
+          style={styles.pickerButton}
+          onPress={() => setShowDayPicker(true)}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.pickerButtonText, !day && styles.pickerPlaceholder]}>
+            {day || '--'}
+          </Text>
+          <Ionicons name="chevron-down" size={18} color="#64748b" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Month Picker */}
+      <View style={[styles.datePickerField, { flex: 1.5 }]}>
+        <Text style={styles.datePickerLabel}>Month</Text>
+        <TouchableOpacity
+          style={styles.pickerButton}
+          onPress={() => setShowMonthPicker(true)}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.pickerButtonText, !month && styles.pickerPlaceholder]} numberOfLines={1}>
+            {getMonthLabel(month)}
+          </Text>
+          <Ionicons name="chevron-down" size={18} color="#64748b" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Year Picker */}
+      <View style={styles.datePickerField}>
+        <Text style={styles.datePickerLabel}>Year</Text>
+        <TouchableOpacity
+          style={styles.pickerButton}
+          onPress={() => setShowYearPicker(true)}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.pickerButtonText, !year && styles.pickerPlaceholder]}>
+            {year || '--'}
+          </Text>
+          <Ionicons name="chevron-down" size={18} color="#64748b" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Picker Modals */}
+      <PickerModal
+        visible={showDayPicker}
+        title="Select Day"
+        options={days}
+        selectedValue={day}
+        onSelect={onDayChange}
+        onClose={() => setShowDayPicker(false)}
+      />
+      <PickerModal
+        visible={showMonthPicker}
+        title="Select Month"
+        options={months}
+        selectedValue={month}
+        onSelect={onMonthChange}
+        onClose={() => setShowMonthPicker(false)}
+      />
+      <PickerModal
+        visible={showYearPicker}
+        title="Select Year"
+        options={years}
+        selectedValue={year}
+        onSelect={onYearChange}
+        onClose={() => setShowYearPicker(false)}
+      />
     </View>
   );
-};
-
-// Style for web select elements
-const selectStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '12px',
-  fontSize: '16px',
-  borderRadius: '10px',
-  border: '2px solid #e2e8f0',
-  backgroundColor: '#f8fafc',
-  color: '#1e293b',
-  cursor: 'pointer',
-  appearance: 'none',
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E")`,
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'right 12px center',
 };
 
 export default function AgeGateModal({ visible, onSubmit, onSkip }: AgeGateModalProps) {
@@ -397,6 +524,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#475569',
     marginBottom: 6,
+  },
+  pickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    backgroundColor: '#f8fafc',
+  },
+  pickerButtonText: {
+    fontSize: 16,
+    color: '#1e293b',
+    flex: 1,
+  },
+  pickerPlaceholder: {
+    color: '#94a3b8',
   },
   mobileNotice: {
     fontSize: 14,
