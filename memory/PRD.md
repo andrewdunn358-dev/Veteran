@@ -17,6 +17,26 @@ Build "Radio Check," a mental health and peer support application for veterans a
 
 ## What's Been Implemented (March 2026)
 
+### Session: March 7, 2026 (Latest)
+**Improved AI Safeguarding Detection System**
+- Significantly expanded indicator patterns:
+  - Added ~50 new RED indicators (indirect death wishes, preparation cues)
+  - Added ~80 new AMBER indicators (subtle hopelessness, self-harm hints, veteran-specific language)
+  - Added ~30 new MODIFIER patterns (farewell language, dark humour, minimisation)
+- **Lowered detection thresholds**:
+  - RED: Score ≥70 (was 120)
+  - AMBER: Score ≥45 (was 80)  
+  - YELLOW: Score ≥25 (was 40)
+- New detection categories:
+  - Subtle low mood: "feeling low", "dark place", "drowning", "barely holding on"
+  - Indirect self-harm: "need to feel something", "hiding marks", "deserve pain"
+  - Veteran-specific: "lost mates", "survivor guilt", "should have been me"
+  - Farewell cues: "not be around much longer", "remember me", "tell my family"
+
+**Admin Portal Events Fix**
+- Fixed Events tab visibility (removed `display: none` from index.html)
+- Fixed `showToast` → `showNotification` function calls in app.js
+
 ### Session: March 7, 2026 (Continued)
 **Virtual Coffee Morning / Community Events Feature**
 - Created backend Events API (`backend/routers/events.py`):

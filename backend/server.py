@@ -1953,6 +1953,7 @@ RED_INDICATORS = {
     # Direct suicidal ideation (+100)
     "want to end it": 100, "end it all": 100, "kill myself": 100, "take my own life": 100,
     "want to die": 100, "going to die": 100, "suicide": 100, "suicidal": 100,
+    "ending it": 100, "end my life": 100, "finish it": 100, "finish myself": 100,
     
     # Indirect death wish (+80)
     "dont want to wake up": 80, "don't want to wake up": 80,
@@ -1960,24 +1961,34 @@ RED_INDICATORS = {
     "tired of waking up": 80, "wish i didnt wake up": 80, "wish i didn't wake up": 80,
     "just want peace": 80, "i just want peace": 80, "want it to stop": 80,
     "past caring": 80, "i'm past caring": 80, "im past caring": 80,
+    "had enough": 80, "ive had enough": 80, "i've had enough": 80,
+    "cant do this anymore": 80, "can't do this anymore": 80,
+    "cant take it anymore": 80, "can't take it anymore": 80,
+    "want out": 80, "just want out": 80, "need out": 80,
+    "ready to go": 80, "time to go": 80,
     
     # Preparation or method references (+100)
     "pills": 100, "rope": 100, "bridge": 100, "jump": 100, "hanging": 100,
     "giving things away": 100, "given my stuff away": 100, "sorted my affairs": 100,
     "written letters": 100, "written a letter": 100, "final letter": 100,
     "made a plan": 100, "got a plan": 100, "know how": 100,
+    "goodbye letter": 100, "saying goodbye": 100, "said my goodbyes": 100,
+    "overdose": 100, "take all my pills": 100, "stockpiling": 100,
     
     # Ongoing self-harm (+90)
     "cutting myself": 90, "cut myself": 90, "hurting myself": 90, "self harm": 90,
     "self-harm": 90, "burning myself": 90, "hitting myself": 90,
     "hurt myself": 90, "want to hurt myself": 90, "going to hurt myself": 90,
+    "harming myself": 90, "doing damage": 90, "punishing myself": 90,
     
     # Loss of control / risk to others (+90)
     "going to hurt someone": 90, "might hurt someone": 90, "losing control": 90,
     "cant control myself": 90, "can't control myself": 90,
+    "scared what i might do": 90, "scared of what i'll do": 90,
     
     # Access to weapons while distressed (+90)
     "got my gun": 90, "still have my weapon": 90, "got weapons": 90,
+    "loaded gun": 90, "weapon ready": 90,
 }
 
 # AMBER INDICATORS - High risk (weighted, stackable)
@@ -1986,18 +1997,40 @@ AMBER_INDICATORS = {
     "feel nothing": 40, "empty inside": 40, "numb": 40, "dont feel anything": 40,
     "don't feel anything": 40, "lost myself": 40, "dont know who i am": 40,
     "don't know who i am": 40, "not the same person": 40,
+    "hollow": 40, "dead inside": 45, "feel dead": 45, "emotionally dead": 45,
+    "shell of myself": 40, "just existing": 35, "going through motions": 35,
+    
+    # Subtle hopelessness / giving up (+35-45)
+    "no future": 45, "no way out": 45, "trapped": 40, "stuck": 30,
+    "nothing will change": 40, "never get better": 45, "wont get better": 45,
+    "won't get better": 45, "always be like this": 40, "no escape": 45,
+    "lost cause": 45, "beyond help": 45, "cant be helped": 45, "can't be helped": 45,
+    "given up": 45, "giving up": 45, "why bother": 40, "whats the use": 40,
+    "what's the use": 40, "doesnt matter": 35, "doesn't matter": 35,
+    "nothing matters": 40, "who cares": 35, "nobody cares": 40,
     
     # PTSD re-experiencing, flashbacks, hypervigilance (+35)
     "flashbacks": 35, "nightmares": 35, "cant sleep": 35, "can't sleep": 35,
     "hypervigilant": 35, "on edge": 35, "constantly alert": 35,
     "reliving it": 35, "keeps coming back": 35, "haunted": 35,
+    "wont leave me alone": 35, "won't leave me alone": 35, "in my head": 30,
+    "seeing things": 40, "hearing things": 40, "voices": 40,
     
-    # Isolation, withdrawal, disengagement (+30)
-    "isolated": 30, "all alone": 30, "no one around": 30, "pushed everyone away": 30,
+    # Isolation, withdrawal, disengagement (+30-40)
+    "isolated": 30, "all alone": 35, "no one around": 30, "pushed everyone away": 35,
     "dont talk to anyone": 30, "don't talk to anyone": 30, "withdrawn": 30,
     "cant face people": 30, "can't face people": 30, "stay in bed": 30,
     "stopped going out": 30, "dont leave the house": 30, "don't leave the house": 30,
-    "avoiding everyone": 30, "cut everyone off": 30,
+    "avoiding everyone": 30, "cut everyone off": 35,
+    "nobody understands": 35, "no one gets it": 35, "alone in this": 35,
+    "no friends": 35, "lost everyone": 40, "everyone left": 40,
+    
+    # Subtle self-harm hints (+35-45)
+    "need to feel something": 40, "only way to feel": 45, "makes me feel alive": 45,
+    "deserve pain": 45, "deserve to suffer": 45, "punish myself": 45,
+    "scars": 35, "marks": 30, "hiding marks": 40, "long sleeves": 35,
+    "blade": 45, "sharp": 35, "razor": 45, "blood": 40,
+    "relief from pain": 40, "only thing that helps": 40,
     
     # Substance misuse / Addiction (+35)
     "drinking to cope": 35, "need a drink": 30, "drinking every day": 35,
@@ -2006,6 +2039,8 @@ AMBER_INDICATORS = {
     "addicted": 40, "addiction": 40, "cant stop drinking": 40, "can't stop drinking": 40,
     "gambling": 30, "lost money gambling": 35, "betting": 25,
     "drugs every day": 40, "need something to get through": 35,
+    "blackout": 35, "blacking out": 35, "drink to forget": 40,
+    "only way to cope": 40, "numbing it": 35,
     
     # Offending / Legal issues (+30)
     "about to lose my home": 25, "homeless": 30, "evicted": 25,
@@ -2015,28 +2050,54 @@ AMBER_INDICATORS = {
     "assault charge": 35, "got in trouble": 25, "fight": 20,
     "lost my temper": 30, "anger issues": 30, "rage": 30,
     
-    # Signs of Change - Self-care deterioration (+25)
+    # Signs of Change - Self-care deterioration (+25-35)
     "stopped showering": 30, "not eating": 30, "cant eat": 25, "can't eat": 25,
     "not looking after myself": 30, "let myself go": 25, "dont care anymore": 35,
     "stopped exercising": 25, "no energy": 25, "exhausted": 20,
+    "stopped caring": 35, "why bother trying": 35, "given up on myself": 40,
     
-    # Signs of Change - Sleep patterns (+25)
+    # Signs of Change - Sleep patterns (+25-30)
     "sleeping all day": 30, "cant get out of bed": 30, "can't get out of bed": 30,
     "not sleeping": 30, "insomnia": 30, "sleep all the time": 25,
     "only sleep a few hours": 25, "awake all night": 25,
+    "dread waking up": 35, "hate mornings": 25, "cant face the day": 30,
     
-    # Pride / Stigma - Barriers to help (+20)
+    # Pride / Stigma - Barriers to help (+20-30)
     "cant ask for help": 25, "can't ask for help": 25, "too proud": 20,
     "sign of weakness": 25, "dont want to be a burden": 30,
     "should be able to handle it": 20, "real men dont": 25,
     "embarrassed": 20, "ashamed": 25, "dont want anyone to know": 25,
+    "failed": 30, "failure": 30, "let everyone down": 35, "disappointed everyone": 35,
     
-    # Crisis language
-    "hopeless": 30, "no hope": 30, "no point": 30, "whats the point": 30,
-    "what's the point": 30, "pointless": 30, "burden": 30, "in the way": 30,
-    "better without me": 40, "theyd be better off": 40, "they'd be better off": 40,
-    "cant go on": 35, "can't go on": 35, "cant cope": 35, "can't cope": 35,
-    "breaking down": 30, "falling apart": 30, "at breaking point": 35,
+    # Crisis language (+30-45)
+    "hopeless": 35, "no hope": 35, "no point": 35, "whats the point": 35,
+    "what's the point": 35, "pointless": 35, "burden": 35, "in the way": 30,
+    "better without me": 45, "theyd be better off": 45, "they'd be better off": 45,
+    "cant go on": 40, "can't go on": 40, "cant cope": 40, "can't cope": 40,
+    "breaking down": 35, "falling apart": 35, "at breaking point": 40,
+    "rock bottom": 40, "hit bottom": 40, "lowest point": 35,
+    "end of my rope": 40, "at the end": 40, "nothing left": 40,
+    "running out of fight": 40, "no fight left": 45, "tired of fighting": 40,
+    
+    # Subtle low mood / depression indicators (+25-35)
+    "really low": 30, "feeling low": 30, "so low": 30, "lowest i've been": 35,
+    "lowest ive been": 35, "dark place": 35, "in a dark place": 35,
+    "nothing matters": 35, "doesnt matter": 30, "doesn't matter": 30,
+    "dont see the point": 35, "don't see the point": 35, "no reason": 30,
+    "struggling": 25, "really struggling": 30, "barely coping": 35,
+    "barely holding on": 40, "hanging by a thread": 40, "on the edge": 40,
+    "drowning": 35, "sinking": 30, "going under": 35,
+    "darkness": 30, "black cloud": 30, "fog": 25, "in a fog": 30,
+    "lost all hope": 45, "losing hope": 35, "hope is gone": 45,
+    "cant see a way out": 40, "can't see a way out": 40,
+    "not myself": 30, "dont recognise myself": 35, "don't recognise myself": 35,
+    "worthless": 40, "useless": 35, "waste of space": 40, "good for nothing": 40,
+    
+    # Relationship/family strain (+25-35)
+    "marriage over": 30, "divorce": 25, "partner left": 30, "wife left": 30,
+    "husband left": 30, "kids dont talk to me": 35, "kids don't talk to me": 35,
+    "lost custody": 35, "cant see my kids": 35, "can't see my kids": 35,
+    "family hate me": 35, "ruined my family": 35,
 }
 
 # MODIFIERS - Stackable additions
@@ -2045,15 +2106,35 @@ MODIFIER_PATTERNS = {
     "just joking": 20, "only joking": 20, "haha": 15, "lol": 15,
     "not that bad": 20, "its fine": 20, "it's fine": 20, "i'm fine": 20, "im fine": 20,
     "dont worry": 15, "don't worry": 15,
+    "forget i said": 25, "ignore me": 25, "being silly": 20, "being stupid": 25,
     
-    # Downplaying severity (+15)
+    # Downplaying severity (+15-25)
     "others had it worse": 15, "shouldnt complain": 15, "shouldn't complain": 15,
     "not a big deal": 15, "nothing really": 15, "just being dramatic": 15,
     "man up": 15, "get over it": 15, "soldier on": 15, "crack on": 10,
+    "overreacting": 20, "being pathetic": 25, "weak": 20,
     
-    # Dark humour about death (+20)
-    "dark joke": 20, "might not be here": 25, "wont be around": 25, "won't be around": 25,
-    "disappear": 20, "vanish": 20, "not here tomorrow": 25,
+    # Dark humour about death (+25)
+    "dark joke": 20, "might not be here": 30, "wont be around": 30, "won't be around": 30,
+    "not be around": 30, "not around much longer": 35, "not here much longer": 35,
+    "disappear": 25, "vanish": 25, "not here tomorrow": 30,
+    "sleep forever": 30, "eternal sleep": 30, "long sleep": 25,
+    "checking out": 30, "signing off": 25,
+    
+    # Veteran-specific language (+20-30)
+    "civvies dont understand": 20, "civvies don't understand": 20,
+    "back in theatre": 25, "deployment": 20, "tour": 20,
+    "lost mates": 30, "lost brothers": 30, "mates didnt make it": 35,
+    "mates didn't make it": 35, "survivor guilt": 35, "should have been me": 40,
+    "left behind": 30, "couldnt save them": 35, "couldn't save them": 35,
+    "blood on my hands": 35, "faces i see": 30, "cant forget": 25,
+    "what i did": 30, "what i saw": 25, "things i've done": 30,
+    
+    # Farewell language (+25-35)
+    "thank you for everything": 25, "you've been great": 20,
+    "take care of yourself": 20, "look after yourself": 20,
+    "remember me": 35, "dont forget me": 30, "don't forget me": 30,
+    "tell them i love them": 35, "tell my family": 35,
 }
 
 # Session risk tracking
@@ -2125,14 +2206,14 @@ def calculate_safeguarding_score(message: str, session_id: str) -> Dict[str, Any
     
     # Determine risk level
     # HARD RULE: Any RED indicator = RED regardless of score
-    # Raised thresholds so modal doesn't pop up too early
+    # LOWERED thresholds for earlier detection of subtle cues
     if is_red_flag:
         risk_level = "RED"
-    elif score >= 120:
+    elif score >= 70:  # Lowered from 120
         risk_level = "RED"
-    elif score >= 80:
+    elif score >= 45:  # Lowered from 80
         risk_level = "AMBER"
-    elif score >= 40:
+    elif score >= 25:  # Lowered from 40
         risk_level = "YELLOW"
     else:
         risk_level = "GREEN"
