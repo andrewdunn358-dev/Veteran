@@ -32,6 +32,7 @@ const FALLBACK_SIGNS_OF_CHANGE = [
 ];
 
 const FALLBACK_SUPPORT_RESOURCES = [
+  { name: 'NHS Mental Health', desc: 'Free 24/7 urgent mental health support - call 111, Option 2', phone: '111', url: 'https://www.nhs.uk/nhs-services/mental-health-services/' },
   { name: 'Op Courage', desc: 'NHS mental health service for serving personnel and veterans', phone: '0300 323 0137', url: 'https://www.nhs.uk/nhs-services/armed-forces-community/mental-health/veterans-reservists/' },
   { name: 'Combat Stress', desc: '24hr helpline for the armed forces community', phone: '0800 138 1619', url: 'https://combatstress.org.uk' },
   { name: 'SSAFA', desc: 'Armed Forces charity support', phone: '0800 260 6767', url: 'https://www.ssafa.org.uk' },

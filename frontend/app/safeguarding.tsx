@@ -162,6 +162,21 @@ export default function SafeguardingPolicy() {
         {/* Getting Help */}
         <Text style={styles.sectionTitle}>Getting Help Now</Text>
 
+        {/* NHS 111 Option 2 - Primary */}
+        <TouchableOpacity 
+          style={[styles.helpCard, { backgroundColor: isDark ? '#1e3a5f' : '#eff6ff', borderColor: '#3b82f6', borderWidth: 2 }]} 
+          onPress={() => Linking.openURL('tel:111')}
+        >
+          <View style={[styles.helpIcon, { backgroundColor: '#3b82f6' }]}>
+            <Ionicons name="medical" size={24} color="#fff" />
+          </View>
+          <View style={styles.helpInfo}>
+            <Text style={[styles.helpTitle, { color: isDark ? '#93c5fd' : '#1d4ed8' }]}>NHS Mental Health</Text>
+            <Text style={[styles.helpNumber, { color: '#3b82f6', fontSize: 18 }]}>111 (Option 2)</Text>
+            <Text style={styles.helpDescription}>Free 24/7 urgent mental health support</Text>
+          </View>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.helpCard} onPress={callSamaritans}>
           <View style={styles.helpIcon}>
             <Ionicons name="call" size={24} color="#22c55e" />

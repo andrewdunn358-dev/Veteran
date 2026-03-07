@@ -114,6 +114,27 @@ export default function CrisisSupport() {
           24/7 Crisis Helplines
         </Text>
 
+        {/* NHS 111 Option 2 - Primary/Most Prominent */}
+        <View style={{ backgroundColor: isDark ? '#1e3a5f' : '#eff6ff', borderRadius: 12, padding: 20, marginBottom: 16, borderWidth: 2, borderColor: '#3b82f6' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 }}>
+            <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#3b82f6', justifyContent: 'center', alignItems: 'center' }}>
+              <Ionicons name="medical" size={28} color="#fff" />
+            </View>
+            <View style={{ marginLeft: 16, flex: 1 }}>
+              <Text style={{ fontSize: 20, fontWeight: '700', color: isDark ? '#93c5fd' : '#1d4ed8', marginBottom: 4 }}>NHS Mental Health</Text>
+              <Text style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 20 }}>Free 24/7 urgent mental health support. Call 111, then press Option 2 to speak to trained mental health professionals.</Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={{ flexDirection: 'row', backgroundColor: '#3b82f6', borderRadius: 10, padding: 18, alignItems: 'center', justifyContent: 'center', gap: 10 }}
+            onPress={() => handleCall('111')}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="call" size={26} color="#ffffff" />
+            <Text style={{ fontSize: 20, fontWeight: '700', color: '#ffffff' }}>111 (Option 2)</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Samaritans */}
         <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 }}>

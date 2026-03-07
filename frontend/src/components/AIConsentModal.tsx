@@ -21,6 +21,11 @@ interface AIConsentModalProps {
 export default function AIConsentModal({ visible, onAccept, onDecline, characterName }: AIConsentModalProps) {
   const { colors, isDark } = useTheme();
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
+  
+  const callNHS111 = () => {
+    Linking.openURL('tel:111');
+  };
+  
   const callSamaritans = () => {
     Linking.openURL('tel:116123');
   };
@@ -131,6 +136,20 @@ export default function AIConsentModal({ visible, onAccept, onDecline, character
             {/* Crisis Numbers */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Need Immediate Support?</Text>
+              
+              {/* NHS 111 - Primary/Prominent */}
+              <TouchableOpacity style={[styles.crisisButton, styles.primaryCrisisButton]} onPress={callNHS111}>
+                <View style={[styles.crisisIcon, styles.primaryCrisisIcon]}>
+                  <Ionicons name="medical" size={22} color="#fff" />
+                </View>
+                <View style={styles.crisisInfo}>
+                  <Text style={[styles.crisisName, styles.primaryCrisisName]}>NHS Mental Health</Text>
+                  <Text style={[styles.crisisNumber, styles.primaryCrisisNumber]}>111 (Option 2)</Text>
+                  <Text style={styles.crisisDesc}>Free urgent mental health support</Text>
+                </View>
+                <Text style={[styles.crisisAvail, styles.primaryCrisisAvail]}>24/7</Text>
+              </TouchableOpacity>
+              
               <TouchableOpacity style={styles.crisisButton} onPress={callSamaritans}>
                 <View style={styles.crisisIcon}>
                   <Ionicons name="call" size={20} color="#22c55e" />
@@ -301,10 +320,46 @@ const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     fontWeight: '700',
     color: colors.primary,
   },
+  crisisDesc: {
+    fontSize: 11,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
   crisisAvail: {
     fontSize: 12,
     color: '#22c55e',
     fontWeight: '600',
+  },
+  // Primary NHS 111 styling - more prominent
+  primaryCrisisButton: {
+    backgroundColor: isDark ? '#1e3a5f' : '#eff6ff',
+    borderColor: '#3b82f6',
+    borderWidth: 2,
+    marginBottom: 14,
+  },
+  primaryCrisisIcon: {
+    backgroundColor: '#3b82f6',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  primaryCrisisName: {
+    fontSize: 15,
+    color: isDark ? '#93c5fd' : '#1d4ed8',
+  },
+  primaryCrisisNumber: {
+    fontSize: 18,
+    color: '#3b82f6',
+  },
+  primaryCrisisAvail: {
+    backgroundColor: '#22c55e',
+    color: '#fff',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    fontSize: 11,
+    fontWeight: '700',
+    overflow: 'hidden',
   },
   acceptButton: {
     backgroundColor: colors.primary,

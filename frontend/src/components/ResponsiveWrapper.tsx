@@ -80,6 +80,17 @@ export default function ResponsiveWrapper({ children, showDesktopShell = true }:
         <Text style={[styles.helpTitle, { color: theme === 'dark' ? '#f8fafc' : '#1e293b' }]}>
           Need Help Now?
         </Text>
+        <View style={[styles.primaryEmergency, { backgroundColor: theme === 'dark' ? '#1e3a5f' : '#eff6ff', borderColor: '#3b82f6' }]}>
+          <Text style={[styles.emergencyLabel, { color: theme === 'dark' ? '#93c5fd' : '#1d4ed8', fontWeight: '600' }]}>
+            NHS Mental Health
+          </Text>
+          <Text style={[styles.emergencyNumber, { color: '#3b82f6', fontSize: 20 }]}>
+            111 (Option 2)
+          </Text>
+          <Text style={[styles.emergencyDesc, { color: theme === 'dark' ? '#94a3b8' : '#64748b' }]}>
+            Free 24/7 urgent support
+          </Text>
+        </View>
         <EmergencyNumber label="Samaritans" number="116 123" theme={theme} />
         <EmergencyNumber label="Combat Stress" number="0800 138 1619" theme={theme} />
         <EmergencyNumber label="Veterans Gateway" number="0808 802 1212" theme={theme} />
@@ -199,5 +210,16 @@ const styles = StyleSheet.create({
   emergencyNumber: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  primaryEmergency: {
+    borderWidth: 2,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 18,
+    width: '100%',
+  },
+  emergencyDesc: {
+    fontSize: 11,
+    marginTop: 2,
   },
 });
