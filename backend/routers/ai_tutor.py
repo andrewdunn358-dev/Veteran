@@ -11,12 +11,14 @@ import os
 import json
 import logging
 from dotenv import load_dotenv
+from openai import AsyncOpenAI
 
 load_dotenv()
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
-
 router = APIRouter(tags=["AI Tutor"])
+
+# Initialize OpenAI client
+openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Mr Clark's avatar and info
 MR_CLARK = {
@@ -203,9 +205,8 @@ def get_db():
 async def evaluate_response(question: dict, response: str) -> TutorFeedback:
     """Use AI to evaluate a learner's response"""
     
-    api_key = os.getenv("EMERGENT_LLM_KEY")
-    if not api_key:
-        raise HTTPException(status_code=500, detail="AI Tutor not configured")
+    if not openai_client.api_key:
+        raise HTTPException(status_code=500, detail="AI Tutor not configured - missing OpenAI API key")
     
     # Build the competency context
     competency_context = []
@@ -262,14 +263,16 @@ Be encouraging but honest. The goal is to ensure learners are safe to support vu
 Please evaluate this response and provide your assessment as JSON."""
 
     try:
-        chat = LlmChat(
-            api_key=api_key,
-            session_id=f"tutor-eval-{datetime.now().timestamp()}",
-            system_message=system_message
-        ).with_model("openai", "gpt-4o-mini")
+        completion = await openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.3
+        )
         
-        message = UserMessage(text=user_prompt)
-        result = await chat.send_message(message)
+        result = completion.choices[0].message.content
         
         # Parse JSON response
         result_text = result.strip()
@@ -756,17 +759,16 @@ class TutorChatResponse(BaseModel):
     tutor: dict
 
 
-# Store chat sessions in memory (in production, use database)
-chat_sessions = {}
+# Store chat sessions in memory - conversation history per learner
+chat_histories = {}
 
 
 @router.post("/api/lms/tutor/chat")
 async def chat_with_tutor(message: TutorChatMessage):
     """Chat with Mr Clark - the AI tutor"""
     
-    api_key = os.getenv("EMERGENT_LLM_KEY")
-    if not api_key:
-        raise HTTPException(status_code=500, detail="AI Tutor not configured")
+    if not openai_client.api_key:
+        raise HTTPException(status_code=500, detail="AI Tutor not configured - missing OpenAI API key")
     
     # Create session ID based on learner email
     session_id = f"tutor-chat-{message.learner_email}"
@@ -777,19 +779,36 @@ async def chat_with_tutor(message: TutorChatMessage):
         context_addition = f"\n\n[Context: The student is currently studying module '{message.current_module}'. Keep your answers relevant to peer support training but do NOT give direct quiz answers.]"
     
     try:
-        # Initialize or reuse chat session
-        if session_id not in chat_sessions:
-            chat_sessions[session_id] = LlmChat(
-                api_key=api_key,
-                session_id=session_id,
-                system_message=MR_CLARK_SYSTEM_PROMPT + context_addition
-            ).with_model("openai", "gpt-4o-mini")
+        # Get or create conversation history for this learner
+        if session_id not in chat_histories:
+            chat_histories[session_id] = []
         
-        chat = chat_sessions[session_id]
+        history = chat_histories[session_id]
         
-        # Send message and get response
-        user_message = UserMessage(text=message.message)
-        response = await chat.send_message(user_message)
+        # Build messages list with history
+        messages = [
+            {"role": "system", "content": MR_CLARK_SYSTEM_PROMPT + context_addition}
+        ]
+        
+        # Add conversation history (limit to last 10 exchanges to avoid token limits)
+        for h in history[-20:]:  # Last 10 pairs
+            messages.append(h)
+        
+        # Add current message
+        messages.append({"role": "user", "content": message.message})
+        
+        # Call OpenAI
+        completion = await openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            temperature=0.7
+        )
+        
+        response = completion.choices[0].message.content
+        
+        # Store in history
+        history.append({"role": "user", "content": message.message})
+        history.append({"role": "assistant", "content": response})
         
         # Store the conversation in database for review
         db = get_db()
@@ -816,8 +835,8 @@ async def chat_with_tutor(message: TutorChatMessage):
 async def clear_chat_session(learner_email: str):
     """Clear chat history for a learner"""
     session_id = f"tutor-chat-{learner_email}"
-    if session_id in chat_sessions:
-        del chat_sessions[session_id]
+    if session_id in chat_histories:
+        del chat_histories[session_id]
     return {"success": True, "message": "Chat session cleared"}
 
 
