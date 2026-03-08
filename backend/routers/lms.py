@@ -1,5 +1,5 @@
 """
-Radio Check Mental Health First Aid LMS - Backend API
+Radio Check Peer to Peer Training LMS - Backend API
 Handles courses, modules, quizzes, progress tracking, and certificates
 """
 
@@ -11,7 +11,13 @@ from bson import ObjectId
 import secrets
 import logging
 
+# Import the full curriculum
+from routers.lms_curriculum_part2 import get_full_curriculum
+
 router = APIRouter(tags=["LMS"])
+
+# Get the full curriculum with all 14 modules
+MHFA_CURRICULUM = get_full_curriculum()
 
 # ============================================================================
 # PYDANTIC MODELS
@@ -45,696 +51,12 @@ class ModuleCompletion(BaseModel):
     module_id: str
     time_spent_minutes: int
 
-# ============================================================================
-# COURSE CURRICULUM DATA
-# ============================================================================
 
-MHFA_CURRICULUM = {
-    "course_id": "mhfa-volunteer-v1",
-    "title": "Mental Health First Aid for Peer Supporters",
-    "description": """This comprehensive course prepares you to become a Radio Check peer support volunteer. 
-    You'll learn to provide safe, ethical mental health first aid to fellow veterans.
-    
-    Upon completion, you will be able to:
-    • Recognise signs of mental health difficulties
-    • Provide initial support using the ALGEE action plan
-    • Know when and how to refer to professional services
-    • Understand BACP ethical boundaries
-    • Support veterans with PTSD, depression, anxiety, and crisis situations
-    
-    This course does NOT qualify you as a counsellor or therapist. 
-    Peer supporters provide listening support and signposting only.""",
-    "duration_hours": 16,
-    "passing_score": 80,
-    "critical_modules_pass_rate": 100,  # Ethics, Crisis, Safeguarding must be 100%
-    "modules": [
-        # ===== MODULE 1 =====
-        {
-            "id": "m1-intro",
-            "title": "Introduction to Mental Health",
-            "description": "Understanding mental health, mental illness, and the role of peer support",
-            "duration_minutes": 60,
-            "order": 1,
-            "is_critical": False,
-            "content": """
-## What is Mental Health?
-
-Mental health is a state of wellbeing in which an individual:
-- Realises their own abilities
-- Can cope with normal stresses of life
-- Can work productively
-- Can contribute to their community
-
-**Mental health is not simply the absence of mental illness.** We all have mental health, just as we all have physical health.
-
-## Mental Health vs Mental Illness
-
-| Mental Health | Mental Illness |
-|---------------|----------------|
-| How we think, feel, and cope | A diagnosable condition |
-| Fluctuates day to day | Requires professional treatment |
-| Affected by life events | Has specific symptoms |
-| Everyone has it | Affects 1 in 4 people |
-
-## Veteran Mental Health Statistics
-
-- **1 in 5** veterans experience depression, anxiety, or PTSD
-- Veterans are **2-3x more likely** to experience depression than civilians
-- **Average of 2 veteran suicides per week** in the UK
-- Only **50%** of veterans with mental health issues seek help
-
-## Barriers to Seeking Help
-
-Veterans face unique barriers:
-- **Stigma**: "Real soldiers don't need help"
-- **Pride**: Self-reliance trained into them
-- **Distrust**: Of non-military services
-- **Identity**: Admitting struggle feels like weakness
-- **Access**: Not knowing what's available
-
-## The Role of Peer Support
-
-As a peer supporter, you are NOT a therapist. You are:
-- A listening ear
-- Someone who understands military life
-- A bridge to professional services
-- A fellow veteran who gets it
-
-**Your role is to SUPPORT, not to FIX.**
-            """,
-            "quiz": {
-                "id": "q1-intro",
-                "title": "Module 1 Quiz",
-                "pass_rate": 80,
-                "questions": [
-                    {
-                        "id": "q1-1",
-                        "question": "Mental health is simply the absence of mental illness.",
-                        "options": ["True", "False"],
-                        "correct": "False",
-                        "explanation": "Mental health is a state of wellbeing, not just the absence of illness. We all have mental health that fluctuates."
-                    },
-                    {
-                        "id": "q1-2",
-                        "question": "What proportion of veterans experience depression, anxiety, or PTSD?",
-                        "options": ["1 in 10", "1 in 5", "1 in 2", "1 in 20"],
-                        "correct": "1 in 5",
-                        "explanation": "Research shows approximately 1 in 5 veterans experience these conditions."
-                    },
-                    {
-                        "id": "q1-3",
-                        "question": "As a peer supporter, your role is to:",
-                        "options": [
-                            "Diagnose mental health conditions",
-                            "Provide therapy and treatment",
-                            "Listen and signpost to professional services",
-                            "Prescribe coping strategies"
-                        ],
-                        "correct": "Listen and signpost to professional services",
-                        "explanation": "Peer supporters provide listening support and help people access professional services. They do not diagnose or treat."
-                    },
-                    {
-                        "id": "q1-4",
-                        "question": "Which is NOT a common barrier to veterans seeking help?",
-                        "options": [
-                            "Stigma around mental health",
-                            "Too many services available",
-                            "Pride and self-reliance",
-                            "Distrust of civilian services"
-                        ],
-                        "correct": "Too many services available",
-                        "explanation": "Lack of awareness of services is a barrier, not having too many. Stigma, pride, and distrust are all common barriers."
-                    },
-                    {
-                        "id": "q1-5",
-                        "question": "What percentage of veterans with mental health issues seek help?",
-                        "options": ["25%", "50%", "75%", "90%"],
-                        "correct": "50%",
-                        "explanation": "Only about half of veterans with mental health issues seek professional help."
-                    }
-                ]
-            }
-        },
-        # ===== MODULE 2 =====
-        {
-            "id": "m2-algee",
-            "title": "The MHFA Action Plan - ALGEE",
-            "description": "Learn the five-step action plan for providing mental health first aid",
-            "duration_minutes": 60,
-            "order": 2,
-            "is_critical": False,
-            "content": """
-## The ALGEE Action Plan
-
-ALGEE is the core framework for Mental Health First Aid. It provides a structured approach to helping someone experiencing mental health difficulties.
-
-### A - Approach, Assess, Assist
-
-**Approach** the person appropriately:
-- Choose a suitable time and place
-- Respect their privacy
-- Be calm and patient
-
-**Assess** for risk of suicide or harm:
-- Look for warning signs
-- Ask directly if concerned
-- Take all threats seriously
-
-**Assist** with any crisis:
-- If immediate danger, call 999
-- Stay with them
-- Follow safeguarding protocols
-
-### L - Listen Non-judgmentally
-
-- Give your full attention
-- Don't interrupt
-- Accept what they say without judging
-- Use open body language
-- Reflect back what you hear
-- Avoid giving advice too quickly
-
-**DON'T SAY:**
-- "You should..."
-- "At least..."
-- "I know how you feel"
-- "Cheer up"
-- "Others have it worse"
-
-**DO SAY:**
-- "I'm here for you"
-- "That sounds really difficult"
-- "Tell me more about that"
-- "How are you coping with this?"
-
-### G - Give Reassurance and Information
-
-- Reassure them they've done the right thing by talking
-- Remind them that help is available
-- Share information about mental health when appropriate
-- Don't minimise their experience
-- Don't make promises you can't keep
-
-### E - Encourage Appropriate Professional Help
-
-Help them understand professional options:
-- GP (first point of contact)
-- NHS 111 Option 2 (mental health crisis)
-- Op Courage (NHS veteran service)
-- Combat Stress
-- Private therapy
-
-**How to encourage help-seeking:**
-- Normalise it: "Lots of people find talking to someone helpful"
-- Remove barriers: "I can help you find a number"
-- Offer support: "Would you like me to be there when you call?"
-
-### E - Encourage Self-Help and Other Supports
-
-- Exercise and physical activity
-- Connecting with others
-- Routine and structure
-- Limiting alcohol
-- Peer support groups
-- Hobbies and interests
-
-**Remember: You are encouraging, not prescribing.**
-            """,
-            "quiz": {
-                "id": "q2-algee",
-                "title": "Module 2 Quiz - ALGEE",
-                "pass_rate": 80,
-                "questions": [
-                    {
-                        "id": "q2-1",
-                        "question": "What does the 'A' in ALGEE stand for?",
-                        "options": [
-                            "Accept and Adapt",
-                            "Approach, Assess, Assist",
-                            "Ask and Answer",
-                            "Attend and Act"
-                        ],
-                        "correct": "Approach, Assess, Assist",
-                        "explanation": "The first step is to Approach the person, Assess for risk, and Assist with any crisis."
-                    },
-                    {
-                        "id": "q2-2",
-                        "question": "Which of these is an example of judgmental language to AVOID?",
-                        "options": [
-                            "That sounds really difficult",
-                            "At least you have a job",
-                            "Tell me more about how you're feeling",
-                            "I'm here for you"
-                        ],
-                        "correct": "At least you have a job",
-                        "explanation": "'At least...' statements minimise the person's experience and are judgmental."
-                    },
-                    {
-                        "id": "q2-3",
-                        "question": "When encouraging professional help, you should:",
-                        "options": [
-                            "Tell them they must see a doctor immediately",
-                            "Diagnose their condition first",
-                            "Normalise help-seeking and offer to support them",
-                            "Give them a prescription"
-                        ],
-                        "correct": "Normalise help-seeking and offer to support them",
-                        "explanation": "Encouraging professional help means making it feel normal and offering practical support to access it."
-                    },
-                    {
-                        "id": "q2-4",
-                        "question": "The second 'E' in ALGEE stands for:",
-                        "options": [
-                            "Educate about mental illness",
-                            "Encourage self-help and other supports",
-                            "Evaluate their progress",
-                            "End the conversation appropriately"
-                        ],
-                        "correct": "Encourage self-help and other supports",
-                        "explanation": "The final step encourages the person to use self-help strategies and connect with other supports."
-                    },
-                    {
-                        "id": "q2-5",
-                        "question": "If someone is in immediate danger, you should:",
-                        "options": [
-                            "Wait and see if they improve",
-                            "Call 999",
-                            "Send them a helpful article",
-                            "Refer them to their GP next week"
-                        ],
-                        "correct": "Call 999",
-                        "explanation": "Immediate danger requires immediate action - call emergency services."
-                    }
-                ]
-            }
-        },
-        # ===== MODULE 3 - CRITICAL =====
-        {
-            "id": "m3-ethics",
-            "title": "BACP Ethics & Boundaries",
-            "description": "Understanding ethical practice and the boundaries of peer support",
-            "duration_minutes": 60,
-            "order": 3,
-            "is_critical": True,  # MUST PASS 100%
-            "content": """
-## ⚠️ CRITICAL MODULE - 100% Pass Required
-
-This module covers essential ethical boundaries. You must pass with 100% to continue.
-
-## What Peer Support IS and IS NOT
-
-### Peer Support IS:
-- Listening without judgment
-- Sharing your own experience (when appropriate)
-- Signposting to professional services
-- Providing emotional support
-- Being a consistent, reliable presence
-- Following safeguarding protocols
-
-### Peer Support IS NOT:
-- Therapy or counselling
-- Diagnosing conditions
-- Prescribing treatments or strategies
-- Giving medical advice
-- A substitute for professional help
-- Available 24/7 at all times
-
-## Boundaries of Competence
-
-**You are competent to:**
-- Listen and validate feelings
-- Share information about resources
-- Recognise warning signs
-- Follow escalation procedures
-- Refer to professionals
-
-**You are NOT competent to:**
-- Diagnose mental health conditions
-- Provide therapy techniques (CBT, EMDR, etc.)
-- Advise on medication
-- Make decisions for the person
-- Guarantee outcomes
-
-## Confidentiality and Its Limits
-
-**What you keep confidential:**
-- Personal details shared with you
-- The content of conversations
-- Their contact information
-
-**When confidentiality MUST be broken:**
-- Immediate risk of suicide
-- Risk of harm to others
-- Disclosure of abuse (especially involving children)
-- Serious crime disclosure
-- Court order requiring disclosure
-
-**Always inform:** "What you tell me is confidential, unless I'm worried about your safety or someone else's safety."
-
-## Avoiding Dependency
-
-Signs someone is becoming dependent:
-- Only wants to talk to you
-- Contacting you outside agreed times
-- Expecting you to solve their problems
-- Getting upset if you're unavailable
-
-How to manage:
-- Set clear boundaries from the start
-- Encourage professional support
-- Rotate peer supporters if possible
-- Discuss with your supervisor
-
-## Power Dynamics
-
-Remember:
-- You are in a position of trust
-- The person may be vulnerable
-- Your words carry weight
-- Don't exploit this position
-
-**Never:**
-- Start a romantic relationship with someone you support
-- Accept gifts of significant value
-- Share personal contact details
-- Meet outside agreed settings without approval
-
-## Self-Disclosure Guidelines
-
-Sharing your own experience CAN be helpful if:
-- It's brief and relevant
-- It normalises their experience
-- It doesn't shift focus to you
-- It's not competitive ("mine was worse")
-
-**Good example:** "I've had times when everything felt overwhelming too. What helped me was talking to someone."
-
-**Bad example:** "Oh, I had PTSD for 10 years and let me tell you about everything that happened to me..."
-
-## Documentation
-
-You MUST record:
-- Date and time of contact
-- Summary of key concerns
-- Any safeguarding issues
-- Actions taken
-- Referrals made
-
-This protects you AND the person you're supporting.
-            """,
-            "quiz": {
-                "id": "q3-ethics",
-                "title": "Module 3 Quiz - Ethics & Boundaries (100% Required)",
-                "pass_rate": 100,  # CRITICAL
-                "questions": [
-                    {
-                        "id": "q3-1",
-                        "question": "As a peer supporter, you ARE qualified to:",
-                        "options": [
-                            "Diagnose depression",
-                            "Listen and signpost to services",
-                            "Recommend specific medications",
-                            "Provide CBT therapy"
-                        ],
-                        "correct": "Listen and signpost to services",
-                        "explanation": "Peer supporters provide listening support and signposting only. They do not diagnose or treat."
-                    },
-                    {
-                        "id": "q3-2",
-                        "question": "When MUST you break confidentiality?",
-                        "options": [
-                            "When the person asks you to",
-                            "When you're curious about something",
-                            "When there's risk of suicide or harm to others",
-                            "When you want to tell your supervisor something interesting"
-                        ],
-                        "correct": "When there's risk of suicide or harm to others",
-                        "explanation": "Confidentiality must be broken when there is a safeguarding concern - risk to the person or others."
-                    },
-                    {
-                        "id": "q3-3",
-                        "question": "A person you support asks you on a date. You should:",
-                        "options": [
-                            "Accept if they seem nice",
-                            "Decline and explain professional boundaries",
-                            "Accept but keep it secret",
-                            "Wait until they're better, then date them"
-                        ],
-                        "correct": "Decline and explain professional boundaries",
-                        "explanation": "Romantic relationships with people you support are never appropriate. This is a clear boundary."
-                    },
-                    {
-                        "id": "q3-4",
-                        "question": "Someone is becoming dependent on you, contacting you constantly. You should:",
-                        "options": [
-                            "Feel flattered and encourage it",
-                            "Ignore them completely",
-                            "Set clear boundaries and encourage professional support",
-                            "Give them your personal phone number"
-                        ],
-                        "correct": "Set clear boundaries and encourage professional support",
-                        "explanation": "Dependency should be managed with boundaries and professional referral, not encouraged or ignored."
-                    },
-                    {
-                        "id": "q3-5",
-                        "question": "When is self-disclosure appropriate?",
-                        "options": [
-                            "Whenever you want to talk about yourself",
-                            "When it's brief, relevant, and normalises their experience",
-                            "When your experience was worse than theirs",
-                            "Never - you should never share anything personal"
-                        ],
-                        "correct": "When it's brief, relevant, and normalises their experience",
-                        "explanation": "Self-disclosure can be helpful when brief and relevant, but should not shift focus to you."
-                    },
-                    {
-                        "id": "q3-6",
-                        "question": "You must document conversations because:",
-                        "options": [
-                            "It's interesting to read later",
-                            "It protects you and the person, and tracks safeguarding",
-                            "Your supervisor is nosy",
-                            "You might forget who you talked to"
-                        ],
-                        "correct": "It protects you and the person, and tracks safeguarding",
-                        "explanation": "Documentation is essential for safeguarding, continuity of care, and professional protection."
-                    },
-                    {
-                        "id": "q3-7",
-                        "question": "If someone discloses child abuse, you should:",
-                        "options": [
-                            "Keep it confidential as they asked",
-                            "Immediately follow safeguarding procedures",
-                            "Investigate it yourself first",
-                            "Wait to see if they mention it again"
-                        ],
-                        "correct": "Immediately follow safeguarding procedures",
-                        "explanation": "Child abuse disclosure requires immediate safeguarding action. This cannot be kept confidential."
-                    },
-                    {
-                        "id": "q3-8",
-                        "question": "The phrase 'peer support is not therapy' means:",
-                        "options": [
-                            "You're not as good as therapists",
-                            "You have different training, boundaries, and scope",
-                            "You can do therapy but call it something else",
-                            "Therapy doesn't work"
-                        ],
-                        "correct": "You have different training, boundaries, and scope",
-                        "explanation": "Peer support is valuable but has a different scope and boundaries than professional therapy."
-                    }
-                ]
-            }
-        },
-        # ===== MODULE 4 =====
-        {
-            "id": "m4-communication",
-            "title": "Communication Skills for Support",
-            "description": "Developing effective listening and communication techniques",
-            "duration_minutes": 60,
-            "order": 4,
-            "is_critical": False,
-            "content": """
-## Active Listening
-
-Active listening is MORE than just hearing words. It involves:
-
-### 1. Full Attention
-- Put away distractions
-- Maintain eye contact (in person) or focus (online)
-- Don't plan what you'll say next
-- Be present in the moment
-
-### 2. Body Language
-- Open posture
-- Nodding to show understanding
-- Leaning slightly forward
-- Facial expressions that match the conversation
-
-### 3. Verbal Encouragers
-- "Mm-hmm"
-- "I see"
-- "Go on"
-- "Tell me more"
-
-## Open vs Closed Questions
-
-### Open Questions (USE THESE)
-Start with: What, How, Tell me about...
-- "How are you feeling about that?"
-- "What's been on your mind?"
-- "Tell me more about what happened"
-
-### Closed Questions (USE SPARINGLY)
-Get yes/no answers:
-- "Are you okay?" → Often gets "I'm fine"
-- "Did that upset you?" → Yes/No
-
-## Reflective Listening
-
-Reflecting back what you hear shows you're listening and helps clarify.
-
-**Simple Reflection:** Repeat key words
-- Person: "I just feel so tired all the time"
-- You: "You're feeling tired..."
-
-**Paraphrasing:** Restate in your own words
-- Person: "My wife doesn't understand what I went through"
-- You: "It sounds like you feel there's a gap between your experiences and hers"
-
-**Reflecting Feelings:** Name the emotion
-- Person: "I don't know why I bother anymore"
-- You: "It sounds like you might be feeling hopeless"
-
-## Empathic Responses
-
-**Empathy is NOT:**
-- Fixing the problem
-- Comparing experiences
-- Giving advice immediately
-- Saying "I know how you feel"
-
-**Empathy IS:**
-- Acknowledging their feelings
-- Validating their experience
-- Being present without judgment
-
-**Examples:**
-- "That sounds really difficult"
-- "I can hear how much this is affecting you"
-- "It makes sense that you'd feel that way"
-- "Thank you for trusting me with this"
-
-## What NOT to Say
-
-❌ **Dismissive:**
-- "You'll be fine"
-- "Just think positive"
-- "Others have it worse"
-- "Snap out of it"
-
-❌ **Judgmental:**
-- "Why didn't you..."
-- "You should have..."
-- "That was silly"
-
-❌ **Competitive:**
-- "I had it worse when..."
-- "At least you didn't..."
-
-❌ **False Reassurance:**
-- "Everything will be okay"
-- "I promise it will get better"
-
-## Handling Silence
-
-Silence is okay! It can mean:
-- They're processing
-- They're gathering courage
-- They need a moment
-
-**Don't:**
-- Rush to fill it
-- Get uncomfortable
-- Change the subject
-
-**Do:**
-- Sit with it
-- Give them space
-- Offer gentle prompts: "Take your time"
-            """,
-            "quiz": {
-                "id": "q4-communication",
-                "title": "Module 4 Quiz - Communication Skills",
-                "pass_rate": 80,
-                "questions": [
-                    {
-                        "id": "q4-1",
-                        "question": "Which is an example of an OPEN question?",
-                        "options": [
-                            "Are you okay?",
-                            "Did that make you angry?",
-                            "How have you been coping with this?",
-                            "Do you want help?"
-                        ],
-                        "correct": "How have you been coping with this?",
-                        "explanation": "Open questions start with How, What, Tell me... and invite detailed responses."
-                    },
-                    {
-                        "id": "q4-2",
-                        "question": "Someone says 'I feel so alone.' A reflective response would be:",
-                        "options": [
-                            "You're not alone, you have me!",
-                            "You're feeling isolated and disconnected",
-                            "That's not true, you have family",
-                            "You should join a club"
-                        ],
-                        "correct": "You're feeling isolated and disconnected",
-                        "explanation": "Reflection acknowledges and mirrors back the feeling without dismissing or fixing."
-                    },
-                    {
-                        "id": "q4-3",
-                        "question": "When there's silence in a conversation, you should:",
-                        "options": [
-                            "Immediately fill it with questions",
-                            "Change the subject",
-                            "Allow space and give gentle prompts if needed",
-                            "End the conversation"
-                        ],
-                        "correct": "Allow space and give gentle prompts if needed",
-                        "explanation": "Silence can be processing time. Allow it without rushing."
-                    },
-                    {
-                        "id": "q4-4",
-                        "question": "'At least you have your health' is an example of:",
-                        "options": [
-                            "Empathic response",
-                            "Active listening",
-                            "Dismissive language",
-                            "Open questioning"
-                        ],
-                        "correct": "Dismissive language",
-                        "explanation": "'At least...' statements minimise the person's experience and dismiss their feelings."
-                    },
-                    {
-                        "id": "q4-5",
-                        "question": "Empathy involves:",
-                        "options": [
-                            "Fixing the person's problems",
-                            "Sharing your worse experiences",
-                            "Acknowledging and validating their feelings",
-                            "Giving immediate advice"
-                        ],
-                        "correct": "Acknowledging and validating their feelings",
-                        "explanation": "Empathy is about understanding and validating, not fixing or comparing."
-                    }
-                ]
-            }
-        },
-        # Continue with more modules...
-        # Modules 5-14 would follow the same structure
-    ]
-}
+class ManualLearnerAdd(BaseModel):
+    """Admin manually add a learner"""
+    full_name: str
+    email: str
+    notes: Optional[str] = None
 
 # ============================================================================
 # API ENDPOINTS
@@ -1278,6 +600,54 @@ The Radio Check Team
         )
     except Exception as e:
         logging.error(f"Failed to send approval email: {e}")
+
+@router.post("/api/lms/admin/learner/add")
+async def admin_add_learner(learner: ManualLearnerAdd, background_tasks: BackgroundTasks):
+    """Admin manually add a learner without requiring registration"""
+    db = get_db()
+    
+    # Check if already enrolled
+    existing = await db.lms_learners.find_one({"email": learner.email})
+    if existing:
+        return {
+            "success": True,
+            "message": f"{learner.full_name} is already enrolled",
+            "already_enrolled": True,
+            "learner_id": str(existing["_id"])
+        }
+    
+    # Create learner record
+    learner_data = {
+        "email": learner.email,
+        "full_name": learner.full_name,
+        "registration_id": None,
+        "manual_add": True,
+        "manual_add_notes": learner.notes,
+        "enrolled_at": datetime.now(timezone.utc),
+        "course_id": MHFA_CURRICULUM["course_id"],
+        "progress": {
+            "completed_modules": [],
+            "current_module": MHFA_CURRICULUM["modules"][0]["id"],
+            "quiz_scores": {},
+            "total_time_spent_minutes": 0
+        },
+        "certificate_issued": False,
+        "certificate_id": None
+    }
+    
+    result = await db.lms_learners.insert_one(learner_data)
+    
+    # Send welcome email (background task)
+    background_tasks.add_task(send_approval_email, learner.email, learner.full_name)
+    
+    return {
+        "success": True,
+        "message": f"Successfully enrolled {learner.full_name}",
+        "learner_id": str(result.inserted_id),
+        "email": learner.email
+    }
+
+
 
 @router.post("/api/lms/admin/registration/{registration_id}/reject")
 async def reject_registration(registration_id: str, reason: str = None, background_tasks: BackgroundTasks = None):

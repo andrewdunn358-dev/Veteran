@@ -647,6 +647,9 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">All Learners</h3>
+                        <button class="btn btn-primary btn-sm" onclick="showAddLearnerModal()">
+                            <i class="fas fa-user-plus"></i> Add Learner Manually
+                        </button>
                     </div>
                     <div class="table-container">
                         <table>
@@ -780,6 +783,36 @@
                 <button class="btn btn-secondary" onclick="saveModule()">
                     <i class="fas fa-save"></i> Save Changes
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Learner Modal -->
+    <div class="modal-overlay" id="addLearnerModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-user-plus"></i> Add Learner Manually</h3>
+                <button class="modal-close" onclick="closeModal('addLearnerModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="color:var(--text-secondary);margin-bottom:1rem;">Add a learner directly without requiring them to register first.</p>
+                <form id="addLearnerForm" onsubmit="handleAddLearner(event)">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-input" id="addLearnerName" placeholder="Enter learner's full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" class="form-input" id="addLearnerEmail" placeholder="Enter learner's email" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes (Optional)</label>
+                        <textarea class="form-input" id="addLearnerNotes" placeholder="Any notes about this learner..." rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="width:100%" id="addLearnerBtn">
+                        <i class="fas fa-user-plus"></i> Add & Enroll Learner
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -1040,6 +1073,52 @@
                 alert(`Progress: ${data.progress_percent}%\nCompleted: ${data.completed_modules} of ${data.total_modules} modules`);
             } catch (error) {
                 console.error('Error:', error);
+            }
+        }
+
+        // Add Learner Manually
+        function showAddLearnerModal() {
+            document.getElementById('addLearnerForm').reset();
+            document.getElementById('addLearnerModal').classList.add('active');
+            document.getElementById('addLearnerName').focus();
+        }
+
+        async function handleAddLearner(event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById('addLearnerBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+            
+            const learnerData = {
+                full_name: document.getElementById('addLearnerName').value.trim(),
+                email: document.getElementById('addLearnerEmail').value.trim(),
+                notes: document.getElementById('addLearnerNotes').value.trim() || null
+            };
+            
+            try {
+                const res = await fetch(`${API_URL}/api/lms/admin/learner/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(learnerData)
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    alert(data.message || 'Learner added successfully!');
+                    closeModal('addLearnerModal');
+                    loadLearners();
+                    loadDashboard();
+                } else {
+                    alert('Error: ' + (data.detail || 'Failed to add learner'));
+                }
+            } catch (error) {
+                console.error('Error adding learner:', error);
+                alert('Failed to add learner. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-user-plus"></i> Add & Enroll Learner';
             }
         }
 

@@ -22,47 +22,64 @@ Build "Radio Check," a mental health and peer support application for veterans a
 
 ### Session: March 8, 2026 (Latest)
 
-**LMS (Learning Management System) Implementation**
-1. **LMS Backend API** (`backend/routers/lms.py`):
-   - Volunteer registration with admin alerts
-   - Admin approve/reject registrations with auto-enrollment
-   - Learner enrollment and progress tracking
-   - Module content delivery with sequential learning
-   - Quiz submission and grading
-   - Certificate generation and verification
-   - All endpoints use async MongoDB operations (motor)
+**COMPLETE LMS (Learning Management System) Implementation**
 
-2. **LMS Admin Dashboard** (`lms-admin/index.html`):
-   - Dashboard with stats (pending registrations, learners, certificates)
-   - Volunteer registrations management (approve/reject)
-   - Learner progress monitoring
-   - Module and quiz management
-   - Certificate verification and revocation
-   - Alert system for new registrations
+**Course: "Radio Check Peer to Peer Training" - All 14 Modules**
 
-3. **LMS Learner Portal** (`lms-learner/`):
-   - Landing page with course overview
-   - Registration of interest form
-   - Login system (email-based)
-   - Dashboard with progress circle
-   - Module cards with completion status
-   - Quiz system with results breakdown
-   - Certificate generation on completion
+1. **Module 1**: Introduction to Mental Health
+2. **Module 2**: The ALGEE Action Plan  
+3. **Module 3**: Ethics and Boundaries (CRITICAL - 100% Required)
+4. **Module 4**: Communication Skills for Peer Supporters
+5. **Module 5**: Crisis Support and Suicide Awareness (CRITICAL - 100% Required)
+6. **Module 6**: Understanding PTSD in Veterans
+7. **Module 7**: Depression and Anxiety in Veterans
+8. **Module 8**: Self-Care for Peer Supporters
+9. **Module 9**: Substance Misuse and Addiction
+10. **Module 10**: Safeguarding (CRITICAL - 100% Required)
+11. **Module 11**: Diversity and Inclusion in Peer Support
+12. **Module 12**: Practical Skills and Resources
+13. **Module 13**: Case Studies and Scenarios
+14. **Module 14**: Course Completion and Next Steps
 
-4. **First 4 Course Modules Populated**:
-   - Module 1: Introduction to Mental Health First Aid
-   - Module 2: The ALGEE Action Plan  
-   - Module 3: BACP Ethics and Boundaries
-   - Module 4: Communication Skills for Peer Supporters
+**Each Module Includes:**
+- Comprehensive text content with external links for further reading
+- Custom generated images
+- Multiple quiz types (MCQ, True/False, Scenario-based)
+- 80% pass rate (100% for critical modules)
+- Links to NHS, Mind, Combat Stress, BACP, and other resources
+
+**LMS Backend API** (`backend/routers/lms.py`, `lms_curriculum.py`, `lms_curriculum_part2.py`):
+- Volunteer registration with admin alerts
+- Admin approve/reject registrations with auto-enrollment
+- **NEW: Admin manual learner add** (bypass registration)
+- Learner enrollment and progress tracking
+- Module content delivery with sequential learning
+- Quiz submission and grading
+- Certificate generation and verification
+- All endpoints use async MongoDB operations (motor)
+
+**LMS Admin Dashboard** (`lms-admin/index.html`):
+- Dashboard with stats (pending registrations, learners, certificates)
+- Volunteer registrations management (approve/reject)
+- **NEW: "Add Learner Manually" button** - enroll learners directly
+- Learner progress monitoring
+- Module and quiz management
+- Certificate verification and revocation
+- Alert system for new registrations
+
+**LMS Learner Portal** (`lms-learner/`):
+- Landing page with course overview
+- Registration of interest form
+- Login system (email-based)
+- Dashboard with progress circle
+- Module cards with completion status
+- Quiz system with results breakdown
+- Certificate generation on completion
 
 **Event Joining Logic Fix**
 - Removed time-gating from event joining (frontend and backend)
 - Users can now join any scheduled/live event for testing
 - "Join Now" buttons appear for all non-cancelled events
-
-**Bug Fixes**
-- Fixed async MongoDB operations in LMS router (motor driver)
-- All LMS admin endpoints now use `await` and `to_list()`
 
 ### Session: March 7, 2026 (Previous)
 
