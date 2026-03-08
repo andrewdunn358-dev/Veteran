@@ -3,11 +3,10 @@
  * Handles course enrollment, module learning, quizzes, and certificates
  */
 
-// Configuration - Update this URL when deploying to production
-// For 20i hosting, set this to your Render backend URL
+// Configuration - Auto-detects environment
 const API_URL = window.location.hostname === 'localhost' || window.location.hostname.includes('preview.emergentagent.com')
     ? window.location.origin  // Use same origin in dev/preview
-    : 'https://your-backend.onrender.com';  // Replace with your Render URL for production
+    : 'https://veterans-support-api.onrender.com';  // Production Render URL
 
 // State
 let currentLearner = null;
