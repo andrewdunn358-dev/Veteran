@@ -1100,3 +1100,157 @@ function showReflectionResults(results, allPassed) {
     document.getElementById('submitReflectionBtn').style.display = 'none';
 }
 
+
+// ============ Mr Clark Chat Widget ============
+
+let chatOpen = false;
+
+function toggleTutorChat() {
+    const chatWindow = document.getElementById('chatWindow');
+    const widget = document.getElementById('tutorChatWidget');
+    chatOpen = !chatOpen;
+    
+    if (chatOpen) {
+        chatWindow.classList.add('open');
+        widget.classList.add('chat-open');
+        document.getElementById('chatInput').focus();
+    } else {
+        chatWindow.classList.remove('open');
+        widget.classList.remove('chat-open');
+    }
+}
+
+async function sendTutorMessage() {
+    if (!currentLearner) {
+        showError('Please log in to chat with Mr Clark');
+        return;
+    }
+    
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    const sendBtn = document.getElementById('chatSendBtn');
+    sendBtn.disabled = true;
+    
+    // Add user message to chat
+    addChatMessage(message, 'user');
+    input.value = '';
+    
+    // Show typing indicator
+    const typingId = showTypingIndicator();
+    
+    try {
+        const res = await fetch(`${API_URL}/api/lms/tutor/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                learner_email: currentLearner.email,
+                message: message,
+                current_module: currentModule?.title || null
+            })
+        });
+        
+        const data = await res.json();
+        
+        // Remove typing indicator
+        removeTypingIndicator(typingId);
+        
+        if (res.ok) {
+            addChatMessage(data.response, 'tutor');
+        } else {
+            addChatMessage("I'm sorry, I'm having trouble responding right now. Please try again in a moment.", 'tutor');
+        }
+    } catch (error) {
+        removeTypingIndicator(typingId);
+        addChatMessage("I'm sorry, I couldn't connect. Please check your internet and try again.", 'tutor');
+        console.error('Chat error:', error);
+    } finally {
+        sendBtn.disabled = false;
+    }
+}
+
+function addChatMessage(content, type) {
+    const messagesContainer = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${type}`;
+    
+    const tutorAvatar = 'https://static.prod-images.emergentagent.com/jobs/535ca64e-70e1-4fc8-813d-3b487fc07905/images/a9bacd4dc492874cedeb536e97e322012136c6e4d632ddf2b353b4dad5037acb.png';
+    
+    if (type === 'tutor') {
+        messageDiv.innerHTML = `
+            <img src="${tutorAvatar}" alt="Mr Clark" class="message-avatar">
+            <div class="message-content">
+                <p>${formatTutorResponse(content)}</p>
+            </div>
+        `;
+    } else {
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                <p>${escapeHtml(content)}</p>
+            </div>
+        `;
+    }
+    
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function formatTutorResponse(text) {
+    // Convert markdown-style formatting to HTML
+    return text
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>')
+        .replace(/^- (.+)$/gm, '• $1');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showTypingIndicator() {
+    const messagesContainer = document.getElementById('chatMessages');
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'chat-message tutor typing-indicator';
+    typingDiv.id = 'typing-' + Date.now();
+    
+    const tutorAvatar = 'https://static.prod-images.emergentagent.com/jobs/535ca64e-70e1-4fc8-813d-3b487fc07905/images/a9bacd4dc492874cedeb536e97e322012136c6e4d632ddf2b353b4dad5037acb.png';
+    
+    typingDiv.innerHTML = `
+        <img src="${tutorAvatar}" alt="Mr Clark" class="message-avatar">
+        <div class="message-content typing">
+            <span></span><span></span><span></span>
+        </div>
+    `;
+    
+    messagesContainer.appendChild(typingDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    return typingDiv.id;
+}
+
+function removeTypingIndicator(id) {
+    const indicator = document.getElementById(id);
+    if (indicator) {
+        indicator.remove();
+    }
+}
+
+// Send message on Enter (Shift+Enter for new line)
+document.addEventListener('DOMContentLoaded', () => {
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendTutorMessage();
+            }
+        });
+    }
+});
+

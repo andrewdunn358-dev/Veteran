@@ -398,6 +398,44 @@
         </div>
     </div>
 
+    <!-- Mr Clark Chat Widget -->
+    <div class="tutor-chat-widget" id="tutorChatWidget">
+        <button class="chat-toggle" id="chatToggleBtn" onclick="toggleTutorChat()">
+            <img src="https://static.prod-images.emergentagent.com/jobs/535ca64e-70e1-4fc8-813d-3b487fc07905/images/a9bacd4dc492874cedeb536e97e322012136c6e4d632ddf2b353b4dad5037acb.png" alt="Mr Clark" class="chat-avatar">
+            <span class="chat-badge">Ask Mr Clark</span>
+        </button>
+        
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <div class="chat-tutor-info">
+                    <img src="https://static.prod-images.emergentagent.com/jobs/535ca64e-70e1-4fc8-813d-3b487fc07905/images/a9bacd4dc492874cedeb536e97e322012136c6e4d632ddf2b353b4dad5037acb.png" alt="Mr Clark">
+                    <div>
+                        <strong>Mr Clark</strong>
+                        <span>Course Tutor</span>
+                    </div>
+                </div>
+                <button class="chat-close" onclick="toggleTutorChat()">&times;</button>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message tutor">
+                    <img src="https://static.prod-images.emergentagent.com/jobs/535ca64e-70e1-4fc8-813d-3b487fc07905/images/a9bacd4dc492874cedeb536e97e322012136c6e4d632ddf2b353b4dad5037acb.png" alt="Mr Clark" class="message-avatar">
+                    <div class="message-content">
+                        <p>Hello! I'm Mr Clark, your course tutor. I'm here to help you understand the material and develop your peer support skills.</p>
+                        <p class="tutor-note"><em>Note: I can guide you through concepts, but I won't give you direct answers to quiz questions - that's for you to work out!</em></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input-area">
+                <textarea id="chatInput" placeholder="Ask Mr Clark a question..." rows="2"></textarea>
+                <button class="chat-send" id="chatSendBtn" onclick="sendTutorMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>

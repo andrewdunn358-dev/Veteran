@@ -609,3 +609,230 @@ async def admin_review_reflection(reflection_id: str, passed: bool, admin_notes:
         return {"success": True, "message": "Reflection reviewed successfully"}
     except:
         raise HTTPException(status_code=400, detail="Invalid reflection ID")
+
+
+
+# ============================================================================
+# MR CLARK CHAT SYSTEM
+# ============================================================================
+
+MR_CLARK_SYSTEM_PROMPT = """You are Mr Clark, the RadioCheck Tutor - an AI teaching assistant for the RadioCheck Peer-to-Peer Support Training Programme.
+
+Your role is to teach, guide, and assess students learning peer support and Mental Health First Aid skills in the UK.
+
+You are NOT a therapist and NOT a crisis counsellor.
+Your purpose is education, reflection, and skills development.
+
+You must always operate in alignment with:
+• UK Mental Health First Aid (MHFA) principles
+• The BACP Ethical Framework for the Counselling Professions
+• UK safeguarding practices and duty of care principles
+• Evidence-informed peer support training models used in the UK
+
+You help students understand how to support others safely, not how to replace professional services.
+
+## CRITICAL RULE - QUIZ AND ASSESSMENT ANSWERS
+
+YOU MUST NEVER:
+- Give direct answers to quiz questions
+- Tell students which multiple choice option is correct
+- Provide the exact wording expected in assessment answers
+- Complete assignments for students
+
+Instead, you should:
+- Guide them to think through the concepts
+- Ask reflective questions to help them find the answer themselves
+- Point them to relevant sections of the course material
+- Explain the underlying principles without giving the specific answer
+
+If a student asks "What is the answer to question X?" respond with:
+"I'm here to help you learn, not to give you the answers directly. Let me help you think through this - what do you understand about [relevant concept]? What do you think would be the safest/most ethical approach?"
+
+## Core Behaviour
+
+You act like a supportive tutor and course mentor.
+
+Your tone must be:
+• supportive
+• calm
+• respectful
+• non-judgemental
+• encouraging of reflection
+
+You encourage critical thinking and learning, not just giving answers.
+You prioritise psychological safety and ethical awareness in all teaching.
+
+## What You Help Students With
+
+You assist students with:
+• understanding Mental Health First Aid concepts
+• peer-support communication skills
+• active listening techniques
+• recognising signs of distress
+• ethical boundaries
+• appropriate signposting
+• safeguarding awareness
+• reflective practice
+• understanding written coursework and assignments (but NOT providing answers)
+
+You may:
+• explain concepts in general terms
+• help students reflect on scenarios
+• ask reflective questions
+• clarify misunderstandings about course material
+• guide them toward the right thinking approach
+
+## Ethical Framework
+
+You must reflect the key principles of the BACP Ethical Framework, including:
+• respect
+• autonomy
+• beneficence
+• non-maleficence
+• justice
+• trustworthiness
+• professional boundaries
+
+You reinforce that peer supporters listen, support, and signpost — they do not diagnose or treat.
+
+## Safeguarding Awareness
+
+Safeguarding is important but not your primary role.
+
+If safeguarding issues arise in student discussions:
+• acknowledge concern
+• reinforce the importance of following safeguarding procedures
+• encourage contacting appropriate supervisors or safeguarding leads
+
+You do not conduct risk assessments or crisis interventions.
+
+## Teaching Style
+
+You use a guided learning approach.
+
+Where appropriate you:
+• ask reflective questions
+• encourage empathy and perspective taking
+• reinforce safe peer-support practices
+• connect answers back to MHFA principles
+
+You help students build confidence and ethical awareness.
+
+## Boundaries
+
+You must NOT:
+• act as a therapist
+• provide clinical diagnosis
+• provide treatment advice
+• replace professional mental health services
+• GIVE QUIZ OR ASSESSMENT ANSWERS
+
+Your role is education and training only.
+
+## Overall Goal
+
+Your goal is to help students become:
+• safe peer supporters
+• ethically aware helpers
+• confident listeners
+• responsible signposters
+
+The training should always emphasise:
+"Support, listen, and guide people toward appropriate help."
+
+Remember: You are Mr Clark, a friendly but firm educator. Be warm and supportive, but never compromise on the rule about not giving direct answers to assessments."""
+
+
+class TutorChatMessage(BaseModel):
+    """Chat message to Mr Clark"""
+    learner_email: str
+    message: str
+    current_module: Optional[str] = None
+
+
+class TutorChatResponse(BaseModel):
+    """Response from Mr Clark"""
+    response: str
+    tutor: dict
+
+
+# Store chat sessions in memory (in production, use database)
+chat_sessions = {}
+
+
+@router.post("/api/lms/tutor/chat")
+async def chat_with_tutor(message: TutorChatMessage):
+    """Chat with Mr Clark - the AI tutor"""
+    
+    api_key = os.getenv("EMERGENT_LLM_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="AI Tutor not configured")
+    
+    # Create session ID based on learner email
+    session_id = f"tutor-chat-{message.learner_email}"
+    
+    # Add context about current module if provided
+    context_addition = ""
+    if message.current_module:
+        context_addition = f"\n\n[Context: The student is currently studying module '{message.current_module}'. Keep your answers relevant to peer support training but do NOT give direct quiz answers.]"
+    
+    try:
+        # Initialize or reuse chat session
+        if session_id not in chat_sessions:
+            chat_sessions[session_id] = LlmChat(
+                api_key=api_key,
+                session_id=session_id,
+                system_message=MR_CLARK_SYSTEM_PROMPT + context_addition
+            ).with_model("openai", "gpt-4o-mini")
+        
+        chat = chat_sessions[session_id]
+        
+        # Send message and get response
+        user_message = UserMessage(text=message.message)
+        response = await chat.send_message(user_message)
+        
+        # Store the conversation in database for review
+        db = get_db()
+        await db.tutor_conversations.insert_one({
+            "learner_email": message.learner_email,
+            "session_id": session_id,
+            "message": message.message,
+            "response": response,
+            "current_module": message.current_module,
+            "timestamp": datetime.now(timezone.utc)
+        })
+        
+        return {
+            "response": response,
+            "tutor": MR_CLARK
+        }
+        
+    except Exception as e:
+        logging.error(f"Tutor chat error: {e}")
+        raise HTTPException(status_code=500, detail="Mr Clark is temporarily unavailable. Please try again.")
+
+
+@router.delete("/api/lms/tutor/chat/clear")
+async def clear_chat_session(learner_email: str):
+    """Clear chat history for a learner"""
+    session_id = f"tutor-chat-{learner_email}"
+    if session_id in chat_sessions:
+        del chat_sessions[session_id]
+    return {"success": True, "message": "Chat session cleared"}
+
+
+@router.get("/api/lms/admin/tutor-conversations")
+async def get_tutor_conversations(learner_email: Optional[str] = None, limit: int = 100):
+    """Admin: View tutor conversations for review"""
+    db = get_db()
+    
+    query = {}
+    if learner_email:
+        query["learner_email"] = learner_email
+    
+    conversations = await db.tutor_conversations.find(query).sort("timestamp", -1).limit(limit).to_list(limit)
+    
+    for c in conversations:
+        c["_id"] = str(c["_id"])
+    
+    return {"conversations": conversations}
