@@ -12,6 +12,8 @@ import secrets
 import logging
 import os
 import resend
+import bcrypt
+import jwt
 
 # Import the full curriculum
 from routers.lms_curriculum_part2 import get_full_curriculum
@@ -20,6 +22,7 @@ router = APIRouter(tags=["LMS"])
 
 # Initialize Resend
 resend.api_key = os.getenv("RESEND_API_KEY")
+LMS_JWT_SECRET = os.getenv("JWT_SECRET", "radiocheck-lms-secret-key-2024")
 
 # Get the full curriculum with all 14 modules
 MHFA_CURRICULUM = get_full_curriculum()
@@ -62,6 +65,45 @@ class ManualLearnerAdd(BaseModel):
     full_name: str
     email: str
     notes: Optional[str] = None
+
+
+class LearnerLogin(BaseModel):
+    """Learner login with email and password"""
+    email: str
+    password: str
+
+
+class LearnerSetPassword(BaseModel):
+    """Set password for a learner (first login after approval)"""
+    email: str
+    password: str
+    confirm_password: str
+
+
+# ============================================================================
+# PASSWORD UTILITY FUNCTIONS
+# ============================================================================
+
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt"""
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+
+def verify_password(password: str, password_hash: str) -> bool:
+    """Verify a password against its hash"""
+    return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
+
+
+def create_learner_token(email: str, full_name: str) -> str:
+    """Create a JWT token for a learner"""
+    payload = {
+        "email": email,
+        "full_name": full_name,
+        "type": "learner",
+        "iat": datetime.now(timezone.utc).timestamp(),
+        "exp": (datetime.now(timezone.utc).timestamp()) + (7 * 24 * 60 * 60)  # 7 days
+    }
+    return jwt.encode(payload, LMS_JWT_SECRET, algorithm="HS256")
 
 # ============================================================================
 # API ENDPOINTS
@@ -202,6 +244,115 @@ async def get_course_info():
         ],
         "certification": "Radio Check Peer Supporter Certificate",
         "dbs_link": "https://www.gov.uk/request-copy-criminal-record"
+    }
+
+
+# ============================================================================
+# LEARNER AUTH ENDPOINTS
+# ============================================================================
+
+@router.post("/api/lms/learner/set-password")
+async def set_learner_password(data: LearnerSetPassword):
+    """Set password for a learner (first login after approval)"""
+    db = get_db()
+    
+    # Validate passwords match
+    if data.password != data.confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match")
+    
+    # Check password strength
+    if len(data.password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    
+    # Find the learner
+    learner = await db.lms_learners.find_one({"email": data.email.lower()})
+    if not learner:
+        raise HTTPException(status_code=404, detail="Learner not found. Please ensure you've been approved first.")
+    
+    # Check if password already set
+    if learner.get("password_hash"):
+        raise HTTPException(status_code=400, detail="Password already set. Please use the login form.")
+    
+    # Hash and save password
+    password_hash = hash_password(data.password)
+    await db.lms_learners.update_one(
+        {"email": data.email.lower()},
+        {"$set": {"password_hash": password_hash, "password_set_at": datetime.now(timezone.utc)}}
+    )
+    
+    # Generate token
+    token = create_learner_token(learner["email"], learner["full_name"])
+    
+    return {
+        "success": True,
+        "message": "Password set successfully! You can now log in.",
+        "token": token,
+        "learner": {
+            "email": learner["email"],
+            "full_name": learner["full_name"]
+        }
+    }
+
+
+@router.post("/api/lms/learner/login")
+async def learner_login(data: LearnerLogin):
+    """Login for learners with email and password"""
+    db = get_db()
+    
+    # Find the learner
+    learner = await db.lms_learners.find_one({"email": data.email.lower()})
+    if not learner:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    # Check if password has been set
+    if not learner.get("password_hash"):
+        raise HTTPException(
+            status_code=400, 
+            detail="Password not set. Please set your password first using the link from your approval email."
+        )
+    
+    # Verify password
+    if not verify_password(data.password, learner["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    # Update last login
+    await db.lms_learners.update_one(
+        {"email": data.email.lower()},
+        {"$set": {"last_login": datetime.now(timezone.utc)}}
+    )
+    
+    # Generate token
+    token = create_learner_token(learner["email"], learner["full_name"])
+    
+    return {
+        "success": True,
+        "token": token,
+        "learner": {
+            "email": learner["email"],
+            "full_name": learner["full_name"],
+            "progress_percent": round(
+                (len(learner["progress"]["completed_modules"]) / len(MHFA_CURRICULUM["modules"])) * 100
+            )
+        }
+    }
+
+
+@router.get("/api/lms/learner/check-status/{email}")
+async def check_learner_status(email: str):
+    """Check if a learner exists and their password status"""
+    db = get_db()
+    
+    learner = await db.lms_learners.find_one({"email": email.lower()})
+    if not learner:
+        return {
+            "exists": False,
+            "message": "Not enrolled. Please register your interest first."
+        }
+    
+    return {
+        "exists": True,
+        "has_password": bool(learner.get("password_hash")),
+        "full_name": learner["full_name"]
     }
 
 @router.post("/api/lms/enroll")
@@ -506,6 +657,27 @@ async def get_admin_alerts(unread_only: bool = False):
         alert["_id"] = str(alert["_id"])
     
     return {"alerts": alerts}
+
+@router.get("/api/lms/admin/module/{module_id}")
+async def get_admin_module_details(module_id: str):
+    """Get full module details including quiz questions for admin view"""
+    module = next((m for m in MHFA_CURRICULUM["modules"] if m["id"] == module_id), None)
+    if not module:
+        raise HTTPException(status_code=404, detail="Module not found")
+    
+    # Return full module data including quiz
+    return {
+        "id": module["id"],
+        "title": module["title"],
+        "description": module["description"],
+        "duration_minutes": module["duration_minutes"],
+        "order": module["order"],
+        "is_critical": module["is_critical"],
+        "image_url": module.get("image_url"),
+        "content": module["content"],
+        "external_links": module.get("external_links", []),
+        "quiz": module.get("quiz")
+    }
 
 @router.post("/api/lms/admin/alert/{alert_id}/read")
 async def mark_alert_read(alert_id: str):

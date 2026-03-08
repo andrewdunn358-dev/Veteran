@@ -16,13 +16,16 @@ let currentModule = null;
 let currentQuiz = null;
 let quizAnswers = {};
 let currentQuestionIndex = 0;
+let authToken = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     // Check for stored learner session
+    const storedToken = localStorage.getItem('lms_token');
     const storedEmail = localStorage.getItem('lms_learner_email');
-    if (storedEmail) {
-        await loginLearner(storedEmail);
+    if (storedToken && storedEmail) {
+        authToken = storedToken;
+        await loadLearnerProgress(storedEmail);
     }
     
     // Load course info for landing page
@@ -69,44 +72,208 @@ function closeModal(modalId) {
 
 async function handleLogin(event) {
     event.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const password = document.getElementById('loginPassword').value;
     
-    if (!email) return;
+    if (!email || !password) {
+        showError('Please enter both email and password');
+        return;
+    }
     
     const btn = document.getElementById('loginBtn');
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
     
     try {
-        await loginLearner(email);
+        const res = await fetch(`${API_URL}/api/lms/learner/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+            // Check if password needs to be set
+            if (res.status === 400 && data.detail && data.detail.includes('Password not set')) {
+                closeModal('loginModal');
+                showSetPasswordModal(email);
+                return;
+            }
+            throw new Error(data.detail || 'Login failed');
+        }
+        
+        // Store session
+        authToken = data.token;
+        localStorage.setItem('lms_token', data.token);
+        localStorage.setItem('lms_learner_email', email);
+        
+        // Load full progress
+        await loadLearnerProgress(email);
         closeModal('loginModal');
+        
     } catch (error) {
-        alert(error.message || 'Login failed. Please check your email or register first.');
+        showError(error.message || 'Login failed. Please check your credentials.');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Access Training';
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
     }
 }
 
-async function loginLearner(email) {
-    const res = await fetch(`${API_URL}/api/lms/progress/${encodeURIComponent(email)}`);
-    
-    if (!res.ok) {
-        throw new Error('Learner not found. Please register first or check your email.');
+function showSetPasswordModal(email) {
+    // Create set password modal if it doesn't exist
+    if (!document.getElementById('setPasswordModal')) {
+        createSetPasswordModal();
     }
     
-    const data = await res.json();
-    currentLearner = data.learner;
-    learnerProgress = data;
+    document.getElementById('setPasswordEmail').value = email;
+    document.getElementById('setPasswordModal').classList.add('active');
+    document.getElementById('newPassword').focus();
+}
+
+function createSetPasswordModal() {
+    const modal = document.createElement('div');
+    modal.id = 'setPasswordModal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h2><i class="fas fa-key"></i> Set Your Password</h2>
+                <button class="modal-close" onclick="closeModal('setPasswordModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    Welcome! Your registration has been approved. Please set a password to access your training account.
+                </p>
+                <form onsubmit="handleSetPassword(event)">
+                    <input type="hidden" id="setPasswordEmail">
+                    
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" id="newPassword" class="form-input" required minlength="8" placeholder="Minimum 8 characters">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" id="confirmPassword" class="form-input" required minlength="8" placeholder="Confirm your password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <p class="form-help">
+                            <i class="fas fa-info-circle"></i> Choose a strong password with at least 8 characters.
+                        </p>
+                    </div>
+                    
+                    <button type="submit" id="setPasswordBtn" class="btn btn-secondary btn-block btn-lg">
+                        <i class="fas fa-check"></i> Set Password & Continue
+                    </button>
+                </form>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+async function handleSetPassword(event) {
+    event.preventDefault();
     
-    // Store session
-    localStorage.setItem('lms_learner_email', email);
+    const email = document.getElementById('setPasswordEmail').value;
+    const password = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
     
-    // Update header
-    updateHeaderForLoggedIn();
+    if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        return;
+    }
     
-    // Show dashboard
-    showDashboard();
+    if (password.length < 8) {
+        showError('Password must be at least 8 characters');
+        return;
+    }
+    
+    const btn = document.getElementById('setPasswordBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Setting Password...';
+    
+    try {
+        const res = await fetch(`${API_URL}/api/lms/learner/set-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, confirm_password: confirmPassword })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+            throw new Error(data.detail || 'Failed to set password');
+        }
+        
+        // Store session
+        authToken = data.token;
+        localStorage.setItem('lms_token', data.token);
+        localStorage.setItem('lms_learner_email', email);
+        
+        closeModal('setPasswordModal');
+        
+        // Show success and load dashboard
+        document.getElementById('successTitle').textContent = 'Password Set Successfully!';
+        document.getElementById('successMessage').innerHTML = `
+            You can now access your training course.<br><br>
+            Click "Start Learning" to begin.
+        `;
+        document.getElementById('successModal').classList.add('active');
+        
+        await loadLearnerProgress(email);
+        
+    } catch (error) {
+        showError(error.message || 'Failed to set password');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check"></i> Set Password & Continue';
+    }
+}
+
+function showError(message) {
+    // Create a toast notification
+    const toast = document.createElement('div');
+    toast.className = 'toast-error';
+    toast.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--danger);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        z-index: 9999;
+        animation: slideUp 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+
+async function loadLearnerProgress(email) {
+    try {
+        const res = await fetch(`${API_URL}/api/lms/progress/${encodeURIComponent(email)}`);
+        
+        if (!res.ok) {
+            throw new Error('Failed to load progress');
+        }
+        
+        const data = await res.json();
+        currentLearner = data.learner;
+        learnerProgress = data;
+        
+        updateHeaderForLoggedIn();
+        showDashboard();
+    } catch (error) {
+        console.error('Error loading progress:', error);
+        logout();
+    }
 }
 
 function updateHeaderForLoggedIn() {
@@ -122,8 +289,10 @@ function updateHeaderForLoggedIn() {
 
 function logout() {
     localStorage.removeItem('lms_learner_email');
+    localStorage.removeItem('lms_token');
     currentLearner = null;
     learnerProgress = null;
+    authToken = null;
     
     // Reset header
     document.getElementById('headerActions').innerHTML = `
@@ -342,8 +511,24 @@ async function openModule(moduleId) {
         // Critical badge
         document.getElementById('criticalBadge').style.display = currentModule.is_critical ? 'inline-flex' : 'none';
         
-        // Render content (simple markdown to HTML)
-        document.getElementById('moduleContent').innerHTML = renderMarkdown(currentModule.content);
+        // Render content with image (simple markdown to HTML)
+        const contentHtml = renderMarkdown(currentModule.content);
+        document.getElementById('moduleContent').innerHTML = renderModuleWithImage(currentModule, contentHtml);
+        
+        // Also show external links if available
+        if (currentModule.external_links && currentModule.external_links.length > 0) {
+            const linksHtml = `
+                <div class="external-links">
+                    <h3><i class="fas fa-external-link-alt"></i> Further Reading</h3>
+                    <ul>
+                        ${currentModule.external_links.map(link => `
+                            <li><a href="${link.url}" target="_blank" rel="noopener">${link.title}</a></li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+            document.getElementById('moduleContent').innerHTML += linksHtml;
+        }
         
         // Update sidebar
         renderModuleSidebar();
@@ -393,6 +578,12 @@ function renderMarkdown(content) {
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         // Italic
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        // Links
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+        // Blockquotes
+        .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+        // Horizontal rules
+        .replace(/^---$/gm, '<hr>')
         // Lists
         .replace(/^- (.+)$/gm, '<li>$1</li>')
         // Line breaks
@@ -403,9 +594,22 @@ function renderMarkdown(content) {
             return `<tr>${cells.map(c => `<td>${c.trim()}</td>`).join('')}</tr>`;
         })
         // Wrap in paragraphs
-        .replace(/^(?!<h|<li|<tr|<table|<ul|<ol|<p)(.+)$/gm, '<p>$1</p>')
+        .replace(/^(?!<h|<li|<tr|<table|<ul|<ol|<p|<blockquote|<hr)(.+)$/gm, '<p>$1</p>')
         // Wrap list items
         .replace(/(<li>.*<\/li>)+/g, '<ul>$&</ul>');
+}
+
+function renderModuleWithImage(module, contentHtml) {
+    // Add module image at the top if available
+    let imageHtml = '';
+    if (module.image_url) {
+        imageHtml = `
+            <div class="module-hero-image">
+                <img src="${module.image_url}" alt="${module.title}" loading="lazy">
+            </div>
+        `;
+    }
+    return imageHtml + contentHtml;
 }
 
 // ============ Quiz ============

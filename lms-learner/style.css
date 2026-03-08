@@ -53,14 +53,72 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-primary);
+}
+
+.logo-image {
+    height: 45px;
+    width: auto;
 }
 
 .logo i {
     color: var(--secondary);
     font-size: 1.75rem;
+}
+
+/* Module Hero Image */
+.module-hero-image {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.module-hero-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* External Links */
+.external-links {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--bg-dark);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.external-links h3 {
+    color: var(--secondary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.external-links ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.external-links li {
+    margin-bottom: 0.75rem;
+}
+
+.external-links a {
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.external-links a:hover {
+    color: var(--secondary);
 }
 
 /* Main Content */

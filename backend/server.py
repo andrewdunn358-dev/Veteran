@@ -6949,7 +6949,7 @@ app.add_middleware(
         "https://veteran.dbty.co.uk",
         "https://www.veteran.dbty.co.uk",
         "https://veterans-support-api.onrender.com",
-        "https://wellness-connect-82.preview.emergentagent.com",
+        "https://bacp-training.preview.emergentagent.com",
     ],
     allow_origin_regex=r"https://.*\.emergentagent\.com|https://.*\.vercel\.app|https://.*\.onrender\.com|https://.*\.radiocheck\.me",
     allow_methods=["*"],
@@ -7485,16 +7485,16 @@ LMS_ADMIN_PATH = Path(__file__).parent.parent / "lms-admin"
 LMS_LEARNER_PATH = Path(__file__).parent.parent / "lms-learner"
 
 if PORTAL_PATH.exists():
-    app.mount("/portal", StaticFiles(directory=str(PORTAL_PATH), html=True), name="staff-portal")
+    app.mount("/api/portal", StaticFiles(directory=str(PORTAL_PATH), html=True), name="staff-portal")
     
 if ADMIN_PATH.exists():
-    app.mount("/admin", StaticFiles(directory=str(ADMIN_PATH), html=True), name="admin-site")
+    app.mount("/api/admin", StaticFiles(directory=str(ADMIN_PATH), html=True), name="admin-site")
 
 if LMS_ADMIN_PATH.exists():
-    app.mount("/lms-admin", StaticFiles(directory=str(LMS_ADMIN_PATH), html=True), name="lms-admin")
+    app.mount("/api/lms-admin", StaticFiles(directory=str(LMS_ADMIN_PATH), html=True), name="lms-admin")
 
 if LMS_LEARNER_PATH.exists():
-    app.mount("/training", StaticFiles(directory=str(LMS_LEARNER_PATH), html=True), name="lms-learner")
+    app.mount("/api/training", StaticFiles(directory=str(LMS_LEARNER_PATH), html=True), name="lms-learner")
 
 # Mount static files for uploaded avatars
 STATIC_AVATARS_PATH = Path(__file__).parent / "static" / "avatars"

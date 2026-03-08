@@ -1333,9 +1333,82 @@
             `).join('');
         }
 
-        function editModule(moduleId) {
-            // In production, this would open an editor
-            alert(`Module editor for ${moduleId} would open here.\n\nIn the full version, you'll be able to:\n- Edit module content (Markdown)\n- Add/edit quiz questions\n- Upload images\n- Reorder content`);
+        async function editModule(moduleId) {
+            try {
+                const res = await fetch(`${API_URL}/api/lms/admin/module/${moduleId}`);
+                if (!res.ok) throw new Error('Failed to fetch module');
+                const module = await res.json();
+                
+                document.getElementById('moduleModalTitle').textContent = `Module: ${module.title}`;
+                document.getElementById('moduleModalBody').innerHTML = `
+                    <div class="form-group">
+                        <label class="form-label">Module ID</label>
+                        <p style="color:var(--secondary);">${module.id}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-input" id="editModuleTitle" value="${module.title}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="editModuleDesc" rows="2">${module.description}</textarea>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Duration (minutes)</label>
+                            <input type="number" class="form-input" id="editModuleDuration" value="${module.duration_minutes}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Order</label>
+                            <input type="number" class="form-input" id="editModuleOrder" value="${module.order}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label checkbox-label">
+                            <input type="checkbox" id="editModuleCritical" ${module.is_critical ? 'checked' : ''}>
+                            <span>Critical Module (100% pass required)</span>
+                        </label>
+                    </div>
+                    ${module.image_url ? `
+                        <div class="form-group">
+                            <label class="form-label">Module Image</label>
+                            <img src="${module.image_url}" style="max-width:100%;max-height:200px;border-radius:8px;margin-top:0.5rem;">
+                        </div>
+                    ` : ''}
+                    <div class="form-group">
+                        <label class="form-label">Content Preview</label>
+                        <div style="max-height:200px;overflow-y:auto;background:var(--bg-dark);padding:1rem;border-radius:8px;font-family:monospace;font-size:0.85rem;white-space:pre-wrap;">
+${module.content ? module.content.substring(0, 1000) + (module.content.length > 1000 ? '\n\n... (content truncated)' : '') : 'No content'}
+                        </div>
+                    </div>
+                    ${module.quiz ? `
+                        <div class="form-group">
+                            <label class="form-label">Quiz Information</label>
+                            <div style="background:var(--bg-dark);padding:1rem;border-radius:8px;">
+                                <p><strong>Quiz:</strong> ${module.quiz.title}</p>
+                                <p><strong>Questions:</strong> ${module.quiz.questions.length}</p>
+                                <p><strong>Pass Rate:</strong> ${module.quiz.pass_rate}%</p>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${module.external_links && module.external_links.length > 0 ? `
+                        <div class="form-group">
+                            <label class="form-label">External Links</label>
+                            <ul style="margin-left:1rem;">
+                                ${module.external_links.map(link => `<li><a href="${link.url}" target="_blank" style="color:var(--secondary);">${link.title}</a></li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:1rem;">
+                        <i class="fas fa-info-circle"></i> Note: Module content is defined in the curriculum file. Contact development team to modify content.
+                    </p>
+                `;
+                
+                document.getElementById('moduleModal').classList.add('active');
+            } catch (error) {
+                console.error('Error loading module:', error);
+                alert('Failed to load module details. Please try again.');
+            }
         }
 
         // Quizzes
@@ -1355,24 +1428,78 @@
             `;
         }
 
-        function loadQuizForModule(moduleId) {
+        async function loadQuizForModule(moduleId) {
             if (!moduleId) {
                 document.getElementById('quizEditor').innerHTML = '';
                 return;
             }
 
-            // For now, show a placeholder
-            document.getElementById('quizEditor').innerHTML = `
-                <p style="color:var(--text-secondary);">
-                    Quiz editor for this module would appear here.<br><br>
-                    In the full version, you'll be able to:<br>
-                    - Add/edit/delete questions<br>
-                    - Set correct answers<br>
-                    - Add explanations<br>
-                    - Set pass rates<br>
-                    - Preview the quiz
-                </p>
-            `;
+            // Fetch full module data including quiz
+            try {
+                const module = courseData.modules.find(m => m.id === moduleId);
+                if (!module) {
+                    document.getElementById('quizEditor').innerHTML = '<p style="color:var(--text-secondary);">Module not found.</p>';
+                    return;
+                }
+
+                // Fetch the full module with quiz from a different endpoint
+                const res = await fetch(`${API_URL}/api/lms/admin/module/${moduleId}`);
+                if (!res.ok) {
+                    throw new Error('Failed to fetch module details');
+                }
+                const moduleData = await res.json();
+                
+                if (!moduleData.quiz || !moduleData.quiz.questions || moduleData.quiz.questions.length === 0) {
+                    document.getElementById('quizEditor').innerHTML = '<p style="color:var(--text-secondary);">No quiz questions found for this module.</p>';
+                    return;
+                }
+
+                const quiz = moduleData.quiz;
+                
+                document.getElementById('quizEditor').innerHTML = `
+                    <div class="quiz-info" style="margin-bottom:1.5rem;padding:1rem;background:var(--bg-dark);border-radius:8px;">
+                        <h4 style="margin-bottom:0.5rem;">${quiz.title}</h4>
+                        <p style="color:var(--text-secondary);font-size:0.9rem;">
+                            Pass Rate: <strong style="color:var(--secondary)">${quiz.pass_rate}%</strong> 
+                            | Questions: <strong>${quiz.questions.length}</strong>
+                        </p>
+                    </div>
+                    
+                    <div class="questions-list">
+                        ${quiz.questions.map((q, idx) => `
+                            <div class="question-card" style="margin-bottom:1rem;padding:1.25rem;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;">
+                                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">
+                                    <span class="badge badge-${q.type === 'true_false' ? 'primary' : q.type === 'scenario' ? 'warning' : 'success'}" style="font-size:0.75rem;">
+                                        ${q.type === 'true_false' ? 'True/False' : q.type === 'scenario' ? 'Scenario' : 'Multiple Choice'}
+                                    </span>
+                                    <span style="color:var(--text-secondary);font-size:0.85rem;">Q${idx + 1}</span>
+                                </div>
+                                <p style="font-weight:600;margin-bottom:1rem;">${q.question}</p>
+                                <div class="options" style="margin-bottom:1rem;">
+                                    ${q.options.map((opt, optIdx) => `
+                                        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0.75rem;margin:0.25rem 0;border-radius:6px;background:${opt === q.correct ? 'rgba(34, 197, 94, 0.15)' : 'transparent'};border:1px solid ${opt === q.correct ? 'var(--success)' : 'var(--border)'};">
+                                            <span style="width:24px;height:24px;border-radius:50%;background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:600;">${String.fromCharCode(65 + optIdx)}</span>
+                                            <span style="flex:1;">${opt}</span>
+                                            ${opt === q.correct ? '<i class="fas fa-check" style="color:var(--success);"></i>' : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div style="background:rgba(201, 162, 39, 0.1);padding:0.75rem;border-radius:6px;font-size:0.9rem;color:var(--text-secondary);">
+                                    <strong style="color:var(--secondary);">Explanation:</strong> ${q.explanation}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading quiz:', error);
+                document.getElementById('quizEditor').innerHTML = `
+                    <p style="color:var(--danger);">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Error loading quiz questions. Please try again.
+                    </p>
+                `;
+            }
         }
 
         // Alerts
