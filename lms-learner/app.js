@@ -433,16 +433,20 @@ function renderModules() {
         const isCompleted = status.completed;
         const score = status.score;
         
+        // Check if this is the admin preview account - can access all modules
+        const isAdminPreview = currentLearner.email.toLowerCase() === 'admin-preview@radiocheck.me';
+        
         // Check if this is the current module (first incomplete)
         const isCurrent = !isCompleted && (index === 0 || moduleStatus[index - 1]?.completed);
         
-        // Check if locked (previous module not complete)
-        const isLocked = index > 0 && !moduleStatus[index - 1]?.completed && !isCompleted;
+        // Check if locked (previous module not complete) - unless admin preview
+        const isLocked = !isAdminPreview && index > 0 && !moduleStatus[index - 1]?.completed && !isCompleted;
         
         let cardClass = 'module-card';
         if (isCompleted) cardClass += ' completed';
         else if (isCurrent) cardClass += ' current';
         else if (isLocked) cardClass += ' locked';
+        else if (isAdminPreview) cardClass += ' admin-preview';
         
         return `
             <div class="${cardClass}" onclick="${isLocked ? '' : `openModule('${module.id}')`}">
@@ -459,6 +463,7 @@ function renderModules() {
                     ${isCompleted ? `<span class="module-score">${score}%</span>` : ''}
                     ${module.is_critical ? '<span class="badge badge-danger">Critical</span>' : ''}
                     ${isLocked ? '<span><i class="fas fa-lock"></i> Locked</span>' : ''}
+                    ${isAdminPreview && !isCompleted && !isCurrent ? '<span class="badge badge-warning"><i class="fas fa-eye"></i> Preview</span>' : ''}
                 </div>
             </div>
         `;

@@ -75,73 +75,151 @@ Mental health is a state of wellbeing in which an individual:
 
 **Mental health is not simply the absence of mental illness.** We all have mental health, just as we all have physical health. It exists on a spectrum and fluctuates based on life circumstances.
 
+### The Mental Health Continuum
+
+Think of mental health as a continuum rather than a fixed state:
+
+**Thriving** → **Surviving** → **Struggling** → **In Crisis**
+
+Everyone moves along this continuum throughout their lives. A veteran might be thriving one month, then experience a trigger that moves them towards struggling. This is normal and doesn't mean they have a mental illness.
+
+**Factors that affect where we are on the continuum:**
+- Sleep quality and quantity
+- Physical health and exercise
+- Relationships and social connections
+- Work or purpose
+- Financial security
+- Life events (bereavement, divorce, job loss)
+- Past trauma or experiences
+- Access to support
+
 ---
 
 ## Mental Health vs Mental Illness
+
+It's crucial to understand the difference between mental health and mental illness:
 
 | Mental Health | Mental Illness |
 |---------------|----------------|
 | How we think, feel, and cope | A diagnosable condition |
 | Fluctuates day to day | Requires professional treatment |
-| Affected by life events | Has specific symptoms |
-| Everyone has it | Affects 1 in 4 people |
+| Affected by life events | Has specific symptoms and criteria |
+| Everyone has it | Affects approximately 1 in 4 people |
+| Can be improved with self-care | May require medication or therapy |
+
+### Common Mental Health Conditions
+
+**Depression** - Persistent low mood, loss of interest, feelings of worthlessness. More than just "feeling sad" - it affects daily functioning.
+
+**Anxiety Disorders** - Excessive worry, panic attacks, phobias. The body's threat response becomes overactive.
+
+**Post-Traumatic Stress Disorder (PTSD)** - Develops after experiencing or witnessing traumatic events. Includes flashbacks, nightmares, hypervigilance.
+
+**Complex PTSD** - Results from prolonged, repeated trauma. Common in veterans exposed to multiple deployments.
+
+**Moral Injury** - Psychological damage from actions (or inaction) that violate one's moral code. Often co-occurs with PTSD in veterans.
 
 ---
 
-## Veteran Mental Health Statistics
+## Veteran Mental Health: Understanding the Unique Challenges
 
-Understanding the scale of the challenge:
+### The Statistics
+
+Understanding the scale of the challenge helps us recognise how vital peer support is:
 
 - **1 in 5** veterans experience depression, anxiety, or PTSD
 - Veterans are **2-3x more likely** to experience depression than civilians
-- **Average of 2 veteran suicides per week** in the UK
+- **Average of 2 veteran suicides per week** in the UK (Office for National Statistics)
 - Only **50%** of veterans with mental health issues seek help
 - **17%** of veterans report symptoms of PTSD
-- Transition from military to civilian life is a high-risk period
+- **Transition from military to civilian life** is identified as a high-risk period
+- Mental health conditions often emerge **years after leaving service**
+
+### Why Veterans Are at Higher Risk
+
+**Combat Exposure**
+Direct exposure to life-threatening situations, witnessing death, and making life-or-death decisions leaves lasting psychological impacts.
+
+**Moral Injury**
+Veterans may struggle with actions they took (or didn't take) during service that conflict with their personal moral code. This is different from PTSD but equally damaging.
+
+**Military Culture**
+The culture of strength, stoicism, and "cracking on" can prevent veterans from acknowledging their struggles or seeking help.
+
+**Loss of Identity**
+For many, being a soldier was their entire identity. Leaving the military can feel like losing who you are.
+
+**Loss of Structure**
+Military life provides clear structure, purpose, and belonging. Civilian life can feel chaotic and meaningless by comparison.
+
+**Loss of Comradeship**
+The bonds formed in military service are unique. Many veterans struggle to form similar connections in civilian life.
+
+**Physical Injuries**
+Physical injuries from service can lead to chronic pain, disability, and associated mental health difficulties.
 
 ---
 
 ## Barriers to Seeking Help
 
-Veterans face unique barriers that prevent them from accessing support:
+Veterans face unique barriers that prevent them from accessing the support they need:
 
-### Stigma
-"Real soldiers don't need help" - the culture of strength can make admitting struggle feel like failure.
+### 1. Stigma
+*"Real soldiers don't need help"* - Military culture often portrays mental health struggles as weakness. Many veterans fear judgment from fellow veterans or society.
 
-### Pride and Self-Reliance
-Military training instils self-reliance, making it hard to ask for help.
+### 2. Pride and Self-Reliance
+Military training instils self-reliance and the ability to cope under extreme pressure. Asking for help can feel like admitting failure.
 
-### Distrust
-Many veterans don't believe civilian services understand military life.
+### 3. Distrust of Services
+Many veterans don't believe civilian services understand military life. Previous negative experiences with military or NHS mental health services reinforce this.
 
-### Identity
-For many, being a soldier was their identity. Admitting mental health struggles can feel like losing that identity.
+### 4. Difficulty Identifying Problems
+The military trains you to suppress emotions and carry on. Many veterans don't recognise their symptoms as mental health issues - they think it's just "how they are now."
 
-### Access
-Not knowing what services exist or how to access them.
+### 5. Fear of Consequences
+Some veterans fear that admitting mental health struggles will affect their employment, security clearance, or how others perceive them.
 
-### Previous Negative Experiences
-Some veterans have had poor experiences with mental health services in the past.
+### 6. Lack of Awareness
+Many veterans simply don't know what support services exist or how to access them.
+
+### 7. Minimisation
+*"Others had it worse"* - Veterans often compare their experiences to those with more severe injuries or trauma, dismissing their own struggles as unimportant.
+
+**This is where YOU come in as a peer supporter.** You understand these barriers because you may have faced them yourself. You can bridge the gap between veterans and professional services.
 
 ---
 
 ## The Role of Peer Support
 
-As a Radio Check Peer Supporter, you are NOT a therapist, counsellor, or mental health professional.
+As a Radio Check Peer Supporter, your role is carefully defined and bounded. Understanding what you ARE and what you ARE NOT is essential for safe, ethical practice.
 
 ### You ARE:
-- A listening ear
-- Someone who understands military life
-- A bridge to professional services
-- A fellow veteran who "gets it"
-- A consistent, reliable presence
+
+✅ **A listening ear** - Sometimes people just need to be heard without judgment
+
+✅ **Someone who understands military life** - Your shared experience creates instant trust
+
+✅ **A bridge to professional services** - You help connect veterans with appropriate support
+
+✅ **A fellow veteran who "gets it"** - The power of shared experience cannot be underestimated
+
+✅ **A consistent, reliable presence** - Showing up regularly builds trust
+
+✅ **A sign that recovery is possible** - Your presence shows that veterans can get through difficult times
 
 ### You are NOT:
-- A therapist or counsellor
-- Able to diagnose conditions
-- A replacement for professional help
-- Available 24/7
-- Responsible for "fixing" anyone
+
+❌ **A therapist or counsellor** - This requires years of training and professional qualification
+
+❌ **Able to diagnose conditions** - Only qualified professionals can diagnose mental health conditions
+
+❌ **A replacement for professional help** - You complement professional services, not replace them
+
+❌ **Available 24/7** - You need boundaries to protect your own wellbeing
+
+❌ **Responsible for "fixing" anyone** - You cannot control another person's recovery
+
+❌ **Expected to have all the answers** - Saying "I don't know, but let's find out together" is perfectly acceptable
 
 **Your role is to SUPPORT, not to FIX.**
 
@@ -149,33 +227,66 @@ As a Radio Check Peer Supporter, you are NOT a therapist, counsellor, or mental 
 
 ## Key Principle: Working Within Your Limits
 
-As a peer supporter, always remember:
+As a peer supporter, this principle will guide everything you do:
 
-> "I am here to listen and support. I am not here to diagnose, treat, or cure. I know my limits and I refer to professionals when needed."
+> *"I am here to listen and support. I am not here to diagnose, treat, or cure. I know my limits and I refer to professionals when needed."*
 
-This principle will guide everything you do as a Radio Check Peer Supporter.
+### Why Limits Matter
+
+**For the veteran you're supporting:**
+- They deserve appropriate professional help when needed
+- Peer support that oversteps can delay proper treatment
+- False reassurance can be harmful
+
+**For you:**
+- Prevents burnout and secondary trauma
+- Protects you from taking on responsibilities beyond your training
+- Keeps you effective in your role long-term
+
+**For Radio Check:**
+- Maintains the integrity and reputation of the service
+- Ensures consistent, safe support across all peer supporters
+- Protects everyone legally and ethically
 
 ---
 
-## Further Reading
+## Understanding Your Own Mental Health
 
-Expand your knowledge with these resources:
+Before you can support others, you need to be aware of your own mental health:
 
-- **Mind - Understanding Mental Health**: https://www.mind.org.uk/information-support/types-of-mental-health-problems/
-- **Royal British Legion - Mental Health**: https://www.britishlegion.org.uk/get-support/mental-health
-- **Combat Stress - Veterans Mental Health**: https://combatstress.org.uk/
-- **NHS - Every Mind Matters**: https://www.nhs.uk/every-mind-matters/
-- **Op Courage - NHS Veteran Mental Health**: https://www.nhs.uk/nhs-services/armed-forces-community/mental-health/veterans-reservists/
+### Questions to Ask Yourself
+
+- How am I feeling right now on the mental health continuum?
+- Do I have unresolved issues that might affect my ability to support others?
+- What are my triggers?
+- What do I do to look after my own mental health?
+- Who supports me when I'm struggling?
+
+### The Importance of Self-Care
+
+You cannot pour from an empty cup. Throughout this training and your time as a peer supporter, you must prioritise your own wellbeing. Module 8 covers self-care in detail.
 
 ---
 
 ## Summary
 
 In this module, you learned:
-- Mental health is more than the absence of illness
-- Veterans face unique mental health challenges and barriers
-- Peer support is about listening, not fixing
-- Working within your limits is essential
+
+✅ **Mental health is more than the absence of illness** - It's a continuum that fluctuates for everyone
+
+✅ **Veterans face unique mental health challenges** - Combat exposure, moral injury, loss of identity, and military culture all contribute
+
+✅ **Significant barriers prevent veterans seeking help** - Stigma, pride, distrust, and lack of awareness
+
+✅ **Peer support is about listening, not fixing** - Your role is clearly defined and bounded
+
+✅ **Working within your limits is essential** - For the veteran, for you, and for Radio Check
+
+---
+
+## What's Next?
+
+In Module 2, you'll learn the **ALGEE Action Plan** - the framework that will guide all your peer support interactions.
             """,
             "external_links": [
                 {"title": "Mind - Understanding Mental Health", "url": "https://www.mind.org.uk/information-support/types-of-mental-health-problems/"},

@@ -772,6 +772,9 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">All Modules</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="previewCourseAsAdmin()">
+                            <i class="fas fa-eye"></i> Preview Course as Learner
+                        </button>
                     </div>
                     <div id="modulesList">
                         <p>Loading modules...</p>
@@ -1857,6 +1860,45 @@ ${module.content ? module.content.substring(0, 1000) + (module.content.length > 
                 }
             });
         });
+
+        // Preview Course as Admin
+        async function previewCourseAsAdmin() {
+            // Create or get admin preview account
+            const adminEmail = 'admin-preview@radiocheck.me';
+            const adminPassword = 'AdminPreview2024!';
+            
+            try {
+                // Try to add admin preview account (will return existing if already created)
+                const res = await fetch(`${API_URL}/api/lms/admin/learner/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        full_name: 'Admin Preview Account',
+                        email: adminEmail,
+                        password: adminPassword,
+                        notes: 'Admin preview account for course testing'
+                    })
+                });
+                
+                const data = await res.json();
+                
+                // Store credentials for the learner portal
+                localStorage.setItem('admin_preview_email', adminEmail);
+                localStorage.setItem('admin_preview_password', adminPassword);
+                
+                // Open learner portal in new tab with preview credentials
+                const learnerUrl = API_URL.includes('localhost') || API_URL.includes('emergentagent') 
+                    ? `${API_URL}/api/training/?preview=admin`
+                    : 'https://radiocheck.me/training/?preview=admin';
+                
+                alert(`Opening Course Preview...\n\nLogin with:\nEmail: ${adminEmail}\nPassword: ${adminPassword}`);
+                window.open(learnerUrl, '_blank');
+                
+            } catch (error) {
+                console.error('Error creating preview account:', error);
+                alert('Failed to create preview account. Please try again.');
+            }
+        }
     </script>
 </body>
 </html>

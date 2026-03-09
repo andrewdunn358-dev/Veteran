@@ -398,7 +398,7 @@ async def enroll_learner(enrollment: LearnerEnrollment):
     }
 
 @router.get("/api/lms/module/{module_id}")
-async def get_module(module_id: str, learner_email: str):
+async def get_module(module_id: str, learner_email: str, admin_preview: bool = False):
     """Get module content for a learner"""
     db = get_db()
     
@@ -412,9 +412,12 @@ async def get_module(module_id: str, learner_email: str):
     if not module:
         raise HTTPException(status_code=404, detail="Module not found")
     
-    # Check if previous modules completed (sequential learning)
+    # Check if admin preview account - skip module lock
+    is_admin_preview = learner_email.lower() == 'admin-preview@radiocheck.me'
+    
+    # Check if previous modules completed (sequential learning) - unless admin preview
     module_order = module["order"]
-    if module_order > 1:
+    if module_order > 1 and not is_admin_preview:
         prev_module_id = MHFA_CURRICULUM["modules"][module_order - 2]["id"]
         if prev_module_id not in learner["progress"]["completed_modules"]:
             raise HTTPException(
@@ -425,7 +428,8 @@ async def get_module(module_id: str, learner_email: str):
     return {
         "module": module,
         "is_completed": module_id in learner["progress"]["completed_modules"],
-        "quiz_score": learner["progress"]["quiz_scores"].get(module_id)
+        "quiz_score": learner["progress"]["quiz_scores"].get(module_id),
+        "is_admin_preview": is_admin_preview
     }
 
 @router.post("/api/lms/quiz/submit")
