@@ -371,7 +371,7 @@
                     <div class="form-group">
                         <label class="form-label checkbox-label">
                             <input type="checkbox" id="regTerms" required>
-                            <span>I agree to the <a href="#" target="_blank">terms and conditions</a> and understand this is a volunteer position *</span>
+                            <span>I agree to the <a href="#" onclick="showTermsModal(event)">terms and conditions</a> and understand this is a volunteer position *</span>
                         </label>
                     </div>
                     
@@ -396,6 +396,137 @@
                 </p>
                 <button class="btn btn-primary" onclick="closeModal('successModal')">
                     <i class="fas fa-check"></i> Got it
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms and Conditions Modal -->
+    <div class="modal-overlay" id="termsModal">
+        <div class="modal modal-xl">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-contract"></i> Terms and Conditions</h2>
+                <button class="modal-close" onclick="closeModal('termsModal')">&times;</button>
+            </div>
+            <div class="modal-body terms-content">
+                <h3>Radio Check Peer to Peer Training Programme</h3>
+                <p class="terms-updated">Last updated: March 2026</p>
+                
+                <h4>1. Introduction</h4>
+                <p>These Terms and Conditions govern your participation in the Radio Check Peer to Peer Training Programme ("the Programme"). By registering for and participating in this Programme, you agree to be bound by these terms.</p>
+                
+                <h4>2. Nature of the Programme</h4>
+                <p>The Radio Check Peer to Peer Training Programme is designed to prepare volunteers to provide peer support to veterans and serving personnel. Upon successful completion, you will receive a certificate qualifying you as a Radio Check Peer Supporter.</p>
+                <p><strong>Important:</strong> This training does NOT qualify you as a counsellor, therapist, or mental health professional. You must work within the boundaries of peer support at all times.</p>
+                
+                <h4>3. Volunteer Status</h4>
+                <p>Participation in this Programme and subsequent peer support activities is on a voluntary basis. You will not receive payment for your training or peer support work. Radio Check may provide reasonable expenses in accordance with our expenses policy.</p>
+                
+                <h4>4. Eligibility Requirements</h4>
+                <p>To participate in this Programme, you must:</p>
+                <ul>
+                    <li>Be aged 18 or over</li>
+                    <li>Have a genuine interest in supporting veterans and serving personnel</li>
+                    <li>Be willing to undergo a DBS (Disclosure and Barring Service) check</li>
+                    <li>Complete all required training modules and assessments</li>
+                    <li>Agree to ongoing supervision and support</li>
+                </ul>
+                
+                <h4>5. Training Requirements</h4>
+                <p>To qualify as a Radio Check Peer Supporter, you must:</p>
+                <ul>
+                    <li>Complete all 14 training modules</li>
+                    <li>Pass all module quizzes with a minimum score of 70%</li>
+                    <li>Achieve 100% on critical modules (Ethics, Crisis Support, Safeguarding)</li>
+                    <li>Complete all required reflection exercises</li>
+                    <li>Pass the final assessment</li>
+                </ul>
+                
+                <h4>6. Code of Conduct</h4>
+                <p>As a trainee and subsequently as a peer supporter, you agree to:</p>
+                <ul>
+                    <li>Maintain strict confidentiality regarding any personal information shared</li>
+                    <li>Work within the boundaries of your role and training</li>
+                    <li>Refer to professional services when appropriate</li>
+                    <li>Follow Radio Check's safeguarding policies and procedures</li>
+                    <li>Report any concerns through appropriate channels</li>
+                    <li>Attend regular supervision sessions</li>
+                    <li>Maintain your own wellbeing and seek support when needed</li>
+                    <li>Not bring Radio Check into disrepute</li>
+                </ul>
+                
+                <h4>7. Confidentiality</h4>
+                <p>You understand and agree that:</p>
+                <ul>
+                    <li>All information shared by veterans during peer support is confidential</li>
+                    <li>Confidentiality may only be broken when there is risk of serious harm to the individual or others</li>
+                    <li>Any safeguarding concerns must be reported according to our procedures</li>
+                    <li>Case discussions in supervision must maintain anonymity</li>
+                </ul>
+                
+                <h4>8. Boundaries of Peer Support</h4>
+                <p>You acknowledge that as a peer supporter you:</p>
+                <ul>
+                    <li>Are NOT a therapist, counsellor, or mental health professional</li>
+                    <li>Cannot diagnose mental health conditions</li>
+                    <li>Cannot provide treatment or clinical advice</li>
+                    <li>Must refer to professional services when needed</li>
+                    <li>Must maintain appropriate personal boundaries</li>
+                </ul>
+                
+                <h4>9. DBS Check</h4>
+                <p>You agree to undergo an enhanced DBS check before commencing peer support activities. Radio Check will cover the cost of this check. You must disclose any relevant criminal convictions or ongoing investigations.</p>
+                
+                <h4>10. Data Protection</h4>
+                <p>Your personal information will be processed in accordance with UK data protection legislation (UK GDPR). We will:</p>
+                <ul>
+                    <li>Only collect information necessary for the Programme</li>
+                    <li>Store your information securely</li>
+                    <li>Not share your information without consent (except where legally required)</li>
+                    <li>Delete your information upon request or when no longer needed</li>
+                </ul>
+                
+                <h4>11. Intellectual Property</h4>
+                <p>All training materials, including text, images, videos, and assessments, are the intellectual property of Radio Check. You may not reproduce, distribute, or share these materials without written permission.</p>
+                
+                <h4>12. Certificate and Continuing Requirements</h4>
+                <p>Your Radio Check Peer Supporter certificate:</p>
+                <ul>
+                    <li>Is valid for 2 years from date of issue</li>
+                    <li>Requires completion of annual refresher training</li>
+                    <li>May be revoked if you breach these terms or the code of conduct</li>
+                </ul>
+                
+                <h4>13. Termination</h4>
+                <p>Radio Check reserves the right to:</p>
+                <ul>
+                    <li>Remove you from the Programme if you fail to meet requirements</li>
+                    <li>Revoke your certificate if you breach these terms</li>
+                    <li>Terminate your involvement for any conduct that brings Radio Check into disrepute</li>
+                </ul>
+                <p>You may withdraw from the Programme at any time by notifying us in writing.</p>
+                
+                <h4>14. Liability</h4>
+                <p>Radio Check provides this training in good faith. We are not liable for any actions taken by you as a result of this training. You agree to indemnify Radio Check against any claims arising from your conduct as a peer supporter.</p>
+                
+                <h4>15. Changes to Terms</h4>
+                <p>Radio Check may update these terms from time to time. You will be notified of any significant changes and continued participation constitutes acceptance of updated terms.</p>
+                
+                <h4>16. Governing Law</h4>
+                <p>These terms are governed by the laws of England and Wales. Any disputes will be subject to the exclusive jurisdiction of the courts of England and Wales.</p>
+                
+                <h4>17. Contact</h4>
+                <p>If you have any questions about these terms, please contact us at:</p>
+                <p>Email: training@radiocheck.me<br>
+                Website: www.radiocheck.me</p>
+                
+                <div class="terms-footer">
+                    <p><strong>By registering for this Programme, you confirm that you have read, understood, and agree to these Terms and Conditions.</strong></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('termsModal')">
+                    <i class="fas fa-check"></i> I Understand
                 </button>
             </div>
         </div>

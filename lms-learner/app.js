@@ -18,6 +18,12 @@ let quizAnswers = {};
 let currentQuestionIndex = 0;
 let authToken = null;
 
+// Show Terms and Conditions Modal
+function showTermsModal(event) {
+    if (event) event.preventDefault();
+    document.getElementById('termsModal').classList.add('active');
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     // Check for stored learner session
