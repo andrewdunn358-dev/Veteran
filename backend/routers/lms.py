@@ -1043,20 +1043,31 @@ async def admin_delete_learner(learner_email: str):
     """Delete a learner and all their data"""
     db = get_db()
     
-    # Check learner exists
+    # Try to find learner - first lowercase, then original case (for legacy records)
     learner = await db.lms_learners.find_one({"email": learner_email.lower()})
+    if not learner:
+        # Try with original case for legacy records
+        learner = await db.lms_learners.find_one({"email": learner_email})
+    
     if not learner:
         raise HTTPException(status_code=404, detail="Learner not found")
     
-    # Delete learner
-    await db.lms_learners.delete_one({"email": learner_email.lower()})
+    # Use the actual email from the found record
+    actual_email = learner["email"]
     
-    # Also delete their reflections and assessments
-    await db.lms_reflections.delete_many({"learner_email": learner_email.lower()})
-    await db.lms_final_assessments.delete_many({"learner_email": learner_email.lower()})
-    await db.tutor_conversations.delete_many({"learner_email": learner_email.lower()})
+    # Delete learner
+    await db.lms_learners.delete_one({"email": actual_email})
+    
+    # Also delete their reflections and assessments (try both cases)
+    await db.lms_reflections.delete_many({"learner_email": actual_email})
+    await db.lms_reflections.delete_many({"learner_email": actual_email.lower()})
+    await db.lms_final_assessments.delete_many({"learner_email": actual_email})
+    await db.lms_final_assessments.delete_many({"learner_email": actual_email.lower()})
+    await db.tutor_conversations.delete_many({"learner_email": actual_email})
+    await db.tutor_conversations.delete_many({"learner_email": actual_email.lower()})
     
     # Delete any registration
-    await db.volunteer_registrations.delete_many({"email": learner_email.lower()})
+    await db.volunteer_registrations.delete_many({"email": actual_email})
+    await db.volunteer_registrations.delete_many({"email": actual_email.lower()})
     
     return {"success": True, "message": f"Learner {learner_email} and all associated data deleted"}
