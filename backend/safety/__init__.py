@@ -7,6 +7,7 @@ Enhanced with:
 - Semantic similarity analysis
 - Pattern detection
 - 500+ phrase dataset
+- AI-based semantic classifier (OpenAI)
 
 MIT License - Free to use with attribution to Zentrafuge
 """
@@ -62,6 +63,15 @@ from .unified_safety import (
     initialize_safety_system,
 )
 
+from .ai_safety_classifier import (
+    classify_message_with_ai,
+    should_invoke_ai_classifier,
+    merge_ai_risk_with_existing,
+    log_ai_classification,
+    get_ai_classifier_status,
+    get_ai_audit_log,
+)
+
 __all__ = [
     # Safety Monitor (Original)
     'EnhancedSafetyMonitor',
@@ -107,4 +117,12 @@ __all__ = [
     'get_safety_audit_report',
     'get_safety_system_status',
     'initialize_safety_system',
+    
+    # AI Safety Classifier (OpenAI)
+    'classify_message_with_ai',
+    'should_invoke_ai_classifier',
+    'merge_ai_risk_with_existing',
+    'log_ai_classification',
+    'get_ai_classifier_status',
+    'get_ai_audit_log',
 ]

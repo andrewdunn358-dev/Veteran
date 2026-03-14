@@ -31,6 +31,73 @@ Build "Radio Check," a mental health and peer support application for veterans a
 
 ## What's Been Implemented (March 2026)
 
+### Session: March 14, 2026 - AI Safety Classifier & Local Storage (LATEST)
+
+**MAJOR: AI-Enhanced Semantic Safety Classifier**
+
+Added OpenAI GPT-4o-mini as a secondary safety layer for deeper semantic analysis of messages that rule-based detection might miss.
+
+1. **AI Classification Layer (NEW)**
+   - Uses OpenAI GPT-4o-mini via Emergent Universal Key
+   - Classifies messages as: none, low, medium, high, imminent
+   - Analyzes conversation context (last 10-20 messages)
+   - Only invoked selectively (when thresholds triggered) to save cost/latency
+   - AI can UPGRADE risk levels, but never downgrade from high/imminent
+   - Caching for recent classifications (5 min TTL)
+
+2. **Selective Invocation Rules**
+   - Rule-based score >= 30
+   - Keywords triggered
+   - Semantic similarity >= 0.5
+   - Concerning patterns detected
+   - Conversation escalating
+
+3. **New Files:**
+   - `backend/safety/ai_safety_classifier.py` - Full AI classifier implementation
+
+4. **New Endpoint:**
+   - `POST /api/safety/generate-summary` - Generate AI session summaries
+
+**MAJOR: Local Conversation Storage**
+
+Store last 50 messages on user's device for cross-session context and AI memory.
+
+1. **Frontend Storage Service:**
+   - `frontend/src/services/conversationStorage.ts`
+   - Stores 50 messages per character
+   - AI-generated session summaries
+   - Privacy controls (opt-out, delete, export)
+   - Risk flags from previous sessions
+
+2. **Features:**
+   - Full transcripts (50 messages per character)
+   - AI-generated summaries (key topics, emotional state, risk flags)
+   - Feeds into safeguarding for cross-session monitoring
+   - User can view/delete their history
+   - User can opt-out entirely
+
+**UI Improvements:**
+
+1. **Home Page Redesigned:**
+   - 2-column grid of square cards (instead of horizontal)
+   - Logo properly centered at top
+   - Matches reference design
+
+2. **Live Chat Cleaned Up:**
+   - Reduced header buttons (one back button, call button, more options)
+   - Consolidated Report/Block/End Chat into single modal
+   - Cleaner, more modern appearance
+
+**Bug Fixes:**
+
+1. **Call/Chat Status:**
+   - Added `force_available` Socket.IO event
+   - Auto-reset stuck staff statuses
+   - Fixed socket reference issues
+
+2. **Deployment:**
+   - Removed emergentintegrations from requirements.txt
+
 ### Session: March 14, 2026 - Unified Safeguarding System Overhaul
 
 **MAJOR: Conversation Trajectory Analysis & Semantic Detection**

@@ -1,7 +1,7 @@
 """
 RadioCheck Safeguarding - Unified Safety System
 ================================================
-Version 2.0 - March 2026
+Version 3.0 - March 2026
 
 This module provides a unified interface to all safety layers:
 1. Keyword-based safety monitor (existing)
@@ -9,6 +9,7 @@ This module provides a unified interface to all safety layers:
 3. Conversation trajectory monitoring (new)
 4. Semantic similarity analysis (new)
 5. Pattern detection (new)
+6. AI-based semantic classifier (NEW - OpenAI)
 
 The unified system evaluates EVERY message within the context
 of the entire conversation and combines all detection methods.
@@ -16,6 +17,7 @@ of the entire conversation and combines all detection methods.
 
 import logging
 import time
+import asyncio
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 
@@ -37,6 +39,16 @@ from .semantic_model import (
     initialize_semantic_model,
 )
 from .phrase_dataset import get_phrase_count, CATEGORY_SEVERITY_ORDER
+
+# Import AI classifier (new)
+from .ai_safety_classifier import (
+    classify_message_with_ai,
+    should_invoke_ai_classifier,
+    merge_ai_risk_with_existing,
+    log_ai_classification,
+    get_ai_classifier_status,
+    get_ai_audit_log,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +89,7 @@ def analyze_message_unified(
     user_id: str,
     character: str = "bob",
     conversation_history: Optional[List[Dict]] = None,
+    previous_sessions: Optional[List[Dict]] = None,  # NEW: for AI context
     is_under_18: bool = False,
 ) -> Dict[str, Any]:
     """
@@ -91,6 +104,7 @@ def analyze_message_unified(
         user_id: User identifier
         character: AI character name
         conversation_history: Optional pre-existing history (will be tracked automatically)
+        previous_sessions: Previous session summaries from local storage (for AI context)
         is_under_18: Whether user is a minor (additional protections)
     
     Returns:
@@ -127,10 +141,82 @@ def analyze_message_unified(
     conversation_score = conversation_result.get("conversation_risk_score", 0)
     
     # =========================================================================
+    # LAYER 4: AI-Based Semantic Classifier (NEW - OpenAI)
+    # Deep semantic analysis using LLM - SELECTIVE INVOCATION
+    # =========================================================================
+    ai_result = None
+    ai_score = 0
+    ai_invoked = False
+    
+    # Check if we should invoke the AI classifier
+    should_invoke_ai = should_invoke_ai_classifier(
+        rule_based_score=keyword_score,
+        keyword_triggered=bool(keyword_triggers),
+        semantic_score=semantic_result.get("highest_similarity", 0),
+        pattern_detected=bool(conversation_result.get("detected_patterns")),
+        conversation_escalating=conversation_result.get("is_escalating", False)
+    )
+    
+    if should_invoke_ai:
+        try:
+            # Get conversation history for AI context
+            conv_state = get_or_create_conversation_state(session_id, user_id, character)
+            # ConversationSafetyState is a dataclass, access attributes directly
+            history_list = getattr(conv_state, 'history', []) if conv_state else []
+            conv_history_for_ai = [
+                {"role": msg.get("role", "user"), "text": msg.get("text", "")}
+                for msg in history_list[-20:]  # Last 20 messages
+            ]
+            
+            # Run AI classification synchronously using nest_asyncio or thread pool
+            import concurrent.futures
+            import functools
+            
+            def run_ai_classification():
+                import asyncio
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    return loop.run_until_complete(
+                        classify_message_with_ai(
+                            message=message,
+                            conversation_history=conv_history_for_ai,
+                            previous_sessions=previous_sessions,
+                            use_cache=True
+                        )
+                    )
+                finally:
+                    loop.close()
+            
+            # Run in a thread pool to avoid event loop conflicts
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(run_ai_classification)
+                ai_result = future.result(timeout=10)  # 10 second timeout
+            
+            ai_invoked = ai_result.get("ai_used", False)
+            ai_score = ai_result.get("risk_score", 0)
+            
+            # Log AI classification
+            log_ai_classification(
+                session_id=session_id,
+                message_preview=message[:100],
+                result=ai_result
+            )
+            
+            logger.info(
+                f"[UnifiedSafety] AI Layer: invoked={ai_invoked}, "
+                f"risk={ai_result.get('risk_level')}, score={ai_score}"
+            )
+            
+        except Exception as e:
+            logger.error(f"[UnifiedSafety] AI classification failed: {e}")
+            ai_result = {"error": str(e), "ai_used": False}
+    
+    # =========================================================================
     # COMBINE SCORES
     # =========================================================================
     
-    # Weighted combination
+    # Weighted combination (original layers)
     weighted_score = (
         keyword_score * COMPONENT_WEIGHTS["keyword"] +
         conversation_score * COMPONENT_WEIGHTS["conversation"] +
@@ -140,6 +226,18 @@ def analyze_message_unified(
     # Add pattern bonus
     pattern_bonus = conversation_result.get("pattern_bonus", 0) * COMPONENT_WEIGHTS["pattern"]
     weighted_score += pattern_bonus
+    
+    # If AI was invoked and found higher risk, boost the score
+    if ai_invoked and ai_result:
+        ai_risk_level = ai_result.get("risk_level", "none")
+        ai_confidence = ai_result.get("confidence", 0)
+        
+        # AI can UPGRADE but not downgrade risk
+        if ai_score > weighted_score and ai_confidence >= 0.6:
+            # Blend AI score with weighted score (AI has max 30% influence)
+            ai_influence = min(0.30, ai_confidence * 0.3)
+            weighted_score = weighted_score * (1 - ai_influence) + ai_score * ai_influence
+            logger.info(f"[UnifiedSafety] AI upgraded score: {weighted_score:.1f}")
     
     # Ensure score doesn't exceed 100
     final_score = min(int(weighted_score), 100)
@@ -283,6 +381,19 @@ def analyze_message_unified(
         
         # Response modifications
         "safety_wrapper": safety_wrapper,
+        
+        # AI Classifier results (NEW)
+        "ai_classification": {
+            "invoked": ai_invoked,
+            "risk_level": ai_result.get("risk_level") if ai_result else None,
+            "risk_score": ai_score,
+            "confidence": ai_result.get("confidence") if ai_result else None,
+            "contains_self_harm_intent": ai_result.get("contains_self_harm_intent") if ai_result else None,
+            "detected_indicators": ai_result.get("detected_indicators", []) if ai_result else [],
+            "reason": ai_result.get("reason") if ai_result else None,
+            "cached": ai_result.get("cached") if ai_result else False,
+            "processing_time_ms": ai_result.get("processing_time_ms") if ai_result else None,
+        } if ai_result else {"invoked": False},
         
         # Metadata
         "processing_time_ms": round(processing_time_ms, 2),

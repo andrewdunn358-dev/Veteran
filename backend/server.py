@@ -7135,6 +7135,96 @@ async def api_safety_audit(
     }
 
 
+class SessionSummaryRequest(BaseModel):
+    session_id: str
+    character_id: str
+    character_name: str
+    messages: List[Dict[str, Any]]  # List of {role, text, timestamp}
+
+
+@api_router.post("/safety/generate-summary")
+async def api_generate_session_summary(request: SessionSummaryRequest):
+    """
+    Generate an AI summary of a conversation session.
+    Used for storing conversation context on user's device.
+    """
+    from safety.ai_safety_classifier import classify_message_with_ai, EMERGENT_LLM_KEY, EMERGENT_AVAILABLE
+    
+    if not EMERGENT_AVAILABLE or not EMERGENT_LLM_KEY:
+        return {
+            "success": False,
+            "error": "AI summarization not available",
+            "summary": None
+        }
+    
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        # Format messages for the summary prompt
+        message_text = "\n".join([
+            f"[{m.get('role', 'user')}] {m.get('text', '')[:200]}"
+            for m in request.messages[-30:]  # Last 30 messages
+        ])
+        
+        summary_prompt = f"""Analyze this conversation between a user and the AI character "{request.character_name}" on RadioCheck (a mental health peer support app for veterans).
+
+Generate a brief summary that includes:
+1. A 1-2 sentence summary of the conversation
+2. Key topics discussed
+3. The user's emotional state
+4. Any concerning risk indicators (be specific if present)
+
+CONVERSATION:
+{message_text}
+
+Respond with JSON only:
+{{
+  "summary": "Brief 1-2 sentence summary",
+  "key_topics": ["topic1", "topic2"],
+  "emotional_state": "calm/distressed/hopeful/anxious/etc",
+  "risk_flags": ["flag1", "flag2"] or []
+}}"""
+
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"summary_{request.session_id[:12]}",
+            system_message="You are a clinical summarizer for a mental health support app. Generate concise, clinically-relevant summaries."
+        ).with_model("openai", "gpt-4o-mini")
+        
+        response = await chat.send_message(UserMessage(text=summary_prompt))
+        
+        # Parse JSON response
+        import json
+        clean_response = response.strip()
+        if clean_response.startswith("```"):
+            clean_response = clean_response.split("```")[1]
+            if clean_response.startswith("json"):
+                clean_response = clean_response[4:]
+        clean_response = clean_response.strip()
+        
+        result = json.loads(clean_response)
+        
+        return {
+            "success": True,
+            "session_id": request.session_id,
+            "character_id": request.character_id,
+            "character_name": request.character_name,
+            "summary": result.get("summary", "Conversation completed."),
+            "key_topics": result.get("key_topics", []),
+            "emotional_state": result.get("emotional_state"),
+            "risk_flags": result.get("risk_flags", []),
+            "message_count": len(request.messages)
+        }
+        
+    except Exception as e:
+        logging.error(f"Error generating session summary: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "summary": None
+        }
+
+
 
 
 # ============ Human-to-Human Chat API ============
