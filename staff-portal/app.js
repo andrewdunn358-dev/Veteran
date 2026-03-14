@@ -2270,7 +2270,9 @@ async function loadMorningReviewQueue() {
     if (!container) return;
     
     try {
-        var queue = await apiCall('/cases/morning-queue');
+        var response = await apiCall('/cases/morning-queue');
+        // Handle both array and object responses
+        var queue = Array.isArray(response) ? response : (response.queue || response.items || []);
         var queueBadge = document.getElementById('review-queue-count');
         
         if (queueBadge) {

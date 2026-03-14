@@ -169,11 +169,41 @@ var TwilioPhone = (function() {
             console.log('Twilio Device unregistered');
             isReady = false;
             updatePhoneUI('offline', 'Disconnected');
+            
+            // Try to re-register after a short delay
+            setTimeout(async function() {
+                console.log('Attempting to re-register Twilio Device...');
+                try {
+                    var newToken = await getAccessToken();
+                    if (newToken && device) {
+                        device.updateToken(newToken);
+                        device.register();
+                    }
+                } catch (e) {
+                    console.error('Failed to re-register:', e);
+                }
+            }, 2000);
         });
         
         device.on('error', function(error) {
             console.error('Twilio Device error:', error);
             updatePhoneUI('error', 'Error: ' + error.message);
+            
+            // Handle token expiration error specifically
+            if (error.code === 31205 || error.message.includes('expired')) {
+                console.log('Token expired error - attempting recovery...');
+                setTimeout(async function() {
+                    try {
+                        var newToken = await getAccessToken();
+                        if (newToken && device) {
+                            device.updateToken(newToken);
+                            device.register();
+                        }
+                    } catch (e) {
+                        console.error('Failed to recover from token error:', e);
+                    }
+                }, 1000);
+            }
         });
         
         device.on('incoming', function(call) {
@@ -183,9 +213,14 @@ var TwilioPhone = (function() {
         
         device.on('tokenWillExpire', async function() {
             console.log('Twilio token expiring - refreshing...');
-            var newToken = await getAccessToken();
-            if (newToken) {
-                device.updateToken(newToken);
+            try {
+                var newToken = await getAccessToken();
+                if (newToken && device) {
+                    device.updateToken(newToken);
+                    console.log('Twilio token refreshed successfully');
+                }
+            } catch (e) {
+                console.error('Failed to refresh token:', e);
             }
         });
     }
