@@ -113,11 +113,12 @@ export default function JitsiMeetComponent({
         }
 
         // Default Jitsi configuration - optimized for public meet.jit.si
+        // IMPORTANT: prejoinPageEnabled MUST be false - we enforce it AFTER spreading config
+        // to prevent any backend override from enabling the confusing prejoin lobby
         const defaultConfig = {
           startWithAudioMuted: true,
           startWithVideoMuted: false,
           disableDeepLinking: true,
-          prejoinPageEnabled: false, // Skip prejoin screen - go directly into meeting
           enableClosePage: false,
           hideConferenceSubject: false,
           // Disable features that cause warnings on public Jitsi
@@ -147,7 +148,10 @@ export default function JitsiMeetComponent({
           },
           // Disable large video optimization issues
           channelLastN: -1,
+          // Spread any config passed from backend/parent
           ...config,
+          // CRITICAL: Always enforce these settings AFTER spreading to prevent overrides
+          prejoinPageEnabled: false, // Skip prejoin screen - go directly into meeting
         };
 
         // Interface configuration - avoid deprecated features

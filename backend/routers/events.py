@@ -389,11 +389,14 @@ async def join_event(event_id: str, display_name: str = "Veteran", user_id: Opti
         is_moderator = staff is not None
     
     # Jitsi configuration
+    # NOTE: prejoinPageEnabled must be FALSE to avoid the confusing "Join meeting" lobby screen
+    # that was causing users to get stuck on "Connecting..." because they didn't click the 
+    # second join button inside Jitsi's prejoin page
     jitsi_config = {
         "startWithAudioMuted": True,
         "startWithVideoMuted": False,
         "disableDeepLinking": True,
-        "prejoinPageEnabled": event.get("waiting_room_enabled", True),
+        "prejoinPageEnabled": False,  # CRITICAL: Skip prejoin lobby - go directly into meeting
         "enableClosePage": False,
         "disableInviteFunctions": True,
         "hideConferenceSubject": False,
