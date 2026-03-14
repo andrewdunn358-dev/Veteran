@@ -21,9 +21,9 @@ import { safeGoBack } from '../src/utils/navigation';
 interface Message {
   id: string;
   text: string;
-  sender: 'user' | 'staff';
+  sender: 'user' | 'staff' | 'system';
   senderName?: string;
-  timestamp: Date;
+  timestamp: Date | string;
 }
 
 export default function LiveChat() {
