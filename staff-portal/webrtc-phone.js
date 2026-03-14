@@ -378,8 +378,9 @@ function setupSocketHandlers() {
         showNotification(data.message || 'Call failed', 'error');
         cleanupCall();
         
-        // Reset status to available
-        socket.emit('update_status', { status: 'available' });
+        // Force reset status to available (clears any stuck state)
+        socket.emit('force_available', {});
+        console.log('Force reset to available after call failed');
         
         updatePhoneStatus('online', 'Ready for calls');
     });
@@ -391,8 +392,9 @@ function setupSocketHandlers() {
         showNotification(data.message || 'WebRTC connection error', 'error');
         cleanupCall();
         
-        // Reset status to available
-        socket.emit('update_status', { status: 'available' });
+        // Force reset status to available
+        socket.emit('force_available', {});
+        console.log('Force reset to available after webrtc error');
         
         updatePhoneStatus('online', 'Ready for calls');
     });
@@ -834,6 +836,23 @@ function setAvailability(status) {
                          status === 'available' ? 'Ready for calls' : 'Busy');
     }
 }
+
+/**
+ * Force reset status to available - cleans up stuck states
+ */
+function forceResetToAvailable() {
+    console.log('=== FORCE RESET TO AVAILABLE ===');
+    if (socket && isRegistered) {
+        socket.emit('force_available', {});
+        console.log('Sent force_available event to server');
+    }
+    // Also clean up local state
+    cleanupCall();
+    updatePhoneStatus('online', 'Ready for calls');
+}
+
+// Expose for use by app.js
+window.forceResetToAvailable = forceResetToAvailable;
 
 // ============ UI Functions ============
 

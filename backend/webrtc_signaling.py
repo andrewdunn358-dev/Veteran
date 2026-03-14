@@ -216,10 +216,55 @@ async def register(sid, data):
 async def update_status(sid, data):
     """Update staff availability status"""
     if sid in connected_users:
-        connected_users[sid]['status'] = data.get('status', 'available')
+        new_status = data.get('status', 'available')
+        old_status = connected_users[sid].get('status')
+        connected_users[sid]['status'] = new_status
+        logger.info(f"Status updated for {sid}: {old_status} -> {new_status}")
         await sio.emit('staff_status_changed', {
             'user_id': connected_users[sid]['user_id'],
-            'status': data.get('status')
+            'status': new_status
+        })
+
+
+@sio.event
+async def force_available(sid, data):
+    """
+    Force a user's status back to 'available' and clean up any orphaned calls.
+    Used when status gets stuck due to disconnects, timeouts, etc.
+    """
+    if sid in connected_users:
+        user_id = connected_users[sid].get('user_id')
+        old_status = connected_users[sid].get('status')
+        
+        # Clean up any active calls involving this user
+        for call_id in list(active_calls.keys()):
+            call = active_calls[call_id]
+            if call['caller_sid'] == sid or call['callee_sid'] == sid:
+                logger.info(f"Cleaning up orphaned call {call_id} for user {user_id}")
+                # Notify the other party
+                other_sid = call['callee_sid'] if call['caller_sid'] == sid else call['caller_sid']
+                if other_sid in connected_users:
+                    connected_users[other_sid]['status'] = 'available'
+                    await sio.emit('call_ended', {
+                        'call_id': call_id,
+                        'reason': 'cleanup'
+                    }, to=other_sid)
+                del active_calls[call_id]
+        
+        # Force status to available
+        connected_users[sid]['status'] = 'available'
+        logger.info(f"Force reset status for {user_id}: {old_status} -> available")
+        
+        await sio.emit('status_reset', {
+            'user_id': user_id,
+            'status': 'available',
+            'message': 'Status reset to available'
+        }, to=sid)
+        
+        # Broadcast to others
+        await sio.emit('staff_status_changed', {
+            'user_id': user_id,
+            'status': 'available'
         })
 
 
@@ -243,16 +288,18 @@ async def get_online_staff(sid, data):
 async def call_initiate(sid, data):
     """
     User initiates a call to staff
-    Data: {target_user_id, caller_name, call_type: 'audio'|'video'}
+    Data: {target_user_id, caller_name, call_type: 'audio'|'video', call_id (optional from client)}
     """
     target_user_id = data.get('target_user_id')
     caller_info = connected_users.get(sid, {})
     call_type = data.get('call_type', 'audio')
+    client_call_id = data.get('call_id')  # Client may provide their own call_id
     
     logger.info(f"=== CALL INITIATE ===")
     logger.info(f"Caller SID: {sid}")
     logger.info(f"Caller info: {caller_info}")
     logger.info(f"Target user_id: {target_user_id}")
+    logger.info(f"Client call_id: {client_call_id}")
     logger.info(f"All connected users: {list(connected_users.keys())}")
     logger.info(f"User to socket mapping: {user_to_socket}")
     
@@ -272,16 +319,31 @@ async def call_initiate(sid, data):
     target_info = connected_users.get(target_sid, {})
     logger.info(f"Target info: {target_info}")
     
-    if target_info.get('status') != 'available':
-        logger.warning(f"Target user {target_user_id} is not available, status: {target_info.get('status')}")
-        await sio.emit('call_failed', {
-            'reason': 'user_busy',
-            'message': 'The person you are trying to call is busy'
-        }, to=sid)
-        return
+    # IMPROVED: Allow calling users in 'in_chat' status (they can answer while chatting)
+    # Also check if they're in a real call vs stuck status
+    target_status = target_info.get('status', 'offline')
+    if target_status not in ['available', 'in_chat']:
+        # Check if this is a stuck status - no active call for this user
+        is_actually_busy = False
+        for call_id, call in active_calls.items():
+            if call['callee_sid'] == target_sid or call['caller_sid'] == target_sid:
+                is_actually_busy = True
+                break
+        
+        if not is_actually_busy:
+            # Status is stuck - auto-reset to available
+            logger.warning(f"Target user {target_user_id} status was stuck as '{target_status}', resetting to 'available'")
+            connected_users[target_sid]['status'] = 'available'
+        else:
+            logger.warning(f"Target user {target_user_id} is genuinely busy, status: {target_status}")
+            await sio.emit('call_failed', {
+                'reason': 'user_busy',
+                'message': 'The person you are trying to call is busy'
+            }, to=sid)
+            return
     
-    # Create call record
-    call_id = f"call_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{sid[:8]}"
+    # Create call record - use client's call_id if provided, otherwise generate one
+    call_id = client_call_id or f"call_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{sid[:8]}"
     active_calls[call_id] = {
         'caller_sid': sid,
         'caller_id': caller_info.get('user_id'),
@@ -729,17 +791,40 @@ async def request_human_chat(sid, data):
     for socket_id, user in connected_users.items():
         logger.info(f"  Connected: {user.get('name')} ({user.get('user_id')}) - type: {user.get('user_type')}, status: {user.get('status')}")
     
-    # Find available staff
+    # Find available staff (also reset any stuck statuses)
     available_staff = []
     for socket_id, user in connected_users.items():
-        if user['user_type'] in ['counsellor', 'peer'] and user['status'] == 'available':
-            if preferred_type == 'any' or user['user_type'] == preferred_type:
-                available_staff.append({
-                    'socket_id': socket_id,
-                    'user_id': user['user_id'],
-                    'user_type': user['user_type'],
-                    'name': user['name']
-                })
+        if user['user_type'] in ['counsellor', 'peer']:
+            user_status = user.get('status', 'offline')
+            
+            # Check if status is stuck (not in a real active call or chat)
+            if user_status not in ['available', 'offline']:
+                is_actually_busy = False
+                # Check active calls
+                for call_id, call in active_calls.items():
+                    if call['caller_sid'] == socket_id or call['callee_sid'] == socket_id:
+                        is_actually_busy = True
+                        break
+                # Check active chat rooms
+                for room_id, room in active_chat_rooms.items():
+                    if room.get('staff_sid') == socket_id:
+                        is_actually_busy = True
+                        break
+                
+                if not is_actually_busy:
+                    # Status is stuck - auto-reset to available
+                    logger.warning(f"Auto-resetting stuck status for {user.get('name')}: {user_status} -> available")
+                    connected_users[socket_id]['status'] = 'available'
+                    user_status = 'available'
+            
+            if user_status == 'available':
+                if preferred_type == 'any' or user['user_type'] == preferred_type:
+                    available_staff.append({
+                        'socket_id': socket_id,
+                        'user_id': user['user_id'],
+                        'user_type': user['user_type'],
+                        'name': user['name']
+                    })
     
     logger.info(f"Available staff count: {len(available_staff)}")
     
@@ -801,16 +886,33 @@ async def request_human_call(sid, data):
     for socket_id, user in connected_users.items():
         logger.info(f"  Connected: {user.get('name')} ({user.get('user_id')}) - type: {user.get('user_type')}, status: {user.get('status')}")
     
-    # Find available staff
+    # Find available staff (also reset any stuck statuses)
     available_staff = []
     for socket_id, user in connected_users.items():
-        if user['user_type'] in ['counsellor', 'peer'] and user['status'] == 'available':
-            available_staff.append({
-                'socket_id': socket_id,
-                'user_id': user['user_id'],
-                'user_type': user['user_type'],
-                'name': user['name']
-            })
+        if user['user_type'] in ['counsellor', 'peer']:
+            user_status = user.get('status', 'offline')
+            
+            # Check if status is stuck (not in a real active call)
+            if user_status not in ['available', 'offline']:
+                is_in_active_call = False
+                for call_id, call in active_calls.items():
+                    if call['caller_sid'] == socket_id or call['callee_sid'] == socket_id:
+                        is_in_active_call = True
+                        break
+                
+                if not is_in_active_call:
+                    # Status is stuck - auto-reset to available
+                    logger.warning(f"Auto-resetting stuck status for {user.get('name')}: {user_status} -> available")
+                    connected_users[socket_id]['status'] = 'available'
+                    user_status = 'available'
+            
+            if user_status == 'available':
+                available_staff.append({
+                    'socket_id': socket_id,
+                    'user_id': user['user_id'],
+                    'user_type': user['user_type'],
+                    'name': user['name']
+                })
     
     logger.info(f"Available staff count: {len(available_staff)}")
     

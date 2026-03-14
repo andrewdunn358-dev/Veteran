@@ -1503,20 +1503,32 @@ function closeLiveChatModal() {
         chatPollingInterval = null;
     }
     
+    // Use the WebRTC phone's socket reference (more reliable)
+    var wsocket = window.webRTCPhone && window.webRTCPhone.socket;
+    
     // Notify server that staff is leaving the chat room (resets status to available)
-    if (currentChatRoom && window.webrtcSocket && window.webrtcSocket.connected) {
+    if (currentChatRoom && wsocket && wsocket.connected) {
         console.log('Emitting leave_chat_room for:', currentChatRoom);
-        window.webrtcSocket.emit('leave_chat_room', { room_id: currentChatRoom });
+        wsocket.emit('leave_chat_room', { 
+            room_id: currentChatRoom,
+            user_id: currentUser.id 
+        });
     }
     
-    // Also update Socket.IO status back to available
-    if (window.webrtcSocket && window.webrtcSocket.connected) {
-        window.webrtcSocket.emit('update_status', { status: 'available' });
-        console.log('Status reset to available after closing chat');
+    // Force reset status to available using the force_available event
+    if (wsocket && wsocket.connected) {
+        wsocket.emit('force_available', {});
+        console.log('Force reset status to available after closing chat');
+    }
+    
+    // Also call the webrtc-phone's force reset if available
+    if (typeof window.forceResetToAvailable === 'function') {
+        window.forceResetToAvailable();
     }
     
     currentChatRoom = null;
     window.currentChatRoom = null;
+    window.currentChatUserId = null;
     
     var modal = document.getElementById('livechat-modal');
     if (modal) {
@@ -1529,10 +1541,18 @@ async function endLiveChat(roomId) {
     if (!confirm('Are you sure you want to end this chat?')) return;
     
     try {
+        // Use the WebRTC phone's socket reference (more reliable)
+        var wsocket = window.webRTCPhone && window.webRTCPhone.socket;
+        
         // Notify server via Socket.IO first (resets status)
-        if (window.webrtcSocket && window.webrtcSocket.connected) {
-            window.webrtcSocket.emit('leave_chat_room', { room_id: roomId });
-            window.webrtcSocket.emit('update_status', { status: 'available' });
+        if (wsocket && wsocket.connected) {
+            wsocket.emit('leave_chat_room', { 
+                room_id: roomId,
+                user_id: currentUser.id 
+            });
+            // Force reset status to available
+            wsocket.emit('force_available', {});
+            console.log('Force reset status to available after ending chat');
         }
         
         await apiCall('/live-chat/rooms/' + roomId + '/end', { method: 'POST' });
@@ -1548,18 +1568,38 @@ async function endLiveChat(roomId) {
 // Call user from within a chat
 function callUserFromChat() {
     var userId = window.currentChatUserId;
+    console.log('=== CALL USER FROM CHAT ===');
+    console.log('User ID:', userId);
+    console.log('Current chat room:', currentChatRoom);
+    
     if (!userId) {
         showNotification('Cannot identify user to call', 'error');
         return;
     }
     
-    // Use WebRTC to call the user
-    if (typeof makeOutboundCall === 'function') {
-        console.log('Calling user from chat:', userId);
-        makeOutboundCall(userId);
-    } else {
-        showNotification('Phone system not available', 'error');
+    // First, force reset our own status to available before initiating call
+    // This helps prevent "user_busy" errors from stuck states
+    var wsocket = window.webRTCPhone && window.webRTCPhone.socket;
+    if (wsocket && wsocket.connected) {
+        // Clean up any stale call state
+        wsocket.emit('force_available', {});
+        console.log('Reset own status before initiating call');
     }
+    
+    // Small delay to let the status reset propagate
+    setTimeout(function() {
+        // Use WebRTC to call the user
+        if (typeof makeOutboundCall === 'function') {
+            console.log('Calling user via WebRTC:', userId);
+            makeOutboundCall(userId);
+        } else if (typeof window.webRTCPhone?.makeOutboundCall === 'function') {
+            console.log('Calling user via webRTCPhone object:', userId);
+            window.webRTCPhone.makeOutboundCall(userId);
+        } else {
+            console.error('makeOutboundCall function not available');
+            showNotification('Phone system not available', 'error');
+        }
+    }, 100);
 }
 
 // ============ NOTES FUNCTIONALITY ============
