@@ -308,27 +308,25 @@ export default function Index() {
           )}
         </TouchableOpacity>
 
-        {/* Main Menu Cards - CMS Powered */}
+        {/* Main Menu Cards - 2-Column Grid Layout */}
         <View style={styles.menuContainer}>
           {menuItems.map((item, index) => (
             <TouchableOpacity 
               key={index}
               style={[
-                item.isPrimary ? styles.primaryCard : styles.menuCard,
-                item.isCallback && styles.callbackCard
+                styles.gridCard,
+                item.isPrimary && styles.gridCardPrimary,
+                item.isCallback && styles.gridCardCallback
               ]}
               onPress={() => router.push(item.route as any)}
-              activeOpacity={0.9}
+              activeOpacity={0.85}
               data-testid={`menu-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
             >
-              <View style={[styles.cardIconContainer, { backgroundColor: item.bgColor }]}>
-                <Ionicons name={item.icon as any} size={item.isPrimary ? 32 : 28} color={item.color} />
+              <View style={[styles.gridCardIconContainer, { backgroundColor: item.bgColor }]}>
+                <Ionicons name={item.icon as any} size={28} color={item.color} />
               </View>
-              <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>{item.title}</Text>
-                <Text style={styles.cardDescription}>{item.description}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={24} color={item.isPrimary || item.isCallback ? item.color : colors.textSecondary} />
+              <Text style={styles.gridCardTitle} numberOfLines={2}>{item.title}</Text>
+              <Text style={styles.gridCardDescription} numberOfLines={2}>{item.description}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -455,30 +453,36 @@ const createStyles = (colors: any) => StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 40,
+    paddingTop: Platform.OS === 'web' ? 20 : 0, // Add top padding for web
+    maxWidth: 600, // Limit width for desktop
+    alignSelf: 'center',
+    width: '100%',
   },
   settingsIcon: {
     position: 'absolute',
-    right: 0,
-    top: 0,
+    right: 20,
+    top: Platform.OS === 'web' ? 20 : 0,
     zIndex: 10,
     padding: 8,
   },
   header: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 24,
+    paddingHorizontal: 20,
   },
   logoWrapper: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   badgeImage: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
+    resizeMode: 'contain',
   },
   headerTitle: {
     fontSize: 28,
@@ -555,9 +559,55 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderTopColor: colors.border,
   },
   menuContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     gap: 12,
     marginBottom: 32,
   },
+  // 2-column grid card styles
+  gridCard: {
+    width: '48%',
+    aspectRatio: 1, // Makes it square
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gridCardPrimary: {
+    borderWidth: 2,
+    borderColor: '#3b82f6',
+  },
+  gridCardCallback: {
+    borderColor: '#22c55e',
+    borderWidth: 2,
+  },
+  gridCardIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: '#dbeafe',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  gridCardTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  gridCardDescription: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  // Keep old styles for backwards compatibility / other use
   primaryCard: {
     flexDirection: 'row',
     alignItems: 'center',
