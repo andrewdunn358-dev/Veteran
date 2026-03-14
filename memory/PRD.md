@@ -7,6 +7,16 @@ Build "Radio Check," a mental health and peer support application for veterans a
 - Vanilla JS web portals for Admin and Staff (20i hosting)
 - **NEW: LMS for volunteer training (20i hosting)**
 
+## CRITICAL DEPLOYMENT NOTES
+
+### DO NOT ADD TO requirements.txt:
+- `emergentintegrations` - This is an Emergent preview-only package. It does NOT work on Render/production. NEVER add it to requirements.txt even if pip freeze includes it.
+
+### Production Deployment:
+- Backend: Render
+- Frontend (mobile app): Vercel  
+- Static portals (admin-site, staff-portal, lms-admin, lms-learner): 20i hosting
+
 ## Core Architecture
 ```
 /app
