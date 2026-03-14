@@ -40,13 +40,23 @@ from safety import (
 
 # Import enhanced safety layer (wraps around personas, doesn't replace them)
 from enhanced_safety_layer import (
-    analyze_message_safety,
+    analyze_message_safety as legacy_analyze_message_safety,
     get_session_safety_summary,
     get_user_safety_summary,
     get_safety_audit_log,
     export_safety_audit_log,
     check_age_for_features,
     RiskLevel,
+)
+
+# Import the new UNIFIED safety system with conversation trajectory analysis
+from safety.unified_safety import (
+    analyze_message_unified,
+    end_safety_session,
+    get_session_safety_status,
+    get_safety_audit_report,
+    get_safety_system_status,
+    initialize_safety_system,
 )
 
 # Import governance router for clinical safety & compliance
@@ -5938,9 +5948,14 @@ async def buddy_chat(request: BuddyChatRequest, req: Request):
         
         logging.info(f"Safeguarding check - Session: {request.sessionId[:12]}, Score: {risk_data['score']}, Level: {risk_level}")
         
-        # === ENHANCED SAFETY LAYER (wraps around persona, doesn't replace it) ===
-        # This adds contextual analysis, dependency detection, and session tracking
-        enhanced_safety = analyze_message_safety(
+        # === UNIFIED SAFETY SYSTEM (Conversation Trajectory + Semantic + Pattern Detection) ===
+        # This combines:
+        # 1. Keyword-based safety monitor (original Zentrafuge)
+        # 2. Contextual risk scoring with session tracking
+        # 3. Conversation trajectory monitoring (evaluates entire conversation)
+        # 4. Semantic similarity analysis (detects intent even without exact keywords)
+        # 5. Crisis pattern detection (escalation sequences)
+        unified_safety = analyze_message_unified(
             message=request.message,
             session_id=request.sessionId,
             user_id=request.sessionId,  # Anonymous users use session as ID
@@ -5948,13 +5963,35 @@ async def buddy_chat(request: BuddyChatRequest, req: Request):
             is_under_18=request.is_under_18
         )
         
+        # Log the unified safety analysis for debugging
+        logging.info(
+            f"UNIFIED SAFETY - Session: {request.sessionId[:12]}, "
+            f"Risk: {unified_safety.get('risk_level')}, "
+            f"Score: {unified_safety.get('risk_score')}, "
+            f"Trend: {unified_safety.get('risk_trend')}, "
+            f"MsgCount: {unified_safety.get('message_count')}, "
+            f"Patterns: {unified_safety.get('detected_patterns', [])}, "
+            f"Escalating: {unified_safety.get('is_escalating')}"
+        )
+        
         # Check for hard fail-safe (method requests, validation of suicidal intent)
-        if enhanced_safety.get("hard_failsafe_triggered"):
-            logging.warning(f"HARD FAILSAFE TRIGGERED - Session: {request.sessionId[:12]}")
+        if unified_safety.get("failsafe_triggered") or unified_safety.get("block_ai_response"):
+            failsafe_reason = unified_safety.get("failsafe_reason", "unknown")
+            logging.warning(f"HARD FAILSAFE TRIGGERED - Session: {request.sessionId[:12]} - Reason: {failsafe_reason}")
+            
+            # Get safety wrapper for crisis response message
+            safety_wrapper = unified_safety.get("safety_wrapper", {})
+            crisis_response = (
+                "I care about you, and I'm really worried about what you're sharing. "
+                "Please call Samaritans on 116 123 (free, 24/7) or in an emergency, call 999. "
+                "A real person is available to talk right now - just use the button below."
+            )
+            if safety_wrapper and safety_wrapper.get("prepend_message"):
+                crisis_response = safety_wrapper.get("prepend_message") + safety_wrapper.get("append_message", "")
+            
             # Return immediate safety response - block normal AI response
             return BuddyChatResponse(
-                reply=enhanced_safety.get("safety_response", 
-                    "I care about you, and I'm not able to help with that. Please call Samaritans on 116 123 or in an emergency, call 999. A real person is available to talk right now."),
+                reply=crisis_response,
                 sessionId=request.sessionId,
                 character=character,
                 characterName=char_config["name"],
@@ -5962,20 +5999,42 @@ async def buddy_chat(request: BuddyChatRequest, req: Request):
                 safeguardingTriggered=True,
                 safeguardingAlertId=None,
                 riskLevel="RED",
-                riskScore=999
+                riskScore=unified_safety.get("risk_score", 999)
             )
         
-        # Upgrade risk level if enhanced analysis detects higher risk
-        enhanced_risk = enhanced_safety.get("risk_level", "LOW")
-        if enhanced_risk in ["HIGH", "IMMINENT"] and risk_level not in ["RED"]:
-            risk_level = "RED" if enhanced_risk == "IMMINENT" else "AMBER"
+        # Upgrade risk level based on unified analysis
+        unified_risk = unified_safety.get("risk_level", "NONE")
+        if unified_risk == "IMMINENT" and risk_level != "RED":
+            risk_level = "RED"
             should_escalate = True
-            logging.info(f"Enhanced safety upgraded risk to {risk_level}")
-        elif enhanced_risk == "MEDIUM" and risk_level == "GREEN":
+            logging.warning(f"Unified safety escalated to RED (IMMINENT) - Session: {request.sessionId[:12]}")
+        elif unified_risk == "HIGH" and risk_level not in ["RED", "AMBER"]:
+            risk_level = "AMBER"
+            should_escalate = True
+            logging.info(f"Unified safety upgraded risk to AMBER (HIGH)")
+        elif unified_risk == "MEDIUM" and risk_level == "GREEN":
             risk_level = "YELLOW"
+            logging.info(f"Unified safety upgraded risk to YELLOW (MEDIUM)")
+        
+        # Also escalate on rapid escalation or concerning patterns
+        if unified_safety.get("rapid_escalation") and not should_escalate:
+            should_escalate = True
+            risk_level = "AMBER" if risk_level == "GREEN" else risk_level
+            logging.warning(f"Rapid escalation detected - Session: {request.sessionId[:12]}")
+        
+        if unified_safety.get("detected_patterns"):
+            concerning_patterns = ["INTENT_ESCALATION", "METHOD_INTRODUCTION", "FINALITY_BEHAVIOR"]
+            if any(p in unified_safety.get("detected_patterns", []) for p in concerning_patterns):
+                should_escalate = True
+                if risk_level == "GREEN":
+                    risk_level = "AMBER"
+                logging.warning(f"Concerning pattern detected: {unified_safety.get('detected_patterns')} - Session: {request.sessionId[:12]}")
         
         # Get safety wrapper text (appended to persona response, not replacing)
-        safety_wrapper = enhanced_safety.get("safety_wrapper")
+        safety_wrapper_data = unified_safety.get("safety_wrapper")
+        safety_wrapper = None
+        if safety_wrapper_data:
+            safety_wrapper = safety_wrapper_data.get("append_message", "")
         
         # === Knowledge Base Integration ===
         # Fetch relevant verified information to enhance the response
@@ -6949,7 +7008,7 @@ app.add_middleware(
         "https://veteran.dbty.co.uk",
         "https://www.veteran.dbty.co.uk",
         "https://veterans-support-api.onrender.com",
-        "https://voice-support-hub-1.preview.emergentagent.com",
+        "https://radiocheck-safeguard.preview.emergentagent.com",
     ],
     allow_origin_regex=r"https://.*\.emergentagent\.com|https://.*\.vercel\.app|https://.*\.onrender\.com|https://.*\.radiocheck\.me",
     allow_methods=["*"],
@@ -7050,6 +7109,32 @@ async def api_debug_webrtc():
         "active_calls_count": len(active_calls),
         "note": "Staff must be connected and 'available' to receive call/chat requests"
     }
+
+
+@api_router.get("/safety/debug")
+async def api_debug_safety():
+    """Debug endpoint to check safety system status (no auth for debugging)"""
+    status = get_safety_system_status()
+    return {
+        "safety_system_status": status,
+        "description": "Unified safety system combining keyword, semantic, and conversation trajectory analysis"
+    }
+
+@api_router.get("/safety/audit")
+async def api_safety_audit(
+    hours_back: int = 24,
+    min_risk_level: str = "MEDIUM"
+):
+    """Get safety audit report for review (no auth for debugging - add auth in production)"""
+    report = get_safety_audit_report(hours_back=hours_back, min_risk_level=min_risk_level)
+    return {
+        "audit_entries_count": len(report),
+        "audit_entries": report[-50:],  # Return last 50 entries
+        "hours_back": hours_back,
+        "min_risk_level": min_risk_level
+    }
+
+
 
 
 # ============ Human-to-Human Chat API ============
