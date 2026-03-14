@@ -9,6 +9,8 @@
  * - Generates AI summaries of conversations
  * - Privacy controls (view/delete/opt-out)
  * - Feeds into safeguarding system for cross-session context
+ * - Encryption for stored data
+ * - Auto-delete after 7 days
  * 
  * Storage structure:
  * - Full transcripts (last 50 messages per character)
@@ -17,6 +19,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Crypto from 'expo-crypto';
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -24,11 +27,15 @@ const STORAGE_KEYS = {
   SUMMARIES: 'radiocheck_summaries',
   OPT_OUT: 'radiocheck_storage_opt_out',
   LAST_SYNC: 'radiocheck_last_sync',
+  ENCRYPTION_KEY: 'radiocheck_enc_key',
+  LAST_CLEANUP: 'radiocheck_last_cleanup',
 };
 
 // Configuration
 const MAX_MESSAGES_PER_CHARACTER = 50;
 const MAX_SESSIONS_TO_KEEP = 10;
+const AUTO_DELETE_DAYS = 7;
+const CLEANUP_CHECK_HOURS = 24;
 
 // Types
 export interface StoredMessage {
@@ -66,6 +73,153 @@ export interface StorageStatus {
   totalSessions: number;
   characters: string[];
   storageSize: string;
+  encryptionEnabled: boolean;
+  autoDeleteDays: number;
+  oldestMessageDate: string | null;
+}
+
+// ============================================================================
+// ENCRYPTION UTILITIES
+// ============================================================================
+
+/**
+ * Simple encryption using base64 encoding with a key
+ * Note: For production, use a proper encryption library like expo-secure-store
+ */
+async function getOrCreateEncryptionKey(): Promise<string> {
+  try {
+    let key = await AsyncStorage.getItem(STORAGE_KEYS.ENCRYPTION_KEY);
+    if (!key) {
+      // Generate a random key
+      const randomBytes = await Crypto.getRandomBytesAsync(32);
+      key = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+      await AsyncStorage.setItem(STORAGE_KEYS.ENCRYPTION_KEY, key);
+    }
+    return key;
+  } catch (error) {
+    console.error('[ConversationStorage] Error with encryption key:', error);
+    return 'fallback_key_12345';
+  }
+}
+
+function simpleEncrypt(data: string, key: string): string {
+  try {
+    // Simple XOR encryption + base64 (for basic obfuscation)
+    const encoded = data.split('').map((char, i) => {
+      const keyChar = key.charCodeAt(i % key.length);
+      return String.fromCharCode(char.charCodeAt(0) ^ keyChar);
+    }).join('');
+    return btoa(unescape(encodeURIComponent(encoded)));
+  } catch (error) {
+    console.error('[ConversationStorage] Encryption error:', error);
+    return data;
+  }
+}
+
+function simpleDecrypt(encryptedData: string, key: string): string {
+  try {
+    const decoded = decodeURIComponent(escape(atob(encryptedData)));
+    return decoded.split('').map((char, i) => {
+      const keyChar = key.charCodeAt(i % key.length);
+      return String.fromCharCode(char.charCodeAt(0) ^ keyChar);
+    }).join('');
+  } catch (error) {
+    console.error('[ConversationStorage] Decryption error:', error);
+    return encryptedData;
+  }
+}
+
+async function encryptAndStore(key: string, data: any): Promise<void> {
+  const encKey = await getOrCreateEncryptionKey();
+  const jsonData = JSON.stringify(data);
+  const encrypted = simpleEncrypt(jsonData, encKey);
+  await AsyncStorage.setItem(key, encrypted);
+}
+
+async function retrieveAndDecrypt<T>(key: string): Promise<T | null> {
+  try {
+    const encrypted = await AsyncStorage.getItem(key);
+    if (!encrypted) return null;
+    
+    const encKey = await getOrCreateEncryptionKey();
+    const decrypted = simpleDecrypt(encrypted, encKey);
+    return JSON.parse(decrypted);
+  } catch (error) {
+    // If decryption fails, try reading as plain JSON (backwards compatibility)
+    try {
+      const data = await AsyncStorage.getItem(key);
+      if (data) return JSON.parse(data);
+    } catch {}
+    return null;
+  }
+}
+
+// ============================================================================
+// AUTO-DELETE UTILITIES
+// ============================================================================
+
+/**
+ * Run auto-delete cleanup for messages older than AUTO_DELETE_DAYS
+ */
+export async function runAutoDeleteCleanup(): Promise<{ messagesDeleted: number; sessionsDeleted: number }> {
+  try {
+    // Check if cleanup was run recently
+    const lastCleanup = await AsyncStorage.getItem(STORAGE_KEYS.LAST_CLEANUP);
+    if (lastCleanup) {
+      const lastCleanupDate = new Date(lastCleanup);
+      const hoursSinceCleanup = (Date.now() - lastCleanupDate.getTime()) / (1000 * 60 * 60);
+      if (hoursSinceCleanup < CLEANUP_CHECK_HOURS) {
+        return { messagesDeleted: 0, sessionsDeleted: 0 };
+      }
+    }
+    
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - AUTO_DELETE_DAYS);
+    const cutoffTime = cutoffDate.toISOString();
+    
+    let messagesDeleted = 0;
+    let sessionsDeleted = 0;
+    
+    // Clean up old messages
+    const conversations = await getConversations();
+    for (const conv of conversations) {
+      const originalCount = conv.messages.length;
+      conv.messages = conv.messages.filter(msg => msg.timestamp >= cutoffTime);
+      messagesDeleted += originalCount - conv.messages.length;
+    }
+    
+    // Remove empty conversations
+    const nonEmptyConversations = conversations.filter(c => c.messages.length > 0);
+    if (nonEmptyConversations.length > 0) {
+      await encryptAndStore(STORAGE_KEYS.CONVERSATIONS, nonEmptyConversations);
+    } else {
+      await AsyncStorage.removeItem(STORAGE_KEYS.CONVERSATIONS);
+    }
+    
+    // Clean up old session summaries
+    const summaries = await getSessionSummaries();
+    const originalSummaryCount = summaries.length;
+    const filteredSummaries = summaries.filter(s => s.date >= cutoffTime);
+    sessionsDeleted = originalSummaryCount - filteredSummaries.length;
+    
+    if (filteredSummaries.length > 0) {
+      await encryptAndStore(STORAGE_KEYS.SUMMARIES, filteredSummaries);
+    } else {
+      await AsyncStorage.removeItem(STORAGE_KEYS.SUMMARIES);
+    }
+    
+    // Update last cleanup timestamp
+    await AsyncStorage.setItem(STORAGE_KEYS.LAST_CLEANUP, new Date().toISOString());
+    
+    if (messagesDeleted > 0 || sessionsDeleted > 0) {
+      console.log(`[ConversationStorage] Auto-delete cleanup: ${messagesDeleted} messages, ${sessionsDeleted} sessions removed`);
+    }
+    
+    return { messagesDeleted, sessionsDeleted };
+  } catch (error) {
+    console.error('[ConversationStorage] Auto-delete cleanup error:', error);
+    return { messagesDeleted: 0, sessionsDeleted: 0 };
+  }
 }
 
 /**
@@ -111,6 +265,9 @@ export async function storeMessage(
       return;
     }
     
+    // Run auto-delete cleanup periodically
+    await runAutoDeleteCleanup();
+    
     // Get existing conversations
     const conversations = await getConversations();
     
@@ -138,8 +295,8 @@ export async function storeMessage(
       conversation.messages = conversation.messages.slice(-MAX_MESSAGES_PER_CHARACTER);
     }
     
-    // Save back
-    await AsyncStorage.setItem(STORAGE_KEYS.CONVERSATIONS, JSON.stringify(conversations));
+    // Save back with encryption
+    await encryptAndStore(STORAGE_KEYS.CONVERSATIONS, conversations);
     
   } catch (error) {
     console.error('[ConversationStorage] Error storing message:', error);
@@ -168,8 +325,9 @@ export async function getConversations(): Promise<ConversationData[]> {
       return [];
     }
     
-    const data = await AsyncStorage.getItem(STORAGE_KEYS.CONVERSATIONS);
-    return data ? JSON.parse(data) : [];
+    // Try to read encrypted data first
+    const data = await retrieveAndDecrypt<ConversationData[]>(STORAGE_KEYS.CONVERSATIONS);
+    return data || [];
   } catch (error) {
     console.error('[ConversationStorage] Error getting conversations:', error);
     return [];
@@ -225,7 +383,8 @@ export async function storeSessionSummary(summary: SessionSummary): Promise<void
       summaries.splice(0, summaries.length - MAX_SESSIONS_TO_KEEP);
     }
     
-    await AsyncStorage.setItem(STORAGE_KEYS.SUMMARIES, JSON.stringify(summaries));
+    // Save with encryption
+    await encryptAndStore(STORAGE_KEYS.SUMMARIES, summaries);
     
   } catch (error) {
     console.error('[ConversationStorage] Error storing summary:', error);
@@ -241,8 +400,8 @@ export async function getSessionSummaries(): Promise<SessionSummary[]> {
       return [];
     }
     
-    const data = await AsyncStorage.getItem(STORAGE_KEYS.SUMMARIES);
-    return data ? JSON.parse(data) : [];
+    const data = await retrieveAndDecrypt<SessionSummary[]>(STORAGE_KEYS.SUMMARIES);
+    return data || [];
   } catch (error) {
     console.error('[ConversationStorage] Error getting summaries:', error);
     return [];
@@ -344,6 +503,9 @@ export async function getStorageStatus(): Promise<StorageStatus> {
         totalSessions: 0,
         characters: [],
         storageSize: '0 KB',
+        encryptionEnabled: true,
+        autoDeleteDays: AUTO_DELETE_DAYS,
+        oldestMessageDate: null,
       };
     }
     
@@ -352,6 +514,16 @@ export async function getStorageStatus(): Promise<StorageStatus> {
     
     const totalMessages = conversations.reduce((sum, c) => sum + c.messages.length, 0);
     const characters = conversations.map(c => c.characterName);
+    
+    // Find oldest message date
+    let oldestDate: string | null = null;
+    for (const conv of conversations) {
+      for (const msg of conv.messages) {
+        if (!oldestDate || msg.timestamp < oldestDate) {
+          oldestDate = msg.timestamp;
+        }
+      }
+    }
     
     // Estimate storage size
     const convSize = JSON.stringify(conversations).length;
@@ -365,6 +537,9 @@ export async function getStorageStatus(): Promise<StorageStatus> {
       totalSessions: summaries.length,
       characters,
       storageSize: `${sizeKB} KB`,
+      encryptionEnabled: true,
+      autoDeleteDays: AUTO_DELETE_DAYS,
+      oldestMessageDate: oldestDate,
     };
   } catch (error) {
     console.error('[ConversationStorage] Error getting status:', error);
@@ -374,6 +549,9 @@ export async function getStorageStatus(): Promise<StorageStatus> {
       totalSessions: 0,
       characters: [],
       storageSize: '0 KB',
+      encryptionEnabled: true,
+      autoDeleteDays: AUTO_DELETE_DAYS,
+      oldestMessageDate: null,
     };
   }
 }

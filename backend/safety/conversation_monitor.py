@@ -56,29 +56,64 @@ CRISIS_PATTERNS = {
     "EMOTIONAL_DECLINE": {
         "sequence": ["distress", "hopelessness", "ideation"],
         "max_span_messages": 15,
-        "escalation_bonus": 30,
+        "escalation_bonus": 40,
     },
     "METHOD_INTRODUCTION": {
         "required": ["method"],
         "any_of": ["distress", "hopelessness", "ideation"],
         "max_span_messages": 10,
-        "escalation_bonus": 40,
+        "escalation_bonus": 50,
     },
     "INTENT_ESCALATION": {
         "sequence": ["ideation", "intent"],
         "max_span_messages": 8,
-        "escalation_bonus": 50,
+        "escalation_bonus": 70,
     },
     "FINALITY_BEHAVIOR": {
         "required": ["finality"],
         "any_of": ["intent", "method", "ideation"],
         "max_span_messages": 10,
-        "escalation_bonus": 45,
+        "escalation_bonus": 80,
     },
     "BURDEN_TO_IDEATION": {
         "sequence": ["burden", "ideation"],
         "max_span_messages": 12,
         "escalation_bonus": 25,
+    },
+    # NEW PATTERNS
+    "REPEATED_IDEATION": {
+        "count_category": "ideation",
+        "min_count": 2,
+        "max_span_messages": 50,
+        "escalation_bonus": 50,
+        "description": "Ideation appears multiple times across conversation",
+    },
+    "MULTIPLE_WEAK_SIGNALS": {
+        "count_category": "distress",
+        "min_count": 3,
+        "max_span_messages": 5,
+        "escalation_bonus": 30,
+        "description": "Cluster of distress signals in recent messages",
+    },
+    "SUDDEN_EMOTIONAL_DROP": {
+        "check_type": "emotional_drop",
+        "drop_threshold": 0.4,
+        "window_size": 10,
+        "escalation_bonus": 25,
+        "description": "Significant drop in emotional intensity",
+    },
+    "RAPID_ESCALATION": {
+        "sequence": ["distress", "ideation", "method"],
+        "max_time_minutes": 10,
+        "max_span_messages": 10,
+        "escalation_bonus": 60,
+        "description": "Rapid emotional collapse within 10 minutes",
+    },
+    "METHOD_PERSISTENCE": {
+        "check_type": "method_anywhere",
+        "max_span_messages": 50,
+        "escalation_bonus": 40,
+        "description": "Method mentioned anywhere in last 50 messages",
     },
 }
 
@@ -444,7 +479,15 @@ def _update_highest_category(state: ConversationSafetyState, category: str):
 
 
 def _detect_crisis_patterns(state: ConversationSafetyState) -> List[str]:
-    """Detect crisis progression patterns in conversation history."""
+    """
+    Detect crisis progression patterns in conversation history.
+    
+    Handles multiple pattern types:
+    - sequence: Categories must appear in order
+    - required + any_of: Must have all required AND at least one of any_of
+    - count_category: Count occurrences of a category
+    - check_type: Special checks (emotional_drop, method_anywhere)
+    """
     if len(state.message_history) < MIN_MESSAGES_FOR_PATTERN:
         return []
     
@@ -463,15 +506,27 @@ def _detect_crisis_patterns(state: ConversationSafetyState) -> List[str]:
         for msg in messages_to_check:
             recent_categories.extend(msg.categories_triggered)
         
-        # Check sequence patterns
-        if "sequence" in pattern_config:
+        # === PATTERN TYPE: Sequence ===
+        if "sequence" in pattern_config and "check_type" not in pattern_config:
             sequence = pattern_config["sequence"]
-            if _check_sequence_pattern(recent_categories, sequence):
-                detected.append(pattern_name)
-                logger.warning(f"[ConversationSafetyMonitor] Pattern detected: {pattern_name}")
-                continue
+            
+            # Check for time constraint (RAPID_ESCALATION)
+            if "max_time_minutes" in pattern_config:
+                if _check_sequence_pattern_with_time(
+                    messages_to_check, 
+                    sequence, 
+                    pattern_config["max_time_minutes"]
+                ):
+                    detected.append(pattern_name)
+                    logger.warning(f"[ConversationSafetyMonitor] Pattern detected: {pattern_name}")
+                    continue
+            else:
+                if _check_sequence_pattern(recent_categories, sequence):
+                    detected.append(pattern_name)
+                    logger.warning(f"[ConversationSafetyMonitor] Pattern detected: {pattern_name}")
+                    continue
         
-        # Check required + any_of patterns
+        # === PATTERN TYPE: Required + Any Of ===
         if "required" in pattern_config and "any_of" in pattern_config:
             required = pattern_config["required"]
             any_of = pattern_config["any_of"]
@@ -482,6 +537,83 @@ def _detect_crisis_patterns(state: ConversationSafetyState) -> List[str]:
             if has_required and has_any:
                 detected.append(pattern_name)
                 logger.warning(f"[ConversationSafetyMonitor] Pattern detected: {pattern_name}")
+                continue
+        
+        # === PATTERN TYPE: Count Category (REPEATED_IDEATION, MULTIPLE_WEAK_SIGNALS) ===
+        if "count_category" in pattern_config:
+            category_to_count = pattern_config["count_category"]
+            min_count = pattern_config.get("min_count", 2)
+            
+            count = sum(1 for cat in recent_categories if cat == category_to_count)
+            if count >= min_count:
+                detected.append(pattern_name)
+                logger.warning(f"[ConversationSafetyMonitor] Pattern detected: {pattern_name} ({count}x {category_to_count})")
+                continue
+        
+        # === PATTERN TYPE: Special Checks ===
+        check_type = pattern_config.get("check_type")
+        
+        if check_type == "emotional_drop":
+            # Check for sudden emotional drop
+            if _detect_emotional_drop(messages_to_check, pattern_config.get("drop_threshold", 0.4)):
+                detected.append(pattern_name)
+                logger.warning(f"[ConversationSafetyMonitor] Pattern detected: {pattern_name}")
+                continue
+        
+        elif check_type == "method_anywhere":
+            # Check if method mentioned anywhere in history
+            if "method" in recent_categories:
+                detected.append(pattern_name)
+                logger.warning(f"[ConversationSafetyMonitor] Pattern detected: {pattern_name}")
+                continue
+    
+    return detected
+
+
+def _check_sequence_pattern_with_time(
+    messages: List[MessageSafetyRecord], 
+    sequence: List[str], 
+    max_minutes: int
+) -> bool:
+    """Check if sequence appears within a time window."""
+    seq_idx = 0
+    first_match_time = None
+    
+    for msg in messages:
+        for cat in msg.categories_triggered:
+            if cat == sequence[seq_idx]:
+                if seq_idx == 0:
+                    first_match_time = msg.timestamp
+                seq_idx += 1
+                
+                if seq_idx >= len(sequence):
+                    # Check time constraint
+                    if first_match_time:
+                        time_diff = (msg.timestamp - first_match_time).total_seconds() / 60
+                        return time_diff <= max_minutes
+                    return True
+                break
+    
+    return False
+
+
+def _detect_emotional_drop(messages: List[MessageSafetyRecord], threshold: float) -> bool:
+    """Detect sudden drop in emotional intensity."""
+    if len(messages) < 3:
+        return False
+    
+    intensities = [msg.emotional_intensity for msg in messages if msg.emotional_intensity > 0]
+    
+    if len(intensities) < 3:
+        return False
+    
+    # Compare latest to average of previous
+    latest = intensities[-1]
+    previous_avg = sum(intensities[:-1]) / len(intensities[:-1])
+    
+    # Check for significant drop
+    drop = previous_avg - latest
+    return drop >= threshold
     
     return detected
 
