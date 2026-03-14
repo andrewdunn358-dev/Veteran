@@ -1292,7 +1292,7 @@ async function joinLiveChat(roomId) {
 }
 
 // Show Live Chat Modal
-async function showLiveChatModal(roomId) {
+async function showLiveChatModal(roomId, userId) {
     console.log('showLiveChatModal called with roomId:', roomId);
     
     // FIRST: Remove any existing modal to prevent duplicates
@@ -1306,12 +1306,21 @@ async function showLiveChatModal(roomId) {
     currentChatRoom = roomId;
     window.currentChatRoom = roomId;
     
+    // Store userId if provided (from the chat request data)
+    var chatUserId = userId || window.currentChatUserId || '';
+    window.currentChatUserId = chatUserId;
+    
     // Create modal HTML FIRST (before any async calls) so socket messages have a target
     var modalHtml = '<div class="livechat-modal" id="livechat-modal">' +
         '<div class="livechat-modal-content">' +
             '<div class="livechat-modal-header">' +
                 '<h3><i class="fas fa-headset"></i> Live Chat Support</h3>' +
-                '<button class="btn btn-icon" onclick="closeLiveChatModal()"><i class="fas fa-times"></i></button>' +
+                '<div style="display:flex;gap:8px;">' +
+                    '<button class="btn btn-success btn-sm" onclick="callUserFromChat()" title="Call this user">' +
+                        '<i class="fas fa-phone"></i> Call' +
+                    '</button>' +
+                    '<button class="btn btn-icon" onclick="closeLiveChatModal()"><i class="fas fa-times"></i></button>' +
+                '</div>' +
             '</div>' +
             '<div class="livechat-messages" id="livechat-messages" style="min-height:200px;background:#1a2634;padding:20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px;">' +
                 '<div style="color:#64748b;text-align:center;padding:20px;">Loading messages...</div>' +
@@ -1493,7 +1502,21 @@ function closeLiveChatModal() {
         clearInterval(chatPollingInterval);
         chatPollingInterval = null;
     }
+    
+    // Notify server that staff is leaving the chat room (resets status to available)
+    if (currentChatRoom && window.webrtcSocket && window.webrtcSocket.connected) {
+        console.log('Emitting leave_chat_room for:', currentChatRoom);
+        window.webrtcSocket.emit('leave_chat_room', { room_id: currentChatRoom });
+    }
+    
+    // Also update Socket.IO status back to available
+    if (window.webrtcSocket && window.webrtcSocket.connected) {
+        window.webrtcSocket.emit('update_status', { status: 'available' });
+        console.log('Status reset to available after closing chat');
+    }
+    
     currentChatRoom = null;
+    window.currentChatRoom = null;
     
     var modal = document.getElementById('livechat-modal');
     if (modal) {
@@ -1506,6 +1529,12 @@ async function endLiveChat(roomId) {
     if (!confirm('Are you sure you want to end this chat?')) return;
     
     try {
+        // Notify server via Socket.IO first (resets status)
+        if (window.webrtcSocket && window.webrtcSocket.connected) {
+            window.webrtcSocket.emit('leave_chat_room', { room_id: roomId });
+            window.webrtcSocket.emit('update_status', { status: 'available' });
+        }
+        
         await apiCall('/live-chat/rooms/' + roomId + '/end', { method: 'POST' });
         closeLiveChatModal();
         loadLiveChats();
@@ -1513,6 +1542,23 @@ async function endLiveChat(roomId) {
     } catch (error) {
         console.error('Error ending chat:', error);
         showNotification('Failed to end chat', 'error');
+    }
+}
+
+// Call user from within a chat
+function callUserFromChat() {
+    var userId = window.currentChatUserId;
+    if (!userId) {
+        showNotification('Cannot identify user to call', 'error');
+        return;
+    }
+    
+    // Use WebRTC to call the user
+    if (typeof makeOutboundCall === 'function') {
+        console.log('Calling user from chat:', userId);
+        makeOutboundCall(userId);
+    } else {
+        showNotification('Phone system not available', 'error');
     }
 }
 

@@ -47,6 +47,7 @@ export default function LiveChat() {
   const [userName] = useState('You');
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
+  const [isRequestingCall, setIsRequestingCall] = useState(false);
   
   const scrollViewRef = useRef<ScrollView>(null);
   const socketRef = useRef<Socket | null>(null);
@@ -397,6 +398,66 @@ export default function LiveChat() {
     }
   };
 
+  // Request a call from within the chat
+  const handleRequestCall = () => {
+    if (isRequestingCall) return;
+    
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm(
+        'Would you like to request a voice call with the support team?'
+      );
+      if (confirmed) {
+        requestCall();
+      }
+    } else {
+      Alert.alert(
+        'Request Voice Call',
+        'Would you like to request a voice call with the support team?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Request Call', 
+            onPress: requestCall
+          },
+        ]
+      );
+    }
+  };
+  
+  const requestCall = () => {
+    setIsRequestingCall(true);
+    
+    // Send a system message to let staff know
+    if (socketRef.current && roomId) {
+      socketRef.current.emit('chat_message', {
+        room_id: roomId,
+        message: '📞 I would like to speak on a voice call if possible.',
+        sender_id: userId,
+        sender_name: userName,
+        sender_type: 'user'
+      });
+    }
+    
+    // Also emit request_human_call event
+    if (socketRef.current) {
+      socketRef.current.emit('request_human_call', {
+        user_id: sessionId || userId,
+        user_name: userName,
+        session_id: sessionId || userId,
+        alert_id: alertId || '',
+        from_chat_room: roomId
+      });
+    }
+    
+    setTimeout(() => setIsRequestingCall(false), 3000);
+    
+    if (Platform.OS === 'web') {
+      alert('Call request sent! A supporter will call you shortly.');
+    } else {
+      Alert.alert('Call Requested', 'A supporter will call you shortly.');
+    }
+  };
+
   // Block user
   const handleBlock = () => {
     Alert.alert(
@@ -472,6 +533,18 @@ export default function LiveChat() {
         >
           <FontAwesome5 name="times" size={16} color="#dc2626" />
         </TouchableOpacity>
+        
+        {/* Call Button - visible when connected to staff */}
+        {!waitingForStaff && staffName && (
+          <TouchableOpacity 
+            style={[styles.callButton, isRequestingCall && styles.callButtonDisabled]}
+            onPress={handleRequestCall}
+            disabled={isRequestingCall}
+            data-testid="request-call-button"
+          >
+            <FontAwesome5 name="phone" size={14} color="#fff" />
+          </TouchableOpacity>
+        )}
         
         {/* Report/Block dropdown */}
         {!waitingForStaff && staffName && (
@@ -731,8 +804,13 @@ const styles = StyleSheet.create({
   },
   callButton: {
     padding: 12,
-    backgroundColor: '#2d3a4d',
+    backgroundColor: '#16a34a',
     borderRadius: 8,
+    marginRight: 8,
+  },
+  callButtonDisabled: {
+    backgroundColor: '#9ca3af',
+    opacity: 0.6,
   },
   endCallButton: {
     padding: 12,

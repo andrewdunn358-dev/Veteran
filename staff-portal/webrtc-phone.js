@@ -180,10 +180,13 @@ function setupSocketHandlers() {
             });
             console.log('Joined Socket.IO room:', roomId);
             
-            // Open the live chat modal with this room
+            // Store the chat user ID for call functionality
+            window.currentChatUserId = data.user_id;
+            
+            // Open the live chat modal with this room and user ID
             if (typeof showLiveChatModal === 'function') {
-                console.log('Opening live chat modal for room:', roomId);
-                showLiveChatModal(roomId);
+                console.log('Opening live chat modal for room:', roomId, 'user:', data.user_id);
+                showLiveChatModal(roomId, data.user_id);
             } else if (typeof joinLiveChat === 'function') {
                 console.log('Joining live chat room:', roomId);
                 joinLiveChat(roomId);
@@ -360,6 +363,11 @@ function setupSocketHandlers() {
         stopRingtone();
         showNotification('Call ended', 'info');
         cleanupCall();
+        
+        // Reset status to available
+        socket.emit('update_status', { status: 'available' });
+        console.log('Status reset to available after call ended event');
+        
         updatePhoneStatus('online', 'Ready for calls');
     });
     
@@ -369,6 +377,10 @@ function setupSocketHandlers() {
         stopRingtone();
         showNotification(data.message || 'Call failed', 'error');
         cleanupCall();
+        
+        // Reset status to available
+        socket.emit('update_status', { status: 'available' });
+        
         updatePhoneStatus('online', 'Ready for calls');
     });
     
@@ -378,6 +390,10 @@ function setupSocketHandlers() {
         console.error('WebRTC error:', data);
         showNotification(data.message || 'WebRTC connection error', 'error');
         cleanupCall();
+        
+        // Reset status to available
+        socket.emit('update_status', { status: 'available' });
+        
         updatePhoneStatus('online', 'Ready for calls');
     });
     
@@ -691,6 +707,11 @@ function endCall() {
     
     socket.emit('call_end', { call_id: currentCallId });
     cleanupCall();
+    
+    // Reset status to available after ending call
+    socket.emit('update_status', { status: 'available' });
+    console.log('Status reset to available after ending call');
+    
     updatePhoneStatus('online', 'Ready for calls');
     showNotification('Call ended', 'info');
 }
