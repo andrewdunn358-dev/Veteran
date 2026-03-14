@@ -119,6 +119,29 @@ CONTEXTUAL_DISTRESS_PATTERNS = {
     "completely alone": 55,
     "i have no one": 60,
     "there's no one left": 65,
+    
+    # Specific method mentions (CRITICAL - immediate danger)
+    "drive off a cliff": 95,
+    "driving off a cliff": 95,
+    "drive of a cliff": 95,  # Common typo
+    "driving of a cliff": 95,  # Common typo
+    "crash my car": 80,
+    "drive into traffic": 90,
+    "drive into a wall": 85,
+    "drive off a bridge": 95,
+    "take tablets": 75,
+    "take some tablets": 80,
+    "take all my tablets": 95,
+    "take all my pills": 95,
+    "overdose": 85,
+    
+    # Intent confirmation phrases (CRITICAL)
+    "i'm going to do it": 95,
+    "im going to do it": 95,
+    "going to do it": 90,
+    "about to do it": 95,
+    "doing it now": 99,
+    "doing it tonight": 95,
 }
 
 # Emotional tone indicators (weighted)
@@ -733,6 +756,7 @@ def analyze_message_safety(
         "triggered_indicators": risk_data["triggered_indicators"],
         "dependency_data": dependency_data,
         "require_staff_alert": require_staff_alert,
+        "requires_intervention": require_staff_alert or risk_data["risk_level"] in ["HIGH", "IMMINENT"],
         "require_immediate_resources": risk_data["risk_level"] in ["HIGH", "IMMINENT"],
         "safety_wrapper": safety_wrapper,
         "block_ai_response": False,
