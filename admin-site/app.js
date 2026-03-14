@@ -3974,13 +3974,13 @@ async function handleAddStaff(e) {
         password: formData.get('password'),
         name: formData.get('name'),
         role: formData.get('role'),
-        phone: formData.get('phone') || null,
-        sms: formData.get('sms') || null,
-        whatsapp: formData.get('whatsapp') || null,
-        specialization: formData.get('specialization') || null,
-        area: formData.get('area') || null,
-        background: formData.get('background') || null,
-        yearsServed: formData.get('yearsServed') || null
+        phone: formData.get('phone') || '',
+        sms: formData.get('sms') || '',
+        whatsapp: formData.get('whatsapp') || '',
+        specialization: formData.get('specialization') || '',
+        area: formData.get('area') || '',
+        background: formData.get('background') || '',
+        yearsServed: formData.get('yearsServed') || ''
     };
     
     try {

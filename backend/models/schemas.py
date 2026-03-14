@@ -24,12 +24,12 @@ class UserCreate(BaseModel):
     first_name: str = ""
     last_name: str = ""
     phone: str = ""
-    sms: Optional[str] = None
-    whatsapp: Optional[str] = None
+    sms: Optional[str] = ""
+    whatsapp: Optional[str] = ""
     specialization: str = ""
-    area: Optional[str] = None
-    background: Optional[str] = None
-    yearsServed: Optional[str] = None
+    area: Optional[str] = ""
+    background: Optional[str] = ""
+    yearsServed: Optional[str] = ""
     linked_staff_id: str = ""
     linked_staff_type: str = ""
     
