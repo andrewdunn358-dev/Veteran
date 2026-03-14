@@ -131,16 +131,29 @@ export default function DynamicAIChat() {
     loadLocalConversationHistory();
   }, [character.id]);
 
-  // Save conversation to device storage whenever messages change
+  // Save conversation to device storage whenever NEW messages are added
+  // We need to track which messages are new (not from previousConversations)
+  const [newMessagesCount, setNewMessagesCount] = useState(0);
+  
   useEffect(() => {
     const saveConversationToDevice = async () => {
-      if (messages.length === 0) return;
+      // Only save if there are actual new messages (beyond welcome message)
+      const currentNewMessages = messages.filter(m => 
+        !m.id.startsWith('welcome') && 
+        !previousConversations.some(p => p.id === m.id)
+      );
+      
+      if (currentNewMessages.length === 0) return;
+      if (currentNewMessages.length === newMessagesCount) return; // No new messages
+      
+      setNewMessagesCount(currentNewMessages.length);
       
       try {
-        // Combine previous + current, keep only the last MAX_STORED_MESSAGES
-        const allMessages = [...previousConversations, ...messages];
+        // Combine previous + only truly new messages, keep only the last MAX_STORED_MESSAGES
+        const allMessages = [...previousConversations, ...currentNewMessages];
         const toStore = allMessages.slice(-MAX_STORED_MESSAGES);
         await AsyncStorage.setItem(CONVERSATION_STORAGE_KEY, JSON.stringify(toStore));
+        console.log(`[ConversationMemory] Saved ${toStore.length} messages with ${character.name}`);
       } catch (error) {
         console.error('Error saving conversation history:', error);
       }
@@ -149,7 +162,7 @@ export default function DynamicAIChat() {
     if (hasLoadedLocalHistory) {
       saveConversationToDevice();
     }
-  }, [messages, hasLoadedLocalHistory]);
+  }, [messages, hasLoadedLocalHistory, previousConversations, newMessagesCount]);
 
   // Build conversation context for AI (summary of previous conversations)
   const buildConversationContext = () => {
@@ -247,18 +260,32 @@ export default function DynamicAIChat() {
     }
   };
 
-  // Add welcome message when session loads
+  // Add welcome message when session loads - with conversation memory awareness
   useEffect(() => {
-    if (hasLoadedSession && messages.length === 0) {
-      const welcomeMessage: Message = {
-        id: 'welcome',
-        text: character.welcomeMessage,
-        sender: 'buddy',
-        timestamp: new Date(),
-      };
-      setMessages([welcomeMessage]);
+    if (hasLoadedSession && hasLoadedLocalHistory && messages.length === 0) {
+      // Check if this is a returning user with conversation history
+      if (previousConversations.length > 0) {
+        // Show previous messages first, then add a "welcome back" message
+        const welcomeBackMessage: Message = {
+          id: 'welcome-back',
+          text: `Welcome back! I remember our previous conversations. ${character.welcomeMessage.replace(/^(Hey there|Hi|Hello|Hey)!?\s*/i, '')} Feel free to continue where we left off, or start something new.`,
+          sender: 'buddy',
+          timestamp: new Date(),
+        };
+        // Show previous messages + welcome back
+        setMessages([...previousConversations, welcomeBackMessage]);
+      } else {
+        // First-time user - show normal welcome
+        const welcomeMessage: Message = {
+          id: 'welcome',
+          text: character.welcomeMessage,
+          sender: 'buddy',
+          timestamp: new Date(),
+        };
+        setMessages([welcomeMessage]);
+      }
     }
-  }, [hasLoadedSession, character.welcomeMessage]);
+  }, [hasLoadedSession, hasLoadedLocalHistory, character.welcomeMessage, previousConversations]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -331,18 +358,20 @@ export default function DynamicAIChat() {
 
   const clearConversation = async () => {
     // Clear both current messages and device-stored history
-    setMessages([{
+    const welcomeMessage: Message = {
       id: 'welcome',
       text: character.welcomeMessage,
       sender: 'buddy',
       timestamp: new Date(),
-    }]);
+    };
+    setMessages([welcomeMessage]);
     
     // Also clear the stored conversation history from device
     try {
       await AsyncStorage.removeItem(CONVERSATION_STORAGE_KEY);
       setPreviousConversations([]);
-      console.log(`Cleared conversation history with ${character.name}`);
+      setNewMessagesCount(0);
+      console.log(`[ConversationMemory] Cleared conversation history with ${character.name}`);
     } catch (error) {
       console.error('Error clearing conversation history:', error);
     }
@@ -466,28 +495,53 @@ export default function DynamicAIChat() {
         contentContainerStyle={styles.messagesContent}
         data-testid="messages-container"
       >
-        {messages.map((message) => (
-          <View 
-            key={message.id}
-            style={[
-              styles.messageBubble,
-              message.sender === 'user' ? styles.userBubble : styles.buddyBubble
-            ]}
-          >
-            {message.sender === 'buddy' && (
-              <View style={styles.buddyLabel}>
-                <Image source={{ uri: character.avatar }} style={styles.buddyLabelAvatar} />
-                <Text style={styles.buddyLabelText}>{character.name}</Text>
-              </View>
-            )}
-            <Text style={[
-              styles.messageText,
-              message.sender === 'user' ? styles.userText : styles.buddyText
-            ]}>
-              {message.text}
-            </Text>
+        {/* Show "Previous conversation" header if there's history */}
+        {previousConversations.length > 0 && (
+          <View style={styles.conversationDivider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>Previous conversation</Text>
+            <View style={styles.dividerLine} />
           </View>
-        ))}
+        )}
+        
+        {messages.map((message, index) => {
+          // Check if this message marks the start of the new session
+          const isFirstNewMessage = previousConversations.length > 0 && 
+            message.id === 'welcome-back';
+          
+          return (
+            <React.Fragment key={message.id}>
+              {/* Show "Today" divider before the welcome back message */}
+              {isFirstNewMessage && (
+                <View style={styles.conversationDivider}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>Today</Text>
+                  <View style={styles.dividerLine} />
+                </View>
+              )}
+              
+              <View 
+                style={[
+                  styles.messageBubble,
+                  message.sender === 'user' ? styles.userBubble : styles.buddyBubble
+                ]}
+              >
+                {message.sender === 'buddy' && (
+                  <View style={styles.buddyLabel}>
+                    <Image source={{ uri: character.avatar }} style={styles.buddyLabelAvatar} />
+                    <Text style={styles.buddyLabelText}>{character.name}</Text>
+                  </View>
+                )}
+                <Text style={[
+                  styles.messageText,
+                  message.sender === 'user' ? styles.userText : styles.buddyText
+                ]}>
+                  {message.text}
+                </Text>
+              </View>
+            </React.Fragment>
+          );
+        })}
         {isLoading && (
           <View style={[styles.messageBubble, styles.buddyBubble]}>
             <ActivityIndicator size="small" color={character.accentColor} />
@@ -1254,5 +1308,23 @@ const createStyles = (colors: any, isDark: boolean, accentColor: string) => Styl
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+  },
+  // Conversation history divider styles
+  conversationDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+    paddingHorizontal: 8,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border,
+  },
+  dividerText: {
+    paddingHorizontal: 12,
+    fontSize: 12,
+    color: colors.textMuted,
+    fontWeight: '500',
   },
 });
