@@ -41,7 +41,7 @@ const FOUNDERS: Founder[] = [
     name: "Andrew \"Frankie\" Dunn",
     role: "Founder",
     avatar: "https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/4zwz619g_image.png",
-    bio: "Andrew \"Frankie\" Dunn is the heart and soul of Radio Check. A veteran himself, Frankie understands firsthand the challenges of transitioning from military to civilian life. His vision for Radio Check came from his own experiences and a deep desire to ensure no veteran faces their struggles alone.\n\nFrankie's passion for fitness and wellbeing led him to develop the 12-week fitness programme integrated into the app. He believes that physical health and mental health are intrinsically linked, and that structured exercise can be a powerful tool for recovery and resilience.\n\nAs a natural leader with an infectious personality, Frankie brings together the Radio Check community with warmth, humour, and genuine care. His motto: \"We look after our own.\""
+    bio: "Andrew Dunn served 27 years in the British Army before creating Frankie's Pod: Uncorking the Unforgettable. Through podcasting and projects like Radio Check, he works to build communities where veterans and others can connect, share their experiences, and support each other through open conversation."
   },
   {
     name: "Rachel Webster",
