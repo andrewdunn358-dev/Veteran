@@ -481,55 +481,45 @@ async def seed_historical_data():
     if existing > 0:
         return {"message": f"Already have {existing} entries. Delete them first to re-seed.", "seeded": False}
     
-    # Historical work estimates based on Radio Check development
+    # Historical work estimates - CORRECT TIMELINE: Started ~Feb 2026
     historical_entries = [
-        # Initial Setup & Core Features
-        {"date": "2024-11-01", "hours": 4, "minutes": 0, "category": "Development", "description": "Initial project setup, FastAPI backend, MongoDB configuration"},
-        {"date": "2024-11-02", "hours": 6, "minutes": 30, "category": "Development", "description": "User authentication system, JWT tokens, password hashing"},
-        {"date": "2024-11-04", "hours": 5, "minutes": 0, "category": "Development", "description": "AI Chat personas - Hugo, Bob, Margie character setup"},
-        {"date": "2024-11-05", "hours": 4, "minutes": 30, "category": "Development", "description": "OpenAI GPT integration for AI chat responses"},
-        {"date": "2024-11-06", "hours": 3, "minutes": 0, "category": "Development", "description": "Chat UI components, message bubbles, typing indicators"},
+        # Week 1 - Mid February 2026 - Initial Setup
+        {"date": "2026-02-14", "hours": 4, "minutes": 0, "category": "Development", "description": "Initial project exploration, understanding codebase structure"},
+        {"date": "2026-02-15", "hours": 5, "minutes": 30, "category": "Development", "description": "AI Chat personas setup - Hugo, Bob, Margie characters"},
+        {"date": "2026-02-16", "hours": 3, "minutes": 0, "category": "App Testing", "description": "Testing AI chat functionality, message flows"},
+        {"date": "2026-02-17", "hours": 4, "minutes": 0, "category": "Admin Portal", "description": "Admin portal exploration and staff management"},
         
-        # Admin & Staff Portals
-        {"date": "2024-11-08", "hours": 6, "minutes": 0, "category": "Admin Portal", "description": "Admin portal setup - user management, dashboard"},
-        {"date": "2024-11-09", "hours": 5, "minutes": 30, "category": "Staff Portal", "description": "Staff portal - case management, support queue"},
-        {"date": "2024-11-11", "hours": 4, "minutes": 0, "category": "Development", "description": "WebRTC signaling server for live calls"},
-        {"date": "2024-11-12", "hours": 5, "minutes": 0, "category": "Development", "description": "Socket.io real-time communication setup"},
+        # Week 2 - Late February
+        {"date": "2026-02-19", "hours": 6, "minutes": 0, "category": "Development", "description": "Safeguarding system review and enhancements"},
+        {"date": "2026-02-20", "hours": 5, "minutes": 0, "category": "Development", "description": "AI Safety Classifier implementation with GPT-4o-mini"},
+        {"date": "2026-02-21", "hours": 4, "minutes": 30, "category": "Development", "description": "Crisis phrase dataset expansion - 527 phrases"},
+        {"date": "2026-02-22", "hours": 3, "minutes": 0, "category": "Documentation", "description": "Safeguarding system documentation"},
+        {"date": "2026-02-23", "hours": 4, "minutes": 0, "category": "Staff Portal", "description": "Staff portal case management review"},
         
-        # LMS Development
-        {"date": "2024-11-14", "hours": 6, "minutes": 0, "category": "LMS Admin", "description": "LMS admin portal - course creation, module management"},
-        {"date": "2024-11-15", "hours": 5, "minutes": 0, "category": "Development", "description": "LMS learner portal - course enrollment, progress tracking"},
-        {"date": "2024-11-16", "hours": 4, "minutes": 30, "category": "Development", "description": "Quiz system with multiple choice questions"},
-        {"date": "2024-11-18", "hours": 3, "minutes": 0, "category": "Documentation", "description": "LMS course content - Mental Health Awareness module"},
+        # Week 3 - Late February / Early March
+        {"date": "2026-02-25", "hours": 5, "minutes": 0, "category": "Development", "description": "Home screen redesign - 2-column grid layout"},
+        {"date": "2026-02-26", "hours": 3, "minutes": 30, "category": "Development", "description": "Live chat UI cleanup, header simplification"},
+        {"date": "2026-02-27", "hours": 4, "minutes": 0, "category": "LMS Admin", "description": "LMS admin portal review and testing"},
+        {"date": "2026-02-28", "hours": 5, "minutes": 0, "category": "Development", "description": "Local conversation storage - encrypted device storage"},
         
-        # Events & Video
-        {"date": "2024-11-20", "hours": 5, "minutes": 0, "category": "Development", "description": "Events system - create, manage, RSVP functionality"},
-        {"date": "2024-11-21", "hours": 6, "minutes": 30, "category": "Development", "description": "Jitsi Meet integration for group video calls"},
-        {"date": "2024-11-22", "hours": 3, "minutes": 0, "category": "App Testing", "description": "Video call testing, debugging WebRTC issues"},
+        # Week 4 - Early March
+        {"date": "2026-03-01", "hours": 4, "minutes": 0, "category": "Support", "description": "Bug fixes - staff status reset, WebSocket issues"},
+        {"date": "2026-03-02", "hours": 3, "minutes": 0, "category": "App Testing", "description": "End-to-end testing of chat and support features"},
+        {"date": "2026-03-03", "hours": 5, "minutes": 0, "category": "Development", "description": "Events system - Jitsi video integration"},
+        {"date": "2026-03-04", "hours": 4, "minutes": 30, "category": "Development", "description": "Jitsi prejoin page fix - disable lobby screen"},
+        {"date": "2026-03-05", "hours": 3, "minutes": 0, "category": "Support", "description": "Debugging live support connection issues"},
         
-        # Safeguarding System
-        {"date": "2024-11-25", "hours": 8, "minutes": 0, "category": "Development", "description": "Safeguarding system v1 - keyword detection, risk scoring"},
-        {"date": "2024-11-26", "hours": 6, "minutes": 0, "category": "Development", "description": "Sentence-transformers integration for semantic analysis"},
-        {"date": "2024-11-27", "hours": 5, "minutes": 30, "category": "Development", "description": "Crisis phrase dataset - 500+ suicide-related phrases"},
-        {"date": "2024-11-28", "hours": 4, "minutes": 0, "category": "Development", "description": "Pattern detection engine - 10 escalation patterns"},
-        {"date": "2024-11-29", "hours": 5, "minutes": 0, "category": "Development", "description": "AI Safety Classifier using GPT-4o-mini"},
-        {"date": "2024-11-30", "hours": 3, "minutes": 0, "category": "Documentation", "description": "Safeguarding system documentation"},
+        # Week 5 - Mid March
+        {"date": "2026-03-08", "hours": 5, "minutes": 0, "category": "Development", "description": "In-chat voice call implementation"},
+        {"date": "2026-03-09", "hours": 4, "minutes": 0, "category": "Development", "description": "WebRTC signaling improvements"},
+        {"date": "2026-03-10", "hours": 6, "minutes": 0, "category": "Development", "description": "AI conversation memory - show previous messages"},
+        {"date": "2026-03-11", "hours": 3, "minutes": 30, "category": "Support", "description": "Debugging video chat issues, log analysis"},
+        {"date": "2026-03-12", "hours": 4, "minutes": 0, "category": "Development", "description": "Jitsi backend config fix - prejoinPageEnabled"},
         
-        # December - UI/UX & Fixes
-        {"date": "2024-12-02", "hours": 4, "minutes": 0, "category": "Development", "description": "Home screen redesign - 2-column grid layout"},
-        {"date": "2024-12-03", "hours": 3, "minutes": 30, "category": "Development", "description": "Live chat UI cleanup, header simplification"},
-        {"date": "2024-12-04", "hours": 2, "minutes": 30, "category": "Development", "description": "Desktop layout fix - removed blue bar issue"},
-        {"date": "2024-12-05", "hours": 4, "minutes": 0, "category": "Development", "description": "Local conversation storage - encrypted device storage"},
-        {"date": "2024-12-06", "hours": 3, "minutes": 0, "category": "Support", "description": "Bug fixes - staff status reset, WebSocket reconnection"},
-        
-        # Recent Sessions
-        {"date": "2024-12-09", "hours": 5, "minutes": 0, "category": "Development", "description": "Jitsi prejoin page fix - disable lobby screen"},
-        {"date": "2024-12-10", "hours": 4, "minutes": 30, "category": "Development", "description": "AI conversation memory - show previous messages on return"},
-        {"date": "2024-12-10", "hours": 2, "minutes": 0, "category": "Support", "description": "Debugging video chat issues, log analysis"},
-        
-        # Today's work
-        {"date": "2024-12-11", "hours": 1, "minutes": 30, "category": "Development", "description": "Jitsi backend config fix - prejoinPageEnabled enforcement"},
-        {"date": "2024-12-11", "hours": 2, "minutes": 0, "category": "Development", "description": "Time tracking system - API, admin portal integration"},
+        # This week - Recent
+        {"date": "2026-03-13", "hours": 5, "minutes": 0, "category": "Development", "description": "Socket.io event handling for live support"},
+        {"date": "2026-03-14", "hours": 4, "minutes": 30, "category": "Support", "description": "Debugging Jitsi video initialization"},
+        {"date": "2026-03-15", "hours": 3, "minutes": 0, "category": "Development", "description": "Time tracking system - API and admin portal"},
     ]
     
     now = datetime.now(timezone.utc)
@@ -550,7 +540,7 @@ async def seed_historical_data():
         "seeded": True
     }
 
-@router.delete("/entries/all")
+@router.delete("/clear-all")
 async def delete_all_entries(confirm: bool = Query(False)):
     """Delete all time entries (use with caution!)"""
     if not confirm:
