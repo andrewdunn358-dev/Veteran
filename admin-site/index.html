@@ -96,6 +96,9 @@
             <button class="tab-btn" data-tab="learning">
                 <i class="fas fa-brain"></i> AI Learning
             </button>
+            <button class="tab-btn" data-tab="timetracking">
+                <i class="fas fa-clock"></i> Time Tracking
+            </button>
             <button class="tab-btn" data-tab="settings">
                 <i class="fas fa-cog"></i> Settings
             </button>
@@ -1790,6 +1793,116 @@
                 </div>
             </div>
 
+            <!-- Time Tracking Tab -->
+            <div id="timetracking-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2><i class="fas fa-clock"></i> Time Tracking</h2>
+                    <div class="tab-actions">
+                        <button class="btn btn-primary" onclick="openAddTimeEntryModal()">
+                            <i class="fas fa-plus"></i> Add Entry
+                        </button>
+                        <button class="btn btn-success" onclick="exportTimeTracking()">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Summary Cards -->
+                <div class="stats-grid" id="time-summary-cards" style="margin-bottom: 30px;">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--primary);">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="total-hours-month">0</div>
+                            <div class="stat-label">Hours This Month</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--success);">
+                            <i class="fas fa-calendar-week"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="total-hours-week">0</div>
+                            <div class="stat-label">Hours This Week</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--warning);">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="total-entries">0</div>
+                            <div class="stat-label">Total Entries</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--info);">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="dev-hours">0</div>
+                            <div class="stat-label">Development Hours</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Breakdown Chart -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                    <div class="card" style="padding: 20px;">
+                        <h3 style="margin-bottom: 15px; color: var(--text-primary);">Hours by Category</h3>
+                        <canvas id="category-chart" style="max-height: 250px;"></canvas>
+                    </div>
+                    <div class="card" style="padding: 20px;">
+                        <h3 style="margin-bottom: 15px; color: var(--text-primary);">Daily Activity</h3>
+                        <canvas id="daily-chart" style="max-height: 250px;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card" style="padding: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <div class="form-group" style="margin: 0;">
+                            <label style="margin-bottom: 5px; display: block;">Month</label>
+                            <input type="month" id="time-filter-month" onchange="loadTimeEntries()" style="padding: 8px; border-radius: 6px; border: 1px solid var(--border);">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label style="margin-bottom: 5px; display: block;">Category</label>
+                            <select id="time-filter-category" onchange="loadTimeEntries()" style="padding: 8px; border-radius: 6px; border: 1px solid var(--border);">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                        <div style="margin-top: 22px;">
+                            <button class="btn btn-secondary btn-small" onclick="seedHistoricalData()">
+                                <i class="fas fa-database"></i> Load Historical Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entries Table -->
+                <div class="card" style="padding: 20px;">
+                    <h3 style="margin-bottom: 15px; color: var(--text-primary);">Time Entries</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table" id="time-entries-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Hours</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Type</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="time-entries-body">
+                                <tr><td colspan="6" style="text-align: center; padding: 40px;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- Settings Tab -->
             <div id="settings-tab" class="tab-content">
                 <div class="tab-header">
@@ -2194,7 +2307,67 @@ Include:
         </div>
     </div>
 
+    <!-- Time Entry Modal -->
+    <div id="time-entry-modal" class="modal-overlay hidden">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 id="time-entry-modal-title"><i class="fas fa-clock"></i> Add Time Entry</h3>
+                <button class="modal-close" onclick="closeTimeEntryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="time-entry-form" onsubmit="saveTimeEntry(event)">
+                    <input type="hidden" id="time-entry-id">
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar"></i> Date</label>
+                        <input type="date" id="time-entry-date" required>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label><i class="fas fa-hourglass"></i> Hours</label>
+                            <input type="number" id="time-entry-hours" min="0" max="24" value="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-hourglass-half"></i> Minutes</label>
+                            <input type="number" id="time-entry-minutes" min="0" max="59" value="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Category</label>
+                        <select id="time-entry-category" required>
+                            <option value="">Select Category</option>
+                            <option value="Development">Development</option>
+                            <option value="Admin Portal">Admin Portal</option>
+                            <option value="Staff Portal">Staff Portal</option>
+                            <option value="LMS Admin">LMS Admin</option>
+                            <option value="LMS Learning">LMS Learning</option>
+                            <option value="App Testing">App Testing</option>
+                            <option value="Support">Support</option>
+                            <option value="Training">Training</option>
+                            <option value="Documentation">Documentation</option>
+                            <option value="Meetings">Meetings</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-align-left"></i> Description</label>
+                        <textarea id="time-entry-description" rows="3" placeholder="What did you work on?" required></textarea>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeTimeEntryModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Entry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="config.js"></script>
     <script src="app.js"></script>
+    <script src="time-tracking.js"></script>
 </body>
 </html>

@@ -7678,6 +7678,10 @@ app.include_router(lms_router)
 # AI Tutor - Mr Clark
 app.include_router(ai_tutor.router)
 
+# Time Tracking - Admin work hours logging
+from routers.timetracking import router as timetracking_router
+app.include_router(timetracking_router)
+
 # Serve static files for Staff Portal and Admin Site
 # This allows testing the portals from the preview environment
 PORTAL_PATH = Path(__file__).parent.parent / "staff-portal"
