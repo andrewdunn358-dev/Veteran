@@ -3,8 +3,10 @@
  * Tracks work hours for invoicing purposes
  */
 
-// Get API URL from config
-const API_BASE_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : 'https://veterans-support-api.onrender.com';
+// Get API URL from config - ensure /api prefix is included
+const API_BASE_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) 
+    ? CONFIG.API_URL + '/api' 
+    : 'https://veterans-support-api.onrender.com/api';
 
 // Chart instances
 let categoryChart = null;
