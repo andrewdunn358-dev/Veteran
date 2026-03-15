@@ -475,6 +475,33 @@ async function seedHistoricalData() {
     }
 }
 
+// Clear all entries
+async function clearAllEntries() {
+    if (!confirm('WARNING: This will DELETE ALL time tracking entries. This cannot be undone. Are you sure?')) {
+        return;
+    }
+    
+    if (!confirm('Really delete everything? Type OK in the next prompt to confirm.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/timetracking/clear-all?confirm=true`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+        });
+        
+        const data = await response.json();
+        showToast(data.message, 'success');
+        loadTimeEntries();
+        loadTimeSummary();
+        
+    } catch (error) {
+        console.error('Error clearing data:', error);
+        showToast('Failed to clear entries', 'error');
+    }
+}
+
 // Simple toast notification (uses existing showToast if available)
 if (typeof showToast !== 'function') {
     function showToast(message, type = 'info') {

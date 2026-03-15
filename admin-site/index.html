@@ -1872,9 +1872,12 @@
                                 <option value="">All Categories</option>
                             </select>
                         </div>
-                        <div style="margin-top: 22px;">
+                        <div style="margin-top: 22px; display: flex; gap: 10px;">
                             <button class="btn btn-secondary btn-small" onclick="seedHistoricalData()">
                                 <i class="fas fa-database"></i> Load Historical Data
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="clearAllEntries()">
+                                <i class="fas fa-trash"></i> Clear All
                             </button>
                         </div>
                     </div>
