@@ -7748,6 +7748,11 @@ STATIC_AVATARS_PATH = Path(__file__).parent / "static" / "avatars"
 STATIC_AVATARS_PATH.mkdir(parents=True, exist_ok=True)
 app.mount("/static/avatars", StaticFiles(directory=str(STATIC_AVATARS_PATH)), name="avatars")
 
+# Mount docs folder for funding documents
+DOCS_PATH = Path(__file__).parent.parent / "docs"
+if DOCS_PATH.exists():
+    app.mount("/api/docs", StaticFiles(directory=str(DOCS_PATH), html=True), name="docs")
+
 # Create ASGI app that combines FastAPI and Socket.IO
 # Store original FastAPI app
 _fastapi_app = app

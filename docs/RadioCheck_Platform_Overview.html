@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radio Check - Platform Overview & Funding Documentation</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --primary: #22c55e;
+            --primary-dark: #16a34a;
+            --background: #1a2332;
+            --surface: #243447;
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #ffffff;
+            color: #1a2332;
+            line-height: 1.6;
+        }
+        
+        .page {
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20mm;
+            background: white;
+        }
+        
+        @media print {
+            .page {
+                padding: 15mm;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+        
+        /* Cover Page */
+        .cover {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, var(--background) 0%, var(--surface) 100%);
+            color: white;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .cover-logo {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 40px;
+        }
+        
+        .cover h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+        
+        .cover h2 {
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-bottom: 60px;
+        }
+        
+        .cover-subtitle {
+            font-size: 20px;
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
+        
+        .cover-date {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+        
+        /* Headers */
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--background);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--background);
+            margin-top: 32px;
+            margin-bottom: 16px;
+        }
+        
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--surface);
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+        
+        h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+        
+        p {
+            margin-bottom: 16px;
+            color: #374151;
+        }
+        
+        /* Lists */
+        ul, ol {
+            margin-bottom: 16px;
+            padding-left: 24px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        th {
+            background: var(--background);
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        
+        /* Boxes */
+        .highlight-box {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-top: 0;
+        }
+        
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid var(--accent);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .compliance-box {
+            background: #f0fdf4;
+            border: 2px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+        
+        .compliance-box h4 {
+            color: var(--primary-dark);
+            margin-top: 0;
+        }
+        
+        /* Feature Cards */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 24px 0;
+        }
+        
+        .feature-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .feature-card h4 {
+            color: var(--background);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .feature-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+        
+        /* Screenshot */
+        .screenshot {
+            margin: 24px 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .screenshot img {
+            width: 100%;
+            display: block;
+        }
+        
+        .screenshot-caption {
+            background: #f8fafc;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+        
+        .stat-card {
+            background: var(--background);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        /* Contact */
+        .contact-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .contact-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+        
+        .contact-info h4 {
+            margin: 0 0 4px 0;
+            color: var(--background);
+        }
+        
+        .contact-role {
+            font-size: 14px;
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+        
+        .contact-email {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        /* TOC */
+        .toc {
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            color: var(--background);
+        }
+        
+        .toc ol {
+            counter-reset: toc;
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            counter-increment: toc;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .toc li:before {
+            content: counter(toc) ".";
+            color: var(--primary);
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        
+        /* Footer */
+        .document-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-green {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .badge-blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .badge-purple {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+    </style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+    <svg class="cover-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="45" fill="#22c55e" opacity="0.2"/>
+        <circle cx="50" cy="50" r="35" fill="#22c55e" opacity="0.3"/>
+        <circle cx="50" cy="50" r="25" fill="#22c55e"/>
+        <path d="M50 25 L50 50 L65 65" stroke="white" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="50" cy="50" r="8" fill="white"/>
+    </svg>
+    <h1>Radio Check</h1>
+    <h2>Mental Health & Peer Support Platform for Veterans</h2>
+    <p class="cover-subtitle">
+        A comprehensive digital platform providing 24/7 AI-powered mental health support, 
+        peer networking, crisis intervention, and professional training for the veteran community.
+    </p>
+    <div style="margin-top: 40px;">
+        <span class="badge badge-green">Platform Overview</span>
+        <span class="badge badge-blue">Funding Documentation</span>
+        <span class="badge badge-purple">Compliance Report</span>
+    </div>
+    <p class="cover-date">
+        Document Version 1.0 | March 2026<br>
+        Confidential - For Funding Review Only
+    </p>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="page page-break">
+    <h1>Table of Contents</h1>
+    
+    <div class="toc">
+        <ol>
+            <li><strong>Executive Summary</strong> - Platform Overview & Mission</li>
+            <li><strong>The Problem We Solve</strong> - Veteran Mental Health Crisis</li>
+            <li><strong>Platform Architecture</strong> - Technical Overview</li>
+            <li><strong>User-Facing Application</strong> - Features & Pages</li>
+            <li><strong>AI Companion System</strong> - How It Works</li>
+            <li><strong>Safeguarding & Safety</strong> - AI Safety Architecture</li>
+            <li><strong>Staff Portal</strong> - Counsellor & Peer Support Management</li>
+            <li><strong>Admin Portal</strong> - Platform Administration</li>
+            <li><strong>Learning Management System</strong> - Peer Supporter Training</li>
+            <li><strong>Compliance & Regulatory Framework</strong></li>
+            <li><strong>Data Protection & Privacy</strong></li>
+            <li><strong>Technical Specifications</strong></li>
+            <li><strong>Founding Team</strong></li>
+            <li><strong>Contact Information</strong></li>
+        </ol>
+    </div>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<div class="page page-break">
+    <h1>1. Executive Summary</h1>
+    
+    <div class="highlight-box">
+        <h3>Our Mission</h3>
+        <p style="margin-bottom: 0; font-size: 18px;">
+            Radio Check exists to ensure no veteran faces their mental health struggles alone. 
+            We provide immediate, accessible, 24/7 support through AI companions trained to understand 
+            military culture, backed by human peer supporters and professional counsellors.
+        </p>
+    </div>
+    
+    <h2>Platform Overview</h2>
+    <p>
+        Radio Check is a comprehensive digital mental health platform specifically designed for UK veterans, 
+        serving personnel, and their families. The platform combines cutting-edge AI technology with human 
+        expertise to create a multi-layered support system that's available whenever it's needed.
+    </p>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">24/7</div>
+            <div class="stat-label">AI Support Available</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">6</div>
+            <div class="stat-label">AI Companions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">14</div>
+            <div class="stat-label">Training Modules</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">100%</div>
+            <div class="stat-label">Free to Veterans</div>
+        </div>
+    </div>
+    
+    <h2>Key Features</h2>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h4><span class="feature-icon">AI</span> AI Battle Buddies</h4>
+            <p>Six AI companions with distinct personalities, trained to understand military culture and provide immediate emotional support.</p>
+        </div>
+        <div class="feature-card">
+            <h4><span class="feature-icon">S</span> Real-Time Safeguarding</h4>
+            <p>AI-powered safety monitoring that detects crisis situations and ensures appropriate escalation to human support.</p>
+        </div>
+        <div class="feature-card">
+            <h4><span class="feature-icon">P</span> Peer Support Network</h4>
+            <p>Trained veteran peer supporters available for voice and chat connections through the platform.</p>
+        </div>
+        <div class="feature-card">
+            <h4><span class="feature-icon">L</span> Professional Training</h4>
+            <p>Comprehensive 14-module LMS for training peer supporters in mental health first aid and safeguarding.</p>
+        </div>
+    </div>
+</div>
+
+<!-- THE PROBLEM -->
+<div class="page page-break">
+    <h1>2. The Problem We Solve</h1>
+    
+    <h2>The Veteran Mental Health Crisis</h2>
+    
+    <div class="warning-box">
+        <strong>Critical Statistics:</strong>
+        <ul style="margin-bottom: 0; margin-top: 8px;">
+            <li>Approximately <strong>2 veteran suicides per week</strong> in the UK</li>
+            <li>Veterans are <strong>2-3x more likely</strong> to experience depression than civilians</li>
+            <li><strong>17%</strong> of veterans report PTSD symptoms</li>
+            <li>Only <strong>50%</strong> of veterans with mental health issues seek help</li>
+            <li>Average delay between symptoms and seeking help: <strong>10+ years</strong></li>
+        </ul>
+    </div>
+    
+    <h2>Barriers to Support</h2>
+    <table>
+        <tr>
+            <th>Barrier</th>
+            <th>Impact</th>
+            <th>How Radio Check Addresses It</th>
+        </tr>
+        <tr>
+            <td><strong>Stigma</strong></td>
+            <td>Veterans fear appearing weak or "broken"</td>
+            <td>Anonymous AI support available 24/7 without judgment</td>
+        </tr>
+        <tr>
+            <td><strong>Waiting Times</strong></td>
+            <td>NHS mental health waiting lists can be months</td>
+            <td>Immediate access to AI companions and peer support</td>
+        </tr>
+        <tr>
+            <td><strong>Civilian Services</strong></td>
+            <td>"They don't understand military life"</td>
+            <td>AI trained on military culture; peer supporters are veterans</td>
+        </tr>
+        <tr>
+            <td><strong>Crisis Timing</strong></td>
+            <td>Mental health crises don't follow office hours</td>
+            <td>24/7 availability with automatic crisis escalation</td>
+        </tr>
+        <tr>
+            <td><strong>Geography</strong></td>
+            <td>Rural veterans far from services</td>
+            <td>Digital platform accessible anywhere with internet</td>
+        </tr>
+    </table>
+    
+    <h2>Our Solution</h2>
+    <p>
+        Radio Check creates a layered support system that meets veterans where they are:
+    </p>
+    <ol>
+        <li><strong>Layer 1: AI Companions</strong> - Immediate, anonymous, always available</li>
+        <li><strong>Layer 2: Peer Supporters</strong> - Trained veterans who understand the experience</li>
+        <li><strong>Layer 3: Professional Counsellors</strong> - Qualified mental health professionals</li>
+        <li><strong>Layer 4: Crisis Services</strong> - Automatic escalation to emergency services when needed</li>
+    </ol>
+</div>
+
+<!-- PLATFORM ARCHITECTURE -->
+<div class="page page-break">
+    <h1>3. Platform Architecture</h1>
+    
+    <h2>System Overview</h2>
+    <p>
+        Radio Check is built on a modern, secure, and scalable architecture designed to handle 
+        sensitive mental health data while providing reliable 24/7 service.
+    </p>
+    
+    <table>
+        <tr>
+            <th>Component</th>
+            <th>Technology</th>
+            <th>Purpose</th>
+        </tr>
+        <tr>
+            <td>User Application</td>
+            <td>React Native / Expo</td>
+            <td>Cross-platform mobile and web app</td>
+        </tr>
+        <tr>
+            <td>Backend API</td>
+            <td>Python FastAPI</td>
+            <td>Secure REST API with real-time capabilities</td>
+        </tr>
+        <tr>
+            <td>Database</td>
+            <td>MongoDB</td>
+            <td>Encrypted data storage with audit trails</td>
+        </tr>
+        <tr>
+            <td>AI Engine</td>
+            <td>OpenAI GPT-4o-mini</td>
+            <td>Conversational AI with custom safety layers</td>
+        </tr>
+        <tr>
+            <td>Safety Classifier</td>
+            <td>Custom ML Model</td>
+            <td>Real-time risk detection and classification</td>
+        </tr>
+        <tr>
+            <td>Voice/Video</td>
+            <td>Twilio WebRTC / Jitsi</td>
+            <td>Secure voice calls and video conferencing</td>
+        </tr>
+        <tr>
+            <td>Staff Portal</td>
+            <td>Vanilla JavaScript</td>
+            <td>Lightweight counsellor management interface</td>
+        </tr>
+        <tr>
+            <td>Admin Portal</td>
+            <td>Vanilla JavaScript</td>
+            <td>Platform administration and analytics</td>
+        </tr>
+        <tr>
+            <td>LMS</td>
+            <td>Custom Built</td>
+            <td>14-module peer supporter training system</td>
+        </tr>
+    </table>
+    
+    <h2>Security Architecture</h2>
+    <div class="compliance-box">
+        <h4>Data Security Measures</h4>
+        <ul>
+            <li><strong>Encryption at Rest</strong>: All database records encrypted using AES-256</li>
+            <li><strong>Encryption in Transit</strong>: TLS 1.3 for all API communications</li>
+            <li><strong>Client-Side Encryption</strong>: Conversation history encrypted on user's device</li>
+            <li><strong>Access Control</strong>: Role-based access with audit logging</li>
+            <li><strong>Data Minimisation</strong>: Only essential data collected and retained</li>
+            <li><strong>Anonymisation</strong>: AI conversations don't require personal identification</li>
+        </ul>
+    </div>
+</div>
+
+<!-- USER APPLICATION - FEATURES -->
+<div class="page page-break">
+    <h1>4. User-Facing Application</h1>
+    
+    <p>
+        The Radio Check app is designed with veteran accessibility in mind. Dark theme reduces eye 
+        strain, large touch targets accommodate users with tremors or reduced dexterity, and the 
+        interface is deliberately simple and uncluttered.
+    </p>
+    
+    <h2>4.1 Home Screen</h2>
+    <p>
+        The home screen serves as the central hub, providing quick access to all support options 
+        and displaying the user's personalised menu based on their preferences.
+    </p>
+    
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Description</th>
+            <th>Purpose</th>
+        </tr>
+        <tr>
+            <td>Quick Access Menu</td>
+            <td>Customisable grid of support options</td>
+            <td>One-tap access to frequently used features</td>
+        </tr>
+        <tr>
+            <td>"Need to Talk?" Button</td>
+            <td>Prominent call-to-action</td>
+            <td>Immediate access to crisis support options</td>
+        </tr>
+        <tr>
+            <td>Peer Support Button</td>
+            <td>Connect with trained peer supporters</td>
+            <td>Human connection when needed</td>
+        </tr>
+        <tr>
+            <td>Meet the Team</td>
+            <td>Founder bios with tap-to-expand</td>
+            <td>Transparency and trust building</td>
+        </tr>
+        <tr>
+            <td>About Section</td>
+            <td>Expandable information panels</td>
+            <td>Platform information and legal links</td>
+        </tr>
+    </table>
+    
+    <h2>4.2 Crisis Support Page</h2>
+    <p>
+        Designed for users in distress, this page provides immediate access to support options 
+        with clear visual hierarchy prioritising the most helpful resources.
+    </p>
+    
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td><strong>Tommy AI Chat (Top of Page)</strong></td>
+            <td>Immediate access to the primary AI battle buddy for crisis support</td>
+        </tr>
+        <tr>
+            <td>On-Duty Counsellors</td>
+            <td>Shows available professional support with real-time status</td>
+        </tr>
+        <tr>
+            <td>24/7 Crisis Helplines</td>
+            <td>Direct dial links to Samaritans, Combat Stress, Veterans Gateway</td>
+        </tr>
+        <tr>
+            <td>NHS 111 Option 2</td>
+            <td>Highlighted access to NHS mental health crisis line</td>
+        </tr>
+    </table>
+    
+    <h2>4.3 Peer Support Page</h2>
+    <p>
+        Connects users with trained veteran peer supporters for voice or text-based support.
+    </p>
+    
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>Available Supporters</td>
+            <td>Real-time list of on-duty peer supporters with status</td>
+        </tr>
+        <tr>
+            <td>Request Chat</td>
+            <td>Initiate text-based support session</td>
+        </tr>
+        <tr>
+            <td>Request Call</td>
+            <td>Initiate voice call with peer supporter</td>
+        </tr>
+        <tr>
+            <td>About Peer Support</td>
+            <td>Information about what to expect from peer support</td>
+        </tr>
+    </table>
+</div>
+
+<!-- MORE USER PAGES -->
+<div class="page page-break">
+    <h2>4.4 Counsellors Page</h2>
+    <p>
+        Lists professional counsellors available on the platform with their qualifications and availability.
+    </p>
+    
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>Counsellor Cards</td>
+            <td>Photo, name, qualifications, and specialities</td>
+        </tr>
+        <tr>
+            <td>Availability Status</td>
+            <td>Real-time availability (Available, Busy, Offline)</td>
+        </tr>
+        <tr>
+            <td>Book Appointment</td>
+            <td>Schedule session with chosen counsellor</td>
+        </tr>
+        <tr>
+            <td>Live Chat</td>
+            <td>Immediate text-based session if available</td>
+        </tr>
+    </table>
+    
+    <h2>4.5 Organizations Page</h2>
+    <p>
+        Comprehensive directory of veteran support organisations with contact information and descriptions.
+    </p>
+    
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td><strong>Hugo AI Chat (Top)</strong></td>
+            <td>AI assistant to help navigate organisations and find the right support</td>
+        </tr>
+        <tr>
+            <td>Organisation Cards</td>
+            <td>Name, description, contact details for each organisation</td>
+        </tr>
+        <tr>
+            <td>Category Filters</td>
+            <td>Filter by type: Housing, Employment, Mental Health, etc.</td>
+        </tr>
+        <tr>
+            <td>Direct Links</td>
+            <td>One-tap access to phone, website, or email</td>
+        </tr>
+    </table>
+    
+    <h2>4.6 Self-Care Page</h2>
+    <p>
+        Tools and resources for daily mental health maintenance and wellbeing.
+    </p>
+    
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>Breathing Exercises</td>
+            <td>Guided breathing techniques for anxiety management</td>
+        </tr>
+        <tr>
+            <td>Grounding Techniques</td>
+            <td>5-4-3-2-1 and other grounding exercises</td>
+        </tr>
+        <tr>
+            <td>Sleep Hygiene</td>
+            <td>Tips and techniques for better sleep</td>
+        </tr>
+        <tr>
+            <td>Daily Check-In</td>
+            <td>Quick mood tracking and journaling</td>
+        </tr>
+    </table>
+    
+    <h2>4.7 Events Page</h2>
+    <p>
+        Community events including virtual meetups with Jitsi video conferencing integration.
+    </p>
+    
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>Event Calendar</td>
+            <td>Upcoming veteran community events</td>
+        </tr>
+        <tr>
+            <td>Virtual Events</td>
+            <td>Online meetups with integrated video conferencing</td>
+        </tr>
+        <tr>
+            <td>Event Registration</td>
+            <td>RSVP and add to personal calendar</td>
+        </tr>
+        <tr>
+            <td>Past Events</td>
+            <td>Archive of previous events</td>
+        </tr>
+    </table>
+</div>
+
+<!-- AI COMPANION SYSTEM -->
+<div class="page page-break">
+    <h1>5. AI Companion System</h1>
+    
+    <h2>Overview</h2>
+    <p>
+        Radio Check's AI Companions (known as "Battle Buddies") are sophisticated conversational AI 
+        agents designed specifically for veteran mental health support. Each AI has a distinct 
+        personality and communication style, allowing users to find a companion that resonates with them.
+    </p>
+    
+    <h2>5.1 AI Characters</h2>
+    <table>
+        <tr>
+            <th>Character</th>
+            <th>Personality</th>
+            <th>Best For</th>
+            <th>Location in App</th>
+        </tr>
+        <tr>
+            <td><strong>Tommy</strong></td>
+            <td>Direct, no-nonsense Army veteran</td>
+            <td>Users who prefer straight-talking support</td>
+            <td>Crisis Support Page</td>
+        </tr>
+        <tr>
+            <td><strong>Rachel</strong></td>
+            <td>Warm, empathetic counsellor</td>
+            <td>Users seeking gentle, understanding support</td>
+            <td>Criminal Justice Page</td>
+        </tr>
+        <tr>
+            <td><strong>Doris</strong></td>
+            <td>Experienced grandmother figure</td>
+            <td>Users wanting wisdom and comfort</td>
+            <td>Criminal Justice Page</td>
+        </tr>
+        <tr>
+            <td><strong>Hugo</strong></td>
+            <td>Knowledgeable navigator</td>
+            <td>Users needing help finding services</td>
+            <td>Organisations Page</td>
+        </tr>
+        <tr>
+            <td><strong>Margie</strong></td>
+            <td>Peer supporter personality</td>
+            <td>Users wanting a mate to chat with</td>
+            <td>General Support</td>
+        </tr>
+        <tr>
+            <td><strong>Bob</strong></td>
+            <td>Practical problem-solver</td>
+            <td>Users seeking practical advice</td>
+            <td>General Support</td>
+        </tr>
+    </table>
+    
+    <h2>5.2 Conversation Continuity</h2>
+    <p>
+        A key feature of Radio Check's AI system is conversation memory. When a user returns to 
+        chat with an AI companion, the system:
+    </p>
+    <ul>
+        <li>Loads the last 15 messages from previous conversations</li>
+        <li>Provides this context to the AI with instructions to continue naturally</li>
+        <li>Instructs the AI to reference specific previous topics ("How'd that thing go?")</li>
+        <li>Creates the feeling of talking to a mate who remembers you</li>
+    </ul>
+    
+    <div class="info-box">
+        <strong>Privacy Note:</strong> Conversation history is encrypted and stored locally on the 
+        user's device, not on our servers. Users can clear their history at any time.
+    </div>
+    
+    <h2>5.3 AI Consent & Disclaimer</h2>
+    <p>
+        Before first use of AI companions, users must acknowledge:
+    </p>
+    <ul>
+        <li>AI companions are not human and cannot replace professional help</li>
+        <li>For emergencies, users should contact 999 or crisis services</li>
+        <li>Conversations may be reviewed for safety purposes</li>
+        <li>AI responses should not be considered medical advice</li>
+        <li>Voice-to-text dictation is available for easier input</li>
+    </ul>
+    <p>
+        This consent is requested once per app installation, not repeatedly per conversation.
+    </p>
+</div>
+
+<!-- SAFEGUARDING -->
+<div class="page page-break">
+    <h1>6. Safeguarding & AI Safety</h1>
+    
+    <div class="highlight-box">
+        <h3>Zentrafuge AI Safety Architecture</h3>
+        <p style="margin-bottom: 0;">
+            Radio Check integrates Zentrafuge's AI safety modules - a research-led approach to 
+            building AI that earns trust rather than assumes it. This architecture ensures that 
+            AI interactions are continuously monitored for safety concerns.
+        </p>
+    </div>
+    
+    <h2>6.1 Real-Time Safety Monitoring</h2>
+    <p>
+        Every message in AI conversations is analysed by our safety classifier system:
+    </p>
+    
+    <table>
+        <tr>
+            <th>Risk Level</th>
+            <th>Triggers</th>
+            <th>Response</th>
+        </tr>
+        <tr>
+            <td style="color: #22c55e;"><strong>LOW</strong></td>
+            <td>General conversation, no risk indicators</td>
+            <td>Normal conversation continues</td>
+        </tr>
+        <tr>
+            <td style="color: #f59e0b;"><strong>MEDIUM</strong></td>
+            <td>Expressions of distress, hopelessness, mentions of self-harm</td>
+            <td>AI provides supportive response with helpline information</td>
+        </tr>
+        <tr>
+            <td style="color: #ef4444;"><strong>HIGH</strong></td>
+            <td>Active suicidal ideation, immediate danger indicators</td>
+            <td>Immediate crisis resources displayed, alert to staff</td>
+        </tr>
+        <tr>
+            <td style="color: #7c3aed;"><strong>CRITICAL</strong></td>
+            <td>Explicit suicide plan, imminent self-harm, harm to others</td>
+            <td>Staff notification, emergency services information, session flagged</td>
+        </tr>
+    </table>
+    
+    <h2>6.2 Safety Classifier Technology</h2>
+    <p>
+        The safety system uses a multi-layered approach:
+    </p>
+    <ol>
+        <li><strong>Keyword Detection</strong>: Primary screening for high-risk phrases</li>
+        <li><strong>Semantic Analysis</strong>: Understanding context and intent using embeddings</li>
+        <li><strong>Sentiment Analysis</strong>: Detecting emotional tone and distress levels</li>
+        <li><strong>Pattern Recognition</strong>: Identifying escalating crisis patterns over time</li>
+        <li><strong>Human Review</strong>: High-risk conversations flagged for staff review</li>
+    </ol>
+    
+    <h2>6.3 Safeguarding Alerts</h2>
+    <p>
+        When the safety system detects concerning content:
+    </p>
+    <ul>
+        <li>Alert generated with risk level, category, and timestamp</li>
+        <li>Alert appears in Staff Portal and Admin Portal dashboards</li>
+        <li>Assigned staff member notified</li>
+        <li>Full conversation transcript available for review</li>
+        <li>Actions logged for audit trail</li>
+    </ul>
+    
+    <div class="compliance-box">
+        <h4>Alert Categories Monitored</h4>
+        <ul style="columns: 2; -webkit-columns: 2; -moz-columns: 2;">
+            <li>Suicidal ideation</li>
+            <li>Self-harm mentions</li>
+            <li>Violence towards others</li>
+            <li>Child safeguarding concerns</li>
+            <li>Domestic abuse indicators</li>
+            <li>Severe mental health crisis</li>
+            <li>Substance abuse crisis</li>
+            <li>Financial exploitation</li>
+        </ul>
+    </div>
+</div>
+
+<!-- STAFF PORTAL -->
+<div class="page page-break">
+    <h1>7. Staff Portal</h1>
+    
+    <p>
+        The Staff Portal is a dedicated interface for counsellors, peer supporters, and mental 
+        health professionals to manage their availability, respond to support requests, and 
+        monitor safeguarding alerts.
+    </p>
+    
+    <h2>7.1 Dashboard Features</h2>
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Description</th>
+            <th>Purpose</th>
+        </tr>
+        <tr>
+            <td><strong>Availability Toggle</strong></td>
+            <td>Set status: Available, Busy, Offline</td>
+            <td>Control when users can reach you</td>
+        </tr>
+        <tr>
+            <td><strong>Support Requests</strong></td>
+            <td>Incoming chat and call requests</td>
+            <td>Accept or decline user connections</td>
+        </tr>
+        <tr>
+            <td><strong>Active Sessions</strong></td>
+            <td>Current support conversations</td>
+            <td>Manage ongoing support sessions</td>
+        </tr>
+        <tr>
+            <td><strong>Safeguarding Alerts</strong></td>
+            <td>Real-time safety notifications</td>
+            <td>Respond to flagged conversations</td>
+        </tr>
+        <tr>
+            <td><strong>Session History</strong></td>
+            <td>Past support sessions</td>
+            <td>Review and document interactions</td>
+        </tr>
+        <tr>
+            <td><strong>Training Link</strong></td>
+            <td>Quick access to LMS</td>
+            <td>Continue professional development</td>
+        </tr>
+    </table>
+    
+    <h2>7.2 Support Session Management</h2>
+    <p>
+        When a user requests support, staff can:
+    </p>
+    <ul>
+        <li>View user's current mood/status before accepting</li>
+        <li>Accept or decline with reason</li>
+        <li>Initiate voice call or text chat</li>
+        <li>Access shared notes from previous sessions (with consent)</li>
+        <li>Escalate to senior staff if needed</li>
+        <li>Document session outcomes</li>
+        <li>Set follow-up reminders</li>
+    </ul>
+    
+    <h2>7.3 Safeguarding Response</h2>
+    <p>
+        For safeguarding alerts, staff can:
+    </p>
+    <ul>
+        <li>Review the flagged conversation in full</li>
+        <li>Assess risk level and required action</li>
+        <li>Attempt to contact the user</li>
+        <li>Document decisions and rationale</li>
+        <li>Escalate to external services if needed</li>
+        <li>Mark alert as resolved with outcome</li>
+    </ul>
+</div>
+
+<!-- ADMIN PORTAL -->
+<div class="page page-break">
+    <h1>8. Admin Portal</h1>
+    
+    <p>
+        The Admin Portal provides comprehensive platform management capabilities for 
+        administrators and supervisors.
+    </p>
+    
+    <h2>8.1 User Management</h2>
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>Staff Management</td>
+            <td>Add, edit, deactivate counsellors and peer supporters</td>
+        </tr>
+        <tr>
+            <td>Role Assignment</td>
+            <td>Assign roles: Admin, Counsellor, Peer Supporter, Tutor</td>
+        </tr>
+        <tr>
+            <td>Credential Verification</td>
+            <td>Track and verify professional qualifications</td>
+        </tr>
+        <tr>
+            <td>Activity Monitoring</td>
+            <td>View staff login times, session counts, availability</td>
+        </tr>
+    </table>
+    
+    <h2>8.2 Content Management</h2>
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>Organisation Directory</td>
+            <td>Add/edit organisations shown in the app</td>
+        </tr>
+        <tr>
+            <td>AI Character Management</td>
+            <td>Configure AI personalities and prompts</td>
+        </tr>
+        <tr>
+            <td>Event Management</td>
+            <td>Create and manage community events</td>
+        </tr>
+        <tr>
+            <td>Announcement System</td>
+            <td>Push notifications to all users or groups</td>
+        </tr>
+    </table>
+    
+    <h2>8.3 Time Tracking (Development)</h2>
+    <p>
+        Built-in time tracking for development work with cost calculation:
+    </p>
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>Time Entry</td>
+            <td>Log hours by category (Development, Admin, Support, etc.)</td>
+        </tr>
+        <tr>
+            <td>Cost Calculation</td>
+            <td>Automatic cost calculation by hourly rate per category</td>
+        </tr>
+        <tr>
+            <td>Monthly Summary</td>
+            <td>Total hours and costs with category breakdown</td>
+        </tr>
+        <tr>
+            <td>Excel Export</td>
+            <td>Download reports for invoicing and accounting</td>
+        </tr>
+    </table>
+    
+    <h2>8.4 Analytics Dashboard</h2>
+    <ul>
+        <li>Total user registrations and active users</li>
+        <li>AI conversation volumes by character</li>
+        <li>Support session statistics</li>
+        <li>Safeguarding alert trends</li>
+        <li>Staff performance metrics</li>
+        <li>Platform health monitoring</li>
+    </ul>
+</div>
+
+<!-- LMS -->
+<div class="page page-break">
+    <h1>9. Learning Management System</h1>
+    
+    <p>
+        Radio Check includes a comprehensive Learning Management System (LMS) for training 
+        volunteer peer supporters. The 14-module curriculum is based on Mental Health First 
+        Aid principles adapted for the veteran context.
+    </p>
+    
+    <h2>9.1 Curriculum Overview</h2>
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Module</th>
+            <th>Content Length</th>
+            <th>Quiz</th>
+        </tr>
+        <tr><td>1</td><td>Introduction to Mental Health</td><td>15,828 chars</td><td>5 questions</td></tr>
+        <tr><td>2</td><td>The ALGEE Action Plan</td><td>17,100 chars</td><td>5 questions</td></tr>
+        <tr><td>3</td><td>Ethics and Boundaries</td><td>14,176 chars</td><td>5 questions</td></tr>
+        <tr><td>4</td><td>Communication Skills</td><td>12,216 chars</td><td>5 questions</td></tr>
+        <tr><td>5</td><td>Crisis Support and Suicide Awareness</td><td>10,117 chars</td><td>5 questions</td></tr>
+        <tr><td>6</td><td>Understanding PTSD in Veterans</td><td>9,089 chars</td><td>5 questions</td></tr>
+        <tr><td>7</td><td>Depression and Anxiety</td><td>8,071 chars</td><td>5 questions</td></tr>
+        <tr><td>8</td><td>Self-Care for Peer Supporters</td><td>9,230 chars</td><td>5 questions</td></tr>
+        <tr><td>9</td><td>Substance Misuse and Addiction</td><td>15,063 chars</td><td>5 questions</td></tr>
+        <tr><td>10</td><td>Safeguarding</td><td>10,977 chars</td><td>5 questions</td></tr>
+        <tr><td>11</td><td>Diversity and Inclusion</td><td>11,653 chars</td><td>5 questions</td></tr>
+        <tr><td>12</td><td>Practical Skills and Resources</td><td>11,722 chars</td><td>5 questions</td></tr>
+        <tr><td>13</td><td>Case Studies and Scenarios</td><td>13,063 chars</td><td>5 questions</td></tr>
+        <tr><td>14</td><td>Course Completion and Next Steps</td><td>11,719 chars</td><td>5 questions</td></tr>
+    </table>
+    
+    <p style="margin-top: 16px;">
+        <strong>Total curriculum content:</strong> 170,024 characters (~85 pages of training material)
+    </p>
+    
+    <h2>9.2 LMS Features</h2>
+    <ul>
+        <li><strong>Progress Tracking:</strong> Learners see completion percentage and can resume where they left off</li>
+        <li><strong>Module Quizzes:</strong> Each module has a 5-question quiz with 80% pass rate required</li>
+        <li><strong>Certificate Generation:</strong> Downloadable certificate upon course completion</li>
+        <li><strong>Admin Oversight:</strong> Administrators can view learner progress and results</li>
+        <li><strong>Content Updates:</strong> Curriculum can be updated centrally</li>
+    </ul>
+    
+    <h2>9.3 Learner Portal</h2>
+    <p>
+        Volunteer applicants access the LMS through a dedicated learner portal where they can:
+    </p>
+    <ul>
+        <li>Register with basic information and veteran status</li>
+        <li>Complete modules at their own pace</li>
+        <li>Take quizzes and track progress</li>
+        <li>Download completion certificate</li>
+        <li>Request mentorship from existing peer supporters</li>
+    </ul>
+</div>
+
+<!-- COMPLIANCE -->
+<div class="page page-break">
+    <h1>10. Compliance & Regulatory Framework</h1>
+    
+    <p>
+        Radio Check is designed to meet or exceed all relevant regulatory requirements for 
+        mental health support services in the United Kingdom.
+    </p>
+    
+    <h2>10.1 Care Act 2014 Compliance</h2>
+    <div class="compliance-box">
+        <h4>Safeguarding Adults Requirements</h4>
+        <ul>
+            <li><strong>Section 42:</strong> Local authority duty to make enquiries - Radio Check facilitates 
+                referral to local safeguarding teams when concerns are identified</li>
+            <li><strong>Section 43:</strong> Safeguarding Adults Boards - Platform designed to integrate 
+                with local SAB procedures</li>
+            <li><strong>Six Principles:</strong> Empowerment, Prevention, Proportionality, Protection, 
+                Partnership, Accountability - embedded in all safeguarding procedures</li>
+        </ul>
+    </div>
+    
+    <h2>10.2 Mental Health Act Considerations</h2>
+    <div class="compliance-box">
+        <h4>Mental Health Act 1983 (as amended 2007)</h4>
+        <ul>
+            <li>AI companions trained to recognise when users may require formal mental health assessment</li>
+            <li>Clear escalation pathways to Approved Mental Health Professionals (AMHPs)</li>
+            <li>Information provided about rights under the Mental Health Act</li>
+            <li>Crisis protocols aligned with Section 136 procedures</li>
+        </ul>
+    </div>
+    
+    <h2>10.3 BACP Ethical Framework Alignment</h2>
+    <div class="compliance-box">
+        <h4>British Association for Counselling and Psychotherapy Standards</h4>
+        <p>Peer supporter training aligns with BACP ethical principles:</p>
+        <ul>
+            <li><strong>Being Trustworthy:</strong> Confidentiality training, clear boundaries</li>
+            <li><strong>Autonomy:</strong> Respecting user choices and self-determination</li>
+            <li><strong>Beneficence:</strong> Acting in users' best interests</li>
+            <li><strong>Non-maleficence:</strong> Avoiding harm, knowing limits</li>
+            <li><strong>Justice:</strong> Fair treatment, anti-discrimination training</li>
+            <li><strong>Self-respect:</strong> Self-care training for supporters</li>
+        </ul>
+    </div>
+    
+    <h2>10.4 NHS Digital Standards</h2>
+    <div class="compliance-box">
+        <h4>NHS Service Standard Alignment</h4>
+        <ul>
+            <li>DCB0129 Clinical Risk Management (software as medical device considerations)</li>
+            <li>DCB0160 Clinical Risk Management (health IT deployment)</li>
+            <li>NHS Digital Technology Assessment Criteria (DTAC) principles</li>
+            <li>Interoperability with NHS services (Op Courage, NHS 111)</li>
+        </ul>
+    </div>
+</div>
+
+<!-- DATA PROTECTION -->
+<div class="page page-break">
+    <h1>11. Data Protection & Privacy</h1>
+    
+    <h2>11.1 GDPR Compliance</h2>
+    <div class="compliance-box">
+        <h4>UK General Data Protection Regulation</h4>
+        <table style="background: white;">
+            <tr>
+                <th>Principle</th>
+                <th>How Radio Check Complies</th>
+            </tr>
+            <tr>
+                <td>Lawfulness, Fairness, Transparency</td>
+                <td>Clear privacy policy, consent mechanisms, legitimate interest basis for processing</td>
+            </tr>
+            <tr>
+                <td>Purpose Limitation</td>
+                <td>Data used only for providing mental health support services</td>
+            </tr>
+            <tr>
+                <td>Data Minimisation</td>
+                <td>Only essential data collected; AI conversations can be anonymous</td>
+            </tr>
+            <tr>
+                <td>Accuracy</td>
+                <td>Users can update their information; regular data review processes</td>
+            </tr>
+            <tr>
+                <td>Storage Limitation</td>
+                <td>Retention policies defined; user can request deletion</td>
+            </tr>
+            <tr>
+                <td>Integrity & Confidentiality</td>
+                <td>Encryption at rest and in transit; access controls; audit logging</td>
+            </tr>
+            <tr>
+                <td>Accountability</td>
+                <td>Documentation of processing activities; DPO considerations</td>
+            </tr>
+        </table>
+    </div>
+    
+    <h2>11.2 Special Category Data</h2>
+    <p>
+        Mental health data is "special category data" under GDPR, requiring additional protections:
+    </p>
+    <ul>
+        <li><strong>Explicit Consent:</strong> Users consent to processing before using AI companions</li>
+        <li><strong>Vital Interests:</strong> Safeguarding actions may process data without consent where life is at risk</li>
+        <li><strong>Healthcare Provision:</strong> Processing necessary for provision of health services</li>
+        <li><strong>Public Interest:</strong> Safeguarding is a substantial public interest</li>
+    </ul>
+    
+    <h2>11.3 User Rights</h2>
+    <table>
+        <tr>
+            <th>Right</th>
+            <th>How Users Exercise It</th>
+        </tr>
+        <tr>
+            <td>Access</td>
+            <td>Request via Your Data Rights page in app</td>
+        </tr>
+        <tr>
+            <td>Rectification</td>
+            <td>Update profile in app settings</td>
+        </tr>
+        <tr>
+            <td>Erasure</td>
+            <td>Request account deletion via support</td>
+        </tr>
+        <tr>
+            <td>Restrict Processing</td>
+            <td>Contact data protection team</td>
+        </tr>
+        <tr>
+            <td>Data Portability</td>
+            <td>Export data in machine-readable format</td>
+        </tr>
+        <tr>
+            <td>Object</td>
+            <td>Contact data protection team</td>
+        </tr>
+    </table>
+    
+    <h2>11.4 Data Security Measures</h2>
+    <ul>
+        <li>AES-256 encryption for data at rest</li>
+        <li>TLS 1.3 for data in transit</li>
+        <li>Client-side encryption for conversation history</li>
+        <li>Role-based access control</li>
+        <li>Comprehensive audit logging</li>
+        <li>Regular security assessments</li>
+        <li>Incident response procedures</li>
+    </ul>
+</div>
+
+<!-- TECHNICAL SPECS -->
+<div class="page page-break">
+    <h1>12. Technical Specifications</h1>
+    
+    <h2>12.1 Infrastructure</h2>
+    <table>
+        <tr>
+            <th>Component</th>
+            <th>Specification</th>
+        </tr>
+        <tr>
+            <td>Hosting</td>
+            <td>Cloud-based (Render, Vercel) with UK data residency options</td>
+        </tr>
+        <tr>
+            <td>Database</td>
+            <td>MongoDB Atlas with encryption at rest</td>
+        </tr>
+        <tr>
+            <td>API</td>
+            <td>FastAPI (Python) with automatic OpenAPI documentation</td>
+        </tr>
+        <tr>
+            <td>Frontend</td>
+            <td>React Native/Expo for cross-platform deployment</td>
+        </tr>
+        <tr>
+            <td>Real-time</td>
+            <td>WebSocket connections for live chat and notifications</td>
+        </tr>
+        <tr>
+            <td>Video</td>
+            <td>Jitsi Meet integration for secure video conferencing</td>
+        </tr>
+        <tr>
+            <td>Voice</td>
+            <td>Twilio WebRTC for peer support voice calls</td>
+        </tr>
+    </table>
+    
+    <h2>12.2 AI Integration</h2>
+    <table>
+        <tr>
+            <th>Component</th>
+            <th>Technology</th>
+        </tr>
+        <tr>
+            <td>Language Model</td>
+            <td>OpenAI GPT-4o-mini via Emergent Integration</td>
+        </tr>
+        <tr>
+            <td>Safety Classifier</td>
+            <td>Custom model with sentence-transformers</td>
+        </tr>
+        <tr>
+            <td>Prompt Engineering</td>
+            <td>Character-specific system prompts with safety guardrails</td>
+        </tr>
+        <tr>
+            <td>Context Management</td>
+            <td>Sliding window with conversation history</td>
+        </tr>
+    </table>
+    
+    <h2>12.3 Availability & Performance</h2>
+    <table>
+        <tr>
+            <th>Metric</th>
+            <th>Target</th>
+        </tr>
+        <tr>
+            <td>Uptime</td>
+            <td>99.9% availability</td>
+        </tr>
+        <tr>
+            <td>AI Response Time</td>
+            <td>&lt;3 seconds average</td>
+        </tr>
+        <tr>
+            <td>Page Load Time</td>
+            <td>&lt;2 seconds</td>
+        </tr>
+        <tr>
+            <td>Support for Concurrent Users</td>
+            <td>1,000+ simultaneous</td>
+        </tr>
+    </table>
+    
+    <h2>12.4 Supported Platforms</h2>
+    <ul>
+        <li><strong>iOS:</strong> iPhone and iPad (iOS 14+)</li>
+        <li><strong>Android:</strong> Android 8.0+ devices</li>
+        <li><strong>Web:</strong> All modern browsers (Chrome, Firefox, Safari, Edge)</li>
+        <li><strong>Accessibility:</strong> WCAG 2.1 AA compliance targeted</li>
+    </ul>
+</div>
+
+<!-- FOUNDING TEAM -->
+<div class="page page-break">
+    <h1>13. Founding Team</h1>
+    
+    <div class="contact-card">
+        <div class="contact-avatar" style="background: linear-gradient(135deg, #22c55e, #16a34a);"></div>
+        <div class="contact-info">
+            <h4>Andrew "Frankie" Dunn</h4>
+            <div class="contact-role">Lead Developer & Founder</div>
+            <div class="contact-email">Frankie@radiocheck.me</div>
+            <p style="margin-top: 12px; margin-bottom: 0; font-size: 14px;">
+                Andrew Dunn served 27 years in the British Army before creating Frankie's Pod: 
+                Uncorking the Unforgettable. Through podcasting and projects like Radio Check, 
+                he works to build communities where veterans and others can connect, share their 
+                experiences, and support each other through open conversation.
+            </p>
+        </div>
+    </div>
+    
+    <div class="contact-card">
+        <div class="contact-avatar" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);"></div>
+        <div class="contact-info">
+            <h4>Rachel Webster</h4>
+            <div class="contact-role">CEO & Marketing Lead</div>
+            <div class="contact-email">Rachel@radiocheck.me</div>
+            <p style="margin-top: 12px; margin-bottom: 0; font-size: 14px;">
+                Rachel Webster brings compassion and strategic leadership to Radio Check. With a 
+                background in mental health support, Rachel has dedicated her career to helping 
+                those who have served. Her work focuses on ensuring Radio Check reaches the 
+                veterans who need it most through effective outreach and partnerships.
+            </p>
+        </div>
+    </div>
+    
+    <div class="contact-card">
+        <div class="contact-avatar" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);"></div>
+        <div class="contact-info">
+            <h4>Anthony Donnelly</h4>
+            <div class="contact-role">AI Safety Expert & Founder</div>
+            <div class="contact-email">Anthony@radiocheck.me</div>
+            <p style="margin-top: 12px; margin-bottom: 0; font-size: 14px;">
+                Anthony James Donnelly is the founder of Zentrafuge (Labs) Limited, an AI safety 
+                and research initiative focused on building continuity-based AI systems for 
+                high-trust environments. His open research repositories examine continuity design, 
+                boundary-setting, and trust-first deployment models for AI systems operating in 
+                psychologically sensitive contexts. Zentrafuge's safety modules are integrated 
+                into the Radio Check platform.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- CONTACT -->
+<div class="page page-break">
+    <h1>14. Contact Information</h1>
+    
+    <div class="highlight-box">
+        <h3>Funding Enquiries</h3>
+        <p>
+            For funding discussions, partnership opportunities, or detailed technical briefings, 
+            please contact any member of the founding team.
+        </p>
+    </div>
+    
+    <h2>Primary Contacts</h2>
+    <table>
+        <tr>
+            <th>Role</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Area</th>
+        </tr>
+        <tr>
+            <td>CEO</td>
+            <td>Rachel Webster</td>
+            <td>Rachel@radiocheck.me</td>
+            <td>Strategy, Partnerships, Marketing</td>
+        </tr>
+        <tr>
+            <td>Lead Developer</td>
+            <td>Andrew "Frankie" Dunn</td>
+            <td>Frankie@radiocheck.me</td>
+            <td>Platform Development, Veteran Engagement</td>
+        </tr>
+        <tr>
+            <td>AI Safety Expert</td>
+            <td>Anthony Donnelly</td>
+            <td>Anthony@radiocheck.me</td>
+            <td>AI Architecture, Safeguarding Systems</td>
+        </tr>
+    </table>
+    
+    <h2>Platform Access</h2>
+    <table>
+        <tr>
+            <th>Portal</th>
+            <th>URL</th>
+            <th>Purpose</th>
+        </tr>
+        <tr>
+            <td>Main Application</td>
+            <td>app.radiocheck.me</td>
+            <td>User-facing mobile/web app</td>
+        </tr>
+        <tr>
+            <td>Staff Portal</td>
+            <td>staff.radiocheck.me</td>
+            <td>Counsellor & peer supporter access</td>
+        </tr>
+        <tr>
+            <td>Admin Portal</td>
+            <td>admin.radiocheck.me</td>
+            <td>Platform administration</td>
+        </tr>
+        <tr>
+            <td>Learning Portal</td>
+            <td>learn.radiocheck.me</td>
+            <td>Peer supporter training</td>
+        </tr>
+    </table>
+    
+    <h2>Social & Web</h2>
+    <ul>
+        <li><strong>Website:</strong> www.radiocheck.me</li>
+        <li><strong>General Enquiries:</strong> admin@radiocheck.me</li>
+    </ul>
+    
+    <div class="document-footer">
+        <p>
+            <strong>Radio Check</strong> | Mental Health & Peer Support for Veterans<br>
+            Document generated March 2026 | Version 1.0<br>
+            Confidential - For Funding Review Only
+        </p>
+        <p style="margin-top: 16px;">
+            &copy; 2026 Radio Check. All rights reserved.
+        </p>
+    </div>
+</div>
+
+</body>
+</html>
