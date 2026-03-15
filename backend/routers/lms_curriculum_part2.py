@@ -1711,7 +1711,19 @@ Upon passing the final quiz, you will receive your Radio Check Peer Supporter Ce
 ]
 
 def get_full_curriculum():
-    """Return the complete curriculum with all 14 modules"""
+    """Return the complete curriculum with all 14 modules, using expanded content where available"""
+    from .lms_curriculum_expanded import get_expanded_content
+    
+    expanded_content = get_expanded_content()
     full_curriculum = RADIOCHECK_CURRICULUM.copy()
-    full_curriculum["modules"] = RADIOCHECK_CURRICULUM["modules"] + MODULES_9_TO_14
+    
+    # Combine modules and apply expanded content
+    all_modules = RADIOCHECK_CURRICULUM["modules"] + MODULES_9_TO_14
+    
+    # Replace content with expanded versions where available
+    for module in all_modules:
+        if module["id"] in expanded_content:
+            module["content"] = expanded_content[module["id"]]
+    
+    full_curriculum["modules"] = all_modules
     return full_curriculum

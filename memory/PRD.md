@@ -31,7 +31,48 @@ Build "Radio Check," a mental health and peer support application for veterans a
 
 ## What's Been Implemented (March 2026)
 
-### Session: March 14, 2026 - AI Safety Classifier & Local Storage (LATEST)
+### Session: March 15, 2026 - UI/UX Fixes & LMS Content Expansion (LATEST)
+
+**UI/UX Fixes Completed:**
+
+1. **Crisis Support Page Redesign:**
+   - Tommy AI chat moved to TOP of page (was buried below)
+   - Red 999 emergency bar REMOVED
+   - Page flow: Tommy → "You're Not Alone" info → On-Duty Counsellors → Crisis Helplines
+   - File: `frontend/app/crisis-support.tsx`
+
+2. **Home Page Update:**
+   - "Talk to a Veteran" renamed to "Talk to Peer Support"
+   - Description: "Connect with those who understand"
+   - File: `frontend/app/home.tsx`
+
+**LMS Content Massively Expanded:**
+
+Expanded 6 modules with comprehensive, production-quality training content:
+
+| Module | Before | After | Increase |
+|--------|--------|-------|----------|
+| m2-algee (ALGEE Action Plan) | 5,748 chars | 17,100 chars | +198% |
+| m9-substance (Substance Misuse) | 5,062 chars | 15,063 chars | +198% |
+| m10-safeguarding (Safeguarding) | 5,543 chars | 10,977 chars | +98% |
+| m11-diversity (Diversity & Inclusion) | 5,031 chars | 11,653 chars | +132% |
+| m12-practical (Practical Skills) | 4,727 chars | 11,722 chars | +148% |
+| m14-completion (Course Completion) | 4,913 chars | 11,719 chars | +139% |
+
+**New expanded content includes:**
+- Detailed ALGEE framework with practice scenarios
+- Comprehensive substance misuse guide with veteran-specific statistics
+- Full safeguarding procedures with real-world scenarios
+- Diversity section covering female, LGBTQ+, BAME veterans
+- Practical skills with complete services directory
+- Certificate and next steps guidance
+
+**New File:**
+- `backend/routers/lms_curriculum_expanded.py` - 6 expanded modules
+
+---
+
+### Session: March 14, 2026 - AI Safety Classifier & Local Storage
 
 **MAJOR: AI-Enhanced Semantic Safety Classifier**
 
