@@ -41,7 +41,7 @@ export default function AIBuddies() {
     try {
       const response = await fetch(`${API_URL}/api/ai-buddies/characters`);
       const data = await response.json();
-      // Filter to only show Tommy and Doris for the 24/7 crisis support page
+      // Filter to only show Tommy and Rachel for the 24/7 crisis support page
       const crisisCharacters = data.characters.filter((char: Character) => 
         char.id === 'tommy' || char.id === 'doris'
       );

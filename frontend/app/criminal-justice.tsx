@@ -14,7 +14,7 @@ import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
 
-// Rachel (Doris) avatar for criminal justice support
+// Rachel avatar for criminal justice support
 const RACHEL_AVATAR = '/images/rachel.png';
 
 const PRISON_RESOURCES = [

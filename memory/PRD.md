@@ -31,6 +31,37 @@ Build "Radio Check," a mental health and peer support application for veterans a
 
 ## What's Been Implemented (March 2026)
 
+### Session: March 15, 2026 (Evening) - AI Character Consolidation
+
+**Doris/Rachel Character Unification Complete:**
+
+The AI characters "Doris" and "Rachel" have been consolidated into a single character named **Rachel**:
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| Display Name | "Doris" | "Rachel" |
+| Internal ID | `doris` | `doris` (preserved for backwards compatibility) |
+| Focus | Generic emotional support | Criminal justice support for veterans |
+| Avatar | rachel.png | rachel.png |
+
+**Files Updated:**
+1. `backend/routers/ai_characters.py` - Updated helper functions to reflect Rachel's criminal justice focus
+2. `frontend/src/services/characterService.ts` - Updated comments to reference Rachel
+3. `frontend/app/criminal-justice.tsx` - Updated comment
+4. `frontend/app/ai-buddies.tsx` - Updated comment
+5. `staff-portal/app.js` - Updated character name display
+6. `website/ai-team.html` - Updated character card comment
+7. `website/script.js` - Updated AI description
+8. `docs/RadioCheck_Platform_Overview.html` - Updated funding document
+9. `scripts/create_board_presentation.py` - Updated presentation scripts
+10. `scripts/create_feature_docs.py` - Updated documentation scripts
+11. `scripts/create_technical_docs.py` - Updated technical docs
+12. `backend/tests/test_safeguarding.py` - Updated test assertions
+13. `backend/tests/test_iteration_15.py` - Updated test assertions
+14. **Database**: Updated `ai_characters` collection with new description and bio
+
+---
+
 ### Session: March 15, 2026 - UI/UX Fixes & LMS Content Expansion (LATEST)
 
 **UI/UX Fixes Completed:**
@@ -515,7 +546,7 @@ Files changed:
 - **Frontend**: Vercel (https://[domain])
 - **Backend**: Render (https://[domain])
 - **Admin/Staff/LMS Portals**: 20i hosting
-- **Preview**: https://time-track-portal.preview.emergentagent.com
+- **Preview**: https://expand-lms-funding.preview.emergentagent.com
   - Learner Portal: `/api/training/`
   - LMS Admin: `/api/lms-admin/`
   - Main Admin: `/api/admin/`

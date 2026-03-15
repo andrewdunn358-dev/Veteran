@@ -873,7 +873,7 @@ function renderSafeguardingAlerts(alerts) {
         actions += '<button class="btn btn-success" onclick="resolveSafeguardingAlert(\'' + alert.id + '\')"><i class="fas fa-check"></i> Resolve</button>';
         
         var characterIcon = alert.character === 'tommy' ? 'fa-user' : 'fa-user-circle';
-        var characterName = alert.character === 'tommy' ? 'Tommy' : 'Doris';
+        var characterName = alert.character === 'tommy' ? 'Tommy' : 'Rachel';
         
         // Risk level styling
         var riskLevel = alert.risk_level || 'AMBER';

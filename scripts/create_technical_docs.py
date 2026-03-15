@@ -545,7 +545,7 @@ def create_docx():
         ['Character', 'Focus', 'Prompt Size'],
         [
             ['Tommy', 'General peer support', '~3000 tokens'],
-            ['Doris', 'Emotional support', '~3000 tokens'],
+            ['Rachel', 'Criminal justice support', '~3000 tokens'],
             ['Bob', 'Para veteran', '~2500 tokens'],
             ['Finch', 'Legal information', '~2000 tokens'],
             ['Margie', 'Addiction support', '~2500 tokens'],

@@ -181,7 +181,7 @@ def create_powerpoint():
         ["Character", "Focus Area"],
         [
             ["Tommy", "General peer support - squaddie tone"],
-            ["Doris", "Emotional support - compassionate listener"],
+            ["Rachel", "Criminal justice - support for veterans in the justice system"],
             ["Bob", "Para veteran - ex-Parachute Regiment"],
             ["Finch", "Military law - UK legal specialist"],
             ["Margie", "Addiction - alcohol, drugs, gambling"],
@@ -366,7 +366,7 @@ def create_docx():
         ['Character', 'Focus Area'],
         [
             ['Tommy', 'General peer support - straightforward squaddie tone'],
-            ['Doris', 'Emotional support - warm, compassionate listener'],
+            ['Rachel', 'Criminal justice - support for veterans in the justice system'],
             ['Bob', 'Para veteran peer - ex-Parachute Regiment perspective'],
             ['Finch', 'Military law - UK legal information specialist'],
             ['Margie', 'Addiction support - alcohol, drugs, gambling'],

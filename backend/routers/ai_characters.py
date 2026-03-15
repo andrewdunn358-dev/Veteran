@@ -396,7 +396,7 @@ def get_character_description(char_id: str) -> str:
     descriptions = {
         "frankie": "Your PTI - Physical Training Instructor with military fitness discipline.",
         "tommy": "A warm, steady presence - like a reliable mate who's been through it.",
-        "doris": "A nurturing, compassionate presence who creates a safe space to talk.",
+        "doris": "Rachel provides warm, non-judgemental support for veterans in the criminal justice system.",
         "bob": "A down-to-earth mate who keeps things real and offers honest support.",
         "sentry": "Knowledgeable companion with expertise in UK military law.",
         "hugo": "Your guide to UK veteran support systems - housing, jobs, benefits, legal help.",
@@ -412,7 +412,7 @@ def get_character_bio(char_id: str) -> str:
     bios = {
         "frankie": "Frankie is your PTI (Physical Training Instructor). A former British Army PTI who brings proper military fitness discipline with motivating banter.",
         "tommy": "Tommy is your straightforward battle buddy. A no-nonsense mate who tells it like it is, but always has your back.",
-        "doris": "Rachel is a nurturing, compassionate presence who creates a safe space to talk. Think of her as a warm cuppa on a difficult day.",
+        "doris": "Rachel provides warm, non-judgemental support for veterans in or leaving the criminal justice system. She understands the unique challenges and is here to listen.",
         "bob": "Bob is a down-to-earth ex-Para who keeps things real. He's been around the block and knows what it's like.",
         "sentry": "Finch is a knowledgeable companion with expertise in UK military law. He provides steady support and practical guidance.",
         "hugo": "Hugo is a 35-year-old wellbeing coach focused on mental health, resilience and daily habits.",

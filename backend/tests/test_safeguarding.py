@@ -7,7 +7,7 @@ import requests
 import os
 import time
 
-BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://time-track-portal.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://expand-lms-funding.preview.emergentagent.com').rstrip('/')
 
 # Test credentials
 ADMIN_EMAIL = "admin@veteran.dbty.co.uk"
@@ -75,10 +75,10 @@ class TestAIBuddiesCharacters:
         assert "characters" in data
         characters = data["characters"]
         
-        # Should have Tommy and Doris
+        # Should have Tommy and Rachel (doris is the internal ID)
         character_ids = [c["id"] for c in characters]
         assert "tommy" in character_ids, "Tommy should be available"
-        assert "doris" in character_ids, "Doris should be available"
+        assert "doris" in character_ids, "Rachel should be available"
         
         # Verify character data
         for char in characters:
@@ -112,11 +112,11 @@ class TestAIBuddiesChat:
         
         print(f"Tommy replied: {data['reply'][:100]}...")
     
-    def test_chat_with_doris(self, api_client):
-        """Test basic chat with Doris"""
-        session_id = f"test-doris-{int(time.time())}"
+    def test_chat_with_rachel(self, api_client):
+        """Test basic chat with Rachel (internal ID: doris)"""
+        session_id = f"test-rachel-{int(time.time())}"
         response = api_client.post(f"{BASE_URL}/api/ai-buddies/chat", json={
-            "message": "Hello Doris",
+            "message": "Hello Rachel",
             "sessionId": session_id,
             "character": "doris"
         })
@@ -126,11 +126,11 @@ class TestAIBuddiesChat:
         
         assert "reply" in data
         assert "characterName" in data
-        assert data["characterName"] == "Doris"
+        assert data["characterName"] == "Rachel"
         assert "safeguardingTriggered" in data
         assert data["safeguardingTriggered"] == False
         
-        print(f"Doris replied: {data['reply'][:100]}...")
+        print(f"Rachel replied: {data['reply'][:100]}...")
 
 
 class TestSafeguardingDetection:

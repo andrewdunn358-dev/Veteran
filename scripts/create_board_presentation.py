@@ -200,7 +200,7 @@ def create_powerpoint():
     # Slide 5: AI Support Characters
     add_content_slide("AI Support Companions (24/7)", [
         "Tommy - Battle Buddy: Straightforward military peer support",
-        "Doris - Emotional Support: Nurturing, compassionate listener",
+        "Rachel - Criminal Justice: Support for veterans in the justice system",
         "Bob - Para Veteran: Real-talk from ex-Parachute Regiment",
         "Finch - Military Law: UK military legal expertise",
         "Margie - Addiction Support: Alcohol, drugs, gambling specialist",

@@ -4,7 +4,7 @@
 const featureData = {
     'AI Battle Buddies': {
         icon: 'fas fa-comments',
-        description: 'Our AI Battle Buddies are available 24/7 and understand military culture. Each has a unique personality — from Tommy\'s friendly chat to Bob\'s straight-talking Para banter, Doris\'s warmth, Finch\'s crisis support, Margie\'s substance guidance, and Hugo\'s wellness tips.\n\nThey\'re trained to listen without judgment, offer coping strategies, and know when to guide you to human support. Perfect for those 3am moments when you need someone to talk to. They won\'t replace professional help, but they\'re always here when you need a friendly ear.'
+        description: 'Our AI Battle Buddies are available 24/7 and understand military culture. Each has a unique personality — from Tommy\'s friendly chat to Bob\'s straight-talking Para banter, Rachel\'s warmth, Finch\'s crisis support, Margie\'s substance guidance, and Hugo\'s wellness tips.\n\nThey\'re trained to listen without judgment, offer coping strategies, and know when to guide you to human support. Perfect for those 3am moments when you need someone to talk to. They won\'t replace professional help, but they\'re always here when you need a friendly ear.'
     },
     'Peer Support': {
         icon: 'fas fa-users',

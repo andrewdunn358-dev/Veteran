@@ -75,7 +75,7 @@ export async function getCharactersByCategory(category: string): Promise<AIChara
 }
 
 /**
- * Get crisis support characters (Tommy & Rachel/Doris)
+ * Get crisis support characters (Tommy & Rachel)
  */
 export async function getCrisisCharacters(): Promise<AICharacter[]> {
   const characters = await fetchCharacters();

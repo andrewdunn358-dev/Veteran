@@ -9,7 +9,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://time-track-portal.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://expand-lms-funding.preview.emergentagent.com').rstrip('/')
 
 # Test credentials
 ADMIN_EMAIL = "admin@veteran.dbty.co.uk"
@@ -94,7 +94,7 @@ class TestAIBuddiesEndpoint:
     """Test AI Buddies characters endpoint"""
     
     def test_get_ai_characters(self):
-        """GET /api/ai-buddies/characters should return all characters including Tommy and Doris"""
+        """GET /api/ai-buddies/characters should return all characters including Tommy and Rachel"""
         response = requests.get(f"{BASE_URL}/api/ai-buddies/characters")
         assert response.status_code == 200
         data = response.json()
@@ -106,10 +106,10 @@ class TestAIBuddiesEndpoint:
         # Get character IDs
         character_ids = [char["id"] for char in data["characters"]]
         
-        # Verify Tommy and Doris are present
+        # Verify Tommy and Rachel (internal ID: doris) are present
         assert "tommy" in character_ids, "Tommy character not found"
-        assert "doris" in character_ids, "Doris character not found"
-        print(f"SUCCESS: AI Buddies endpoint returns {len(data['characters'])} characters including Tommy and Doris")
+        assert "doris" in character_ids, "Rachel character not found"
+        print(f"SUCCESS: AI Buddies endpoint returns {len(data['characters'])} characters including Tommy and Rachel")
         
         # Verify each character has required fields
         for char in data["characters"]:
@@ -132,18 +132,18 @@ class TestAIBuddiesEndpoint:
         assert tommy["avatar"].startswith("http")
         print(f"SUCCESS: Tommy character details verified - {tommy['description']}")
     
-    def test_ai_characters_doris_details(self):
-        """Verify Doris character has correct details"""
+    def test_ai_characters_rachel_details(self):
+        """Verify Rachel character has correct details (internal ID: doris)"""
         response = requests.get(f"{BASE_URL}/api/ai-buddies/characters")
         assert response.status_code == 200
         data = response.json()
         
-        doris = next((c for c in data["characters"] if c["id"] == "doris"), None)
-        assert doris is not None
-        assert doris["name"] == "Doris"
-        assert "nurturing" in doris["description"].lower() or "compassionate" in doris["description"].lower()
-        assert doris["avatar"].startswith("http")
-        print(f"SUCCESS: Doris character details verified - {doris['description']}")
+        rachel = next((c for c in data["characters"] if c["id"] == "doris"), None)
+        assert rachel is not None
+        assert rachel["name"] == "Rachel"
+        assert "criminal" in rachel["description"].lower() or "justice" in rachel["description"].lower()
+        assert rachel["avatar"].startswith("http")
+        print(f"SUCCESS: Rachel character details verified - {rachel['description']}")
 
 
 class TestCMSEndpoints:
