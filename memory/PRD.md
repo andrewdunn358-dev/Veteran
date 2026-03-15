@@ -479,3 +479,41 @@ Files changed:
 ## Test Credentials
 - Preview Password: `radiocheck1358`
 - Test Learner: `test@example.com` / `testpass123`
+
+## Time Tracking System (NEW - March 15, 2026)
+
+### Purpose
+Track work hours for invoicing when Radio Check goes live.
+
+### Location
+Admin Portal → "Time Tracking" tab
+
+### Features
+- Manual time entry (Date, Hours, Minutes, Category, Description)
+- Monthly/category filtering
+- Hours by category pie chart
+- Daily activity bar chart
+- Excel export for invoicing
+- Categories: Development, Admin Portal, Staff Portal, LMS Admin, LMS Learning, App Testing, Support, Training, Documentation, Meetings, Other
+
+### WORKFLOW: Log Time After Each Session
+**After every Emergent development session:**
+1. Go to Admin Portal → Time Tracking
+2. Click "Add Entry"
+3. Enter: Date, Hours worked, Category (usually "Development"), Description of work done
+4. Click Save
+
+### Files
+- `backend/routers/timetracking.py` - API endpoints
+- `admin-site/time-tracking.js` - Frontend logic
+- `admin-site/index.html` - Tab and modal UI
+
+### API Endpoints
+- `GET /api/timetracking/entries` - List entries with filters
+- `POST /api/timetracking/entries` - Add entry
+- `PUT /api/timetracking/entries/{id}` - Update entry
+- `DELETE /api/timetracking/entries/{id}` - Delete entry
+- `GET /api/timetracking/summary` - Monthly summary
+- `GET /api/timetracking/export?month=YYYY-MM` - Excel download
+- `POST /api/timetracking/seed-historical` - Load sample data
+- `DELETE /api/timetracking/clear-all?confirm=true` - Clear all entries
