@@ -171,15 +171,26 @@ export default function DynamicAIChat() {
   const buildConversationContext = () => {
     if (previousConversations.length === 0) return '';
     
-    // Get the last 10 messages from previous conversations for context
-    const recentPrevious = previousConversations.slice(-10);
+    // Get the last 15 messages from previous conversations for better context
+    const recentPrevious = previousConversations.slice(-15);
     
-    // Format as a summary for the AI
-    const summary = recentPrevious.map(msg => 
+    // Format as a conversation transcript for the AI
+    const transcript = recentPrevious.map(msg => 
       `${msg.sender === 'user' ? 'User' : character.name}: ${msg.text}`
     ).join('\n');
     
-    return `\n\n[PREVIOUS CONVERSATION CONTEXT - The user has spoken to you before. Here's a summary of your last conversation:\n${summary}\n\nUse this context to provide continuity, but don't explicitly reference "our last conversation" unless relevant.]`;
+    return `\n\n[CONVERSATION HISTORY - This is a RETURNING user. Below is your previous conversation with them. You MUST treat this as an ongoing relationship - pick up naturally where you left off. Reference specific things they told you. Ask follow-up questions about topics they mentioned. Show you genuinely remember them as a person, not just that they visited before.
+
+PREVIOUS CONVERSATION:
+${transcript}
+
+IMPORTANT INSTRUCTIONS:
+- Do NOT say generic things like "welcome back" or "I remember you from before"
+- Instead, reference SPECIFIC things from the conversation above
+- If they mentioned a problem, ask how it's going
+- If they shared something personal, show you remember the details
+- Treat them like a friend you're catching up with, not a new visitor
+- Be warm and personal, showing genuine continuity]`;
   };
 
   // Check for available staff when safeguarding modal opens
