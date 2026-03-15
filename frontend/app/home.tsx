@@ -27,6 +27,36 @@ interface AITeamMember {
   route: string;
 }
 
+// Founder type
+interface Founder {
+  name: string;
+  role: string;
+  avatar: string;
+  bio: string;
+}
+
+// Founders data
+const FOUNDERS: Founder[] = [
+  {
+    name: "Andrew \"Frankie\" Dunn",
+    role: "Founder",
+    avatar: "https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/4zwz619g_image.png",
+    bio: "Andrew \"Frankie\" Dunn is the heart and soul of Radio Check. A veteran himself, Frankie understands firsthand the challenges of transitioning from military to civilian life. His vision for Radio Check came from his own experiences and a deep desire to ensure no veteran faces their struggles alone.\n\nFrankie's passion for fitness and wellbeing led him to develop the 12-week fitness programme integrated into the app. He believes that physical health and mental health are intrinsically linked, and that structured exercise can be a powerful tool for recovery and resilience.\n\nAs a natural leader with an infectious personality, Frankie brings together the Radio Check community with warmth, humour, and genuine care. His motto: \"We look after our own.\""
+  },
+  {
+    name: "Rachel Webster",
+    role: "Founder",
+    avatar: "https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/kec981d4_Rachel.avif",
+    bio: "Rachel Webster brings compassion and clinical expertise to Radio Check. With a background in mental health support, Rachel has dedicated her career to helping those who have served.\n\nRachel's approach combines professional knowledge with genuine warmth. She understands that sometimes people just need someone to listen without judgement, and she has helped shape Radio Check's peer support model to reflect this understanding.\n\nHer work on the platform focuses on ensuring that every interaction - whether with AI companions or human supporters - feels safe, welcoming, and truly helpful. Rachel believes that asking for help is a sign of strength, not weakness."
+  },
+  {
+    name: "Anthony Donnelly",
+    role: "Founder",
+    avatar: "https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/jz9ku914_image.png",
+    bio: "Anthony James Donnelly is the founder of Zentrafuge (Labs) Limited, an AI safety and research initiative focused on building continuity-based AI systems for high-trust environments.\n\nHis interest in computing began in the early 1980s and has remained consistent across a career spanning technology sales, international marketing, construction partnerships in the United States, and sales leadership. The common thread has been systems thinking — how tools shape behaviour, trust, and decision-making.\n\nAnthony now focuses on AI safety architecture and structured testing. His open research repositories — including ZP-1, The Symbiosis Manifesto, and the AI Doorman Architecture — examine continuity design, boundary-setting, and trust-first deployment models for AI systems operating in psychologically sensitive contexts.\n\nZentrafuge's safety modules are integrated into the Radio Check platform. The work is research-led and mission-driven, centred on building AI that earns trust rather than assumes it."
+  }
+];
+
 // Menu item type
 interface MenuItem {
   title: string;
@@ -74,6 +104,7 @@ export default function Index() {
   const [showAITeam, setShowAITeam] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [selectedMember, setSelectedMember] = useState<AITeamMember | null>(null);
+  const [selectedFounder, setSelectedFounder] = useState<Founder | null>(null);
   const [userId, setUserId] = useState<string>('');
   
   // Age gate context - show modal if not verified
@@ -360,22 +391,21 @@ export default function Index() {
               {/* Founders Section */}
               <View style={styles.foundersSection}>
                 <Text style={styles.foundersSectionTitle}>Our Founders</Text>
+                <Text style={styles.foundersSubtitle}>Tap to learn more</Text>
                 <View style={styles.foundersGrid}>
-                  <View style={styles.founderCard}>
-                    <Image source={{ uri: 'https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/4zwz619g_image.png' }} style={styles.founderAvatar} />
-                    <Text style={styles.founderName}>Andrew "Frankie" Dunn</Text>
-                    <Text style={styles.founderRole}>Founder</Text>
-                  </View>
-                  <View style={styles.founderCard}>
-                    <Image source={{ uri: 'https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/kec981d4_Rachel.avif' }} style={styles.founderAvatar} />
-                    <Text style={styles.founderName}>Rachel Webster</Text>
-                    <Text style={styles.founderRole}>Founder</Text>
-                  </View>
-                  <View style={styles.founderCard}>
-                    <Image source={{ uri: 'https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/jz9ku914_image.png' }} style={styles.founderAvatar} />
-                    <Text style={styles.founderName}>Anthony Donnelly</Text>
-                    <Text style={styles.founderRole}>Founder</Text>
-                  </View>
+                  {FOUNDERS.map((founder) => (
+                    <TouchableOpacity 
+                      key={founder.name}
+                      style={styles.founderCard}
+                      onPress={() => setSelectedFounder(founder)}
+                      activeOpacity={0.8}
+                      data-testid={`founder-${founder.name.toLowerCase().replace(/[^a-z]/g, '-')}`}
+                    >
+                      <Image source={{ uri: founder.avatar }} style={styles.founderAvatar} />
+                      <Text style={styles.founderName}>{founder.name}</Text>
+                      <Text style={styles.founderRole}>{founder.role}</Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               </View>
               
@@ -431,6 +461,40 @@ export default function Index() {
                   <TouchableOpacity 
                     style={styles.closeButton}
                     onPress={() => setSelectedMember(null)}
+                  >
+                    <Text style={styles.closeButtonText}>Close</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
+        {/* Founder Bio Modal */}
+        <Modal
+          visible={selectedFounder !== null}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setSelectedFounder(null)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setSelectedFounder(null)}
+          >
+            <View style={styles.founderModalContent}>
+              {selectedFounder && (
+                <>
+                  <Image source={{ uri: selectedFounder.avatar }} style={styles.founderModalAvatar} />
+                  <Text style={styles.founderModalName}>{selectedFounder.name}</Text>
+                  <Text style={styles.founderModalRole}>{selectedFounder.role}</Text>
+                  <View style={styles.modalDivider} />
+                  <ScrollView style={styles.founderBioScroll} showsVerticalScrollIndicator={false}>
+                    <Text style={styles.founderModalBio}>{selectedFounder.bio}</Text>
+                  </ScrollView>
+                  <TouchableOpacity 
+                    style={styles.closeButton}
+                    onPress={() => setSelectedFounder(null)}
                   >
                     <Text style={styles.closeButtonText}>Close</Text>
                   </TouchableOpacity>
@@ -730,6 +794,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: colors.text,
+    marginBottom: 4,
+  },
+  foundersSubtitle: {
+    fontSize: 12,
+    color: colors.textMuted,
     marginBottom: 16,
   },
   foundersGrid: {
@@ -870,6 +939,49 @@ const createStyles = (colors: any) => StyleSheet.create({
   closeButtonText: {
     color: colors.textSecondary,
     fontSize: 14,
+  },
+  // Founder Modal styles
+  founderModalContent: {
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '80%',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  founderModalAvatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 16,
+    borderWidth: 3,
+    borderColor: colors.primary,
+  },
+  founderModalName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  founderModalRole: {
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  founderBioScroll: {
+    maxHeight: 300,
+    width: '100%',
+  },
+  founderModalBio: {
+    fontSize: 14,
+    color: colors.text,
+    lineHeight: 22,
+    textAlign: 'left',
   },
   disclaimer: {
     marginTop: 8,
