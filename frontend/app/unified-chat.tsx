@@ -137,10 +137,13 @@ export default function UnifiedAIChat() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
   
-  // Consent state
+  // Consent state - now app-wide, not per-chat
   const [hasLoadedSession, setHasLoadedSession] = useState(false);
   const [showAIConsent, setShowAIConsent] = useState(false);
   const [hasAcceptedConsent, setHasAcceptedConsent] = useState(false);
+  
+  // Global consent key - same for all AI chats
+  const GLOBAL_AI_CONSENT_KEY = 'radiocheck_ai_consent_accepted';
   
   // Safeguarding state
   const [showSafeguardingModal, setShowSafeguardingModal] = useState(false);
@@ -274,17 +277,18 @@ export default function UnifiedAIChat() {
     });
   };
 
-  // Check consent on mount - wait for character to fully load (API + merge)
+  // Check consent on mount - uses global consent now
   useEffect(() => {
     if (character && !characterLoading) {
       checkAIConsent();
     }
-  }, [character?.consentKey, characterLoading]);
+  }, [character, characterLoading]);
 
   const checkAIConsent = async () => {
     if (!character) return;
     try {
-      const consent = await AsyncStorage.getItem(character.consentKey);
+      // Check global AI consent, not per-character
+      const consent = await AsyncStorage.getItem(GLOBAL_AI_CONSENT_KEY);
       if (consent === 'true') {
         setHasAcceptedConsent(true);
         setHasLoadedSession(true);
@@ -299,7 +303,8 @@ export default function UnifiedAIChat() {
   const handleAcceptConsent = async () => {
     if (!character) return;
     try {
-      await AsyncStorage.setItem(character.consentKey, 'true');
+      // Save global consent, not per-character
+      await AsyncStorage.setItem(GLOBAL_AI_CONSENT_KEY, 'true');
       await AsyncStorage.setItem('ai_chat_consent_date', new Date().toISOString());
       setHasAcceptedConsent(true);
       setShowAIConsent(false);

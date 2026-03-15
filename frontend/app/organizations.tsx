@@ -73,12 +73,6 @@ export default function Organizations() {
           <Text style={{ fontSize: 22, fontWeight: '700', color: colors.text }}>Support Organisations</Text>
         </View>
 
-        {/* Emergency Banner - Display only, no call functionality */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#cc0000', paddingVertical: 12, paddingHorizontal: 24, marginHorizontal: 24, borderRadius: 8, gap: 12 }}>
-          <Ionicons name="warning" size={24} color="#ffffff" />
-          <Text style={{ fontSize: 16, fontWeight: '700', color: '#ffffff' }}>Emergency? Dial 999</Text>
-        </View>
-
         <ScrollView 
           style={{ flex: 1 }}
           contentContainerStyle={{ padding: 24, paddingTop: 16, paddingBottom: 40 }}

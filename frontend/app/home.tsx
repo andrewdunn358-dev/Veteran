@@ -42,7 +42,7 @@ interface MenuItem {
 // Fallback Menu Items (used when CMS is empty or unavailable)
 const FALLBACK_MENU_ITEMS: MenuItem[] = [
   { title: "Need to Talk?", description: "Connect with support now", icon: "heart", color: "#3b82f6", bgColor: "#dbeafe", route: "/crisis-support", isPrimary: true },
-  { title: "Talk to a Veteran", description: "Peer support from those who understand", icon: "people", color: "#22c55e", bgColor: "#dcfce7", route: "/peer-support" },
+  { title: "Talk to Peer Support", description: "Peer support from those who understand", icon: "people", color: "#22c55e", bgColor: "#dcfce7", route: "/peer-support" },
   { title: "Warfare on Lawfare", description: "Support for historical investigations", icon: "shield", color: "#6366f1", bgColor: "#e0e7ff", route: "/historical-investigations" },
   { title: "Support Organisations", description: "Directory of veteran services", icon: "list", color: "#f59e0b", bgColor: "#fef3c7", route: "/organizations" },
   { title: "Self-Care Tools", description: "Journal, grounding, breathing & more", icon: "fitness", color: "#ec4899", bgColor: "#fce7f3", route: "/self-care" },
@@ -334,7 +334,7 @@ export default function Index() {
         {/* Community Events Section */}
         <EventsSection />
 
-        {/* Meet the AI Team Section */}
+        {/* Meet the Team Section */}
         <View style={styles.aiTeamSection}>
           <TouchableOpacity 
             style={styles.aiTeamHeader}
@@ -342,8 +342,8 @@ export default function Index() {
             activeOpacity={0.8}
           >
             <View>
-              <Text style={styles.aiTeamTitle}>Meet the AI Team</Text>
-              <Text style={styles.aiTeamSubtitle}>Available 24/7 to chat</Text>
+              <Text style={styles.aiTeamTitle}>Meet the Team</Text>
+              <Text style={styles.aiTeamSubtitle}>Our founders & AI companions</Text>
             </View>
             <View style={styles.aiTeamToggle}>
               <Text style={styles.aiTeamToggleText}>{showAITeam ? 'Hide' : 'Show'}</Text>
@@ -356,20 +356,46 @@ export default function Index() {
           </TouchableOpacity>
           
           {showAITeam && (
-            <View style={styles.aiTeamGrid}>
-              {aiTeam.map((member) => (
-                <TouchableOpacity 
-                  key={member.name}
-                  style={styles.aiTeamMember}
-                  onPress={() => handleMemberPress(member)}
-                  activeOpacity={0.8}
-                  data-testid={`ai-team-${member.name.toLowerCase()}`}
-                >
-                  <Image source={{ uri: member.avatar }} style={styles.aiTeamAvatar} />
-                  <Text style={styles.aiTeamName}>{member.name}</Text>
-                  <Text style={styles.aiTeamDesc}>{member.description}</Text>
-                </TouchableOpacity>
-              ))}
+            <View>
+              {/* Founders Section */}
+              <View style={styles.foundersSection}>
+                <Text style={styles.foundersSectionTitle}>Our Founders</Text>
+                <View style={styles.foundersGrid}>
+                  <View style={styles.founderCard}>
+                    <Image source={{ uri: 'https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/4zwz619g_image.png' }} style={styles.founderAvatar} />
+                    <Text style={styles.founderName}>Andrew "Frankie" Dunn</Text>
+                    <Text style={styles.founderRole}>Founder</Text>
+                  </View>
+                  <View style={styles.founderCard}>
+                    <Image source={{ uri: 'https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/kec981d4_Rachel.avif' }} style={styles.founderAvatar} />
+                    <Text style={styles.founderName}>Rachel Webster</Text>
+                    <Text style={styles.founderRole}>Founder</Text>
+                  </View>
+                  <View style={styles.founderCard}>
+                    <Image source={{ uri: 'https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/jz9ku914_image.png' }} style={styles.founderAvatar} />
+                    <Text style={styles.founderName}>Anthony Donnelly</Text>
+                    <Text style={styles.founderRole}>Founder</Text>
+                  </View>
+                </View>
+              </View>
+              
+              {/* AI Team Section */}
+              <Text style={styles.aiTeamSectionTitle}>AI Companions (Available 24/7)</Text>
+              <View style={styles.aiTeamGrid}>
+                {aiTeam.map((member) => (
+                  <TouchableOpacity 
+                    key={member.name}
+                    style={styles.aiTeamMember}
+                    onPress={() => handleMemberPress(member)}
+                    activeOpacity={0.8}
+                    data-testid={`ai-team-${member.name.toLowerCase()}`}
+                  >
+                    <Image source={{ uri: member.avatar }} style={styles.aiTeamAvatar} />
+                    <Text style={styles.aiTeamName}>{member.name}</Text>
+                    <Text style={styles.aiTeamDesc}>{member.description}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           )}
         </View>
@@ -695,6 +721,55 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
     marginTop: 16,
+  },
+  // Founders Section Styles
+  foundersSection: {
+    marginBottom: 24,
+  },
+  foundersSectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 16,
+  },
+  foundersGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  founderCard: {
+    flex: 1,
+    backgroundColor: colors.background,
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  founderAvatar: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    marginBottom: 10,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  founderName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  founderRole: {
+    fontSize: 11,
+    color: colors.textSecondary,
+  },
+  aiTeamSectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 8,
   },
   aiTeamMember: {
     width: '47%',

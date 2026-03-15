@@ -1891,8 +1891,8 @@ function openAddCounsellorModal() {
                 <input type="text" name="specialization" required placeholder="e.g., Trauma & PTSD">
             </div>
             <div class="form-group">
-                <label>Phone *</label>
-                <input type="tel" name="phone" required placeholder="01234567890">
+                <label>Phone</label>
+                <input type="tel" name="phone" placeholder="01234567890 (optional)">
             </div>
             <div class="form-group">
                 <label>SMS Number</label>
@@ -2062,8 +2062,8 @@ function openAddPeerModal() {
                 <input type="text" name="yearsServed" required placeholder="e.g., 2001-2013">
             </div>
             <div class="form-group">
-                <label>Phone *</label>
-                <input type="tel" name="phone" required placeholder="01234567890">
+                <label>Phone</label>
+                <input type="tel" name="phone" placeholder="01234567890 (optional)">
             </div>
             <div class="form-group">
                 <label>SMS Number</label>

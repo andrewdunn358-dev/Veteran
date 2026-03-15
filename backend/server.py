@@ -3713,6 +3713,48 @@ async def _seed_organizations_internal():
             "sms": None,
             "whatsapp": None,
         },
+        {
+            "name": "Mind",
+            "description": "Mental health charity providing advice and support for anyone experiencing a mental health problem.",
+            "phone": "0300 123 3393",
+            "sms": None,
+            "whatsapp": None,
+        },
+        {
+            "name": "Walking With The Wounded",
+            "description": "Supporting wounded veterans back into work and independence through employment programmes.",
+            "phone": "01011 828305",
+            "sms": None,
+            "whatsapp": None,
+        },
+        {
+            "name": "The Veterans Gateway",
+            "description": "First point of contact for veterans seeking support. Signposts to relevant charities and services.",
+            "phone": "0808 802 1212",
+            "sms": "81212",
+            "whatsapp": None,
+        },
+        {
+            "name": "Blind Veterans UK",
+            "description": "Support for veterans with sight loss. Training, rehabilitation and equipment.",
+            "phone": "0800 389 7979",
+            "sms": None,
+            "whatsapp": None,
+        },
+        {
+            "name": "Veterans Aid",
+            "description": "Emergency support for veterans in crisis including housing, welfare and immediate needs.",
+            "phone": "0800 012 6867",
+            "sms": None,
+            "whatsapp": None,
+        },
+        {
+            "name": "Op Courage",
+            "description": "NHS mental health specialist service for armed forces veterans with complex mental health needs.",
+            "phone": "0300 323 0137",
+            "sms": None,
+            "whatsapp": None,
+        },
     ]
     
     added_count = 0

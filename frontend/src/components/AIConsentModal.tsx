@@ -124,6 +124,20 @@ export default function AIConsentModal({ visible, onAccept, onDecline, character
               </Text>
             </View>
 
+            {/* Voice Dictation Tip */}
+            <View style={styles.voiceTipBox}>
+              <View style={styles.sectionHeader}>
+                <Ionicons name="mic" size={20} color="#8b5cf6" />
+                <Text style={styles.sectionTitle}>Speaking Your Thoughts</Text>
+              </View>
+              <Text style={styles.paragraph}>
+                RadioCheck's AI chat offers something unique. While the AI does not currently speak back, 
+                you can verbalise your thoughts by using the microphone on your phone to dictate messages. 
+                Speaking thoughts out loud can often help people process emotions and experiences more clearly, 
+                making the interaction feel more natural and supportive during difficult moments.
+              </Text>
+            </View>
+
             {/* Safeguarding Notice */}
             <View style={styles.safeguardingBox}>
               <Ionicons name="heart" size={20} color="#ef4444" />
@@ -360,6 +374,14 @@ const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     overflow: 'hidden',
+  },
+  voiceTipBox: {
+    backgroundColor: isDark ? '#2d2447' : '#f3e8ff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: isDark ? '#4c3a7e' : '#c4b5fd',
   },
   acceptButton: {
     backgroundColor: colors.primary,
