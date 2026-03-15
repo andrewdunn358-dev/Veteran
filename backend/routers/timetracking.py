@@ -22,7 +22,7 @@ db = client[DB_NAME]
 time_entries = db.time_entries
 active_sessions = db.time_tracking_sessions
 
-# Categories for time tracking
+# Categories for time tracking with default hourly rates
 CATEGORIES = [
     "Development",
     "Admin Portal",
@@ -36,6 +36,34 @@ CATEGORIES = [
     "Meetings",
     "Other"
 ]
+
+# Default hourly rate in GBP
+DEFAULT_HOURLY_RATE = 35.00
+
+# Category-specific rates (optional - defaults to DEFAULT_HOURLY_RATE)
+CATEGORY_RATES = {
+    "Development": 35.00,
+    "Admin Portal": 35.00,
+    "Staff Portal": 35.00,
+    "LMS Admin": 35.00,
+    "LMS Learning": 35.00,
+    "App Testing": 35.00,
+    "Support": 30.00,
+    "Training": 30.00,
+    "Documentation": 30.00,
+    "Meetings": 25.00,
+    "Other": 30.00
+}
+
+def get_rate_for_category(category: str) -> float:
+    """Get the hourly rate for a category"""
+    return CATEGORY_RATES.get(category, DEFAULT_HOURLY_RATE)
+
+def calculate_cost(hours: int, minutes: int, category: str) -> float:
+    """Calculate cost for a time entry"""
+    rate = get_rate_for_category(category)
+    total_hours = hours + (minutes / 60)
+    return round(total_hours * rate, 2)
 
 # Pydantic Models
 class TimeEntryCreate(BaseModel):
@@ -62,14 +90,22 @@ class SessionEnd(BaseModel):
 
 def serialize_entry(entry):
     """Convert MongoDB document to JSON-serializable dict"""
+    hours = entry.get("hours", 0)
+    minutes = entry.get("minutes", 0)
+    category = entry.get("category", "Other")
+    cost = calculate_cost(hours, minutes, category)
+    rate = get_rate_for_category(category)
+    
     return {
         "id": str(entry["_id"]),
         "date": entry.get("date"),
-        "hours": entry.get("hours", 0),
-        "minutes": entry.get("minutes", 0),
-        "category": entry.get("category"),
+        "hours": hours,
+        "minutes": minutes,
+        "category": category,
         "description": entry.get("description"),
         "auto_tracked": entry.get("auto_tracked", False),
+        "hourly_rate": rate,
+        "cost": cost,
         "created_at": entry.get("created_at").isoformat() if entry.get("created_at") else None,
         "updated_at": entry.get("updated_at").isoformat() if entry.get("updated_at") else None,
     }
@@ -78,8 +114,20 @@ def serialize_entry(entry):
 
 @router.get("/categories")
 async def get_categories():
-    """Get available time tracking categories"""
-    return {"categories": CATEGORIES}
+    """Get available time tracking categories with their rates"""
+    return {
+        "categories": CATEGORIES,
+        "rates": CATEGORY_RATES,
+        "default_rate": DEFAULT_HOURLY_RATE
+    }
+
+@router.get("/rates")
+async def get_rates():
+    """Get hourly rates for all categories"""
+    return {
+        "rates": CATEGORY_RATES,
+        "default_rate": DEFAULT_HOURLY_RATE
+    }
 
 @router.post("/entries")
 async def create_entry(entry: TimeEntryCreate):
@@ -317,16 +365,22 @@ async def get_summary(
     # Calculate totals
     by_category = {}
     grand_total_minutes = 0
+    grand_total_cost = 0.0
     
     for r in results:
         cat = r["_id"]
         total_mins = r["total_hours"] * 60 + r["total_minutes"]
         grand_total_minutes += total_mins
+        rate = get_rate_for_category(cat)
+        cost = round((total_mins / 60) * rate, 2)
+        grand_total_cost += cost
         by_category[cat] = {
             "hours": total_mins // 60,
             "minutes": total_mins % 60,
             "total_minutes": total_mins,
-            "entry_count": r["entry_count"]
+            "entry_count": r["entry_count"],
+            "hourly_rate": rate,
+            "cost": cost
         }
     
     # Get daily breakdown for the period
@@ -359,11 +413,13 @@ async def get_summary(
         "total": {
             "hours": grand_total_minutes // 60,
             "minutes": grand_total_minutes % 60,
-            "total_minutes": grand_total_minutes
+            "total_minutes": grand_total_minutes,
+            "total_cost": round(grand_total_cost, 2)
         },
         "by_category": by_category,
         "daily_breakdown": daily_breakdown,
-        "entry_count": sum(r["entry_count"] for r in results)
+        "entry_count": sum(r["entry_count"] for r in results),
+        "rates": CATEGORY_RATES
     }
 
 @router.get("/export")
@@ -406,7 +462,7 @@ async def export_entries(
     )
     
     # Headers
-    headers = ["Date", "Hours", "Minutes", "Total (hrs)", "Category", "Description", "Type"]
+    headers = ["Date", "Hours", "Minutes", "Total (hrs)", "Category", "Rate (£/hr)", "Cost (£)", "Description", "Type"]
     for col, header in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col, value=header)
         cell.font = header_font
@@ -416,25 +472,36 @@ async def export_entries(
     
     # Data rows
     total_minutes = 0
+    total_cost = 0.0
     for row, entry in enumerate(entries, 2):
         mins = entry.get("hours", 0) * 60 + entry.get("minutes", 0)
         total_minutes += mins
+        category = entry.get("category", "Other")
+        rate = get_rate_for_category(category)
+        cost = round((mins / 60) * rate, 2)
+        total_cost += cost
         
         ws.cell(row=row, column=1, value=entry.get("date", "")).border = border
         ws.cell(row=row, column=2, value=entry.get("hours", 0)).border = border
         ws.cell(row=row, column=3, value=entry.get("minutes", 0)).border = border
         ws.cell(row=row, column=4, value=round(mins / 60, 2)).border = border
-        ws.cell(row=row, column=5, value=entry.get("category", "")).border = border
-        ws.cell(row=row, column=6, value=entry.get("description", "")).border = border
-        ws.cell(row=row, column=7, value="Auto" if entry.get("auto_tracked") else "Manual").border = border
+        ws.cell(row=row, column=5, value=category).border = border
+        ws.cell(row=row, column=6, value=rate).border = border
+        ws.cell(row=row, column=7, value=cost).border = border
+        ws.cell(row=row, column=8, value=entry.get("description", "")).border = border
+        ws.cell(row=row, column=9, value="Auto" if entry.get("auto_tracked") else "Manual").border = border
     
     # Summary row
     summary_row = len(entries) + 3
     ws.cell(row=summary_row, column=1, value="TOTAL").font = Font(bold=True)
     ws.cell(row=summary_row, column=4, value=round(total_minutes / 60, 2)).font = Font(bold=True)
+    ws.cell(row=summary_row, column=7, value=round(total_cost, 2)).font = Font(bold=True)
     
     # Category summary
     ws.cell(row=summary_row + 2, column=1, value="By Category:").font = Font(bold=True)
+    ws.cell(row=summary_row + 2, column=5, value="Rate").font = Font(bold=True)
+    ws.cell(row=summary_row + 2, column=6, value="Hours").font = Font(bold=True)
+    ws.cell(row=summary_row + 2, column=7, value="Cost").font = Font(bold=True)
     
     # Aggregate by category
     cat_totals = {}
@@ -444,8 +511,12 @@ async def export_entries(
         cat_totals[cat] = cat_totals.get(cat, 0) + mins
     
     for i, (cat, mins) in enumerate(sorted(cat_totals.items())):
+        rate = get_rate_for_category(cat)
+        cost = round((mins / 60) * rate, 2)
         ws.cell(row=summary_row + 3 + i, column=1, value=cat)
-        ws.cell(row=summary_row + 3 + i, column=4, value=round(mins / 60, 2))
+        ws.cell(row=summary_row + 3 + i, column=5, value=f"£{rate}")
+        ws.cell(row=summary_row + 3 + i, column=6, value=round(mins / 60, 2))
+        ws.cell(row=summary_row + 3 + i, column=7, value=f"£{cost}")
     
     # Adjust column widths
     ws.column_dimensions['A'].width = 12
@@ -453,8 +524,10 @@ async def export_entries(
     ws.column_dimensions['C'].width = 10
     ws.column_dimensions['D'].width = 12
     ws.column_dimensions['E'].width = 15
-    ws.column_dimensions['F'].width = 50
-    ws.column_dimensions['G'].width = 10
+    ws.column_dimensions['F'].width = 12
+    ws.column_dimensions['G'].width = 12
+    ws.column_dimensions['H'].width = 50
+    ws.column_dimensions['I'].width = 10
     
     # Save to bytes
     from fastapi.responses import StreamingResponse
