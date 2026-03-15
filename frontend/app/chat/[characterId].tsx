@@ -179,18 +179,11 @@ export default function DynamicAIChat() {
       `${msg.sender === 'user' ? 'User' : character.name}: ${msg.text}`
     ).join('\n');
     
-    return `\n\n[CONVERSATION HISTORY - This is a RETURNING user. Below is your previous conversation with them. You MUST treat this as an ongoing relationship - pick up naturally where you left off. Reference specific things they told you. Ask follow-up questions about topics they mentioned. Show you genuinely remember them as a person, not just that they visited before.
+    return `\n\n[RETURNING MATE - You've chatted with this person before. Here's what you talked about last time:
 
-PREVIOUS CONVERSATION:
 ${transcript}
 
-IMPORTANT INSTRUCTIONS:
-- Do NOT say generic things like "welcome back" or "I remember you from before"
-- Instead, reference SPECIFIC things from the conversation above
-- If they mentioned a problem, ask how it's going
-- If they shared something personal, show you remember the details
-- Treat them like a friend you're catching up with, not a new visitor
-- Be warm and personal, showing genuine continuity]`;
+Talk to them like an old mate you're catching up with. Be natural - maybe ask "how'd that thing go?" or "you still dealing with that?" based on what they told you. No formal "welcome back" rubbish - just pick up like mates do. If they mentioned something was bothering them, check in on it. Keep it relaxed and genuine.]`;
   };
 
   // Check for available staff when safeguarding modal opens
