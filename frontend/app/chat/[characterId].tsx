@@ -269,15 +269,69 @@ Talk to them like an old mate you're catching up with. Be natural - maybe ask "h
     }
   };
 
+  // Natural returning user greetings - like two mates catching up
+  const getReturningUserGreeting = (charId: string): string => {
+    const greetings: Record<string, string[]> = {
+      tommy: [
+        "Ey up mate, good to see you again. How's things?",
+        "Alright mucker, you're back. What's occurring?",
+        "Hey mate, was just thinking about you. How you getting on?",
+      ],
+      doris: [
+        "Hello love, nice to see you again. Kettle's on. What's on your mind?",
+        "Hiya pet, good to have you back. How've you been?",
+        "Hello again love. Come on in, let's have a chat.",
+      ],
+      bob: [
+        "Alright mate, you're back. Brew's on. What's the score?",
+        "Ey up mucker, good to see you. How's it going?",
+        "Back again are we? Good lad. What's happening?",
+      ],
+      hugo: [
+        "Hey, good to see you again. What can I help with today?",
+        "Hello again. Still here if you need help finding the right support.",
+        "Hey, you're back. What are we working on today?",
+      ],
+      margie: [
+        "Hello love, nice to see you again. How have you been getting on?",
+        "Hiya, good to have you back. No judgement here, just a friendly ear.",
+        "Hello again sweetheart. How are things?",
+      ],
+      rita: [
+        "Hello love, lovely to see you again. How are you doing?",
+        "Hiya, you're back. How's everything at home?",
+        "Hello again. Come and have a chat, I'm here for you.",
+      ],
+      catherine: [
+        "Hello, good to see you again. What's on your mind today?",
+        "Hello again. Let's pick up where we left off, or start fresh - your call.",
+        "Good to see you. What would you like to talk through today?",
+      ],
+      sentry: [
+        "Hello again. What legal matters can I help clarify today?",
+        "Good to see you. What questions do you have?",
+        "Hello. I'm here to help with any legal information you need.",
+      ],
+      frankie: [
+        "Alright soldier, you're back! Ready to put in some work?",
+        "Ey up, good to see you again. Time to crack on?",
+        "Back for more are we? Good attitude. Let's go!",
+      ],
+    };
+    
+    const charGreetings = greetings[charId] || greetings['tommy'];
+    return charGreetings[Math.floor(Math.random() * charGreetings.length)];
+  };
+
   // Add welcome message when session loads - with conversation memory awareness
   useEffect(() => {
     if (hasLoadedSession && hasLoadedLocalHistory && messages.length === 0) {
       // Check if this is a returning user with conversation history
       if (previousConversations.length > 0) {
-        // Show previous messages first, then add a "welcome back" message
+        // Show previous messages first, then add a natural "welcome back" message
         const welcomeBackMessage: Message = {
           id: 'welcome-back',
-          text: `Welcome back! I remember our previous conversations. ${character.welcomeMessage.replace(/^(Hey there|Hi|Hello|Hey)!?\s*/i, '')} Feel free to continue where we left off, or start something new.`,
+          text: getReturningUserGreeting(character.id),
           sender: 'buddy',
           timestamp: new Date(),
         };

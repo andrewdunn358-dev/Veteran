@@ -3,28 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meet the AI Team - Radio Check</title>
-    <meta name="description" content="Meet our AI Battle Buddies - supportive AI companions designed for UK Armed Forces personnel and veterans.">
+    <title>Meet the Team - Radio Check</title>
+    <meta name="description" content="Meet the founders behind Radio Check and our AI Battle Buddies.">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/favicon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .founders-section { margin-bottom: 60px; }
+        .founders-section h2 { color: #1e3a5f; font-size: 2rem; margin-bottom: 8px; text-align: center; }
+        .section-subtitle { color: #6b7280; text-align: center; margin-bottom: 32px; font-size: 1.1rem; }
+        .founders-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+        .founder-card { background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%); border-radius: 16px; padding: 28px; color: white; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; }
+        .founder-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(30, 58, 95, 0.3); }
+        .founder-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .founder-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3); }
+        .founder-info h3 { font-size: 1.3rem; margin: 0 0 4px 0; color: white; }
+        .founder-role { color: #93c5fd; font-size: 0.95rem; font-weight: 500; }
+        .founder-bio { font-size: 0.95rem; line-height: 1.6; color: rgba(255,255,255,0.9); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+        .read-more { color: #93c5fd; font-size: 0.9rem; margin-top: 12px; display: inline-block; }
+        .section-divider { display: flex; align-items: center; margin: 48px 0; gap: 16px; }
+        .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, transparent, #d1d5db, transparent); }
+        .section-divider span { color: #6b7280; font-size: 0.9rem; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
+        .modal-header { background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%); padding: 24px; border-radius: 16px 16px 0 0; display: flex; align-items: center; gap: 16px; }
+        .modal-header img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3); }
+        .modal-header h3 { color: white; font-size: 1.5rem; margin: 0 0 4px 0; }
+        .modal-header .role { color: #93c5fd; font-size: 1rem; }
+        .modal-body { padding: 24px; }
+        .modal-body p { color: #374151; line-height: 1.8; margin-bottom: 16px; }
+        .modal-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; }
+        .modal-close:hover { background: rgba(255,255,255,0.3); }
+    </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="nav-logo">
-                <img src="images/logo.png" alt="Radio Check Logo">
-                <span>Radio Check</span>
-            </a>
-            <button class="nav-toggle" onclick="toggleMobileNav()">
-                <i class="fas fa-bars"></i>
-            </button>
+            <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="Radio Check Logo"><span>Radio Check</span></a>
+            <button class="nav-toggle" onclick="toggleMobileNav()"><i class="fas fa-bars"></i></button>
             <ul class="nav-menu" id="navMenu">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="ai-team.html" class="active">AI Team</a></li>
+                <li><a href="ai-team.html" class="active">Meet the Team</a></li>
                 <li><a href="contact.html">Contact</a></li>
                 <li><a href="privacy.html">Privacy</a></li>
                 <li><a href="legal.html">Legal</a></li>
@@ -32,186 +54,112 @@
         </div>
     </nav>
 
-    <!-- Page Header -->
     <section class="page-header">
-        <h1>Meet the AI Team</h1>
-        <p>Your 24/7 AI Battle Buddies - always ready to listen, day or night</p>
+        <h1>Meet the Team</h1>
+        <p>The founders behind Radio Check and your 24/7 AI Battle Buddies</p>
     </section>
 
-    <!-- AI Team Grid -->
     <section class="page-content">
         <div class="container">
-            <p style="text-align: center; color: #6b7280; max-width: 700px; margin: 0 auto 40px; font-size: 1.1rem;">
-                Our AI Battle Buddies are available 24/7 when you need someone to talk to. Each has their own personality and speciality - find the one that suits you best.
-            </p>
+            <div class="founders-section">
+                <h2>Our Founders</h2>
+                <p class="section-subtitle">The team dedicated to supporting the Armed Forces community</p>
+                <div class="founders-grid">
+                    <div class="founder-card" onclick="openModal('andrew')">
+                        <div class="founder-header">
+                            <img src="https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/4zwz619g_image.png" alt="Andrew Dunn" class="founder-avatar">
+                            <div class="founder-info"><h3>Andrew "Frankie" Dunn</h3><span class="founder-role">Founder</span></div>
+                        </div>
+                        <p class="founder-bio">Andrew Dunn served 27 years in the British Army before creating Frankie's Pod. Through podcasting and Radio Check, he builds communities where veterans can connect and support each other.</p>
+                        <span class="read-more">Click to read more <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                    <div class="founder-card" onclick="openModal('rachel')">
+                        <div class="founder-header">
+                            <img src="https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/kec981d4_Rachel.avif" alt="Rachel Webster" class="founder-avatar">
+                            <div class="founder-info"><h3>Rachel Webster</h3><span class="founder-role">Founder</span></div>
+                        </div>
+                        <p class="founder-bio">Rachel brings compassion and clinical expertise to Radio Check. With a background in mental health support, she has dedicated her career to helping those who have served.</p>
+                        <span class="read-more">Click to read more <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                    <div class="founder-card" onclick="openModal('anthony')">
+                        <div class="founder-header">
+                            <img src="https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/jz9ku914_image.png" alt="Anthony Donnelly" class="founder-avatar">
+                            <div class="founder-info"><h3>Anthony Donnelly</h3><span class="founder-role">Founder</span></div>
+                        </div>
+                        <p class="founder-bio">Anthony is the founder of Zentrafuge Labs, an AI safety initiative focused on building continuity-based AI systems for high-trust environments.</p>
+                        <span class="read-more">Click to read more <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-divider"><span>AI Battle Buddies - Available 24/7</span></div>
+            
+            <p style="text-align: center; color: #6b7280; max-width: 700px; margin: 0 auto 40px; font-size: 1.1rem;">Our AI Battle Buddies are available 24/7 when you need someone to talk to. Each has their own personality and speciality.</p>
             
             <div class="ai-team-grid">
-                <!-- Tommy -->
-                <div class="ai-card">
-                    <div class="ai-card-header">
-                        <img src="images/tommy.png" alt="Tommy" class="ai-avatar-img">
-                        <div class="ai-info">
-                            <h3>Tommy</h3>
-                            <span class="ai-role">Your Battle Buddy</span>
-                        </div>
-                    </div>
-                    <p>Tommy is your friendly, down-to-earth companion. He's great for everyday chats, checking in on how you're doing, and providing a supportive ear when you need one. Tommy understands military culture and speaks your language - no jargon, just straight talking.</p>
-                </div>
-
-                <!-- Rachel - Criminal Justice Support -->
-                <div class="ai-card">
-                    <div class="ai-card-header">
-                        <img src="images/rachel.png" alt="Rachel" class="ai-avatar-img">
-                        <div class="ai-info">
-                            <h3>Rachel</h3>
-                            <span class="ai-role">Warm Support</span>
-                        </div>
-                    </div>
-                    <p>Rachel brings warmth and comfort to every conversation. She's particularly helpful when you're feeling down or just need someone kind to talk to. With a gentle, understanding approach, Rachel helps you feel heard and valued - like a caring friend who listens without judgement.</p>
-                </div>
-
-                <!-- Bob -->
-                <div class="ai-card">
-                    <div class="ai-card-header">
-                        <img src="images/bob.png" alt="Bob" class="ai-avatar-img">
-                        <div class="ai-info">
-                            <h3>Bob</h3>
-                            <span class="ai-role">Ex-Para Peer Support</span>
-                        </div>
-                    </div>
-                    <p>Bob is your no-nonsense mate who's been there and done it. As an ex-Para character, he brings military banter, practical advice, and the kind of straight-talking support that forces personnel appreciate. Bob won't wrap you in cotton wool - he'll give it to you straight, with a healthy dose of humour.</p>
-                </div>
-
-                <!-- Frankie -->
-                <div class="ai-card" style="border: 2px solid #22c55e;">
-                    <div class="ai-card-header">
-                        <img src="images/frankie.png" alt="Frankie" class="ai-avatar-img">
-                        <div class="ai-info">
-                            <h3>Frankie</h3>
-                            <span class="ai-role" style="color: #22c55e;">PTI & Fitness Coach</span>
-                        </div>
-                    </div>
-                    <p>Frankie is your AI Physical Training Instructor. She delivers a structured 12-week fitness programme designed for all levels - whether you're getting back into shape or maintaining your fitness. Proper military-style PT with warm-ups, main sessions, and cool-downs. Frankie knows that physical fitness supports mental health, and she'll keep you motivated!</p>
-                </div>
-
-                <!-- Hugo -->
-                <div class="ai-card">
-                    <div class="ai-card-header">
-                        <img src="images/hugo.png" alt="Hugo" class="ai-avatar-img">
-                        <div class="ai-info">
-                            <h3>Hugo</h3>
-                            <span class="ai-role">Services Navigator</span>
-                        </div>
-                    </div>
-                    <p>Hugo helps you navigate the maze of support services available to the Armed Forces community. Housing, employment, benefits, healthcare, charities - Hugo knows where to point you. He'll help you find the right organisation for your needs and explain what support you're entitled to.</p>
-                </div>
-
-                <!-- Margie -->
-                <div class="ai-card">
-                    <div class="ai-card-header">
-                        <img src="images/margie.png" alt="Margie" class="ai-avatar-img">
-                        <div class="ai-info">
-                            <h3>Margie</h3>
-                            <span class="ai-role">Addiction Support</span>
-                        </div>
-                    </div>
-                    <p>Margie is here for conversations about alcohol, drugs, gambling, or any addiction. She provides a non-judgmental space to talk about your relationship with substances, offers harm reduction information, and can help you find specialised support services when you're ready. No lectures, just understanding.</p>
-                </div>
-
-                <!-- Rita -->
-                <div class="ai-card">
-                    <div class="ai-card-header">
-                        <img src="images/rita.png" alt="Rita" class="ai-avatar-img">
-                        <div class="ai-info">
-                            <h3>Rita</h3>
-                            <span class="ai-role">Family Support</span>
-                        </div>
-                    </div>
-                    <p>Rita specialises in supporting families of serving personnel and veterans. Whether you're a partner, parent, or child of someone who serves or served, Rita understands the unique challenges military families face. Deployment, transition, communication - Rita's here to help.</p>
-                </div>
-
-                <!-- Catherine -->
-                <div class="ai-card">
-                    <div class="ai-card-header">
-                        <img src="images/catherine.png" alt="Catherine" class="ai-avatar-img">
-                        <div class="ai-info">
-                            <h3>Catherine</h3>
-                            <span class="ai-role">Thoughtful Support</span>
-                        </div>
-                    </div>
-                    <p>Catherine offers calm, intelligent support for deeper conversations. She's great for working through complex thoughts and feelings, exploring options, and gaining perspective. Catherine asks thoughtful questions and helps you find clarity when life feels overwhelming.</p>
-                </div>
-
-                <!-- Finch -->
-                <div class="ai-card">
-                    <div class="ai-card-header">
-                        <img src="images/finch.png" alt="Finch" class="ai-avatar-img">
-                        <div class="ai-info">
-                            <h3>Finch</h3>
-                            <span class="ai-role">Legal Information</span>
-                        </div>
-                    </div>
-                    <p>Finch provides information about legal matters affecting service personnel and veterans. From service complaints to civilian legal issues, Finch can point you towards the right resources and explain your options. Note: Finch provides information, not legal advice - always consult a qualified solicitor for specific legal matters.</p>
-                </div>
+                <div class="ai-card"><div class="ai-card-header"><img src="images/tommy.png" alt="Tommy" class="ai-avatar-img"><div class="ai-info"><h3>Tommy</h3><span class="ai-role">Your Battle Buddy</span></div></div><p>Tommy is your friendly, down-to-earth companion. Great for everyday chats and providing a supportive ear. Tommy understands military culture and speaks your language.</p></div>
+                <div class="ai-card"><div class="ai-card-header"><img src="images/rachel.png" alt="Rachel" class="ai-avatar-img"><div class="ai-info"><h3>Rachel</h3><span class="ai-role">Criminal Justice Support</span></div></div><p>Rachel provides warm, non-judgemental support for veterans in or leaving the criminal justice system. No judgement, just understanding.</p></div>
+                <div class="ai-card"><div class="ai-card-header"><img src="images/bob.png" alt="Bob" class="ai-avatar-img"><div class="ai-info"><h3>Bob</h3><span class="ai-role">Ex-Para Peer Support</span></div></div><p>Bob is your no-nonsense mate who's been there and done it. Military banter, practical advice, straight-talking support.</p></div>
+                <div class="ai-card" style="border: 2px solid #22c55e;"><div class="ai-card-header"><img src="images/frankie.png" alt="Frankie" class="ai-avatar-img"><div class="ai-info"><h3>Frankie</h3><span class="ai-role" style="color: #22c55e;">PTI & Fitness Coach</span></div></div><p>Your AI Physical Training Instructor with a 12-week fitness programme. Military-style PT to build strength and resilience.</p></div>
+                <div class="ai-card"><div class="ai-card-header"><img src="images/hugo.png" alt="Hugo" class="ai-avatar-img"><div class="ai-info"><h3>Hugo</h3><span class="ai-role">Services Navigator</span></div></div><p>Hugo helps navigate support services - housing, employment, benefits, healthcare, charities. He knows where to point you.</p></div>
+                <div class="ai-card"><div class="ai-card-header"><img src="images/margie.png" alt="Margie" class="ai-avatar-img"><div class="ai-info"><h3>Margie</h3><span class="ai-role">Addiction Support</span></div></div><p>Margie is here for conversations about alcohol, drugs, gambling. Non-judgmental space, harm reduction info, specialist support.</p></div>
+                <div class="ai-card"><div class="ai-card-header"><img src="images/rita.png" alt="Rita" class="ai-avatar-img"><div class="ai-info"><h3>Rita</h3><span class="ai-role">Family Support</span></div></div><p>Rita supports families of serving personnel and veterans. Deployment, transition, communication - she understands military families.</p></div>
+                <div class="ai-card"><div class="ai-card-header"><img src="images/catherine.png" alt="Catherine" class="ai-avatar-img"><div class="ai-info"><h3>Catherine</h3><span class="ai-role">Thoughtful Support</span></div></div><p>Catherine offers calm, intelligent support for deeper conversations. Working through complex thoughts and gaining perspective.</p></div>
+                <div class="ai-card"><div class="ai-card-header"><img src="images/finch.png" alt="Finch" class="ai-avatar-img"><div class="ai-info"><h3>Finch</h3><span class="ai-role">Legal Information</span></div></div><p>Finch provides legal information for service personnel and veterans. Service complaints to civilian issues - pointing you to the right resources.</p></div>
             </div>
 
             <div class="content-section" style="margin-top: 48px; background: #f8fafc; padding: 30px; border-radius: 12px;">
                 <h2 style="color: #1e3a5f;">Important Information</h2>
-                <p>Our AI Battle Buddies are designed to provide supportive conversation, practical information, and a listening ear 24/7. However, they are:</p>
-                <ul style="margin: 16px 0;">
-                    <li><strong>Not</strong> qualified therapists or counsellors</li>
-                    <li><strong>Not</strong> able to diagnose medical or mental health conditions</li>
-                    <li><strong>Not</strong> a replacement for professional mental health care</li>
-                </ul>
-                <p>If you're struggling with your mental health, please reach out to a qualified professional or contact one of our human counsellors and peer supporters through the app's Live Chat feature.</p>
-                
+                <p>Our AI Battle Buddies provide supportive conversation and a listening ear 24/7. However, they are <strong>not</strong> qualified therapists, cannot diagnose conditions, and are <strong>not</strong> a replacement for professional care.</p>
                 <div style="margin-top: 24px; padding: 16px; background: #fef2f2; border-radius: 8px; border-left: 4px solid #ef4444;">
-                    <p style="margin: 0; color: #991b1b;"><strong>In a crisis?</strong> If you're in immediate danger, please call 999. For urgent mental health support, contact Samaritans on 116 123 (free, 24/7) or Combat Stress on 0800 138 1619.</p>
+                    <p style="margin: 0; color: #991b1b;"><strong>In a crisis?</strong> Call 999 for immediate danger. Samaritans: 116 123 (free, 24/7). Combat Stress: 0800 138 1619.</p>
                 </div>
             </div>
         </div>
     </section>
+    
+    <div class="modal-overlay" id="founderModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div class="modal-header"><img id="modalAvatar" src="" alt=""><div><h3 id="modalName"></h3><span class="role" id="modalRole"></span></div></div>
+            <div class="modal-body"><div id="modalBio"></div></div>
+        </div>
+    </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
-                    <h4>Radio Check</h4>
-                    <p>Free, confidential mental health support for UK Armed Forces personnel, veterans, and their families.</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="ai-team.html">AI Team</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Legal</h4>
-                    <ul>
-                        <li><a href="privacy.html">Privacy Policy</a></li>
-                        <li><a href="terms.html">Terms of Use</a></li>
-                        <li><a href="legal.html">Legal Information</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Crisis Support</h4>
-                    <ul>
-                        <li><a href="tel:116123"><i class="fas fa-phone"></i> Samaritans: 116 123</a></li>
-                        <li><a href="tel:08001381619"><i class="fas fa-phone"></i> Combat Stress: 0800 138 1619</a></li>
-                        <li><a href="tel:08088021212"><i class="fas fa-phone"></i> Veterans Gateway: 0808 802 1212</a></li>
-                        <li><a href="tel:999"><i class="fas fa-exclamation-triangle"></i> Emergency: 999</a></li>
-                    </ul>
-                </div>
+                <div class="footer-section"><h4>Radio Check</h4><p>Free, confidential mental health support for UK Armed Forces personnel, veterans, and families.</p></div>
+                <div class="footer-section"><h4>Quick Links</h4><ul><li><a href="about.html">About</a></li><li><a href="ai-team.html">Meet the Team</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+                <div class="footer-section"><h4>Legal</h4><ul><li><a href="privacy.html">Privacy Policy</a></li><li><a href="terms.html">Terms of Use</a></li><li><a href="legal.html">Legal Information</a></li></ul></div>
+                <div class="footer-section"><h4>Crisis Support</h4><ul><li><a href="tel:116123"><i class="fas fa-phone"></i> Samaritans: 116 123</a></li><li><a href="tel:08001381619"><i class="fas fa-phone"></i> Combat Stress: 0800 138 1619</a></li><li><a href="tel:999"><i class="fas fa-exclamation-triangle"></i> Emergency: 999</a></li></ul></div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Radio Check. All rights reserved. | Supporting the UK Armed Forces Community</p>
-            </div>
+            <div class="footer-bottom"><p>&copy; 2026 Radio Check. All rights reserved.</p></div>
         </div>
     </footer>
 
     <script src="script.js"></script>
+    <script>
+        const founders = {
+            andrew: { name: "Andrew \"Frankie\" Dunn", role: "Founder", avatar: "https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/4zwz619g_image.png", bio: "<p>Andrew Dunn served 27 years in the British Army before creating Frankie's Pod: Uncorking the Unforgettable. Through podcasting and projects like Radio Check, he works to build communities where veterans can connect, share experiences, and support each other.</p><p>Andrew's military career gave him first-hand understanding of the challenges service personnel face, both during service and after transition. This drives his passion for creating spaces where veterans can find support without stigma.</p><p>Through Radio Check, Andrew aims to ensure no veteran feels alone, combining technology with genuine human connection for round-the-clock support.</p>" },
+            rachel: { name: "Rachel Webster", role: "Founder", avatar: "https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/kec981d4_Rachel.avif", bio: "<p>Rachel Webster brings compassion and clinical expertise to Radio Check. With a background in mental health support, Rachel has dedicated her career to helping those who have served.</p><p>Rachel's approach combines professional knowledge with genuine warmth. She understands that sometimes people just need someone to listen without judgement, and has helped shape Radio Check's peer support model to reflect this.</p><p>Her work focuses on ensuring every interaction - whether with AI companions or human supporters - feels safe, welcoming, and truly helpful. Rachel believes asking for help is a sign of strength, not weakness.</p>" },
+            anthony: { name: "Anthony Donnelly", role: "Founder", avatar: "https://customer-assets.emergentagent.com/job_e4b45c7f-469e-4d50-8310-96df1bd9d53a/artifacts/jz9ku914_image.png", bio: "<p>Anthony James Donnelly is the founder of Zentrafuge (Labs) Limited, an AI safety and research initiative focused on building continuity-based AI systems for high-trust environments.</p><p>His interest in computing began in the early 1980s across a career spanning technology sales, international marketing, construction partnerships, and sales leadership. The common thread: systems thinking - how tools shape behaviour, trust, and decision-making.</p><p>Anthony now focuses on AI safety architecture and structured testing. His open research repositories examine continuity design, boundary-setting, and trust-first deployment models for AI in psychologically sensitive contexts.</p><p>Zentrafuge's safety modules are integrated into Radio Check. The work is research-led and mission-driven, building AI that earns trust rather than assumes it.</p>" }
+        };
+        function openModal(id) {
+            const f = founders[id]; if (!f) return;
+            document.getElementById('modalAvatar').src = f.avatar;
+            document.getElementById('modalName').textContent = f.name;
+            document.getElementById('modalRole').textContent = f.role;
+            document.getElementById('modalBio').innerHTML = f.bio;
+            document.getElementById('founderModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            document.getElementById('founderModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        document.getElementById('founderModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+    </script>
 </body>
 </html>
